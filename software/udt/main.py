@@ -1,8 +1,9 @@
 from typing import Union
 
 from fastapi import FastAPI
+from config.settings import APP_TITLE, DEBUG
 
-app = FastAPI()
+app = FastAPI(title=APP_TITLE, debug=DEBUG)
 
 
 @app.get("/")
