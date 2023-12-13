@@ -1,13 +1,11 @@
-from tortoise import fields, models
-from tortoise.contrib.pydantic import pydantic_model_creator
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase
 
 
-class BaseModel(models.Model):
+class Base(DeclarativeBase):
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    id = fields.IntField(pk=True)
-
-    def __str__(self):
-        return self.id
-
-    class Meta:
-        ordering = ["id"]
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()

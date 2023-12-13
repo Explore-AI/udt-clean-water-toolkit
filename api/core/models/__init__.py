@@ -1,1 +1,1 @@
-from core.models.trunk_mains import TrunkMains
+from core.models.user import User
