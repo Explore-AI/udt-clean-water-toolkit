@@ -16,21 +16,6 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-# Dependency
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
-# def db_session(depends: bool = True):
-#     if depends:
-#         return Depends(get_db)
-#     return get_db
-
-
 # https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#using-context-managers-in-dependencies-with-yield
 class DBSession:
     def __init__(self):

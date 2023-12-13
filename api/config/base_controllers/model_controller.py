@@ -5,20 +5,22 @@ class ModelController:
     Model = None
     query = None
 
-    # There appears to be a FastAPI bug with the usage of next(). See link:
-    # https://github.com/tiangolo/fastapi/discussions/7334
+    # def get_queryset(self):
+    #     if self.Model and not self.query != None:
+    #         return session.query(self.Model).all()
+    #     print(self.query)
+    #     import pdb
 
-    def get_queryset(self):
+    #     pdb.set_trace()
+    #     return
+
+    def execute_query():
         session = next(db_session())
         if self.Model and not self.query != None:
             return session.query(self.Model).all()
-        print(self.query)
-        import pdb
-
-        pdb.set_trace()
+        # There appears to be a FastAPI bug with the usage of next(). See link:
+        # https://github.com/tiangolo/fastapi/discussions/7334
         return session.execute(self.query)
-        # return db.query(self.queryset)
-        # return db.query(models.User).filter(models.User.id == user_id).first()
 
     # def get_user_by_email(db: Session, email: str):
     #     return db.query(models.User).filter(models.User.email == email).first()
