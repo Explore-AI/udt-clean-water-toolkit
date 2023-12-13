@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 
 class BaseController:
     def get_obj(self, db: Session):
+        import pdb
+
+        pdb.set_trace()
         print(self)
         # return db.query(self.queryset)
         # return db.query(models.User).filter(models.User.id == user_id).first()
