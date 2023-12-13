@@ -2,18 +2,21 @@ from config.db import db_session
 
 
 class ModelController:
-    queryset = None
+    Model = None
+    query = None
 
-    def __init__(self):
-        self.session = next(db_session())
-        # There appears to be a bug with the usage of next(). See link:
-        # https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#using-context-managers-in-dependencies-with-yield
+    # There appears to be a FastAPI bug with the usage of next(). See link:
+    # https://github.com/tiangolo/fastapi/discussions/7334
 
-    def get_obj(self):
-        print(self.session)
+    def get_queryset(self):
+        session = next(db_session())
+        if self.Model and not self.query != None:
+            return session.query(self.Model).all()
+        print(self.query)
         import pdb
 
         pdb.set_trace()
+        return session.execute(self.query)
         # return db.query(self.queryset)
         # return db.query(models.User).filter(models.User.id == user_id).first()
 

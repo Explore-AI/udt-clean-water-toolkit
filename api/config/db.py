@@ -43,7 +43,8 @@ class DBSession:
         self.db.close()
 
 
-# There appears to be a bug with the usage of next(). See link above.
+# There appears to be a bug with the usage of next(). See link below:
+# https://github.com/tiangolo/fastapi/discussions/7334
 def db_session():
     with DBSession() as db:
         yield db
