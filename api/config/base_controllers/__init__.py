@@ -1,0 +1,1 @@
+from config.base_controllers.model_controller import ModelController

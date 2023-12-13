@@ -1,12 +1,19 @@
-from sqlalchemy.orm import Session
+from config.db import db_session
 
 
-class BaseController:
-    def get_obj(self, db: Session):
+class ModelController:
+    queryset = None
+
+    def __init__(self):
+        self.session = next(db_session())
+        # There appears to be a bug with the usage of next(). See link:
+        # https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#using-context-managers-in-dependencies-with-yield
+
+    def get_obj(self):
+        print(self.session)
         import pdb
 
         pdb.set_trace()
-        print(self)
         # return db.query(self.queryset)
         # return db.query(models.User).filter(models.User.id == user_id).first()
 
