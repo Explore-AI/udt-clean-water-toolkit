@@ -1,10 +1,13 @@
+from datetime import datetime
 from config.base_serializer import BaseSerializer
+from core.models import User
 
 
-class User(BaseSerializer):
+class UserSerializer(BaseSerializer):
     id: int
     is_active: bool
-    items: list[Item] = []
+    created_at: datetime
+    modified_at: datetime
 
-    class Config:
-        orm_mode = True
+    class Meta:
+        model = User

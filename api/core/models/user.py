@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -10,11 +10,13 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(254), nullable=False)
     email: Mapped[str] = mapped_column(String(254), nullable=False)
     is_active: Mapped[bool] = mapped_column(unique=False)
-    created_at: Mapped[datetime.datetime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    modified_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
+    modified_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.current_timestamp(),
     )
 
     def __repr__(self) -> str:
