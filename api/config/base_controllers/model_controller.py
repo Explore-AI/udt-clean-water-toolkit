@@ -13,6 +13,19 @@ class ModelController:
         # https://github.com/tiangolo/fastapi/discussions/7334
         return session.execute(self.query)
 
+    def list(self, request, *args, **kwargs):
+        pass
+        # return
+        # queryset = self.filter_queryset(self.query)
+
+        # page = self.paginate_queryset(queryset)
+        # if page is not None:
+        #     serializer = self.get_serializer(page, many=True)
+        #     return self.get_paginated_response(serializer.data)
+
+        # serializer = self.get_serializer(queryset, many=True)
+        # return Response(serializer.data)
+
     # @app.get("/users/", response_model=list[serializer_class])
     # def get(self):
     #     self.execute_query()
