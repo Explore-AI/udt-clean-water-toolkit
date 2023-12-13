@@ -5,16 +5,7 @@ class ModelController:
     Model = None
     query = None
 
-    # def get_queryset(self):
-    #     if self.Model and not self.query != None:
-    #         return session.query(self.Model).all()
-    #     print(self.query)
-    #     import pdb
-
-    #     pdb.set_trace()
-    #     return
-
-    def execute_query():
+    def execute_query(self):
         session = next(db_session())
         if self.Model and not self.query != None:
             return session.query(self.Model).all()
@@ -22,8 +13,9 @@ class ModelController:
         # https://github.com/tiangolo/fastapi/discussions/7334
         return session.execute(self.query)
 
-    # def get_user_by_email(db: Session, email: str):
-    #     return db.query(models.User).filter(models.User.email == email).first()
+    # @app.get("/users/", response_model=list[serializer_class])
+    # def get(self):
+    #     self.execute_query()
 
     # def get_users(db: Session, skip: int = 0, limit: int = 100):
     #     return db.query(models.User).offset(skip).limit(limit).all()
