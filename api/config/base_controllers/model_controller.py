@@ -1,10 +1,18 @@
+from typing import Optional
 from config.db import db_session
+from config.routers import ModelRouter
+from fastapi import Depends
+from core.serializers.user_serializer import UserSerializer
 
 
-class ModelController:
+class ModelController(ModelRouter):
     Model = None
     query = None
     serializer_class = None
+    # TO DO: apparantly the getter for __fields__ is deprecated
+
+    def _get_args(self):
+        return dict([(i, None) for i in list(self.serializer_class.__fields__.keys())])
 
     def get_attr(self):
         return ModelController.__dict__.items()
@@ -13,11 +21,20 @@ class ModelController:
         session = next(db_session())
         if self.Model and not self.query != None:
             return session.query(self.Model).all()
+        # TO DO: have another look at this issue
         # There appears to be a FastAPI bug with the usage of next(). See link:
         # https://github.com/tiangolo/fastapi/discussions/7334
         return session.execute(self.query)
 
-    def list(self, *args, **kwargs):
+    def initialise_request(self, *args, **kwargs):
+        # self.list()
+        return
+        # self._get(*args, response_model=self.serializer_class, **kwargs)
+
+    # https://stackoverflow.com/questions/75249150/how-to-use-class-based-views-in-fastapi
+    def list_data(name: str = None, id: Optional[int] = None):
+        # model: UserSerializer = Depends()
+
         return [{"name": "yellow"}]
         # return
         # queryset = self.filter_queryset(self.query)
