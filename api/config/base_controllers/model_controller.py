@@ -4,6 +4,10 @@ from config.db import db_session
 class ModelController:
     Model = None
     query = None
+    serializer_class = None
+
+    def get_attr(self):
+        return ModelController.__dict__.items()
 
     def execute_query(self):
         session = next(db_session())
@@ -13,9 +17,7 @@ class ModelController:
         # https://github.com/tiangolo/fastapi/discussions/7334
         return session.execute(self.query)
 
-    def list(self):
-        print("Fdfd")
-        print("ddsds")
+    def list(self, *args, **kwargs):
         return [{"name": "yellow"}]
         # return
         # queryset = self.filter_queryset(self.query)

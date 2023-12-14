@@ -1,4 +1,10 @@
 from fastapi import APIRouter
+import inspect
+
+
+def Convert(tup, di):
+    di = dict(tup)
+    return di
 
 
 class BaseRouter(APIRouter):
@@ -6,12 +12,16 @@ class BaseRouter(APIRouter):
         # https://stackoverflow.com/a/70563827
         self.url = url
         self.controller = controller
-        self.router = APIRouter()
+
+        super().__init__(*args, **kwargs)
         self.get(self.url)
 
     def get(self, url, *args, **kwargs):
         url = url or self.url
-        set_api_route = self.router.get(url)
+        set_api_route = super().get(url)
+        # attr = dict(self.controller().get_attr()) | dict(
+        #     self.controller.__dict__.items()
+        # )
         set_api_route(self.controller.list)
 
 
@@ -20,7 +30,4 @@ class RouterUtils:
     @classmethod
     def generate_routers(cls, app, url_routers):
         for router in url_routers:
-            # router[1].prefix = router[0]
-            print("gggg")
-            print(router[1].__dict__)
-            app.include_router(router[1].router)
+            app.include_router(router[1])
