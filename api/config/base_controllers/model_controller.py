@@ -13,8 +13,10 @@ class ModelController:
         # https://github.com/tiangolo/fastapi/discussions/7334
         return session.execute(self.query)
 
-    def list(self, request, *args, **kwargs):
-        pass
+    def list(self):
+        print("Fdfd")
+        print("ddsds")
+        return [{"name": "yellow"}]
         # return
         # queryset = self.filter_queryset(self.query)
 
