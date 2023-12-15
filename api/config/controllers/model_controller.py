@@ -23,16 +23,17 @@ class ModelController:
     def initial(self, request, db_session):
         self.db_session = db_session
         self.query_params = request._query_params
+        self.query = self.db_session.query(self.Model)
 
     def construct_query(self, **kwargs):
-        q = self.db_session.query(self.Model)
+        q = self.query
         for k, v in kwargs.items():
             f = getattr(self.Model, k)
             q = q.filter(f.in_(v))
-        return q
+        self.query = q
 
     def execute_query(self):
-        return self.db_session.query(self.Model).all()
+        return self.query.all()
 
     def get_serializer_class(self):
         assert self.serializer_class is not None, (
@@ -52,9 +53,9 @@ class ModelController:
         pass
 
     def paginate_queryset(self):
-        x = {"page_limit": 100}
-        query = self.construct_query(**x)
-        return query
+        page_limit = 5
+        # query = self.construct_query(**x)
+        self.query = self.query.limit(page_limit)
 
     @classmethod
     def list(
@@ -63,13 +64,13 @@ class ModelController:
         db_session: Session = Depends(get_db_session),
     ):
         self = request["endpoint"].__self__()
-        self.initial(request)
+        self.initial(request, db_session)
 
         self.filter_queryset()
 
         self.paginate_queryset()
-
-        queryset = self.execute_query()
+        print(self.query)
+        queryset = self.query.all()
 
         return queryset
 
