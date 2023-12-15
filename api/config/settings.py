@@ -20,4 +20,7 @@ DB_URL = f"{DATABASES['default']['ENGINE']}{DATABASES['default']['NAME']}"
 
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
 
+DEFAULT_PAGE_SIZE = 100
+MAX_PAGE_SIZE = 500
+
 DEBUG = True

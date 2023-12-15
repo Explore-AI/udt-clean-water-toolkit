@@ -1,8 +1,8 @@
-from typing import Optional
+# from typing import Optional
 from fastapi import Request, Depends
 from sqlalchemy.orm import Session
 from config.db import get_db_session
-from core.serializers.user_serializer import UserSerializer
+from config.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 
 
 class ModelController:
@@ -22,7 +22,7 @@ class ModelController:
 
     def initial(self, request, db_session):
         self.db_session = db_session
-        self.query_params = request._query_params
+        self.query_params = dict(request._query_params)
         self.query = self.db_session.query(self.Model)
 
     def construct_query(self, **kwargs):
@@ -45,16 +45,28 @@ class ModelController:
     def set_get_args(self):
         return {"response_model": list[self.get_serializer_class()]}
 
-    def get_validated_params(self):
-        validated_params = self.get_serializer_class(**self.query_params)
-        return validated_params
+    def validate_query_params(self):
+        page_size = self.query_params.pop("page_size", None)
+        page_num = self.query_params.pop("page_num", None)
+        order = self.query_params.pop("order", None)
+
+        try:
+            page_size = int(page_size)
+        except:
+            raise TypeError("Got non-integer argument for 'page_size' query paramter")
+
+        self.validated_query_params = self.get_serializer_class(**self.query_params)
+        return page_size
 
     def filter_queryset(self):
         pass
 
-    def paginate_queryset(self):
-        page_limit = 5
-        # query = self.construct_query(**x)
+    def paginate_queryset(self, page_size):
+        page_limit = page_size or DEFAULT_PAGE_SIZE
+
+        # if page_limit > MAX_PAGE_SIZE:
+        #     page_limit = MAX_PAGE_SIZE
+
         self.query = self.query.limit(page_limit)
 
     @classmethod
@@ -65,11 +77,11 @@ class ModelController:
     ):
         self = request["endpoint"].__self__()
         self.initial(request, db_session)
-
+        page_size = self.validate_query_params()
         self.filter_queryset()
 
-        self.paginate_queryset()
-        print(self.query)
+        self.paginate_queryset(page_size)
+
         queryset = self.query.all()
 
         return queryset
