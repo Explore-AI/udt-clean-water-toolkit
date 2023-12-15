@@ -1,4 +1,4 @@
-from config.base_controllers import ModelController
+from config.controllers import ModelController
 from core.models import User
 from sqlalchemy import select
 from core.serializers.user_serializer import UserSerializer
