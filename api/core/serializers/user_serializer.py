@@ -7,7 +7,7 @@ from core.models import User
 
 class UserSerializer(BaseSerializer):
     # id: int = Field(frozen=True)
-    # is_active: bool = Field(frozen=True)
+    is_active: Optional[bool] = Field(default=None, frozen=True)
     first_name: Union[str, None] = None
     # created_at: datetime = Field(frozen=True)
     # modified_at: datetime = Field(frozen=True)
