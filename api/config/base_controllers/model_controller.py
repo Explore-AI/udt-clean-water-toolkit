@@ -1,21 +1,12 @@
 from typing import Optional
 from config.db import db_session
-from config.routers import ModelRouter
-from fastapi import Depends
-from core.serializers.user_serializer import UserSerializer
+from fastapi import Request
 
 
-class ModelController(ModelRouter):
+class ModelController:
     Model = None
     query = None
     serializer_class = None
-    # TO DO: apparantly the getter for __fields__ is deprecated
-
-    def _get_args(self):
-        return dict([(i, None) for i in list(self.serializer_class.__fields__.keys())])
-
-    def get_attr(self):
-        return ModelController.__dict__.items()
 
     def execute_query(self):
         session = next(db_session())
@@ -26,16 +17,21 @@ class ModelController(ModelRouter):
         # https://github.com/tiangolo/fastapi/discussions/7334
         return session.execute(self.query)
 
-    def initialise_request(self, *args, **kwargs):
-        # self.list()
-        return
-        # self._get(*args, response_model=self.serializer_class, **kwargs)
-
     # https://stackoverflow.com/questions/75249150/how-to-use-class-based-views-in-fastapi
-    def list_data(name: str = None, id: Optional[int] = None):
-        # model: UserSerializer = Depends()
 
-        return [{"name": "yellow"}]
+    def set_get_args(self):
+        return {"response_model": self.serializer_class}
+
+        # TO DO: apparantly the getter for __fields__ is deprecated
+
+    def set_query_params(self):
+        return dict([(i, None) for i in list(self.serializer_class.__fields__.keys())])
+
+    @classmethod
+    def list(cls, request: Request):
+        # print(request["endpoint"].__self__.serializer_class)
+        return {"first_name": "bob"}
+
         # return
         # queryset = self.filter_queryset(self.query)
 

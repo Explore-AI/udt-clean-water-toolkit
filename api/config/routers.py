@@ -1,26 +1,31 @@
+from typing import Callable, Optional
 from fastapi import APIRouter
 
 
 class BaseRouter(APIRouter):
     def __init__(self, *args, **kwargs):
+        # print("aaa", args, kwargs)
         super().__init__(*args, **kwargs)
 
 
 class ModelRouter(BaseRouter):
-    def __init__(self, url: str, controller, *args, **kwargs):
+    # TO DO: add callable type for controller
+    def __init__(
+        self, url: str, *args, controller: Optional[Callable] = None, **kwargs
+    ):
         # https://stackoverflow.com/a/70563827
         self.url = url
         self.controller = controller
-
         super().__init__(*args, **kwargs)
-        self._get()
+        self.get_list()
 
-    def _get(self, *args, **kwargs):
-        set_api_route = super().get(self.url, *args, **kwargs)
+    def get_list(self):
+        kwargs = self.controller().set_get_args()
+        set_api_route = super().get(self.url, *query_params, **kwargs)
         # attr = dict(self.controller().get_attr()) | dict(
         #     self.controller.__dict__.items()
         # )
-        set_api_route(self.controller.list_data)
+        set_api_route(self.controller.list)
 
 
 class RouterUtils:

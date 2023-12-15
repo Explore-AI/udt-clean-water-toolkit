@@ -6,10 +6,11 @@ from core.models import User
 
 
 class UserSerializer(BaseSerializer):
-    id: int = Field(frozen=True)
-    is_active: bool = Field(frozen=True)
-    created_at: datetime = Field(frozen=True)
-    modified_at: datetime = Field(frozen=True)
+    # id: int = Field(frozen=True)
+    # is_active: bool = Field(frozen=True)
+    first_name: str
+    # created_at: datetime = Field(frozen=True)
+    # modified_at: datetime = Field(frozen=True)
 
     class Meta:
         model = User
