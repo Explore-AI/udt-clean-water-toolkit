@@ -21,7 +21,7 @@ class ModelRouter(BaseRouter):
 
     def get_list(self):
         kwargs = self.controller().set_get_args()
-        set_api_route = super().get(self.url, *query_params, **kwargs)
+        set_api_route = super().get(self.url, **kwargs)
         # attr = dict(self.controller().get_attr()) | dict(
         #     self.controller.__dict__.items()
         # )

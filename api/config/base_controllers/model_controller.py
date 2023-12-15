@@ -29,7 +29,8 @@ class ModelController:
 
     @classmethod
     def list(cls, request: Request):
-        # print(request["endpoint"].__self__.serializer_class)
+        self = request["endpoint"].__self__()
+        print(list(self.serializer_class))
         return {"first_name": "bob"}
 
         # return
