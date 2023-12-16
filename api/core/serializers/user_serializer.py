@@ -1,6 +1,6 @@
 from typing import Optional, Union
 from datetime import datetime
-from pydantic import Field
+from pydantic import Field, EmailStr
 from config.serializers import BaseSerializer
 from core.models import User
 
@@ -17,10 +17,9 @@ class UserSerializer(BaseSerializer):
 
 
 class UserCreateSerializer(UserSerializer):
-    # id: int = Field(frozen=True)
     first_name: str = Field(...)
-    # created_at: datetime = Field(frozen=True)
-    # modified_at: datetime = Field(frozen=True)
+    last_name: str = Field(...)
+    email: EmailStr = Field(...)
 
     class Meta:
         model = User

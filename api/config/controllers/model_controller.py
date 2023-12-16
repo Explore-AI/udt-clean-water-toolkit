@@ -1,10 +1,11 @@
 # from typing import Optional
 from json.decoder import JSONDecodeError
 from fastapi import Request, Depends, status
+from pydantic import ValidationError as PyValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from config.db import get_db_session
-from config.exceptions import MethodNotAllowed, ParseError
+from config.exceptions import MethodNotAllowed, ParseError, ValidationError
 from config.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from . import BaseController
 
@@ -175,6 +176,13 @@ class ModelController(BaseController):
         # https://stackoverflow.com/a/77379809
         return queryset.limit(page_limit)
 
+    def serialize_data(self, serializer_class, data):
+        """Serialize the body of a request"""
+        try:
+            return serializer_class(**data)
+        except PyValidationError as e:
+            raise ValidationError(detail=e.json())
+
     @classmethod
     def list(
         cls,
@@ -218,8 +226,8 @@ class ModelController(BaseController):
         except ValueError:
             raise ParseError(detail="Did not receive valid JSON")
 
-        serializer = self.get_serializer_class()
-        serializer_data = serializer(**data)
+        serializer_class = self.get_serializer_class()
+        serializer = self.serialize_data(serializer_class, data)
 
         return []
         # serializer = self.get_serializer(data=request.data)
