@@ -1,9 +1,10 @@
 # from typing import Optional
 from json.decoder import JSONDecodeError
-from fastapi import Request, Depends
+from fastapi import Request, Depends, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from config.db import get_db_session
+from config.exceptions import MethodNotAllowed, ParseError
 from config.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from . import BaseController
 
@@ -27,6 +28,7 @@ class ModelController(BaseController):
     Model = None
     serializer_class = None
     db_query = None
+    allowed_methods = ["get", "put", "put", "destroy"]
 
     def __init__(self):
         """Define all instance attributes here."""
@@ -37,6 +39,7 @@ class ModelController(BaseController):
         self.page_size = None
         self.page_num = None
         self.order = None
+        self.request = None
 
     def initial(self, request, db_session):
         """The first method called by this
@@ -44,19 +47,44 @@ class ModelController(BaseController):
         want to initialise all these attributes
         on class initialisation so we do it here"""
 
+        if request.method.lower() not in list(
+            map(lambda x: x.lower(), self.allowed_methods)
+        ):
+            raise MethodNotAllowed()
+
+        self.request = request
         self.db_session = db_session
         self.query_params = dict(request._query_params)
 
-        if not self.db_query:
+        if self.get_db_query() is None:
             self.queryset = select(self.Model)
 
+    def get_request_method(self):
+        # Certain functions such as the `get_serializer_class`
+        # method is called when the router function is instantiated
+        # upon compilation. However, the request object is only
+        # populated at run time. Therefore, have to check is request
+        # object is present first.
+
+        try:
+            method = self.request.method.lower()
+        except:
+            method = None
+
+        return method
+
     def execute_query(self):
-        if not self.get_db_query():
-            print(self.queryset)
-            return self.db_session.scalars(self.queryset)
-        return self.get_db_query()
+        qs = self.queryset
+        if self.get_db_query() is not None:
+            qs = self.get_db_query()
+        return self.db_session.scalars(qs)
 
     def get_db_query(self):
+        """
+        To write a custom query overide this method or
+        supply the `db_query` class attribute.
+        """
+        # TO DO: below assert does not make sense
         assert self.db_query is not None or self.Model is not None, (
             f"'{self.__class__.__name__}' should either include a Model attribute"
             ", a `db_query` attribute, or override the `get_db_query()` method."
@@ -163,11 +191,12 @@ class ModelController(BaseController):
 
         self.validate_query_params()
 
-        if not self.db_query:
+        if self.get_db_query() is None:
             self.filter_queryset()
             self.paginate_queryset()
 
         queryset = self.execute_query()
+
         return queryset
 
     @classmethod
@@ -185,9 +214,12 @@ class ModelController(BaseController):
         try:
             data = await request.json()
         except JSONDecodeError:
-            raise ValueError("Did not receive valid JSON")
+            raise ParseError(detail="Did not receive valid JSON")
+        except ValueError:
+            raise ParseError(detail="Did not receive valid JSON")
 
         serializer = self.get_serializer_class()
+        serializer_data = serializer(**data)
 
         return []
         # serializer = self.get_serializer(data=request.data)
