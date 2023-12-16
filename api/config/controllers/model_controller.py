@@ -32,7 +32,7 @@ class ModelController:
         self.db_session = None
         self.query_params = None
         self.validated_query_params = None
-        self.session_query = None
+        self.queryset = None
         self.page_size = None
         self.page_num = None
         self.order = None
@@ -47,12 +47,12 @@ class ModelController:
         self.query_params = dict(request._query_params)
 
         if not self.db_query:
-            self.session_query = select(self.Model)
+            self.queryset = select(self.Model)
 
     def execute_query(self):
         if not self.get_db_query():
-            print(self.session_query)
-            return self.db_session.scalars(self.session_query)
+            print(self.queryset)
+            return self.db_session.scalars(self.queryset)
         return self.get_db_query()
 
     def get_db_query(self):
@@ -95,9 +95,16 @@ class ModelController:
             k: v for k, v in dict(validated_serializer).items() if v is not None
         }
 
-    # def order_queryset(self):
-    #     if self.order == "asc":
-    #         self.session_query.order_by(''
+    def order_queryset(self, queryset):
+        field = self.order.split("__")[0]
+        ordering = self.order.split("__")[1]
+
+        attr = getattr(self.Model, field)
+        if ordering == "asc":
+            queryset = queryset.order_by(attr)
+        elif ordering == "dsc":
+            queryset = queryset.order_by(attr.desc())
+        return queryset
 
     def filter_queryset(self):
         """Filter validated query params using the
@@ -107,14 +114,15 @@ class ModelController:
         TO DO: Filter across joins
         """
 
-        q = self.session_query
+        qs = self.queryset
         for k, v in self.validated_query_params.items():
-            f = getattr(self.Model, k)
-            q = q.where(f == v)
+            attr = getattr(self.Model, k)
+            qs = qs.where(attr == v)
 
-        self.session_query = q
+        if self.order:
+            qs = self.order_queryset(qs)
 
-    #        self.order_queryset()
+        self.queryset = qs
 
     def paginate_queryset(self):
         page_limit = self.page_size or DEFAULT_PAGE_SIZE
@@ -125,7 +133,7 @@ class ModelController:
         # TO DO: Have to use limit while working with sqlite.
         # Proper implmentation is with fetch but sqlite not yet supported
         # https://stackoverflow.com/a/77379809
-        self.session_query = self.session_query.limit(page_limit)
+        self.queryset = self.queryset.limit(page_limit)
 
     @classmethod
     def list(
