@@ -8,7 +8,7 @@ from config.base_model import Base
 class User(Base):
     first_name: Mapped[str] = mapped_column(String(254), nullable=False)
     last_name: Mapped[str] = mapped_column(String(254), nullable=False)
-    email: Mapped[str] = mapped_column(String(254), nullable=False)
+    email: Mapped[str] = mapped_column(String(254), nullable=False, unique=True)
     is_active: Mapped[bool] = mapped_column(unique=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

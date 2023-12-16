@@ -1,9 +1,11 @@
 # from typing import Optional
+from json.decoder import JSONDecodeError
 from fastapi import Request, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from config.db import get_db_session
 from config.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from . import BaseController
 
 # def execute_query(self):
 #     session = next(db_session())
@@ -15,12 +17,11 @@ from config.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 #     return session.execute(self.query)
 
 
-class ModelController:
-    """This is an abstract base class. It should not be
-    instantiated directly. It should only be used as an inherited
-    class.
+class ModelController(BaseController):
+    """This is an abstract base class. It should not be instantiated
+    directly. It should only be used as an inherited class.
 
-    # https://stackoverflow.com/questions/75249150/how-to-use-class-based-views-in-fastapi
+    https://stackoverflow.com/questions/75249150/how-to-use-class-based-views-in-fastapi
     """
 
     Model = None
@@ -69,8 +70,16 @@ class ModelController:
         )
         return self.serializer_class
 
+    def set_generic_args(self, args={}):
+        return args | {"response_model": list[self.get_serializer_class()]}
+
     def set_get_args(self):
-        return {"response_model": list[self.get_serializer_class()]}
+        args = {"response_model": list[self.get_serializer_class()]}
+        return self.set_generic_args(args)
+
+    def set_post_args(self):
+        args = {"response_model": self.get_serializer_class()}
+        return self.set_generic_args(args)
 
     def validate_query_params(self):
         page_size = self.query_params.pop("page_size", None)
@@ -96,7 +105,7 @@ class ModelController:
         }
 
     def order_queryset(self, queryset):
-        """Construct query param as follows:
+        """Construct order query param as follows:
         `order=field__asc` or `order=field_dsc`"""
 
         field = self.order.split("__")[0]
@@ -146,8 +155,7 @@ class ModelController:
     ):
         """This method is bound to GET requests on this
         controller. It is the endpoint function for the
-        FastAPI get method.
-
+        FastAPI @get method.
         """
 
         self = request["endpoint"].__self__()
@@ -161,3 +169,29 @@ class ModelController:
 
         queryset = self.execute_query()
         return queryset
+
+    @classmethod
+    async def create(
+        cls,
+        request: Request,
+        db_session: Session = Depends(get_db_session),
+    ):
+        """This method is bound to POST requests on this
+        controller. It is the endpoint function for the
+        FastAPI @post method.
+        """
+        self = request["endpoint"].__self__()
+        self.initial(request, db_session)
+        try:
+            data = await request.json()
+        except JSONDecodeError:
+            raise ValueError("Did not receive valid JSON")
+
+        serializer = self.get_serializer_class()
+
+        return []
+        # serializer = self.get_serializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # self.perform_create(serializer)
+        # headers = self.get_success_headers(serializer.data)
+        # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

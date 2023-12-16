@@ -3,6 +3,9 @@ from fastapi import APIRouter
 
 
 class BaseRouter(APIRouter):
+    """This is an abstract base class. It should not be instantiated
+    directly. It should only be used as an inherited class.
+    """
     def __init__(self, *args, **kwargs):
         # print("aaa", args, kwargs)
         super().__init__(*args, **kwargs)
@@ -17,15 +20,20 @@ class ModelRouter(BaseRouter):
         self.url = url
         self.controller = controller
         super().__init__(*args, **kwargs)
-        self.get_list()
+        self.set_get_route()
+        self.set_post_route()
 
-    def get_list(self):
+    def set_get_route(self):
         kwargs = self.controller().set_get_args()
         set_api_route = super().get(self.url, **kwargs)
-        # attr = dict(self.controller().get_attr()) | dict(
-        #     self.controller.__dict__.items()
-        # )
         set_api_route(self.controller.list)
+
+
+    def set_post_route(self):
+        kwargs = self.controller().set_post_args()
+        set_api_route = super().post(self.url, **kwargs)
+        set_api_route(self.controller.create)
+
 
 
 class RouterUtils:
