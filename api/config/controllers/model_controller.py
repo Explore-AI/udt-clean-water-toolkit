@@ -1,44 +1,71 @@
 # from typing import Optional
 from fastapi import Request, Depends
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from config.db import get_db_session
 from config.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 
+# def execute_query(self):
+#     session = next(db_session())
+#     if self.Model and not self.query != None:
+#         return session.query(self.Model).all()
+#     # TO DO: have another look at this issue
+#     # There appears to be a FastAPI bug with the usage of next(). See link:
+#     # https://github.com/tiangolo/fastapi/discussions/7334
+#     return session.execute(self.query)
+
 
 class ModelController:
-    # https://stackoverflow.com/questions/75249150/how-to-use-class-based-views-in-fastapi
-    Model = None
-    query = None
-    serializer_class = None
+    """This is an abstract base class. It should not be
+    instantiated directly. It should only be used as an inherited
+    class.
 
-    # def execute_query(self):
-    #     session = next(db_session())
-    #     if self.Model and not self.query != None:
-    #         return session.query(self.Model).all()
-    #     # TO DO: have another look at this issue
-    #     # There appears to be a FastAPI bug with the usage of next(). See link:
-    #     # https://github.com/tiangolo/fastapi/discussions/7334
-    #     return session.execute(self.query)
+    # https://stackoverflow.com/questions/75249150/how-to-use-class-based-views-in-fastapi
+    """
+
+    Model = None
+    serializer_class = None
+    db_query = None
+
+    def __init__(self):
+        """Define all instance attributes here."""
+        self.db_session = None
+        self.query_params = None
+        self.validated_query_params = None
+        self.session_query = None
+        self.page_size = None
+        self.page_num = None
+        self.order = None
 
     def initial(self, request, db_session):
+        """The first method called by this
+        controller in the response cycle. We don't
+        want to initialise all these attributes
+        on class initialisation so we do it here"""
+
         self.db_session = db_session
         self.query_params = dict(request._query_params)
-        self.query = self.db_session.query(self.Model)
 
-    def construct_query(self, **kwargs):
-        q = self.query
-        for k, v in kwargs.items():
-            f = getattr(self.Model, k)
-            q = q.filter(f.in_(v))
-        self.query = q
+        if not self.db_query:
+            self.session_query = select(self.Model)
 
     def execute_query(self):
-        return self.query.all()
+        if not self.get_db_query():
+            print(self.session_query)
+            return self.db_session.scalars(self.session_query)
+        return self.get_db_query()
+
+    def get_db_query(self):
+        assert self.db_query is not None or self.Model is not None, (
+            f"'{self.__class__.__name__}' should either include a Model attribute"
+            ", a `db_query` attribute, or override the `get_db_query()` method."
+        )
+        return self.db_query
 
     def get_serializer_class(self):
         assert self.serializer_class is not None, (
-            "'%s' should either include a `serializer_class` attribute, "
-            "or override the `get_serializer_class()` method." % self.__class__.__name__
+            f"'{self.__class__.__name__}' should either include a `serializer_class` attribute, "
+            "or override the `get_serializer_class()` method."
         )
         return self.serializer_class
 
@@ -48,26 +75,57 @@ class ModelController:
     def validate_query_params(self):
         page_size = self.query_params.pop("page_size", None)
         page_num = self.query_params.pop("page_num", None)
-        order = self.query_params.pop("order", None)
+        self.order = self.query_params.pop("order", None)
 
         try:
-            page_size = int(page_size)
-        except:
-            raise TypeError("Got non-integer argument for 'page_size' query paramter")
+            if page_size:
+                self.page_size = int(page_size)
+        except ValueError:
+            raise ValueError("Got non-integer argument for 'page_size' query paramter")
 
-        self.validated_query_params = self.get_serializer_class(**self.query_params)
-        return page_size
+        try:
+            if page_num:
+                self.page_num = int(page_num)
+        except ValueError:
+            raise ValueError("Got non-integer argument for 'page_num' query paramter")
+
+        serializer = self.get_serializer_class()
+        validated_serializer = serializer(**self.query_params)
+        self.validated_query_params = {
+            k: v for k, v in dict(validated_serializer).items() if v is not None
+        }
+
+    # def order_queryset(self):
+    #     if self.order == "asc":
+    #         self.session_query.order_by(''
 
     def filter_queryset(self):
-        pass
+        """Filter validated query params using the
+        AND operator.
 
-    def paginate_queryset(self, page_size):
-        page_limit = page_size or DEFAULT_PAGE_SIZE
+        TO DO: Filter by OR
+        TO DO: Filter across joins
+        """
 
-        # if page_limit > MAX_PAGE_SIZE:
-        #     page_limit = MAX_PAGE_SIZE
+        q = self.session_query
+        for k, v in self.validated_query_params.items():
+            f = getattr(self.Model, k)
+            q = q.where(f == v)
 
-        self.query = self.query.limit(page_limit)
+        self.session_query = q
+
+    #        self.order_queryset()
+
+    def paginate_queryset(self):
+        page_limit = self.page_size or DEFAULT_PAGE_SIZE
+
+        if page_limit > MAX_PAGE_SIZE:
+            page_limit = MAX_PAGE_SIZE
+
+        # TO DO: Have to use limit while working with sqlite.
+        # Proper implmentation is with fetch but sqlite not yet supported
+        # https://stackoverflow.com/a/77379809
+        self.session_query = self.session_query.limit(page_limit)
 
     @classmethod
     def list(
@@ -75,24 +133,20 @@ class ModelController:
         request: Request,
         db_session: Session = Depends(get_db_session),
     ):
+        """This method is bound to GET requests on this
+        controller. It is the endpoint function for the
+        FastAPI get method.
+
+        """
+
         self = request["endpoint"].__self__()
         self.initial(request, db_session)
-        page_size = self.validate_query_params()
-        self.filter_queryset()
 
-        self.paginate_queryset(page_size)
+        self.validate_query_params()
 
-        queryset = self.query.all()
+        if not self.db_query:
+            self.filter_queryset()
+            self.paginate_queryset()
 
+        queryset = self.execute_query()
         return queryset
-
-        # return
-        # queryset = self.filter_queryset(self.query)
-
-        # page = self.paginate_queryset(queryset)
-        # if page is not None:
-        #     serializer = self.get_serializer(page, many=True)
-        #     return self.get_paginated_response(serializer.data)
-
-        # serializer = self.get_serializer(queryset, many=True)
-        # return Response(serializer.data)
