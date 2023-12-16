@@ -35,7 +35,6 @@ class ModelController(BaseController):
         self.db_session = None
         self.query_params = None
         self.validated_query_params = None
-        self.queryset = None
         self.page_size = None
         self.page_num = None
         self.order = None
@@ -56,8 +55,11 @@ class ModelController(BaseController):
         self.db_session = db_session
         self.query_params = dict(request._query_params)
 
+        qs = None
         if self.get_db_query() is None:
-            self.queryset = select(self.Model)
+            qs = select(self.Model)
+
+        return qs
 
     def get_request_method(self):
         # Certain functions such as the `get_serializer_class`
@@ -73,8 +75,7 @@ class ModelController(BaseController):
 
         return method
 
-    def execute_query(self):
-        qs = self.queryset
+    def execute_query(self, qs):
         if self.get_db_query() is not None:
             qs = self.get_db_query()
         return self.db_session.scalars(qs)
@@ -146,7 +147,7 @@ class ModelController(BaseController):
             queryset = queryset.order_by(attr.desc())
         return queryset
 
-    def filter_queryset(self):
+    def filter_queryset(self, queryset):
         """Filter validated query params using the
         AND operator.
 
@@ -154,17 +155,16 @@ class ModelController(BaseController):
         TO DO: Filter across joins
         """
 
-        qs = self.queryset
         for k, v in self.validated_query_params.items():
             attr = getattr(self.Model, k)
-            qs = qs.where(attr == v)
+            queryset = queryset.where(attr == v)
 
         if self.order:
-            qs = self.order_queryset(qs)
+            queryset = self.order_queryset(queryset)
 
-        self.queryset = qs
+        return queryset
 
-    def paginate_queryset(self):
+    def paginate_queryset(self, queryset):
         page_limit = self.page_size or DEFAULT_PAGE_SIZE
 
         if page_limit > MAX_PAGE_SIZE:
@@ -173,7 +173,7 @@ class ModelController(BaseController):
         # TO DO: Have to use limit while working with sqlite.
         # Proper implmentation is with fetch but sqlite not yet supported
         # https://stackoverflow.com/a/77379809
-        self.queryset = self.queryset.limit(page_limit)
+        return queryset.limit(page_limit)
 
     @classmethod
     def list(
@@ -187,15 +187,15 @@ class ModelController(BaseController):
         """
 
         self = request["endpoint"].__self__()
-        self.initial(request, db_session)
+        queryset = self.initial(request, db_session)
 
         self.validate_query_params()
 
         if self.get_db_query() is None:
-            self.filter_queryset()
-            self.paginate_queryset()
+            queryset = self.filter_queryset(queryset)
+            queryset = self.paginate_queryset(queryset)
 
-        queryset = self.execute_query()
+        queryset = self.execute_query(queryset)
 
         return queryset
 
