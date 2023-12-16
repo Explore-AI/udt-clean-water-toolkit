@@ -96,6 +96,9 @@ class ModelController:
         }
 
     def order_queryset(self, queryset):
+        """Construct query param as follows:
+        `order=field__asc` or `order=field_dsc`"""
+
         field = self.order.split("__")[0]
         ordering = self.order.split("__")[1]
 
