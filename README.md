@@ -55,7 +55,7 @@ Devops tools for application, development, and deployment.
 - SQLAlchemy
 - alembic
 
-### 
+### devops
 
 - docker
 - docker-compose
