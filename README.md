@@ -14,11 +14,11 @@ A FastAPI application built with SQLAlchemy. Provides a RESTful API interface fo
 
 ### cwm
 
-The Clean Water Module (cwm) is a python module/library that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network.
+The clean water module is a python module/library that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network.
 
 ### app
 
-The primary application for Clean Water Toolkit. It utilises the `cwm` library and provides functional and class based APIs. It is non-graphical.
+The primary application for Clean Water Toolkit. It utilises the `cwm` library and provides functional and class based APIs. It is packaged into a single distributable and can be imported into other .py files or run with the provided shell commands. It is non-graphical. 
 
 ### api2
 
@@ -36,13 +36,7 @@ Devops tools for application development and deployment.
 
 ### api
 
-NB: Before running the `api` for development one must create a symlink of the cwm module into the `api` directory.
-
-```
-ln -s ../cwm/src/ api/cwm
-```
-
-Create a python3 virtual environment and install required modules. The necessary `cwm` modules will also need to be installed. For example using pip:
+Create a python3 virtual environment and install required modules. For example using pip:
 
 ```
 python3 -m venv api/venv
@@ -51,18 +45,23 @@ source api/venv/bin/activate
 
 pip install -r api/requirements.txt
 
-pip install -r cwm/requirements.txt
 ```
+
+Before running the `api` for development one needs to package and install the `cwm` module in dev mode:
+
+```
+# assuming you area already in the `api` virtual environment
+
+cd cwm/
+
+pip install -e .
+
+```
+
 
 ### app
 
-NB: Before running the `api` for development one must create a symlink of the cwm module into the `api` directory.
-
-```
-ln -s ../cwm/src/ app/cwm
-```
-
-Create a python3 virtual environment and install required modules. The necessary `cwm` modules will also need to be installed. For example using pip:
+Create a python3 virtual environment and install required modules. For example using pip:
 
 ```
 python3 -m venv app/venv
@@ -71,7 +70,17 @@ source app/venv/bin/activate
 
 pip install -r app/requirements.txt
 
-pip install -r cwm/requirements.txt
+```
+
+Before running the `app` for development one needs to package and install the `cwm` module in dev mode:
+
+```
+# assuming you area already in the `app` virtual environment
+
+cd cwm/
+
+pip install -e .
+
 ```
 
 ## 4. Deployment
