@@ -2,5 +2,5 @@
 from config.routers import ModelRouter
 from core.controllers.user_controller import UserController
 
-# router = BaseRouter()
-router = ModelRouter("/core/user", controller=UserController, tags=["user"])
+
+router = ModelRouter("/user", controller=UserController, prefix="/core", tags=["user"])

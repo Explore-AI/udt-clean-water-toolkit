@@ -50,4 +50,4 @@ class RouterUtils:
     @staticmethod
     def generate_routers(app, url_routers):
         for router in url_routers:
-            app.include_router(router[1])
+            app.include_router(router)
