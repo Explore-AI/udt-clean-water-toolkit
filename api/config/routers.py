@@ -22,17 +22,22 @@ class ModelRouter(BaseRouter):
         super().__init__(*args, **kwargs)
         self.set_get_route()
         self.set_post_route()
+        self.set_delete_route()
 
     def set_get_route(self):
         kwargs = self.controller().set_get_args()
         set_api_route = super().get(self.url, **kwargs)
         set_api_route(self.controller.list)
 
-
     def set_post_route(self):
         kwargs = self.controller().set_post_args()
         set_api_route = super().post(self.url, **kwargs)
         set_api_route(self.controller.create)
+
+    def set_delete_route(self):
+        kwargs = self.controller().set_delete_args()
+        set_api_route = super().delete(self.url, **kwargs)
+        set_api_route(self.controller.destroy)
 
 
 

@@ -6,6 +6,7 @@ from config.base_model import Base
 
 
 class User(Base):
+    #__tablename__ = 'user'
     first_name: Mapped[str] = mapped_column(String(254), nullable=False)
     last_name: Mapped[str] = mapped_column(String(254), nullable=False)
     email: Mapped[str] = mapped_column(String(254), nullable=False, unique=True)

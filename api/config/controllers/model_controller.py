@@ -1,8 +1,8 @@
 # from typing import Optional
 from json.decoder import JSONDecodeError
-from fastapi import Request, Depends, status
+from fastapi import Request, Depends, status, HTTPException
 from pydantic import ValidationError as PyValidationError
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from config.db import get_db_session
@@ -35,7 +35,7 @@ class ModelController(BaseController):
     Model = None
     serializer_class = None
     db_query = None
-    allowed_methods = ["get", "put", "put", "destroy"]
+    allowed_methods = ["get", "put", "put", "delete"]
 
     def __init__(self):
         """Define all instance attributes here."""
@@ -52,12 +52,13 @@ class ModelController(BaseController):
         want to initialise all these attributes
         on class initialisation so we do it here"""
 
-        if request.method.lower() not in list(
+        self.request = request
+
+        if self.get_request_method() not in list(
             map(lambda x: x.lower(), self.allowed_methods)
         ):
             raise MethodNotAllowed()
 
-        self.request = request
         self.db_session = db_session
         self.query_params = dict(request._query_params)
 
@@ -116,6 +117,9 @@ class ModelController(BaseController):
     def set_post_args(self):
         args = {"response_model": self.get_serializer_class(), "status_code": 201}
         return self.set_generic_args(args)
+
+    def set_delete_args(self):
+        return self.set_generic_args()
 
     def validate_query_params(self):
         page_size = self.query_params.pop("page_size", None)
@@ -192,6 +196,35 @@ class ModelController(BaseController):
         except PyValidationError as e:
             raise ValidationError(detail=e.json())
 
+    def _get_object_or_404(self, pk):
+
+        obj = self.db_session.get(self.Model, pk)
+        print(obj, "hhhhhh")
+        if obj:
+            return obj
+
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Object not found")
+
+    async def get_object(self):
+        """
+        Returns the object the controller is displaying.
+
+        You may want to override this if you need to provide non-standard
+        queryset lookups. Eg if objects are referenced using multiple
+        keyword arguments in the url conf.
+        """
+        data = await self.get_json_data()
+
+        serializer_class = self.get_serializer_class()
+        serializer = self.serialize_data(serializer_class, data)
+
+        obj = self._get_object_or_404(serializer.id)
+
+        # TO DO: May raise a permission denied
+        #self.check_object_permissions(self.request, obj)
+
+        return obj
+
     def create_obj(self, serializer):
         validated_data = serializer.model_dump()
 
@@ -207,6 +240,21 @@ class ModelController(BaseController):
         self.db_session.refresh(new_obj)
 
         return new_obj
+
+    def destroy_obj(self, obj):
+        self.db_session.delete(obj)
+        self.db_session.commit()
+
+    async def get_json_data(self):
+
+        try:
+            data = await self.request.json()
+        except JSONDecodeError:
+            raise ParseError(detail="Did not receive valid JSON")
+        except ValueError:
+            raise ParseError(detail="Did not receive valid JSON")
+
+        return data
 
     @classmethod
     def list(
@@ -244,12 +292,8 @@ class ModelController(BaseController):
         """
         self = request["endpoint"].__self__()
         self.initial(request, db_session)
-        try:
-            data = await request.json()
-        except JSONDecodeError:
-            raise ParseError(detail="Did not receive valid JSON")
-        except ValueError:
-            raise ParseError(detail="Did not receive valid JSON")
+
+        data = await self.get_json_data()
 
         serializer_class = self.get_serializer_class()
         serializer = self.serialize_data(serializer_class, data)
@@ -257,8 +301,18 @@ class ModelController(BaseController):
         new_obj = self.create_obj(serializer)
 
         return new_obj
-        # serializer = self.get_serializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-        # self.perform_create(serializer)
-        # headers = self.get_success_headers(serializer.data)
-        # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @classmethod
+    async def destroy(cls,
+        request: Request,
+        db_session: Session = Depends(get_db_session),
+    ):
+        """This method is bound to DELETE requests on this
+        controller. It is the endpoint function for the
+        FastAPI @delete method.
+        """
+        self = request["endpoint"].__self__()
+        self.initial(request, db_session)
+        obj = await self.get_object()
+        self.destroy_obj(obj)
+        return {"message": "success"}
