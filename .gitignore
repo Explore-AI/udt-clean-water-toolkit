@@ -166,4 +166,7 @@ db.sqlite3
 
 api/cwm
 api2/cwm
+app/cwm
+
 examples
+misc
