@@ -30,7 +30,7 @@ An electron based app. Interacts with the `api` and provides a GUI that demonstr
 
 ### devops
 
-Devops tools for application development and deployment.
+Devops tools for application, development, and deployment.
 
 ## 3. Development
 
