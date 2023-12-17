@@ -7,8 +7,10 @@ from core.models import User
 
 class UserSerializer(BaseSerializer):
     id: Union[int, None] = None
-    is_active: Union[int, None] = None
     first_name: Union[str, None] = None
+    last_name: Union[str, None] = None
+    email: Union[EmailStr, None] = None
+    is_active: Union[int, None] = None
     created_at: Union[datetime, None] = None
     modified_at: Union[datetime, None] = None
 

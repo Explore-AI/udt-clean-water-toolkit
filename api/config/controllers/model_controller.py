@@ -4,8 +4,14 @@ from fastapi import Request, Depends, status
 from pydantic import ValidationError as PyValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from config.db import get_db_session
-from config.exceptions import MethodNotAllowed, ParseError, ValidationError
+from config.exceptions import (
+    MethodNotAllowed,
+    ParseError,
+    ValidationError,
+    SQLAlchemyIntegrityError,
+)
 from config.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from . import BaseController
 
@@ -35,7 +41,6 @@ class ModelController(BaseController):
         """Define all instance attributes here."""
         self.db_session = None
         self.query_params = None
-        self.validated_query_params = None
         self.page_size = None
         self.page_num = None
         self.order = None
@@ -101,14 +106,15 @@ class ModelController(BaseController):
         return self.serializer_class
 
     def set_generic_args(self, args={}):
-        return args | {"response_model": list[self.get_serializer_class()]}
+        generic_args = {}
+        return args | generic_args
 
     def set_get_args(self):
         args = {"response_model": list[self.get_serializer_class()]}
         return self.set_generic_args(args)
 
     def set_post_args(self):
-        args = {"response_model": self.get_serializer_class()}
+        args = {"response_model": self.get_serializer_class(), "status_code": 201}
         return self.set_generic_args(args)
 
     def validate_query_params(self):
@@ -128,11 +134,14 @@ class ModelController(BaseController):
         except ValueError:
             raise ValueError("Got non-integer argument for 'page_num' query paramter")
 
-        serializer = self.get_serializer_class()
-        validated_serializer = serializer(**self.query_params)
-        self.validated_query_params = {
-            k: v for k, v in dict(validated_serializer).items() if v is not None
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(**self.query_params)
+
+        validated_query_params = {
+            k: v for k, v in serializer.model_dump().items() if v is not None
         }
+
+        return validated_query_params
 
     def order_queryset(self, queryset):
         """Construct order query param as follows:
@@ -148,7 +157,7 @@ class ModelController(BaseController):
             queryset = queryset.order_by(attr.desc())
         return queryset
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset, validated_query_params):
         """Filter validated query params using the
         AND operator.
 
@@ -156,7 +165,7 @@ class ModelController(BaseController):
         TO DO: Filter across joins
         """
 
-        for k, v in self.validated_query_params.items():
+        for k, v in validated_query_params.items():
             attr = getattr(self.Model, k)
             queryset = queryset.where(attr == v)
 
@@ -183,6 +192,22 @@ class ModelController(BaseController):
         except PyValidationError as e:
             raise ValidationError(detail=e.json())
 
+    def create_obj(self, serializer):
+        validated_data = serializer.model_dump()
+
+        new_obj = self.Model(**validated_data)
+
+        self.db_session.add(new_obj)
+
+        try:
+            self.db_session.commit()
+        except IntegrityError:
+            raise SQLAlchemyIntegrityError()
+
+        self.db_session.refresh(new_obj)
+
+        return new_obj
+
     @classmethod
     def list(
         cls,
@@ -197,10 +222,10 @@ class ModelController(BaseController):
         self = request["endpoint"].__self__()
         queryset = self.initial(request, db_session)
 
-        self.validate_query_params()
+        validated_query_params = self.validate_query_params()
 
         if self.get_db_query() is None:
-            queryset = self.filter_queryset(queryset)
+            queryset = self.filter_queryset(queryset, validated_query_params)
             queryset = self.paginate_queryset(queryset)
 
         queryset = self.execute_query(queryset)
@@ -229,7 +254,9 @@ class ModelController(BaseController):
         serializer_class = self.get_serializer_class()
         serializer = self.serialize_data(serializer_class, data)
 
-        return []
+        new_obj = self.create_obj(serializer)
+
+        return new_obj
         # serializer = self.get_serializer(data=request.data)
         # serializer.is_valid(raise_exception=True)
         # self.perform_create(serializer)

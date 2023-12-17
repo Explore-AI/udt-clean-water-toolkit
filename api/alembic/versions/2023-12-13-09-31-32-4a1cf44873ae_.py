@@ -24,8 +24,8 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("first_name", sa.String(254), nullable=False),
         sa.Column("last_name", sa.String(254), nullable=False),
-        sa.Column("email", sa.String(254), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column("email", sa.String(254), nullable=False, unique=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False, default=True),
         sa.Column(
             "created_at", sa.DateTime, server_default=sa.func.current_timestamp()
         ),
