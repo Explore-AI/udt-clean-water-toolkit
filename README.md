@@ -1,4 +1,4 @@
-# udt-project
+# udt-toolkit
 
 NB: This document is a work in progress.
 
