@@ -2,11 +2,11 @@
 
 NB: This document is a work in progress.
 
-## Overview
+## 1. Overview
 
 Development of a clean water toolkit that combines aspects of a digital twin and clean water modelling/analysis.
 
-## Project structure
+## 2. Project structure
 
 ### api
 
