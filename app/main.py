@@ -1,13 +1,15 @@
-import CleanWaterToolkit
 from cleanwater.data_managers import GeospatialDataManager
+from geospatial.data_managers.twgs_data_manager import TWGS_DataManager
+
+# import fiona
 
 
 def main():
-    dm = BaseDataManager()
+    gdm = GeospatialDataManager()
 
     zip_file_path = r"../misc/CW_20231108_060001.gdb.zip"
 
-    gdf = dm.gdb_zip_to_gdf_layer(zip_file_path, "wLoggerfff")
+    gdf = gdm.gdb_zip_to_gdf_layer(zip_file_path, "wLogger")
 
     print(gdf)
 
