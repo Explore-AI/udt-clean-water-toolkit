@@ -16,10 +16,16 @@ A FastAPI application built with SQLAlchemy. Provides a RESTful interface for th
 
 The Clean Water Module (cwm) is a python module that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network.
 
+## 3. Development
+
+### api
 
 NB: Before running the `api` for development one must create a symlink of the cwm module into the `api` directory.
 
 ```
 ln -s ../cwm/src/ api/uwm
 ```
+
+## 4. Deployment
+
 
