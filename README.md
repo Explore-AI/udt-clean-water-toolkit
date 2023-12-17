@@ -24,6 +24,10 @@ The primary application for Clean Water Toolkit. It utilises the `cwm` library a
 
 NB: for experimentation purposes only. A DRF application. Provides a RESTful API interface for the `cwm` module. Also provides additional apis for visualisation, analysis, and modelling. It is not for production.
 
+### ui
+
+An electron based app. Interacts with the `api` and provides a GUI that demonstrates some of the capabilities of the Clean Water Toolkit.
+
 ### devops
 
 Devops tools for application development and deployment.
