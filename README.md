@@ -32,7 +32,36 @@ An electron based app. Interacts with the `api` and provides a GUI that demonstr
 
 Devops tools for application, development, and deployment.
 
-## 3. Development
+
+## 3. Requirements
+
+### api
+
+- FastAPI
+- pydantic
+- uvicorn
+- SQLAlchemy
+- alembic
+
+### cwm
+
+- pandas
+- geopandas
+- numpy
+- networkx
+
+### app
+
+- SQLAlchemy
+- alembic
+
+### 
+
+- docker
+- docker-compose
+
+
+## 4. Development
 
 ### api
 
@@ -83,6 +112,6 @@ pip install -e .
 
 ```
 
-## 4. Deployment
+## 5. Deployment
 
 
