@@ -118,6 +118,10 @@ class ModelController(BaseController):
         args = {"response_model": self.get_serializer_class(), "status_code": 201}
         return self.set_generic_args(args)
 
+    def set_put_args(self):
+        args = {"response_model": self.get_serializer_class()}
+        return self.set_generic_args(args)
+
     def set_delete_args(self):
         return self.set_generic_args()
 
@@ -199,7 +203,7 @@ class ModelController(BaseController):
     def _get_object_or_404(self, pk):
 
         obj = self.db_session.get(self.Model, pk)
-        print(obj, "hhhhhh")
+
         if obj:
             return obj
 
@@ -209,7 +213,7 @@ class ModelController(BaseController):
         """
         Returns the object the controller is displaying.
 
-        You may want to override this if you need to provide non-standard
+        You may want to override this method if you need to provide non-standard
         queryset lookups. Eg if objects are referenced using multiple
         keyword arguments in the url conf.
         """
@@ -226,6 +230,14 @@ class ModelController(BaseController):
         return obj
 
     def create_obj(self, serializer):
+        """
+        This method creates an object based on a one to one
+        mapping of the serializer and model.
+
+        You may want to override this method if you need to
+        provide a non-standard create.
+        """
+
         validated_data = serializer.model_dump()
 
         new_obj = self.Model(**validated_data)
@@ -240,6 +252,24 @@ class ModelController(BaseController):
         self.db_session.refresh(new_obj)
 
         return new_obj
+
+    def update_obj(self, obj, serializer):
+        """
+        This method updates an object based on a one to one
+        mapping of the serializer and model.
+
+        You may want to override this method if you need to
+        provide a non-standard update.
+        """
+        validated_data = serializer.model_dump()
+
+        for k, v in validated_data.items():
+            if v:
+                setattr(obj, k, v)
+
+        self.db_session.commit()
+
+        return obj
 
     def destroy_obj(self, obj):
         self.db_session.delete(obj)
@@ -264,7 +294,7 @@ class ModelController(BaseController):
     ):
         """This method is bound to GET requests on this
         controller. It is the endpoint function for the
-        FastAPI @get method.
+        FastAPI @get decorator method.
         """
 
         self = request["endpoint"].__self__()
@@ -288,7 +318,7 @@ class ModelController(BaseController):
     ):
         """This method is bound to POST requests on this
         controller. It is the endpoint function for the
-        FastAPI @post method.
+        FastAPI @post decorator method.
         """
         self = request["endpoint"].__self__()
         self.initial(request, db_session)
@@ -303,16 +333,38 @@ class ModelController(BaseController):
         return new_obj
 
     @classmethod
+    async def update(cls,
+        request: Request,
+        db_session: Session = Depends(get_db_session),
+    ):
+        """This method is bound to PUT requests on this
+        controller. It is the endpoint function for the
+        FastAPI @put decorator method.
+        """
+        self = request["endpoint"].__self__()
+        self.initial(request, db_session)
+
+        data = await self.get_json_data()
+        serializer_class = self.get_serializer_class()
+        serializer = self.serialize_data(serializer_class, data)
+
+        obj = await self.get_object()
+
+        obj = self.update_obj(obj, serializer)
+        return obj
+
+    @classmethod
     async def destroy(cls,
         request: Request,
         db_session: Session = Depends(get_db_session),
     ):
         """This method is bound to DELETE requests on this
         controller. It is the endpoint function for the
-        FastAPI @delete method.
+        FastAPI @delete decorator method.
         """
         self = request["endpoint"].__self__()
         self.initial(request, db_session)
+
         obj = await self.get_object()
         self.destroy_obj(obj)
         return {"message": "success"}
