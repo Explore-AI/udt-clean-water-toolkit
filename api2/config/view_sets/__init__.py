@@ -1,0 +1,1 @@
+from .base_model_viewset import BaseModelViewSet
