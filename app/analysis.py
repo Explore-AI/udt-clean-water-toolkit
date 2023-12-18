@@ -1,5 +1,4 @@
-from geospatial.data_managers.twgs_data_manager import TWGS_DataManager
-
+from .geospatial.data_managers.twgs_data_manager import TWGS_DataManager
 
 # import fiona
 

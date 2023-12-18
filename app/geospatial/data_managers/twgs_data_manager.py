@@ -1,5 +1,5 @@
 from cleanwater.data_managers import GeospatialDataManager
-from config.settings import TW_GS_CLEAN_WATER_ZIP_PATH
+from ...config.settings import TW_GS_CLEAN_WATER_ZIP_PATH
 
 
 class TWGS_DataManager(GeospatialDataManager):

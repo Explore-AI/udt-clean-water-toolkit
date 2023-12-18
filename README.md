@@ -68,12 +68,15 @@ Devops tools for toolkit development and deployment.
 Create a python3 virtual environment and install required modules. For example using pip:
 
 ```
+# from project root dir
+
 python3 -m venv api/venv
 
 source api/venv/bin/activate
 
 pip install -r api/requirements.txt
 
+ln -s ../app/ ./api/
 ```
 
 Before running the `api` for development one needs to package and install the `cwm` module in dev mode:
@@ -84,7 +87,35 @@ Before running the `api` for development one needs to package and install the `c
 cd cwm/
 
 pip install -e .
+```
 
+### api2
+
+Create a python3 virtual environment and install required modules. For example using pip:
+
+```
+
+# from project root dir
+
+python3 -m venv api/venv
+
+source api2/venv/bin/activate
+
+pip install -r api2/requirements.txt
+
+pip install -r api2/dev-requirements.txt # for dev packages
+
+ln -s ../app/ ./api2/
+```
+
+Before running the `api` for development one needs to package and install the `cwm` module in dev mode:
+
+```
+# assuming you area already in the `api2` virtual environment
+
+cd cwm/
+
+pip install -e .
 ```
 
 
@@ -98,7 +129,6 @@ python3 -m venv app/venv
 source app/venv/bin/activate
 
 pip install -r app/requirements.txt
-
 ```
 
 Before running the `app` for development one needs to package and install the `cwm` module in dev mode:
@@ -109,7 +139,6 @@ Before running the `app` for development one needs to package and install the `c
 cd cwm/
 
 pip install -e .
-
 ```
 
 ## 5. Deployment
