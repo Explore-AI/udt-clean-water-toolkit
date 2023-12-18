@@ -4,19 +4,10 @@ from geospatial.data_managers.twgs_data_manager import TWGS_DataManager
 # import fiona
 
 
-def main():
+def analysis():
     twdm = TWGS_DataManager()
 
     gdf = twdm.wlogger_layer_to_sql()
-
-    print(gdf)
-    import pdb
-
-    pdb.set_trace()
-
-
-if __name__ == "__main__":
-    main()
 
 
 # gdf = gdm.gdb_zip_to_gdf_layer(zip_file_path, "wLogger")

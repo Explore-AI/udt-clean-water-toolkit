@@ -90,10 +90,6 @@ DATABASES = {
         "HOST": os.getenv("DJANGO_BASE_APP_DEFAULT_DB_HOST__ENV_VAR"),
         "PORT": "5432",
     }
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
 }
 
 
