@@ -1,12 +1,8 @@
 from .geospatial.data_managers.twgs_data_manager import TWGS_DataManager
 
-# import fiona
-
 
 def analysis():
-    twdm = TWGS_DataManager()
-
-    gdf = twdm.wlogger_layer_to_sql()
+    pass
 
 
 # gdf = gdm.gdb_zip_to_gdf_layer(zip_file_path, "wLogger")

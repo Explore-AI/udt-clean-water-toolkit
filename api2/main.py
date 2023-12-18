@@ -5,15 +5,26 @@ from django import setup
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 setup()
 
-# sys.path.append(os.path.abspath(os.sep.join(["..", "app"])))
+from app.geospatial.data_managers.twgs_data_manager import TWGS_DataManager
 
-print(sys.path)
-from app.analysis import analysis
+
+def gdf_to_sql():
+    twdm = TWGS_DataManager()
+
+    layers = twdm.get_layer_list()
+
+    gdf = twdm.wlogger_layer_gdb_to_gdf()
+
+    # Have a look at the TWGS_DataManager
+    # create additioal functions to convert csv to gdf
+    # Create a django model for each layer
+    # write to sql using the Model.create method here
+
+    # run this file when in the api2 directory. ensure venv is activated
 
 
 def main():
-    pass
-    # analysis()
+    gdf_to_sql()
 
 
 if __name__ == "__main__":
