@@ -108,6 +108,12 @@ pip install -r api2/dev-requirements.txt # for dev packages
 ln -s ../app/ ./api2/
 ```
 
+Install a postgis database and expose the required port
+
+```
+docker run --name udtpostgis -e POSTGRES_USER=udt -e POSTGRES_PASSWORD=[somepassword] -v /opt/udt/data/pgdata:/var/lib/postgresql/data -d postgis/postgis
+```
+
 Before running the `api` for development one needs to package and install the `cwm` module in dev mode:
 
 ```
