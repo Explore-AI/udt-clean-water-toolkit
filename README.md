@@ -43,6 +43,10 @@ Devops tools for toolkit development and deployment.
 - SQLAlchemy
 - alembic
 
+### api2
+
+See [api2 requirements](api2/README.md)
+
 ### cwm
 
 - pandas
@@ -91,6 +95,7 @@ pip install -e .
 
 ### api2
 
+See [api2 development instructions](api2/README.md)
 
 ### app
 
