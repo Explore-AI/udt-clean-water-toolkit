@@ -37,11 +37,7 @@ Devops tools for toolkit development and deployment.
 
 ### api
 
-- FastAPI
-- pydantic
-- uvicorn
-- SQLAlchemy
-- alembic
+See [api requirements](api/README.md)
 
 ### api2
 
@@ -56,8 +52,7 @@ See [api2 requirements](api2/README.md)
 
 ### app
 
-- SQLAlchemy
-- alembic
+See [app requirements](app/README.md)
 
 ### devops
 
@@ -69,29 +64,7 @@ See [api2 requirements](api2/README.md)
 
 ### api
 
-Create a python3 virtual environment and install required modules. For example using pip:
-
-```
-# from project root dir
-
-python3 -m venv api/venv
-
-source api/venv/bin/activate
-
-pip install -r api/requirements.txt
-
-ln -s ../app/ ./api/
-```
-
-Before running the `api` for development one needs to package and install the `cwm` module in dev mode:
-
-```
-# assuming you area already in the `api` virtual environment
-
-cd cwm/
-
-pip install -e .
-```
+See [api development instructions](api/README.md)
 
 ### api2
 
@@ -99,25 +72,7 @@ See [api2 development instructions](api2/README.md)
 
 ### app
 
-Create a python3 virtual environment and install required modules. For example using pip:
-
-```
-python3 -m venv app/venv
-
-source app/venv/bin/activate
-
-pip install -r app/requirements.txt
-```
-
-Before running the `app` for development one needs to package and install the `cwm` module in dev mode:
-
-```
-# assuming you area already in the `app` virtual environment
-
-cd cwm/
-
-pip install -e .
-```
+See [app development instructions](app/README.md)
 
 ## 5. Deployment
 

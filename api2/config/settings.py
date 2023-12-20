@@ -26,12 +26,12 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_BASE_APP_SECRET_KEY__ENV_VAR")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY__ENV_VAR")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [os.getenv("DJANGO_BASE_APP_ALLOWED_HOSTS__ENV_VAR")]
+ALLOWED_HOSTS = [os.getenv("DJANGO_ALLOWED_HOSTS__ENV_VAR")]
 
 
 # Application definition
@@ -84,10 +84,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     # "default": {
     #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "NAME": os.getenv("DJANGO_BASE_APP_DEFAULT_DB_NAME__ENV_VAR"),
-    #     "USER": os.getenv("DJANGO_BASE_APP_DEFAULT_DB_USER__ENV_VAR"),
-    #     "PASSWORD": os.getenv("DJANGO_BASE_APP_DEFAULT_DB_PASSWORD__ENV_VAR"),
-    #     "HOST": os.getenv("DJANGO_BASE_APP_DEFAULT_DB_HOST__ENV_VAR"),
+    #     "NAME": os.getenv("DJANGO_DEFAULT_DB_NAME__ENV_VAR"),
+    #     "USER": os.getenv("DJANGO_DEFAULT_DB_USER__ENV_VAR"),
+    #     "PASSWORD": os.getenv("DJANGO_DEFAULT_DB_PASSWORD__ENV_VAR"),
+    #     "HOST": os.getenv("DJANGO_DEFAULT_DB_HOST__ENV_VAR"),
     #     "PORT": "5432",
     # }
     "default": {
@@ -95,6 +95,16 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# currently only works with neo4j
+GRAPH_DATABASES = {
+    "default": {
+        "HOST":"http://localhost",
+        "PORT": "7687",
+        "USER":os.getenv("NEO4J_USER"),
+        "PASSWORD":os.getenv("NEO4J_PASSWORD")
+        }
+    }
 
 
 # Password validation
