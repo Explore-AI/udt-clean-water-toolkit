@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "core",
     "assets",
     "utilities",
+   # "django.contrib.gis",   #added this
 ]
 
 MIDDLEWARE = [
@@ -83,14 +84,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "NAME": os.getenv("DJANGO_DEFAULT_DB_NAME__ENV_VAR"),
-    #     "USER": os.getenv("DJANGO_DEFAULT_DB_USER__ENV_VAR"),
-    #     "PASSWORD": os.getenv("DJANGO_DEFAULT_DB_PASSWORD__ENV_VAR"),
-    #     "HOST": os.getenv("DJANGO_DEFAULT_DB_HOST__ENV_VAR"),
-    #     "PORT": "5432",
-    # }
+   #  "default": {
+   #      "ENGINE": "django.contrib.gis.db.backends.postgis",
+   #      "NAME": os.getenv("DJANGO_DEFAULT_DB_NAME__ENV_VAR"),
+   #      "USER": os.getenv("DJANGO_DEFAULT_DB_USER__ENV_VAR"),
+   #      "PASSWORD": os.getenv("DJANGO_DEFAULT_DB_PASSWORD__ENV_VAR"),
+   #      "HOST": os.getenv("DJANGO_DEFAULT_DB_HOST__ENV_VAR"),
+   #      "PORT": "5432",
+   #  }
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -183,3 +184,5 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
     CORS_ORIGIN_ALLOW_ALL = True
     ALLOWED_HOSTS = ["*"]
     DEBUG = True
+
+SPATIALITE_LIBRARY_PATH = "/user/local/lib/mod_spatialite.dylib" #added this
