@@ -1,4 +1,6 @@
 import fiona
+#import pandas as pd          #added this
+#import geopandas as gpd      #added this
 from cleanwater.data_managers import GeospatialDataManager
 from ...config.settings import TW_GS_CLEAN_WATER_ZIP_PATH
 
@@ -15,3 +17,4 @@ class TWGS_DataManager(GeospatialDataManager):
     def wlogger_layer_csv_to_gdf(self):
         """Retrieve the TW clean water wlogger layer csv as a geodataframe."""
         pass
+       # pd.read_csv('wLogger.csv')   #added this
