@@ -2,7 +2,15 @@ from neo4j import GraphDatabase
 from config.settings import GRAPH_DATABASES
 
 
-class GraphDatabaseDriver:
+def init_graphdb(func):
+    def wrapper():
+        with _GraphDatabaseDriver() as driver:
+            func()
+
+    return wrapper
+
+
+class _GraphDatabaseDriver:
     def __init__(self, uri, user, password):
         self.driver = None
 
