@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "core",
     "assets",
     "utilities",
-   # "django.contrib.gis",   #added this
+    #"django.contrib.gis",   #added this
 ]
 
 MIDDLEWARE = [
@@ -185,4 +185,8 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
     ALLOWED_HOSTS = ["*"]
     DEBUG = True
 
-SPATIALITE_LIBRARY_PATH = "/user/local/lib/mod_spatialite.dylib" #added this
+#GDAl_LIBRARY_PATH = "/opt/homebrew/Cellar/gdal/3.8.2/lib/libgdal.34.3.8.2.dylib" #added this
+#GEOS_LIBRARY_PATH = "/opt/homebrew/Cellar/postgis/3.3.4_2/lib/postgresql@14" #added this
+GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'     #added this
+GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'   #added this  
+#SPATIALITE_LIBRARY_PATH = ""                                      #added this
