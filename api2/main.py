@@ -4,13 +4,13 @@ from django import setup
 # https://stackoverflow.com/a/32590521
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 setup()
-from app.geospatial.data_managers.twgs_data_manager import TWGS_DataManager
+#from app.geospatial.data_managers.twgs_data_manager import TWGS_DataManager
 from django.contrib.gis.gdal import DataSource
 from utilities.models import DMA
 
 
-def gdf_to_sql():
-    twdm = TWGS_DataManager()
+#def gdf_to_sql():
+#    twdm = TWGS_DataManager()
 
     # layers = twdm.get_layer_list()
 
@@ -34,7 +34,7 @@ def gdf_to_sql():
 
 
 def create_dma_codes():
-    ds = DataSource("/home/timol/work/exploreai/udt/data/CW_20231108_060001.gdb.zip")
+    ds = DataSource("/Users/annegret/Documents/Enterprise/practicedata/CW_20231108_060001.gdb.zip")
 
     for feature in ds[26]:
         layer_dma_code = feature.get("DMA1CODE")
