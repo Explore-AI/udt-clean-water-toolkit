@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+import platform
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,7 +47,6 @@ INSTALLED_APPS = [
     "core",
     "assets",
     "utilities",
-    #"django.contrib.gis",   #added this
 ]
 
 MIDDLEWARE = [
@@ -84,14 +84,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-   #  "default": {
-   #      "ENGINE": "django.contrib.gis.db.backends.postgis",
-   #      "NAME": os.getenv("DJANGO_DEFAULT_DB_NAME__ENV_VAR"),
-   #      "USER": os.getenv("DJANGO_DEFAULT_DB_USER__ENV_VAR"),
-   #      "PASSWORD": os.getenv("DJANGO_DEFAULT_DB_PASSWORD__ENV_VAR"),
-   #      "HOST": os.getenv("DJANGO_DEFAULT_DB_HOST__ENV_VAR"),
-   #      "PORT": "5432",
-   #  }
+    #  "default": {
+    #      "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #      "NAME": os.getenv("DJANGO_DEFAULT_DB_NAME__ENV_VAR"),
+    #      "USER": os.getenv("DJANGO_DEFAULT_DB_USER__ENV_VAR"),
+    #      "PASSWORD": os.getenv("DJANGO_DEFAULT_DB_PASSWORD__ENV_VAR"),
+    #      "HOST": os.getenv("DJANGO_DEFAULT_DB_HOST__ENV_VAR"),
+    #      "PORT": "5432",
+    #  }
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -101,12 +101,12 @@ DATABASES = {
 # currently only works with neo4j
 GRAPH_DATABASES = {
     "default": {
-        "HOST":"http://localhost",
+        "HOST": "http://localhost",
         "PORT": "7687",
-        "USER":os.getenv("NEO4J_USER"),
-        "PASSWORD":os.getenv("NEO4J_PASSWORD")
-        }
+        "USER": os.getenv("NEO4J_USER"),
+        "PASSWORD": os.getenv("NEO4J_PASSWORD"),
     }
+}
 
 
 # Password validation
@@ -175,7 +175,6 @@ LOGGING = {
 
 AUTH_USER_MODEL = "core.User"
 
-
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
     # INSTALLED_APPS.append("corsheaders")
@@ -185,8 +184,6 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
     ALLOWED_HOSTS = ["*"]
     DEBUG = True
 
-#GDAl_LIBRARY_PATH = "/opt/homebrew/Cellar/gdal/3.8.2/lib/libgdal.34.3.8.2.dylib" #added this
-#GEOS_LIBRARY_PATH = "/opt/homebrew/Cellar/postgis/3.3.4_2/lib/postgresql@14" #added this
-GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'     #added this
-GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'   #added this  
-#SPATIALITE_LIBRARY_PATH = ""                                      #added this
+    if platform.system() == "Darwin":  # only set imports for MacOS
+        GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"  # added this
+        GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"  # added this
