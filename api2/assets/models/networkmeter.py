@@ -3,8 +3,8 @@ from django.contrib.gis.db.models import Model, IntegerField, FloatField, PointF
 
 class NetworkMeter(Model):
     GISID = IntegerField(null=False, blank=False)
-    SHAPEX = FloatField(max_length=50, null=False, blank=False)
-    SHAPEY = FloatField(max_length=50, null=False, blank=False)
+    SHAPEX = FloatField(null=False, blank=False)
+    SHAPEY = FloatField(null=False, blank=False)
     geometry = PointField()    
     DMACODE1 = ForeignKey(utilities.DMA1,on_delete=CASCADE)  #can possibly be created
     DMACODE2 = ForeignKey(utilities.DMA2,on_delete=CASCADE)  #can possibly be created
