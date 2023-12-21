@@ -4,8 +4,9 @@ from django import setup
 # https://stackoverflow.com/a/32590521
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 setup()
-
 from app.geospatial.data_managers.twgs_data_manager import TWGS_DataManager
+from django.contrib.gis.gdal import DataSource
+from utilities.models import DMA
 
 
 def gdf_to_sql():
@@ -24,16 +25,39 @@ def gdf_to_sql():
     # run this file when in the api2 directory. ensure venv is activated
 
 
+def add_layer_dma_code(ds, layer_index):
+    for feature in ds[layer_index]:
+        layer_dma_code = feature.get("DMA1CODE")
+
+        if layer_dma_code:
+            does_dma_code_already_exist = DMA.objects.filter(
+                code=layer_dma_code
+            ).exists()
+
+            if does_dma_code_already_exist:
+                continue
+
+            dma = DMA.objects.create(code=layer_dma_code)
+            dma.save()
+
+
 def create_dma_codes():
-    pass
-    # read in the layers from csv to gdf here
-    # extract the dma code data
-    # make a single list with a set of UNIQUE dma codes. each dma code should only appear once
-    # Write this to the dma code table using the DMA.objects.create. You will need to import the DMA model.
+    ds = DataSource("/home/timol/work/exploreai/udt/data/CW_20231108_060001.gdb.zip")
+
+    layer_indices = {
+        "wNetworkMeter": 26,
+        "wTrunkMains": 9,
+        "wDistributionMain": 10,
+        "wHydrant": 28,
+        "wLogger": 2,
+    }
+
+    for layer_index in layer_indices.values():
+        add_layer_dma_code(ds, layer_index)
 
 
 def main():
-    gdf_to_sql()
+    create_dma_codes()
 
 
 if __name__ == "__main__":
