@@ -1,20 +1,13 @@
-from django.contrib.gis.db.models import (
-    Model,
-    IntegerField,
-    FloatField,
-    PointField,
-    ForeignKey,
-)
-
-# from core.models.dma import DMA   #unsure
+from django.contrib.gis.db import models
+from utilities.models.dma import DMA 
 
 
-class Hydrant(Model):
-    GISID = IntegerField(null=False, blank=False)
-    SHAPEX = FloatField(null=False, blank=False)
-    SHAPEY = FloatField(null=False, blank=False)
-    geometry = PointField()  # unsure
-    #    DMACODE = ForeignKey(utilities.DMA,on_delete=CASCADE)  #unsure
+class Hydrant(models.Model):
+    gisid = models.IntegerField(null=False, blank=False)
+    shape_x = models.FloatField(null=False, blank=False)
+    shape_y = models.FloatField(null=False, blank=False)
+    geometry = models.PointField()
+    dma = models.ForeignKey(DMA,on_delete=models.CASCADE,related_name="network_meter_dma")  
 
     def __str__(self):
-        return self.name
+        return self.gisid
