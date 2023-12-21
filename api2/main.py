@@ -24,9 +24,19 @@ def gdf_to_sql():
 
     # run this file when in the api2 directory. ensure venv is activated
 
+    # layer_indices = {
+    #     "wNetworkMeter": 26,
+    #     "wTrunkMains": 9,
+    #     "wDistributionMain": 10,
+    #     "wHydrant": 28,
+    #     "wLogger": 2,
+    # }
 
-def add_layer_dma_code(ds, layer_index):
-    for feature in ds[layer_index]:
+
+def create_dma_codes():
+    ds = DataSource("/home/timol/work/exploreai/udt/data/CW_20231108_060001.gdb.zip")
+
+    for feature in ds[26]:
         layer_dma_code = feature.get("DMA1CODE")
 
         if layer_dma_code:
@@ -39,21 +49,6 @@ def add_layer_dma_code(ds, layer_index):
 
             dma = DMA.objects.create(code=layer_dma_code)
             dma.save()
-
-
-def create_dma_codes():
-    ds = DataSource("/home/timol/work/exploreai/udt/data/CW_20231108_060001.gdb.zip")
-
-    layer_indices = {
-        "wNetworkMeter": 26,
-        "wTrunkMains": 9,
-        "wDistributionMain": 10,
-        "wHydrant": 28,
-        "wLogger": 2,
-    }
-
-    for layer_index in layer_indices.values():
-        add_layer_dma_code(ds, layer_index)
 
 
 def main():
