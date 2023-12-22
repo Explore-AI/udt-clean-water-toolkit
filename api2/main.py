@@ -131,8 +131,16 @@ def create_dma_codes():
             dma.save()
 
 
+#def create_asset_codes():
+    #ds = DataSource("/Users/annegret/Documents/Enterprise/practicedata/CW_20231108_060001.gdb.zip")
+
+    # Logger GISID, DMACODE1, SHAPEX, SHAPEY, geometry
+
+
+
 def main():
     create_dma_codes()
+    #create_asset_codes()
 
 
 if __name__ == "__main__":

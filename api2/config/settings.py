@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "core",
     "assets",
     "utilities",
-    #"django.contrib.gis"    #added this
+    "django.contrib.gis",    #added this
 ]
 
 MIDDLEWARE = [
@@ -96,6 +96,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        #"ENGINE": "django.contrib.gis.db.backends.spatialite",  #added this
+        # "NAME": BASE_DIR / "db.spatialite",                    #added this
+       
     }
 }
 
