@@ -7,7 +7,7 @@ class Hydrant(models.Model):
     shape_x = models.FloatField(null=False, blank=False)
     shape_y = models.FloatField(null=False, blank=False)
     geometry = models.PointField()
-    dma = models.ForeignKey(DMA,on_delete=models.CASCADE,related_name="network_meter_dma")  
+    dma = models.ForeignKey(DMA,on_delete=models.CASCADE,related_name="hydrant_dma")  
 
     def __str__(self):
         return self.gisid

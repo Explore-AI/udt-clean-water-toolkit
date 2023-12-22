@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "core",
     "assets",
     "utilities",
+    #"django.contrib.gis"    #added this
 ]
 
 MIDDLEWARE = [

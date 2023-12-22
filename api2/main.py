@@ -7,6 +7,8 @@ setup()
 #from app.geospatial.data_managers.twgs_data_manager import TWGS_DataManager
 from django.contrib.gis.gdal import DataSource
 from utilities.models import DMA
+from assets.models import distribution_main, hydrant, logger, network_meter, trunk_main
+
 
 
 #def gdf_to_sql():
@@ -98,7 +100,7 @@ def create_dma_codes():
             dma = DMA.objects.create(code=layer_dma_code)
             dma.save()
 
-    # Hydrant
+    # Hydrant DMACODE
     for feature in ds[28]:
         layer_dma_code = feature.get("DMACODE")
 
@@ -113,7 +115,7 @@ def create_dma_codes():
             dma = DMA.objects.create(code=layer_dma_code)
             dma.save()
 
-    # Logger
+    # Logger DMACODE1
     for feature in ds[2]:
         layer_dma_code = feature.get("DMACODE1")
 
