@@ -36,8 +36,86 @@ from utilities.models import DMA
 def create_dma_codes():
     ds = DataSource("/Users/annegret/Documents/Enterprise/practicedata/CW_20231108_060001.gdb.zip")
 
+    # NetworkMeter DMA1CODE
     for feature in ds[26]:
         layer_dma_code = feature.get("DMA1CODE")
+
+        if layer_dma_code:
+            does_dma_code_already_exist = DMA.objects.filter(
+                code=layer_dma_code
+            ).exists()
+
+            if does_dma_code_already_exist:
+                continue
+
+            dma = DMA.objects.create(code=layer_dma_code)
+            dma.save()
+
+
+    # NetworkMeter DMA2CODE
+    for feature in ds[26]:
+        layer_dma_code = feature.get("DMA2CODE")
+
+        if layer_dma_code:
+            does_dma_code_already_exist = DMA.objects.filter(
+                code=layer_dma_code
+            ).exists()
+
+            if does_dma_code_already_exist:
+                continue
+
+            dma = DMA.objects.create(code=layer_dma_code)
+            dma.save()
+
+
+    # TrunkMain DMACODE
+    for feature in ds[9]:
+        layer_dma_code = feature.get("DMACODE")
+
+        if layer_dma_code:
+            does_dma_code_already_exist = DMA.objects.filter(
+                code=layer_dma_code
+            ).exists()
+
+            if does_dma_code_already_exist:
+                continue
+
+            dma = DMA.objects.create(code=layer_dma_code)
+            dma.save()
+
+    # DistributionMain DMACODE
+    for feature in ds[10]:
+        layer_dma_code = feature.get("DMACODE")
+
+        if layer_dma_code:
+            does_dma_code_already_exist = DMA.objects.filter(
+                code=layer_dma_code
+            ).exists()
+
+            if does_dma_code_already_exist:
+                continue
+
+            dma = DMA.objects.create(code=layer_dma_code)
+            dma.save()
+
+    # Hydrant
+    for feature in ds[28]:
+        layer_dma_code = feature.get("DMACODE")
+
+        if layer_dma_code:
+            does_dma_code_already_exist = DMA.objects.filter(
+                code=layer_dma_code
+            ).exists()
+
+            if does_dma_code_already_exist:
+                continue
+
+            dma = DMA.objects.create(code=layer_dma_code)
+            dma.save()
+
+    # Logger
+    for feature in ds[2]:
+        layer_dma_code = feature.get("DMACODE1")
 
         if layer_dma_code:
             does_dma_code_already_exist = DMA.objects.filter(
