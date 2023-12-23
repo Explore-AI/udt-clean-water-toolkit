@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "core",
     "assets",
     "utilities",
-    "django.contrib.gis",    #added this
+    "django.contrib.gis",
 ]
 
 MIDDLEWARE = [
@@ -94,11 +94,9 @@ DATABASES = {
     #      "PORT": "5432",
     #  }
     "default": {
-        #"ENGINE": "django.db.backends.sqlite3",
+        # "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-        "ENGINE": "django.contrib.gis.db.backends.spatialite",  #added this
-        
-       
+        "ENGINE": "django.contrib.gis.db.backends.spatialite",  # added this
     }
 }
 
@@ -191,4 +189,6 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
     if platform.system() == "Darwin":  # only set imports for MacOS
         GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"  # added this
         GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"  # added this
-        SPATIALITE_LIBRARY_PATH = "/System/Volumes/Data/opt/homebrew/lib/mod_spatialite.dylib"  # added this
+        SPATIALITE_LIBRARY_PATH = (
+            "/System/Volumes/Data/opt/homebrew/lib/mod_spatialite.dylib"  # added this
+        )
