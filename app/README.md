@@ -5,7 +5,7 @@ NB: This package is a module that can be run independently as well as within ano
 ## 1. Requirements
 
 - tbc
-- cwm (from this package)
+- cleanwater (from this package)
 
 These packages can be installed with the instructions in Section 2.
 
@@ -20,7 +20,7 @@ python3 -m venv app/venv
 
 source app/venv/bin/activate
 
-pip install -r app/requirements.txt
+pip install -r api2/requirements.txt -r api2/dev-requirements.txt 
 ```
 
 Before running the `app` for development one needs to package and install the `cwm` module in dev mode:
@@ -28,7 +28,7 @@ Before running the `app` for development one needs to package and install the `c
 ```
 # assuming you area already in the `app` virtual environment
 
-cd cwm/
+cd cleanwater/
 
 pip install -e .
 
