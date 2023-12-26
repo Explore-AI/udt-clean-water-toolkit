@@ -85,19 +85,19 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    #  "default": {
-    #      "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #      "NAME": os.getenv("DJANGO_DEFAULT_DB_NAME__ENV_VAR"),
-    #      "USER": os.getenv("DJANGO_DEFAULT_DB_USER__ENV_VAR"),
-    #      "PASSWORD": os.getenv("DJANGO_DEFAULT_DB_PASSWORD__ENV_VAR"),
-    #      "HOST": os.getenv("DJANGO_DEFAULT_DB_HOST__ENV_VAR"),
-    #      "PORT": "5432",
-    #  }
     "default": {
-        # "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-        "ENGINE": "django.contrib.gis.db.backends.spatialite",  # added this
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.getenv("POSTGIS_DB_NAME__ENV_VAR"),
+        "USER": os.getenv("POSTGIS_DB_USER__ENV_VAR"),
+        "PASSWORD": os.getenv("POSTGIS_DEFAULT_DB_PASSWORD__ENV_VAR"),
+        "HOST": os.getenv("POSTGIS_DEFAULT_DB_HOST__ENV_VAR"),
+        "PORT": "5432",
     }
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    #     "ENGINE": "django.contrib.gis.db.backends.spatialite",
+    # }
 }
 
 # currently only works with neo4j
