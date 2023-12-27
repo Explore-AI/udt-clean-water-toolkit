@@ -52,3 +52,7 @@ class Command(BaseCommand):
             if len(new_distribution_mains) == 100000:
                 DistributionMain.objects.bulk_create(new_distribution_mains)
                 new_distribution_mains = []
+
+        # save the last set of data as it will probably be less than 100000
+        if new_distribution_mains:
+            DistributionMain.objects.bulk_create(new_distribution_mains)
