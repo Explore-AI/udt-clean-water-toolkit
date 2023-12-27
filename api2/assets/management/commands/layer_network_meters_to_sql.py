@@ -27,6 +27,15 @@ class Command(BaseCommand):
         layer_geometries = network_meter_layer.get_geoms()
 
         new_network_meters = []
+        zipped_layer_data = zip(
+            layer_gisids,
+            layer_shapes_x,
+            layer_shapes_y,
+            layer_dma_codes_1,
+            layer_dma_codes_2,
+            layer_geometries,
+        )
+
         for (
             layer_gisid,
             layer_shape_x,
@@ -34,14 +43,7 @@ class Command(BaseCommand):
             layer_dma_code_1,
             layer_dma_code_2,
             layer_geometry,
-        ) in zip(
-            layer_gisids,
-            layer_shapes_x,
-            layer_shapes_y,
-            layer_dma_codes_1,
-            layer_dma_codes_2,
-            layer_geometries,
-        ):
+        ) in zipped_layer_data:
             data = {
                 "gisid": layer_gisid,
                 "shape_x": layer_shape_x,

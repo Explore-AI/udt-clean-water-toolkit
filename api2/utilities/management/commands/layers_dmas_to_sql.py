@@ -7,7 +7,7 @@ LAYER_DATA = {
     "wNetworkMeter": [26, ["DMA1CODE", "DMA2CODE"]],
     "wTrunkMains": [9, ["DMACODE"]],
     "wHydrant": [28, ["DMACODE"]],
-    #    "wDistributionMain": [10, ["DMACODE"]],
+    "wDistributionMain": [10, ["DMACODE"]],
 }
 
 
