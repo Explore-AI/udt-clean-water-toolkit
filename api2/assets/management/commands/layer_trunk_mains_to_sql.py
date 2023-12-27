@@ -18,31 +18,28 @@ class Command(BaseCommand):
 
         ds = DataSource(zip_path)
         trunk_main_layer = ds[TRUNK_MAINS_LAYER_INDEX]
+        import pdb
 
+        pdb.set_trace()
         layer_gisids = trunk_main_layer.get_fields("GISID")
-        layer_shapes_x = trunk_main_layer.get_fields("SHAPEX")
-        layer_shapes_y = trunk_main_layer.get_fields("SHAPEY")
         layer_dma_codes = trunk_main_layer.get_fields("DMACODE")
         layer_geometries = trunk_main_layer.get_geoms()
 
         new_trunk_mains = []
         for (
             layer_gisid,
-            layer_shape_x,
-            layer_shape_y,
             layer_dma_code_1,
             layer_geometry,
         ) in zip(
             layer_gisids,
-            layer_shapes_x,
-            layer_shapes_y,
             layer_dma_codes,
             layer_geometries,
         ):
+            import pdb
+
+            pdb.set_trace()
             data = {
                 "gisid": layer_gisid,
-                "shape_x": layer_shape_x,
-                "shape_y": layer_shape_y,
                 "dma": layer_dma_code_1,
                 "geometry": layer_geometry.wkt,
             }

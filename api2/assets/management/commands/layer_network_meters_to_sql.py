@@ -3,7 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from assets.models import NetworkMeter
 from utilities.models import DMA
 
-NETWORK_METERS_LAYER_INDEX = 9
+NETWORK_METERS_LAYER_INDEX = 26
 
 
 class Command(BaseCommand):
