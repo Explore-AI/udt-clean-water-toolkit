@@ -29,7 +29,7 @@ class Command(BaseCommand):
                 self.add_data_from_layer(ds[layer_values[0]], field_code)
 
     def add_data_from_layer(self, layer, field_code):
-        def _instantiate_new_dma_model(dma_code):
+        def _instantiate_new_dma_model_map(dma_code):
             return DMA(code=dma_code)
 
         layer_dmas = layer.get_fields(field_code)
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         # remove None items
         dmas_not_in_sql = list(filter(lambda item: item is not None, dmas_not_in_sql))
 
-        new_dmas = list(map(_instantiate_new_dma_model, dmas_not_in_sql))
+        new_dmas = list(map(_instantiate_new_dma_model_map, dmas_not_in_sql))
 
         DMA.objects.bulk_create(new_dmas)
 

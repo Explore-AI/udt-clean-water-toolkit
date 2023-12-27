@@ -3,7 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from assets.models import Logger
 from utilities.models import DMA
 
-LAYER_DATA = {"wlogger": 2}
+LOGGER_LAYER_INDEX = 2
 
 
 class Command(BaseCommand):
@@ -17,8 +17,7 @@ class Command(BaseCommand):
         zip_path = kwargs.get("file")
 
         ds = DataSource(zip_path)
-        logger_layer_index = 2
-        logger_layer = ds[logger_layer_index]
+        logger_layer = ds[LOGGER_LAYER_INDEX]
 
         layer_gisids = logger_layer.get_fields("GISID")
         layer_shapes_x = logger_layer.get_fields("SHAPEX")
