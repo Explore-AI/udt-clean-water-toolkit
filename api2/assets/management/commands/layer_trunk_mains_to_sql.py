@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.gdal.error import GDALException
 from assets.models import TrunkMain
 from utilities.models import DMA
 
@@ -12,36 +13,65 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
 
-    ### Attempt using bulk create
+    ### This method doesn't work because of errors in the geometry object
+    # def handle(self, *args, **kwargs):
+    #     zip_path = kwargs.get("file")
+
+    #     ds = DataSource(zip_path)
+    #     trunk_main_layer = ds[TRUNK_MAINS_LAYER_INDEX]
+
+    #     layer_gisids = trunk_main_layer.get_fields("GISID")
+    #     layer_dma_codes = trunk_main_layer.get_fields("DMACODE")
+    #     layer_geometries = trunk_main_layer.get_geoms()
+
+    #     new_trunk_mains = []
+    #     for (
+    #         layer_gisid,
+    #         layer_dma_code_1,
+    #         layer_geometry,
+    #     ) in zip(
+    #         layer_gisids,
+    #         layer_dma_codes,
+    #         layer_geometries,
+    #     ):
+    #         data = {
+    #             "gisid": layer_gisid,
+    #             "dma": layer_dma_code_1,
+    #             "geometry": layer_geometry.wkt,
+    #         }
+
+    #         if not None in data.values():
+    #             dma = DMA.objects.get(code=data["dma"])
+    #             data["dma"] = dma
+    #             new_trunk_mains.append(TrunkMain(**data))
+
+    #     TrunkMain.objects.bulk_create(new_trunk_mains)
+
     def handle(self, *args, **kwargs):
         zip_path = kwargs.get("file")
 
         ds = DataSource(zip_path)
         trunk_main_layer = ds[TRUNK_MAINS_LAYER_INDEX]
-        import pdb
-
-        pdb.set_trace()
-        layer_gisids = trunk_main_layer.get_fields("GISID")
-        layer_dma_codes = trunk_main_layer.get_fields("DMACODE")
-        layer_geometries = trunk_main_layer.get_geoms()
 
         new_trunk_mains = []
-        for (
-            layer_gisid,
-            layer_dma_code_1,
-            layer_geometry,
-        ) in zip(
-            layer_gisids,
-            layer_dma_codes,
-            layer_geometries,
-        ):
-            import pdb
 
-            pdb.set_trace()
+        for feature in trunk_main_layer:
+            gisid = feature.get("GISID")
+            dma_code = feature.get("DMACODE")
+            shape_length = feature.get("SHAPE_Length")
+
+            # Had to to the except as got this error
+            # django.contrib.gis.gdal.error.GDALException: Invalid OGR Integer Type: 11
+            try:
+                geometry = feature.geom
+            except GDALException:
+                continue
+
             data = {
-                "gisid": layer_gisid,
-                "dma": layer_dma_code_1,
-                "geometry": layer_geometry.wkt,
+                "gisid": gisid,
+                "dma": dma_code,
+                "shape_length": shape_length,
+                "geometry": geometry.wkt,
             }
 
             if not None in data.values():
