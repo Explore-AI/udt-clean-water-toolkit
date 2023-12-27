@@ -2,6 +2,8 @@
 
 ## 1. Requirements
 
+### 1.1 Packages
+
 - Django
 - djangorestframework
 - django-filter
@@ -10,6 +12,15 @@
 - cwm (from this package)
 
 These packages can be installed with the instructions in Section 2.
+
+### 1.2 Database
+
+The following databases are suppored by GeoDjango can be used with the app:
+
+- SpatiaLite
+- MySQL
+- MariaDB
+- PostGIS (recommended for use with this application)
 
 ## 2. Development
 
