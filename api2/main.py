@@ -8,13 +8,16 @@ setup()
 from django.contrib.gis.gdal import DataSource
 from utilities.models import DMA
 
+
+# https://docs.djangoproject.com/en/4.2/ref/contrib/gis/db-api/#spatial-lookups
+# https://docs.djangoproject.com/en/4.2/ref/contrib/gis/geoquerysets/#std-fieldlookup-dwithin
 def main():
-    #from django.contrib.gis.db.models.functions import Distance
+    # from django.contrib.gis.db.models.functions import Distance
     # logger_first = Logger.objects.first()
     # Logger.objects.annotate(distance=Distance("geometry", logger_first.geometry)).filter(distance__lte=10) # gets all loggers within 10 meters of the first logger
 
-    #from django.contrib.gis.measure import D
-    #Logger.objects.filter(geometry__dwithin=(first_trunk_main.geometry, D(m=100)))
+    # from django.contrib.gis.measure import D
+    # Logger.objects.filter(geometry__dwithin=(first_trunk_main.geometry, D(m=100)))
     pass
 
 
