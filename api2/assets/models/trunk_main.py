@@ -4,7 +4,7 @@ from config.settings import DEFAULT_SRID
 
 
 class TrunkMain(models.Model):
-    gisid = models.IntegerField(null=False, blank=False)
+    gisid = models.IntegerField(null=False, blank=False, unique=True)
     shape_length = models.FloatField(null=False, blank=False)
     geometry = models.MultiLineStringField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID

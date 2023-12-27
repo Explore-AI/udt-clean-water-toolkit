@@ -1,6 +1,6 @@
 version: "3"
 
-# docker run --name udtpostgis -e POSTGRES_USER=udt -e POSTGRES_PASSWORD=123456yellow -v /opt/udt/data/pgdata:/var/lib/postgresql/data -d postgis/postgis
+# docker run --name udtpostgis -e POSTGRES_PASSWORD=123456yellow -v /opt/udt/data/pgdata:/var/lib/postgresql/data -d postgis/postgis
 
 #name: <your project name>
 

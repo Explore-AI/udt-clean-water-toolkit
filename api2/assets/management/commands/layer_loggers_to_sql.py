@@ -4,10 +4,11 @@ from assets.models import Logger
 from utilities.models import DMA
 
 LOGGER_LAYER_INDEX = 2
+DMA_FIELD_NAME = "DMACODE1"
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water dma codes from geospatial layers of interest to sql"
+    help = "Write Thames Water logger layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
@@ -19,10 +20,14 @@ class Command(BaseCommand):
         ds = DataSource(zip_path)
         logger_layer = ds[LOGGER_LAYER_INDEX]
 
+        print(
+            f"There are {logger_layer.num_feat} features. Large numbers of features will take a long time to save."
+        )
+
         layer_gisids = logger_layer.get_fields("GISID")
         layer_shapes_x = logger_layer.get_fields("SHAPEX")
         layer_shapes_y = logger_layer.get_fields("SHAPEY")
-        layer_dma_codes_1 = logger_layer.get_fields("DMACODE1")
+        layer_dma_codes_1 = logger_layer.get_fields(DMA_FIELD_NAME)
         layer_geometries = logger_layer.get_geoms()
 
         new_loggers = []

@@ -4,7 +4,7 @@ from config.settings import DEFAULT_SRID
 
 
 class Logger(models.Model):
-    gisid = models.IntegerField(null=False, blank=False)
+    gisid = models.IntegerField(null=False, blank=False, unique=True)
     shape_x = models.FloatField(null=False, blank=False)
     shape_y = models.FloatField(null=False, blank=False)
     geometry = models.PointField(

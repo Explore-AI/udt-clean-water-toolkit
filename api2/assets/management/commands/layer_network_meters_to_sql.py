@@ -7,7 +7,7 @@ NETWORK_METERS_LAYER_INDEX = 26
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water dma codes from geospatial layers of interest to sql"
+    help = "Write Thames Water network meter layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
@@ -18,6 +18,10 @@ class Command(BaseCommand):
 
         ds = DataSource(zip_path)
         network_meter_layer = ds[NETWORK_METERS_LAYER_INDEX]
+
+        print(
+            f"There are {network_meter_layer.num_feat} features. Large numbers of features will take a long time to save."
+        )
 
         layer_gisids = network_meter_layer.get_fields("GISID")
         layer_shapes_x = network_meter_layer.get_fields("SHAPEX")

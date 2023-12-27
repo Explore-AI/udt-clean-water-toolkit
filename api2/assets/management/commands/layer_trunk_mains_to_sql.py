@@ -8,7 +8,7 @@ TRUNK_MAINS_LAYER_INDEX = 9
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water dma codes from geospatial layers of interest to sql"
+    help = "Write Thames Water trunk mains layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
@@ -51,11 +51,14 @@ class Command(BaseCommand):
         zip_path = kwargs.get("file")
 
         ds = DataSource(zip_path)
-        trunk_main_layer = ds[TRUNK_MAINS_LAYER_INDEX]
+        trunk_mains_layer = ds[TRUNK_MAINS_LAYER_INDEX]
+
+        print(
+            f"There are {trunk_mains_layer.num_feat} features. Large numbers of features will take a long time to save."
+        )
 
         new_trunk_mains = []
-
-        for feature in trunk_main_layer:
+        for feature in trunk_mains_layer:
             gisid = feature.get("GISID")
             dma_code = feature.get("DMACODE")
             shape_length = feature.get("SHAPE_Length")
