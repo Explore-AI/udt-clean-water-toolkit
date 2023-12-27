@@ -5,6 +5,7 @@ from assets.models import DistributionMain
 from utilities.models import DMA
 
 DISTRIBUTION_MAINS_LAYER_INDEX = 10
+DMA_FIELD_NAME = "DMACODE"
 
 
 class Command(BaseCommand):
@@ -26,7 +27,7 @@ class Command(BaseCommand):
         new_distribution_mains = []
         for feature in distribution_mains_layer:
             gisid = feature.get("GISID")
-            dma_code = feature.get("DMACODE")
+            dma_code = feature.get(DMA_FIELD_NAME)
             shape_length = feature.get("SHAPE_Length")
 
             # Had to to the except as got this error:

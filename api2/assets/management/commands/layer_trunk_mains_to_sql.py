@@ -5,6 +5,7 @@ from assets.models import TrunkMain
 from utilities.models import DMA
 
 TRUNK_MAINS_LAYER_INDEX = 9
+DMA_FIELD_NAME = "DMACODE"
 
 
 class Command(BaseCommand):
@@ -60,7 +61,7 @@ class Command(BaseCommand):
         new_trunk_mains = []
         for feature in trunk_mains_layer:
             gisid = feature.get("GISID")
-            dma_code = feature.get("DMACODE")
+            dma_code = feature.get(DMA_FIELD_NAME)
             shape_length = feature.get("SHAPE_Length")
 
             # Had to to the except as got this error

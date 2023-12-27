@@ -4,6 +4,8 @@ from assets.models import NetworkMeter
 from utilities.models import DMA
 
 NETWORK_METERS_LAYER_INDEX = 26
+DMA_FIELD_NAME_1 = "DMA1CODE"
+DMA_FIELD_NAME_2 = "DMA2CODE"
 
 
 class Command(BaseCommand):
@@ -26,8 +28,8 @@ class Command(BaseCommand):
         layer_gisids = network_meter_layer.get_fields("GISID")
         layer_shapes_x = network_meter_layer.get_fields("SHAPEX")
         layer_shapes_y = network_meter_layer.get_fields("SHAPEY")
-        layer_dma_codes_1 = network_meter_layer.get_fields("DMA1CODE")
-        layer_dma_codes_2 = network_meter_layer.get_fields("DMA2CODE")
+        layer_dma_codes_1 = network_meter_layer.get_fields(DMA_FIELD_NAME_1)
+        layer_dma_codes_2 = network_meter_layer.get_fields(DMA_FIELD_NAME_2)
         layer_geometries = network_meter_layer.get_geoms()
 
         new_network_meters = []
