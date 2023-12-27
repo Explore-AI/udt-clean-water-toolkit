@@ -177,6 +177,8 @@ LOGGING = {
 
 AUTH_USER_MODEL = "core.User"
 
+DEFAULT_SRID = 27700
+
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
     # INSTALLED_APPS.append("corsheaders")

@@ -20,7 +20,7 @@ python3 -m venv app/venv
 
 source app/venv/bin/activate
 
-pip install -r api2/requirements.txt -r api2/dev-requirements.txt 
+pip install -r app/requirements.txt -r app/dev-requirements.txt 
 ```
 
 Before running the `app` for development one needs to package and install the `cwm` module in dev mode:
@@ -28,7 +28,7 @@ Before running the `app` for development one needs to package and install the `c
 ```
 # assuming you area already in the `app` virtual environment
 
-cd cleanwater/
+cd cwm/
 
 pip install -e .
 
