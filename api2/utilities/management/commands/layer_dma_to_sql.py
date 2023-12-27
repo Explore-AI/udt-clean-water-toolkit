@@ -40,12 +40,17 @@ class Command(BaseCommand):
 
         dmas_not_in_sql = set(layer_dmas) - set(dmas_that_already_exist_in_sql)
 
-        # remove None items
-        dmas_not_in_sql = list(filter(lambda item: item is not None, dmas_not_in_sql))
+        if dmas_not_in_sql:
+            # remove None items
+            cleaned_dmas_not_in_sql = list(
+                filter(lambda item: item is not None, dmas_not_in_sql)
+            )
 
-        new_dmas = list(map(_instantiate_new_dma_model_map, dmas_not_in_sql))
+            new_dmas = list(
+                map(_instantiate_new_dma_model_map, cleaned_dmas_not_in_sql)
+            )
 
-        DMA.objects.bulk_create(new_dmas)
+            DMA.objects.bulk_create(new_dmas)
 
     ### The below two functions use the get_or_create approach but is slow.
     # def handle(self, *args, **kwargs):
