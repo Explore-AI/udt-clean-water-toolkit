@@ -3,10 +3,10 @@ from django.contrib.gis.gdal import DataSource
 from utilities.models import DMA
 
 LAYER_DATA = {
-    "wHydrant": [28, ["DMACODE"]],
     "wLogger": [2, ["DMACODE1"]],
     "wNetworkMeter": [26, ["DMA1CODE", "DMA2CODE"]],
     "wTrunkMains": [9, ["DMACODE"]],
+    "wHydrant": [28, ["DMACODE"]],
     #    "wDistributionMain": [10, ["DMACODE"]],
 }
 
@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
 
-    ### The below two functions use the get_or_create approach but is slow.
+    ### Attempt using bulk create
     def handle(self, *args, **kwargs):
         zip_path = kwargs.get("file")
 
@@ -25,50 +25,48 @@ class Command(BaseCommand):
 
         for layer_name, layer_values in LAYER_DATA.items():
             print(f"Reading in data from layer: {layer_name}")
-            for layer_code in layer_values[1]:
-                self.add_data_from_layer(ds, layer_values[0], layer_code)
+            for field_code in layer_values[1]:
+                self.add_data_from_layer(ds[layer_values[0]], field_code)
 
-    def add_data_from_layer(self, ds, layer_index, layer_code):
-        for feature in ds[layer_index]:
-            layer_dma_code = feature.get(layer_code)
+    def add_data_from_layer(self, layer, field_code):
+        def _instantiate_new_dma_model(dma_code):
+            return DMA(code=dma_code)
 
-            if layer_dma_code:
-                dma = DMA.objects.get_or_create(code=layer_dma_code)
+        layer_dmas = layer.get_fields(field_code)
 
+        dmas_that_already_exist_in_sql = DMA.objects.filter(
+            code__in=layer_dmas
+        ).values_list("code", flat=True)
 
-### Attempt using bulk create
-# def handle(self, *args, **kwargs):
-#     zip_path = kwargs.get("file")
+        dmas_not_in_sql = set(layer_dmas) - set(dmas_that_already_exist_in_sql)
 
-#     ds = DataSource(zip_path)
+        # remove None items
+        dmas_not_in_sql = list(filter(lambda item: item is not None, dmas_not_in_sql))
 
-#     for layer_name, layer_values in LAYER_DATA.items():
-#         print(f"Reading in data from layer: {layer_name}")
-#         for layer_code in layer_values[1]:
-#             self.add_data_from_layer(ds, layer_values[0], layer_code)
+        new_dmas = list(map(_instantiate_new_dma_model, dmas_not_in_sql))
 
-# def add_data_from_layer(self, ds, layer_index, layer_code):
-#     def _get_feature_data(feature):
-#         feature.get(layer_code)
+        DMA.objects.bulk_create(new_dmas)
 
-#     all_dma_codes_from_layer = list(map(_get_feature_data, ds[layer_index]))
-#     import pdb
+    ### The below two functions use the get_or_create approach but is slow.
+    # def handle(self, *args, **kwargs):
+    #     zip_path = kwargs.get("file")
 
-#     pdb.set_trace()
+    #     ds = DataSource(zip_path)
 
-#     # all_dma_codes_from_layer = [
-#     #     feature.get(layer_code) for feature in ds[layer_index]
-#     # ]
+    #     for layer_name, layer_values in LAYER_DATA.items():
+    #         print(f"Reading in data from layer: {layer_name}")
+    #         for layer_code in layer_values[1]:
+    #             self.add_data_from_layer(ds, layer_values[0], layer_code)
 
-#     dmas_that_already_exist_in_sql = DMA.objects.filter(
-#         code__in=all_dma_codes_from_layer
-#     ).values_list("code", flat=True)
+    # def add_data_from_layer(self, ds, layer_index, layer_code):
+    #     for feature in ds[layer_index]:
+    #         layer_dma_code = feature.get(layer_code)
 
-#     dmas_not_in_sql = set(all_dma_codes_from_layer) - set(
-#         dmas_that_already_exist_in_sql
-#     )
+    #         if layer_dma_code:
+    #             dma = DMA.objects.get_or_create(code=layer_dma_code)
 
 
+### TODO: implement in the future
 ### This below function should allow for dma layermapping directly
 # def handle(self, *args, **kwargs):
 #     from django.contrib.gis.utils import LayerMapping
