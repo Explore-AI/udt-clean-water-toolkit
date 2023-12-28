@@ -23,8 +23,11 @@ def graph_from_trunk_mains():
     import networkx as nx
 
     trunk_mains_data = serialize(
-        "geojson", TrunkMain.objects.all(), geometry_field="geometry", srid=2770
+        "geojson", TrunkMain.objects.all()[:2], geometry_field="geometry", srid=2770
     )
+    import pdb
+
+    pdb.set_trace()
 
     trunk_mains_gdf = gpd.read_file(trunk_mains_data)
     trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)
