@@ -6,6 +6,10 @@ from ...utilities.models import DMA
 LOGGER_LAYER_INDEX = 2
 DMA_FIELD_NAME = "DMACODE1"
 
+import pdb
+
+pdb.set_trace()
+
 
 class Command(BaseCommand):
     help = "Write Thames Water logger layer data to sql"

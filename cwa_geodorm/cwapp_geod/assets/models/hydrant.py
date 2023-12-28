@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from ...utilities.models.dma import DMA
-from ...gdorm_config.settings import DEFAULT_SRID
+from ...config.settings import DEFAULT_SRID
 
 
 class Hydrant(models.Model):

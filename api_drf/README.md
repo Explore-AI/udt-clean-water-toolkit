@@ -31,11 +31,11 @@ Create a python3 virtual environment and install required modules. For example u
 ```
 # from project root dir
 
-python3 -m venv drf_api/venv
+python3 -m venv api-drf/venv
 
-source drf_api/venv/bin/activate
+source api-drf/venv/bin/activate
 
-pip install -r drf_api/requirements.txt -r drf_api/dev-requirements.txt
+pip install -r api-drf/requirements.txt -r api-drf/dev-requirements.txt
 
 ln -s cwa_geodorm/cleanwaterapp_geod/ ./api_drf
 ```
