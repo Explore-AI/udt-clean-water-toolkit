@@ -37,7 +37,7 @@ source drf_api/venv/bin/activate
 
 pip install -r drf_api/requirements.txt -r drf_api/dev-requirements.txt
 
-ln -s cwa_geodorm/cleanwaterapp_geod/ ./drf_api
+ln -s cwa_geodorm/cleanwaterapp_geod/ ./api_drf
 ```
 
 Install a postgis database and expose the required port. Before running the `docker-compose` command to setup the postgis DB. you will need set the `POSTGRES_PASSWORD` env var in `devops/docker/env/.db_env`.
