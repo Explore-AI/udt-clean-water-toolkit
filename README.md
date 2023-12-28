@@ -8,25 +8,29 @@ Development of a clean water toolkit that combines aspects of a digital twin and
 
 ## 2. Project structure
 
-### api
-
-A FastAPI application built with SQLAlchemy. Provides a RESTful API interface for the `cwm` module. Also provides additional apis for visualisation, analysis, and modelling.
-
 ### cwm
 
-The clean water module is a python module/library that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network.
+The clean water module is a python package/module that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network. Provides functional and class based apis for visualisation, analysis, and modelling. 
 
-### app
+### cwa_geoaorm
 
-The primary application for Clean Water Toolkit. It utilises the `cwm` library and provides functional and class based APIs. It is packaged into a single distributable and can be imported into other .py files or run with the provided shell commands. It is non-graphical. 
+An application of the Clean Water Toolkit. Integrates the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
 
-### api2
+### cwa_geodorm
 
-NB: for experimentation purposes only. A DRF application. Provides a RESTful API interface for the `cwm` module. Also provides additional apis for visualisation, analysis, and modelling. It is not for production.
+An application of the Clean Water Toolkit. It uses GeoDjango as an ORM. Integrates the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
+
+### api_fastapi
+
+An example api application built with FastAPI application SQLAlchemy. Provides a RESTful API interface for the `cwa_geoaorm` application. Also provides additional apis for visualisation, analysis, and modelling.
+
+### api_drf
+
+An example api application built with djangorestframework. Provides a RESTful API interface for the `cwa_geodorm` module. Also provides additional apis for visualisation, analysis, and modelling.
 
 ### ui
 
-An electron based app. Interacts with the `api` and provides a GUI that demonstrates some of the capabilities of the Clean Water Toolkit.
+An electron based app. Commincates with the apis Clean Water ToolkitInteracts with the `api` and RESTFul APIs and provides a graphicainterface that demonstrates some of the Toolkit capabilities.
 
 ### devops
 
