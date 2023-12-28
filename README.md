@@ -39,14 +39,6 @@ Devops tools for toolkit development and deployment.
 
 ## 3. Requirements
 
-### api
-
-See [api requirements](api/README.md#1-requirements)
-
-### api2
-
-See [api2 requirements](api2/README.md#1-requirements)
-
 ### cwm
 
 - pandas
@@ -54,29 +46,53 @@ See [api2 requirements](api2/README.md#1-requirements)
 - numpy
 - networkx
 
-### app
+### cwa_geoaorm
 
-See [app requirements](app/README.md#1-requirements)
+pending
+
+<!-- See [app requirements](cwa_geoaorm/README.md#1-requirements) -->
+
+### cwa_geodorm
+
+See [app requirements](cwa_geodorm/README.md#1-requirements)
+
+### api_fastapi
+
+See [fast api requirements](api_fastapi/README.md#1-requirements)
+
+### api_drf
+
+See [drf api requirements](api_drf/README.md#1-requirements)
 
 ### devops
 
 - docker
 - docker-compose
 
-
 ## 4. Development
 
-### api
+### cwm
 
-See [api development instructions](api/README.md#2-development)
+pending
 
-### api2
+### cwa_geoaorm
 
-See [api2 development instructions](api2/README.md#2-development)
+pending
 
-### app
+<!-- See [app requirements](cwa_geoaorm/README.md#1-requirements) -->
 
-See [app development instructions](app/README.md#2-development)
+### cwa_geodorm
+
+See [app development instructions](cwa_geodorm/README.md#2-development)
+
+### api_fastapi
+
+See [fast api development instructions](api_fastapi/README.md#2-development)
+
+### api_drf
+
+See [drf api development instructions](drf_fastapi/README.md#2-development)
+
 
 ## 5. Deployment
 
