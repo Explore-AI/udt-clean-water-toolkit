@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "core",
-    "app_gdorm.assets",
-    "app_gdorm.utilities",
+    "gdorm.assets",
+    "gdorm.utilities",
 ]
 
 MIDDLEWARE = [
@@ -85,10 +85,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.getenv("POSTGIS_DB_NAME__ENV_VAR"),
+        "USER": os.getenv("POSTGIS_DB_USER__ENV_VAR"),
+        "PASSWORD": os.getenv("POSTGIS_DEFAULT_DB_PASSWORD__ENV_VAR"),
+        "HOST": os.getenv("POSTGIS_DEFAULT_DB_HOST__ENV_VAR"),
+        "PORT": "5432",
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # Password validation

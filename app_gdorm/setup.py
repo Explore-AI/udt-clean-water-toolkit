@@ -4,7 +4,7 @@ import os
 from django import setup
 
 # https://stackoverflow.com/a/32590521
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gdorm_config.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gdorm.gdorm_config.settings")
 
 
 setup()
