@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "core",
-    "gdorm.assets",
-    "gdorm.utilities",
+    "cwa_geod.assets",
+    "cwa_geod.utilities",
 ]
 
 MIDDLEWARE = [
