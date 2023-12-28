@@ -1,4 +1,4 @@
-# api
+# api_fastapi
 
 ## 1. Requirements
 
@@ -23,20 +23,18 @@ python3 -m venv api/venv
 
 source api/venv/bin/activate
 
-pip install -r api/requirements.txt
-
-pip install -r api/dev-requirements.txt # for dev packages
-
-ln -s ../app/ ./api/
+pip install -r api/requirements.txt -r api/dev-requirements.txt # for dev packages
 ```
 
-Install a postgis database and expose the required port
+Install a postgis database and expose the required port. Before running the `docker-compose` command to setup the postgis DB. you will need set the `POSTGRES_PASSWORD` env var in `devops/docker/env/.db_env`.
 
 ```
-docker run --name udtpostgis -e POSTGRES_USER=udt -e POSTGRES_PASSWORD=[somepassword] -v /opt/udt/data/pgdata:/var/lib/postgresql/data -d postgis/postgis
+cd devops/docker/
+
+docker-compose -f docker-compose-postgis.yml up -d
 ```
 
-Before running the `api` for development one needs to package and install the `cwm` module in dev mode:
+Before running the `api_fastapi` for development one needs to package and install the `cwm` module in dev mode:
 
 ```
 # assuming you area already in the `api` virtual environment
