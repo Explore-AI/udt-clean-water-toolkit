@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "core",
-    "app_gdorm",
+    "app_gdorm.assets",
+    "app_gdorm.utilities",
 ]
 
 MIDDLEWARE = [
