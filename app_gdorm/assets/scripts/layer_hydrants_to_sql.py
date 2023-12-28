@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from assets.models import Hydrant
-from utilities.models import DMA
+from ..assets.models import Hydrant
+from ...utilities.models import DMA
 
 HYDRANT_LAYER_INDEX = 28
 DMA_FIELD_NAME = "DMACODE"

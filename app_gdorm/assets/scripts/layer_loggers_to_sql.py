@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from assets.models import Logger
-from utilities.models import DMA
+from ..assets.models import Logger
+from ...utilities.models import DMA
 
 LOGGER_LAYER_INDEX = 2
 DMA_FIELD_NAME = "DMACODE1"

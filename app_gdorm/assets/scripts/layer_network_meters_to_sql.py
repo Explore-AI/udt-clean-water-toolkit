@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from assets.models import NetworkMeter
-from utilities.models import DMA
+from ..assets.models import NetworkMeter
+from ...utilities.models import DMA
 
 NETWORK_METERS_LAYER_INDEX = 26
 DMA_FIELD_NAME_1 = "DMA1CODE"

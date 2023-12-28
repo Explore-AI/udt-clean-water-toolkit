@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from utilities.models import DMA
+from ..models import DMA
 
 LAYER_DATA = {
     "wLogger": [2, ["DMACODE1"]],
