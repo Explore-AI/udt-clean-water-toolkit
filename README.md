@@ -37,11 +37,11 @@ Devops tools for toolkit development and deployment.
 
 ### api
 
-See [api requirements](api/README.md)
+See [api requirements](api/README.md#1-requirements)
 
 ### api2
 
-See [api2 requirements](api2/README.md)
+See [api2 requirements](api2/README.md#1-requirements)
 
 ### cwm
 
@@ -52,7 +52,7 @@ See [api2 requirements](api2/README.md)
 
 ### app
 
-See [app requirements](app/README.md)
+See [app requirements](app/README.md#1-requirements)
 
 ### devops
 
@@ -64,15 +64,15 @@ See [app requirements](app/README.md)
 
 ### api
 
-See [api development instructions](api/README.md)
+See [api development instructions](api/README.md#2-development)
 
 ### api2
 
-See [api2 development instructions](api2/README.md)
+See [api2 development instructions](api2/README.md#2-development)
 
 ### app
 
-See [app development instructions](app/README.md)
+See [app development instructions](app/README.md#2-development)
 
 ## 5. Deployment
 
