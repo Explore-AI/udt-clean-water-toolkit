@@ -45,9 +45,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "core",
-    "assets",
-    "utilities",
-    "django.contrib.gis",
 ]
 
 MIDDLEWARE = [
@@ -86,27 +83,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": os.getenv("POSTGIS_DB_NAME__ENV_VAR"),
-        "USER": os.getenv("POSTGIS_DB_USER__ENV_VAR"),
-        "PASSWORD": os.getenv("POSTGIS_DEFAULT_DB_PASSWORD__ENV_VAR"),
-        "HOST": os.getenv("POSTGIS_DEFAULT_DB_HOST__ENV_VAR"),
-        "PORT": "5432",
-    }
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    #     "ENGINE": "django.contrib.gis.db.backends.spatialite",
-    # }
-}
-
-# currently only works with neo4j
-GRAPH_DATABASES = {
-    "default": {
-        "HOST": "http://localhost",
-        "PORT": "7687",
-        "USER": os.getenv("NEO4J_USER"),
-        "PASSWORD": os.getenv("NEO4J_PASSWORD"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -177,8 +155,6 @@ LOGGING = {
 
 AUTH_USER_MODEL = "core.User"
 
-DEFAULT_SRID = 27700
-
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
     # INSTALLED_APPS.append("corsheaders")
@@ -187,10 +163,3 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
     CORS_ORIGIN_ALLOW_ALL = True
     ALLOWED_HOSTS = ["*"]
     DEBUG = True
-
-    if platform.system() == "Darwin":  # only set imports for MacOS
-        GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"  # added this
-        GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"  # added this
-        SPATIALITE_LIBRARY_PATH = (
-            "/System/Volumes/Data/opt/homebrew/lib/mod_spatialite.dylib"  # added this
-        )

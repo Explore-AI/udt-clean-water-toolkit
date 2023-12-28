@@ -16,7 +16,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -42,6 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "assets",
+    "utilities",
+    "django.contrib.gis",
 ]
 
 MIDDLEWARE = [
@@ -68,6 +70,16 @@ DATABASES = {
     }
 }
 
+# currently only works with neo4j
+GRAPH_DATABASES = {
+    "default": {
+        "HOST": "http://localhost",
+        "PORT": "7687",
+        "USER": os.getenv("NEO4J_USER"),
+        "PASSWORD": os.getenv("NEO4J_PASSWORD"),
+    }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -86,9 +98,24 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_SRID = 27700
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEBUG = True
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
+    TW_GS_CLEAN_WATER_ZIP_PATH = os.getenv("TW_GS_CLEAN_WATER_ZIP_PATH__ENV_VAR")
 
     if platform.system() == "Darwin":  # only set imports for MacOS
         GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"  # added this
