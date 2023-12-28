@@ -1,12 +1,9 @@
 import sys, os
 
-### Renamed this file to main.py so that it does not clash
-### with manage.py when integrated into other django projects
-
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cwapp_geod.config.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cwa_geod.config.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

@@ -1,14 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from ..assets.models import Logger
-from ...utilities.models import DMA
+from ...models import Logger
+from cwa_geod.utilities.models import DMA
 
 LOGGER_LAYER_INDEX = 2
 DMA_FIELD_NAME = "DMACODE1"
-
-import pdb
-
-pdb.set_trace()
 
 
 class Command(BaseCommand):
