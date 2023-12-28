@@ -15,12 +15,14 @@ These packages can be installed with the instructions in Section 2.
 
 ### 1.2 Database
 
-The following databases are suppored by GeoDjango can be used with the app:
+The following databases are suppored by GeoDjango can be used with the app*:
 
 - SpatiaLite
 - MySQL
 - MariaDB
 - PostGIS (recommended for use with this application)
+
+*Please check the functions used in the application have compatability with your selected database. 
 
 ## 2. Development
 
@@ -29,24 +31,24 @@ Create a python3 virtual environment and install required modules. For example u
 ```
 # from project root dir
 
-python3 -m venv api/venv
+python3 -m venv drf_api/venv
 
-source api2/venv/bin/activate
+source drf_api/venv/bin/activate
 
-pip install -r api2/requirements.txt
+pip install -r drf_api/requirements.txt -r drf_api/dev-requirements.txt
 
-pip install -r api2/dev-requirements.txt # for dev packages
-
-ln -s ../app/ ./api2/
+ln -s cwa_geodorm/cleanwaterapp_geod/ ./drf_api
 ```
 
-Install a postgis database and expose the required port
+Install a postgis database and expose the required port. Before running the `docker-compose` command to setup the postgis DB. you will need set the `POSTGRES_PASSWORD` env var in `devops/docker/env/.db_env`.
 
 ```
-docker run --name udtpostgis -e POSTGRES_USER=udt -e POSTGRES_PASSWORD=[somepassword] -v /opt/udt/data/pgdata:/var/lib/postgresql/data -d postgis/postgis
+cd devops/docker/
+
+docker-compose -f docker-compose-postgis.yml up -d
 ```
 
-Before running the `api2` for development one needs to package and install the `cwm` module in dev mode:
+Before running the `api_drf` for development one needs to package and install the `cwm` module in dev mode:
 
 ```
 # assuming you area already in the `api2` virtual environment
