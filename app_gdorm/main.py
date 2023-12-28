@@ -1,5 +1,8 @@
 import sys, os
 
+### Renamed this file to main.py so that it does not clash
+### with manage.py when integrated into other django projects
+
 
 def main():
     """Run administrative tasks."""
