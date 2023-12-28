@@ -1,14 +1,16 @@
 #!/bin/bash
 
-echo "Started udt DB reset. The udt database will be dropped and recreated. "
+echo "Started udt postgis DB reset. The udt postgis  database will be dropped and recreated. Ensure all connections to the udt postgis DB are closed."
+
+source ../docker/env/.db_env
 
 DB_CONTAINER_ID=`docker ps | grep udtpostgis | grep postgis/postgis | awk '{ print $1 }'`
 
 #docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "select pg_terminate_backend(pid) from pg_stat_activity where datname='udt_api2';"
 
-#CREATE USER udt with password '[somepassword]' superuser;
 docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "drop database udt"
 docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "create database udt"
+docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "create user udt with superuser password '${POSTGRES_PASSWORD}'"
 
 echo "DB reset complete."
 
