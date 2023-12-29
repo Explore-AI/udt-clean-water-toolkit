@@ -16,14 +16,22 @@ from cwa_geod.assets.models import Logger
 
 # https://networkx.org/documentation/stable/auto_examples/geospatial/plot_lines.html
 # https://docs.momepy.org/en/stable/user_guide/graph/convert.html # alternate
+
+
+# TrunkMain.objects.all().select_related("dma").prefetch_related("dma__dma_loggers")
+# from django.contrib.gis.measure import D
+# TrunkMain.objects.filter(geometry=(geom, D(m=5)))
+# https://stackoverflow.com/a/65324191
+# https://postgis.net/docs/ST_ClosestPoint.html
 def graph_from_trunk_mains():
     import geopandas as gpd
     import matplotlib.pyplot as plt
     import momepy
     import networkx as nx
 
+    trunk_mains = TrunkMain.objects.all()
     trunk_mains_data = serialize(
-        "geojson", TrunkMain.objects.all()[:2], geometry_field="geometry", srid=2770
+        "geojson", trunk_mains, geometry_field="geometry", srid=2770
     )
     import pdb
 
