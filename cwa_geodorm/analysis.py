@@ -2,10 +2,11 @@ import setup  # Required. Do not remove.
 from django.core.serializers import serialize
 from cwa_geod.assets.models import TrunkMain
 from cwa_geod.assets.models import Logger
+from cwa_geod.config.settings import DEFAULT_SRID
 
 
-# https://docs.djangoproject.com/en/4.2/ref/contrib/gis/db-api/#spatial-lookups
-# https://docs.djangoproject.com/en/4.2/ref/contrib/gis/geoquerysets/#std-fieldlookup-dwithin
+# https://docs.djangoproject.com/en/5.0/ref/contrib/gis/db-api/#spatial-lookups
+# https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geoquerysets/#std-fieldlookup-dwithin
 
 
 # NOTE: The crux of the below two examples is that one can contruct a graph from
@@ -23,6 +24,11 @@ from cwa_geod.assets.models import Logger
 # TrunkMain.objects.filter(geometry=(geom, D(m=5)))
 # https://stackoverflow.com/a/65324191
 # https://postgis.net/docs/ST_ClosestPoint.html
+# https://docs.djangoproject.com/en/5.0/ref/contrib/gis/functions/#django.contrib.gis.db.models.functions.ClosestPoint
+
+
+# tgeo = TrunkMain.objects.first().geometry
+# Logger.objects.annotate(dist=Distance(tgeo, "geometry")).all().order_by("dist").first().dist
 def graph_from_trunk_mains():
     import geopandas as gpd
     import matplotlib.pyplot as plt
@@ -31,11 +37,8 @@ def graph_from_trunk_mains():
 
     trunk_mains = TrunkMain.objects.all()
     trunk_mains_data = serialize(
-        "geojson", trunk_mains, geometry_field="geometry", srid=2770
+        "geojson", trunk_mains, geometry_field="geometry", srid=DEFAULT_SRID
     )
-    import pdb
-
-    pdb.set_trace()
 
     trunk_mains_gdf = gpd.read_file(trunk_mains_data)
     trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)
@@ -46,7 +49,7 @@ def graph_from_trunk_mains():
     f, ax = plt.subplots(1, 2, figsize=(12, 6), sharex=True, sharey=True)
     trunk_mains_gdf.plot(color="k", ax=ax[0])
     for i, facet in enumerate(ax):
-        facet.set_title(("TrunkMains", "Graph")[i])
+        facet.set_title(("TrunkMains Geospatial", "TrunkMains Graph")[i])
         facet.axis("off")
 
     nx.draw(G, positions, ax=ax[1], node_size=5)
@@ -62,7 +65,7 @@ def graph_from_loggers():
     import numpy as np
 
     logger_data = serialize(
-        "geojson", Logger.objects.all(), geometry_field="geometry", srid=2770
+        "geojson", Logger.objects.all(), geometry_field="geometry", srid=DEFAULT_SRID
     )
 
     logger_gdf = gpd.read_file(logger_data)
