@@ -38,7 +38,7 @@ def _geojson_serialize_feature_collection(qs):
     # see https://postgis.net/docs/ST_AsGeoJSON.html
     geo_data = {
         "type": "FeatureCollection",
-        "crs": {"type": "name", "properties": {"name": "EPSG:27700"}},
+        "crs": {"type": "name", "properties": {"name": f"EPSG:{DEFAULT_SRID}"}},
         "features": [
             {"properties": i["properties"], "geometry": json.loads(i["geometry"])}
             for i in qs
@@ -68,7 +68,6 @@ def graph_from_trunk_mains():
     import datetime
 
     # faster serialization into geoson. geopandas still slow
-
     start = datetime.datetime.now()
     qs = TrunkMain.objects.values("gisid", "shape_length").annotate(
         geometry=AsGeoJSON("geometry", crs=True),
