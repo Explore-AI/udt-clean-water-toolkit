@@ -34,6 +34,8 @@ import json
 
 
 def _geojson_serialize_feature_collection(qs):
+    # TODO: figure out how to load geometry object into json directly on DB.
+    # see https://postgis.net/docs/ST_AsGeoJSON.html
     geo_data = {
         "type": "FeatureCollection",
         "crs": {"type": "name", "properties": {"name": "EPSG:27700"}},
