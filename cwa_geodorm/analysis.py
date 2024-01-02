@@ -1,6 +1,6 @@
 import setup  # Required. Do not remove.
 from django.core.serializers import serialize
-from cwa_geod.assets.models import TrunkMain
+from cwa_geod.assets.serializers import TrunkMainGeoJsonSerializer
 from cwa_geod.assets.models import Logger
 from cwa_geod.config.settings import DEFAULT_SRID
 
@@ -34,8 +34,6 @@ import json
 
 
 def _geojson_serialize_feature_collection_redux(qs):
-    # TODO: figure out how to load geometry object into json directly on DB.
-    # see https://postgis.net/docs/ST_AsGeoJSON.html
     geo_data = {
         "type": "FeatureCollection",
         "crs": {"type": "name", "properties": {"name": f"EPSG:{DEFAULT_SRID}"}},
@@ -49,7 +47,6 @@ def _geojson_serialize_feature_collection_redux(qs):
 
 
 def _geojson_serialize_feature_collection(qs):
-    # TODO: figure out how to load geometry object into json directly on DB.
     # see https://postgis.net/docs/ST_AsGeoJSON.html
     geo_data = {
         "type": "FeatureCollection",
@@ -67,62 +64,13 @@ def graph_from_trunk_mains():
     import matplotlib.pyplot as plt
     import momepy
     import networkx as nx
-    import time
-    from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
-    from django.contrib.postgres.aggregates import JSONBAgg
 
-    from django.db.models.functions import JSONObject
-    from django.db.models.fields.json import KT
-    from django.db.models import Value, JSONField
+    serializer = TrunkMainGeoJsonSerializer()
+    trunk_mains_data = serializer.tw_trunk_mains_to_geojson()
+    import pdb
 
-    # use AsGeoJson is query combined with json build object
-    # https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
-    # https://postgis.net/docs/ST_AsGeoJSON.html
-    # https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
-
-    import datetime
-
-    # 3) faster (maybe with bigger datasets) serialization into geoson. geopandas still slow
-    start = datetime.datetime.now()
-    qs = (
-        TrunkMain.objects.values("gisid", "shape_length")
-        .annotate(
-            geojson=JSONObject(
-                properties=JSONObject(gisid="gisid", shape_length="shape_length"),
-                type=Value("Feature"),
-                geometry=Cast(
-                    AsGeoJSON("geometry", crs=True),
-                    output_field=JSONField(),
-                ),
-            ),
-        )
-        .values_list("geojson", flat=True)
-    )
-    x = _geojson_serialize_feature_collection_redux(qs)
-    finish = datetime.datetime.now()
-    print(finish - start)
-    trunk_mains_gdf = gpd.read_file(x)
-
-    # 2) faster serialization into geoson compared to 1) but iteration required. geopandas still slow
-    # qs = TrunkMain.objects.values("gisid", "shape_length").annotate(
-    #     geometry=AsGeoJSON("geometry", crs=True),
-    #     properties=JSONObject(gisid="gisid", shape_length="shape_length"),
-    # )
-    # x = _geojson_serialize_feature_collection(qs)
-    # finish = datetime.datetime.now()
-    # print(finish - start)
-    # trunk_mains_gdf = gpd.read_file(x)
-
-    # 1) slower serialization into geojson
-    # start = datetime.datetime.now()
-    # trunk_mains = TrunkMain.objects.all()
-    # trunk_mains_data = serialize(
-    #     "geojson", trunk_mains, geometry_field="geometry", srid=DEFAULT_SRID
-    # )
-    # finish = datetime.datetime.now()
-    # print(finish - start)
-    # trunk_mains_gdf = gpd.read_file(trunk_mains_data)
-
+    pdb.set_trace()
+    trunk_mains_gdf = gpd.read_file(trunk_mains_data)
     trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)
     G = momepy.gdf_to_nx(trunk_mains_as_single_lines_gdf, approach="primal")
 

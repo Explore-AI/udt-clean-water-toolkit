@@ -5,6 +5,8 @@ from cleanwater.exceptions import LayerLoadException
 
 
 class GeospatialDataManager(BaseDataManager):
+    """Helper functions to manipulate geospatial data"""
+
     def gdb_zip_to_gdf_layer(self, zip_path: str, layer_name: str):
         if not os.path.exists(zip_path):
             raise Exception("gdf file not found")
