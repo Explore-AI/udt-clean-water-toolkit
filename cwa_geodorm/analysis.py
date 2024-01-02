@@ -29,18 +29,65 @@ from cwa_geod.config.settings import DEFAULT_SRID
 
 # tgeo = TrunkMain.objects.first().geometry
 # Logger.objects.annotate(dist=Distance(tgeo, "geometry")).all().order_by("dist").first().dist
+
+import json
+
+
+def _geojson_serialize_feature_collection(qs):
+    geo_data = {
+        "type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "EPSG:27700"}},
+        "features": [
+            {"properties": i["properties"], "geometry": json.loads(i["geometry"])}
+            for i in qs
+        ],
+    }
+
+    return json.dumps(geo_data)
+
+
 def graph_from_trunk_mains():
     import geopandas as gpd
     import matplotlib.pyplot as plt
     import momepy
     import networkx as nx
+    import time
+    from django.contrib.gis.db.models.functions import AsGeoJSON
 
-    trunk_mains = TrunkMain.objects.all()
-    trunk_mains_data = serialize(
-        "geojson", trunk_mains, geometry_field="geometry", srid=DEFAULT_SRID
+    from django.db.models.functions import JSONObject
+    from django.db.models.fields.json import KT
+    from django.db.models import Value
+
+    # use AsGeoJson is query combined with json build object
+    # https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
+    # https://postgis.net/docs/ST_AsGeoJSON.html
+    # https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
+
+    import datetime
+
+    # faster serialization into geoson. geopandas still slow
+
+    start = datetime.datetime.now()
+    qs = TrunkMain.objects.values("gisid", "shape_length").annotate(
+        geometry=AsGeoJSON("geometry", crs=True),
+        properties=JSONObject(gisid="gisid", shape_length="shape_length"),
+        type=Value("Feature"),
     )
+    x = _geojson_serialize_feature_collection(qs)
+    finish = datetime.datetime.now()
+    print(finish - start)
+    trunk_mains_gdf = gpd.read_file(x)
 
-    trunk_mains_gdf = gpd.read_file(trunk_mains_data)
+    # slower serialization into geojson
+    # start = datetime.datetime.now()
+    # trunk_mains = TrunkMain.objects.all()
+    # trunk_mains_data = serialize(
+    #     "geojson", trunk_mains, geometry_field="geometry", srid=DEFAULT_SRID
+    # )
+    # finish = datetime.datetime.now()
+    # print(finish - start)
+    # trunk_mains_gdf = gpd.read_file(trunk_mains_data)
+
     trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)
     G = momepy.gdf_to_nx(trunk_mains_as_single_lines_gdf, approach="primal")
 
