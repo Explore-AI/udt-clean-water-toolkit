@@ -2,7 +2,7 @@ import json
 
 
 class GeoDjangoSerializer:
-    """Customer serializers from GeoDjango."""
+    """Custom serializers from GeoDjango."""
 
     srid = 27700  # set default srid in config
     items_limit = 50000  # set defauly in cofig
