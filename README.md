@@ -22,7 +22,7 @@ An application of the Clean Water Toolkit. It uses GeoDjango as an ORM. Integrat
 
 ### api_fastapi
 
-An example api application built with FastAPI application SQLAlchemy. Provides a RESTful API interface for the `cwa_geoaorm` application. Also provides additional apis for visualisation, analysis, and modelling.
+An example api application built with FastAPI. Provides a RESTful API interface for the `cwa_geoaorm` application. Also provides additional apis for visualisation, analysis, and modelling.
 
 ### api_drf
 
