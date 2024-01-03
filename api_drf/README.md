@@ -1,4 +1,4 @@
-# api2
+# api_drf
 
 ## 1. Requirements
 
