@@ -86,9 +86,7 @@ class TrunkMainController(GeoDjangoController):
 
     def trunk_mains_to_geodataframe(self, properties=None):
         """Serialization of db data to GeoPandas DataFrame.
-
-        Fast (maybe with bigger datasets) serialization into geoson.
-
+        
         Args:
               properties: a list of model fields
         Returns:
