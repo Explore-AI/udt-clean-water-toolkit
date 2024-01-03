@@ -10,28 +10,17 @@ from cwa_geod.config.settings import DEFAULT_SRID
 
 
 # NOTE: The crux of the below two examples is that one can contruct a graph from
-# lines or points using geojson. Need to figure out how to create graph that has
-# both lines and points as geojson can combine only one layer. Can we create a layer that has
-# both lines and points and then convert it to geojson
+# lines or points using geojson. Need to figure out how to create graph that has combined assets
 
 
-# https://networkx.org/documentation/stable/auto_examples/geospatial/plot_lines.html
-# https://docs.momepy.org/en/stable/user_guide/graph/convert.html # alternate
-
-
-# TrunkMain.objects.all().select_related("dma").prefetch_related("dma__dma_loggers")
-# from django.contrib.gis.measure import D
-# TrunkMain.objects.filter(geometry=(geom, D(m=5)))
 # https://stackoverflow.com/a/65324191
 # https://postgis.net/docs/ST_ClosestPoint.html
 # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/functions/#django.contrib.gis.db.models.functions.ClosestPoint
 
 
-import json
-
-
+# https://networkx.org/documentation/stable/auto_examples/geospatial/plot_lines.html
+# https://docs.momepy.org/en/stable/user_guide/graph/convert.html # alternate
 def graph_from_trunk_mains():
-    import geopandas as gpd
     import matplotlib.pyplot as plt
     import momepy
     import networkx as nx
@@ -58,7 +47,10 @@ def graph_from_trunk_mains():
 # https://networkx.org/documentation/stable/auto_examples/geospatial/plot_lines.html
 # Lots of island loggers as expected
 def graph_from_loggers():
+    import matplotlib.pyplot as plt
     from libpysal import weights
+    import geopandas as gpd
+    import networkx as nx
     from contextily import add_basemap
     import numpy as np
 
