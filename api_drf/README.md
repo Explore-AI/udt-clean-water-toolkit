@@ -13,6 +13,8 @@
 
 These packages can be installed with the instructions in Section 2.
 
+`sudo apt-get install libgdal-dev`
+
 ### 1.2 Database
 
 The following databases are suppored by GeoDjango can be used with the app*:
