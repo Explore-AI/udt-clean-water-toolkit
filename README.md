@@ -30,7 +30,7 @@ An example api application built with djangorestframework. Provides a RESTful AP
 
 ### ui
 
-An electron based app. Commincates with the apis Clean Water ToolkitInteracts with the `api` and RESTFul APIs and provides a graphicainterface that demonstrates some of the Toolkit capabilities.
+An electron based app. A front-end for the RESTful apis.
 
 ### devops
 
