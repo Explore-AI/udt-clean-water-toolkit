@@ -38,11 +38,7 @@ def graph_from_trunk_mains():
 
     tm_controller = TrunkMainController()
     trunk_mains_gdf = tm_controller.trunk_mains_to_geodataframe()
-    import pdb
 
-    pdb.set_trace()
-
-    trunk_mains_gdf = gpd.read_file(trunk_mains_data)
     trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)
     G = momepy.gdf_to_nx(trunk_mains_as_single_lines_gdf, approach="primal")
 
