@@ -14,7 +14,7 @@ The clean water module is a python package that reads in clean water assett data
 
 ### cwa_geoaorm
 
-An application of the Clean Water Toolkit. Integrates the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
+An application of the Clean Water Toolkit with GeoAlchemy integration. Includes the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
 
 ### cwa_geodorm
 
