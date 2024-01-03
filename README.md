@@ -8,31 +8,39 @@ Development of a clean water toolkit that combines aspects of a digital twin and
 
 ## 2. Toolkit structure
 
-### cwm
+### 2.1 `cwm` Module
 
 The clean water module is a python package that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network. Provides functional and class based apis for visualisation, analysis, and modelling. 
 
-### cwa_geoaorm
+## 2.2 Applications
+
+The `cwa_geoarm` and `cwa_geodorm` are two independent applications. They provide the same functionality.
+
+#### cwa_geoaorm
 
 An application of the Clean Water Toolkit with GeoAlchemy integration. Includes the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
 
-### cwa_geodorm
+#### cwa_geodorm
 
 An application of the Clean Water Toolkit. It uses GeoDjango as an ORM. Integrates the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
 
-### api_fastapi
+### 2.3 RESTful API apps
+
+The `api_fastapi` and `api_drf` are two independent applications. They provide the same functionality.
+
+#### api_fastapi
 
 An example api application built with FastAPI. Provides a RESTful API interface for the `cwa_geoaorm` application. Also provides additional apis for visualisation, analysis, and modelling.
 
-### api_drf
+#### api_drf
 
 An example api application built with djangorestframework. Provides a RESTful API interface for the `cwa_geodorm` module. Also provides additional apis for visualisation, analysis, and modelling.
 
-### ui
+### 2.4 ui
 
 An electron based app. A front-end for the RESTful apis.
 
-### devops
+### 2.5 devops
 
 Devops tools for toolkit development and deployment.
 
