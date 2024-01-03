@@ -50,7 +50,7 @@ class TrunkMainController(GeoDjangoController):
         return qs
 
     def trunk_mains_to_geojson(self, properties=None):
-        """Serialization of db date to GeoJSON.
+        """Serialization of db data to GeoJSON.
 
         Fast (maybe with bigger datasets) serialization into geoson.
 
@@ -64,8 +64,8 @@ class TrunkMainController(GeoDjangoController):
         return self.queryset_to_geojson(qs)
 
     #
-    def tw_trunk_mains_to_json2(self, properties=None):
-        """Serialization of db date to GeoJSON. Alternate method
+    def trunk_mains_to_geojson2(self, properties=None):
+        """Serialization of db data to GeoJSON. Alternate method
         Slighly faster serialization into geoson compared to 1) but
         employs iteration.
 
@@ -85,7 +85,7 @@ class TrunkMainController(GeoDjangoController):
         return self.queryset_to_geojson2(qs)
 
     def trunk_mains_to_geodataframe(self, properties=None):
-        """Serialization of db date to GeoJSON.
+        """Serialization of db data to GeoPandas DataFrame.
 
         Fast (maybe with bigger datasets) serialization into geoson.
 
@@ -96,7 +96,7 @@ class TrunkMainController(GeoDjangoController):
         """
 
         qs = self.get_geometry_queryset(properties)
-        return self.queryset_to_geojson2(qs)
+        return self.django_queryset_to_geodataframe(qs)
 
     # 1) slower serialization into geojson
     # start = datetime.datetime.now()

@@ -36,8 +36,8 @@ def graph_from_trunk_mains():
     import momepy
     import networkx as nx
 
-    trunk_main_controller = TrunkMainController()
-    trunk_mains_data = trunk_main_controller.trunk_mains_to_geojson()
+    tm_controller = TrunkMainController()
+    trunk_mains_gdf = tm_controller.trunk_mains_to_geodataframe()
     import pdb
 
     pdb.set_trace()

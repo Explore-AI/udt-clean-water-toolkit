@@ -4,8 +4,7 @@ import json
 class GeoDjangoSerializer:
     """Custom serializers from GeoDjango."""
 
-    srid = 27700  # set default srid in config
-    items_limit = 50000  # set defauly in cofig
+    srid = 27700  # TODO: set default srid in config
 
     def queryset_to_geojson(self, qs, srid=None):
         """GeoJSON serialization for properties and geometry
