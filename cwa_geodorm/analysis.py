@@ -1,6 +1,5 @@
 import setup  # Required. Do not remove.
 from django.core.serializers import serialize
-from cwa_geod.assets.controllers import TrunkMainController
 from cwa_geod.assets.models import Logger
 from cwa_geod.config.settings import DEFAULT_SRID
 
