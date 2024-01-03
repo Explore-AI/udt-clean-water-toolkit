@@ -1,5 +1,7 @@
 # cwa_geodorm
 
+NB: This document is a work in progress.
+
 ## 1. Requirements
 
 ### 1.1 Packages
