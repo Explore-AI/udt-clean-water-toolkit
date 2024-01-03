@@ -1,13 +1,14 @@
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
 from django.db.models.functions import JSONObject
 from django.db.models import Value, JSONField
-from cleanwater.serializers import GeoDjangoSerializer
+from cleanwater.controllers import GeoDjangoController
 from ..models import TrunkMain
 from cwa_geod.config.settings import DEFAULT_SRID
 
 
-class TrunkMainGeoJsonSerializer(GeoDjangoSerializer):
-    """Convert trunk_mains data to geojson. See these refs
+class TrunkMainController(GeoDjangoController):
+    """Convert trunk_mains data to geoJSON. Please look into
+    structore of geoJSON object. Also, see these refs
     for a guide on how the geojson is contructed.
 
     AsGeoJson query combined with json to build object
@@ -27,17 +28,7 @@ class TrunkMainGeoJsonSerializer(GeoDjangoSerializer):
         "dma__code",
     ]  # should not include the geometry column as per convention
 
-    def tw_trunk_mains_to_geojson(self, properties=None):
-        """Serialization of db date to GeoJSON.
-
-        Fast (maybe with bigger datasets) serialization into geoson.
-
-        Args:
-              properties: a list of model fields
-        Returns:
-              GeoJSON
-        """
-
+    def get_geometry_queryset(self, properties):
         properties = properties or self.default_properties
         properties = set(properties)
         json_properties = dict(zip(properties, properties))
@@ -56,7 +47,20 @@ class TrunkMainGeoJsonSerializer(GeoDjangoSerializer):
             )
             .values_list("geojson", flat=True)
         )
+        return qs
 
+    def trunk_mains_to_geojson(self, properties=None):
+        """Serialization of db date to GeoJSON.
+
+        Fast (maybe with bigger datasets) serialization into geoson.
+
+        Args:
+              properties: a list of model fields
+        Returns:
+              GeoJSON
+        """
+
+        qs = self.get_geometry_queryset(properties)
         return self.queryset_to_geojson(qs)
 
     #
@@ -78,6 +82,20 @@ class TrunkMainGeoJsonSerializer(GeoDjangoSerializer):
             properties=JSONObject(**json_properties),
             geometry=AsGeoJSON("geometry", crs=True),
         )
+        return self.queryset_to_geojson2(qs)
+
+    def trunk_mains_to_geodataframe(self, properties=None):
+        """Serialization of db date to GeoJSON.
+
+        Fast (maybe with bigger datasets) serialization into geoson.
+
+        Args:
+              properties: a list of model fields
+        Returns:
+              GeoJSON
+        """
+
+        qs = self.get_geometry_queryset(properties)
         return self.queryset_to_geojson2(qs)
 
     # 1) slower serialization into geojson

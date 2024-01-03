@@ -1,6 +1,6 @@
 import setup  # Required. Do not remove.
 from django.core.serializers import serialize
-from cwa_geod.assets.serializers import TrunkMainGeoJsonSerializer
+from cwa_geod.assets.controllers import TrunkMainController
 from cwa_geod.assets.models import Logger
 from cwa_geod.config.settings import DEFAULT_SRID
 
@@ -27,36 +27,7 @@ from cwa_geod.config.settings import DEFAULT_SRID
 # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/functions/#django.contrib.gis.db.models.functions.ClosestPoint
 
 
-# tgeo = TrunkMain.objects.first().geometry
-# Logger.objects.annotate(dist=Distance(tgeo, "geometry")).all().order_by("dist").first().dist
-
 import json
-
-
-def _geojson_serialize_feature_collection_redux(qs):
-    geo_data = {
-        "type": "FeatureCollection",
-        "crs": {"type": "name", "properties": {"name": f"EPSG:{DEFAULT_SRID}"}},
-        "features": list(qs)
-        # "features": [
-        #     {"properties": i["properties"], "geometry": json.loads(i["geometry"])}
-        #     for i in qs
-        # ],
-    }
-    return json.dumps(geo_data)
-
-
-def _geojson_serialize_feature_collection(qs):
-    # see https://postgis.net/docs/ST_AsGeoJSON.html
-    geo_data = {
-        "type": "FeatureCollection",
-        "crs": {"type": "name", "properties": {"name": f"EPSG:{DEFAULT_SRID}"}},
-        "features": [
-            {"properties": i["properties"], "geometry": json.loads(i["geometry"])}
-            for i in qs
-        ],
-    }
-    return json.dumps(geo_data)
 
 
 def graph_from_trunk_mains():
@@ -65,8 +36,11 @@ def graph_from_trunk_mains():
     import momepy
     import networkx as nx
 
-    serializer = TrunkMainGeoJsonSerializer()
-    trunk_mains_data = serializer.tw_trunk_mains_to_geojson()
+    trunk_main_controller = TrunkMainController()
+    trunk_mains_data = trunk_main_controller.trunk_mains_to_geojson()
+    import pdb
+
+    pdb.set_trace()
 
     trunk_mains_gdf = gpd.read_file(trunk_mains_data)
     trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)

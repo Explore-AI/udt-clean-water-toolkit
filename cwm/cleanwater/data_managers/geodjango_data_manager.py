@@ -5,7 +5,7 @@ from cleanwater.serializers import GeoDjangoSerializer
 from .base_data_manager import BaseDataManager
 
 
-class GeospatialDataManager(BaseDataManager):
+class GeoDjangoDataManager(BaseDataManager, GeoDjangoSerializer):
     """Helper functions to manipulate geospatial data"""
 
     def gdb_zip_to_gdf_layer(self, zip_path: str, layer_name: str):
@@ -21,6 +21,5 @@ class GeospatialDataManager(BaseDataManager):
 
     def django_queryset_to_geodataframe(self, qs, srid=None):
         # TODO: this class should probably not be instantiated here
-        serializer = GeoDjangoSerializer()
-        data = serializer.queryset_to_geojson(qs, srid)
+        data = self.queryset_to_geojson(qs, srid)
         return gpd.read_file(data)
