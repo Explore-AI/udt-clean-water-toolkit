@@ -1,1 +1,1 @@
-from .trunk_main_controller import TrunkMainController
+from .trunk_mains_controller import TrunkMainsController

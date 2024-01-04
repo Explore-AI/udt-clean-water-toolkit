@@ -2,6 +2,7 @@ import setup  # Required. Do not remove.
 from django.core.serializers import serialize
 from cwa_geod.assets.models import Logger
 from cwa_geod.config.settings import DEFAULT_SRID
+from cwa_geod.network import GisToGraphNetwork
 
 
 # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/db-api/#spatial-lookups
@@ -19,28 +20,38 @@ from cwa_geod.config.settings import DEFAULT_SRID
 
 # https://networkx.org/documentation/stable/auto_examples/geospatial/plot_lines.html
 # https://docs.momepy.org/en/stable/user_guide/graph/convert.html # alternate
+
+
 def graph_from_trunk_mains():
-    import matplotlib.pyplot as plt
-    import momepy
-    import networkx as nx
+    gis_to_graph = GisToGraphNetwork()
+    networkx_graph = (
+        gis_to_graph.create_network()
+    )  # for now it only creates the trunk mains networkx graph
+    print(networkx_graph)
 
-    tm_controller = TrunkMainController()
-    trunk_mains_gdf = tm_controller.trunk_mains_to_geodataframe()
 
-    trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)
-    G = momepy.gdf_to_nx(trunk_mains_as_single_lines_gdf, approach="primal")
+# def graph_from_trunk_mains():
+#     import matplotlib.pyplot as plt
+#     import momepy
+#     import networkx as nx
 
-    positions = {n: [n[0], n[1]] for n in list(G.nodes)}
+#     tm_controller = TrunkMainController()
+#     trunk_mains_gdf = tm_controller._create_trunk_mains_()
 
-    f, ax = plt.subplots(1, 2, figsize=(12, 6), sharex=True, sharey=True)
-    trunk_mains_gdf.plot(color="k", ax=ax[0])
-    for i, facet in enumerate(ax):
-        facet.set_title(("TrunkMains Geospatial", "TrunkMains Graph")[i])
-        facet.axis("off")
+#     trunk_mains_as_single_lines_gdf = trunk_mains_gdf.explode(index_parts=True)
+#     G = momepy.gdf_to_nx(trunk_mains_as_single_lines_gdf, approach="primal")
 
-    nx.draw(G, positions, ax=ax[1], node_size=5)
+#     positions = {n: [n[0], n[1]] for n in list(G.nodes)}
 
-    plt.show()
+#     f, ax = plt.subplots(1, 2, figsize=(12, 6), sharex=True, sharey=True)
+#     trunk_mains_gdf.plot(color="k", ax=ax[0])
+#     for i, facet in enumerate(ax):
+#         facet.set_title(("TrunkMains Geospatial", "TrunkMains Graph")[i])
+#         facet.axis("off")
+
+#     nx.draw(G, positions, ax=ax[1], node_size=5)
+
+#     plt.show()
 
 
 # https://networkx.org/documentation/stable/auto_examples/geospatial/plot_lines.html

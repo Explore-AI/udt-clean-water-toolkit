@@ -6,7 +6,7 @@ from ..models import TrunkMain
 from cwa_geod.config.settings import DEFAULT_SRID
 
 
-class TrunkMainController(GeoDjangoController):
+class TrunkMainsController(GeoDjangoController):
     """Convert trunk_mains data to geoJSON. Please look into
     structore of geoJSON object. Also, see these refs
     for a guide on how the geojson is contructed.
@@ -18,6 +18,7 @@ class TrunkMainController(GeoDjangoController):
     https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
     """
 
+    model = TrunkMain
     srid = DEFAULT_SRID
     items_limit = 100000  # set default in cofig
     default_properties = [
@@ -28,13 +29,13 @@ class TrunkMainController(GeoDjangoController):
         "dma__code",
     ]  # should not include the geometry column as per convention
 
-    def get_geometry_queryset(self, properties):
+    def get_geometry_queryset(self, properties=None):
         properties = properties or self.default_properties
         properties = set(properties)
         json_properties = dict(zip(properties, properties))
 
         qs = (
-            TrunkMain.objects.values(*properties)
+            self.model.objects.values(*properties)
             .annotate(
                 geojson=JSONObject(
                     properties=JSONObject(**json_properties),
@@ -54,31 +55,30 @@ class TrunkMainController(GeoDjangoController):
 
         Fast (maybe with bigger datasets) serialization into geoson.
 
-        Args:
-              properties: a list of model fields
+        Params:
+              properties: list (optional). A list of model fields
         Returns:
-              GeoJSON
+              geoJSON: geoJSON object
         """
 
         qs = self.get_geometry_queryset(properties)
         return self.queryset_to_geojson(qs)
 
-    #
     def trunk_mains_to_geojson2(self, properties=None):
         """Serialization of db data to GeoJSON. Alternate method
         Slighly faster serialization into geoson compared to 1) but
         employs iteration.
 
-        Args:
-              properties: a list of model fields
+        Params:
+              properties: list (optional). A list of model fields
         Returns:
-              GeoJSON
+              geoJSON: geoJSON object
         """
         properties = properties or self.default_properties
         properties = set(properties)
         json_properties = dict(zip(properties, properties))
 
-        qs = TrunkMain.objects.values(*properties).annotate(
+        qs = self.model.objects.values(*properties).annotate(
             properties=JSONObject(**json_properties),
             geometry=AsGeoJSON("geometry", crs=True),
         )
@@ -86,11 +86,11 @@ class TrunkMainController(GeoDjangoController):
 
     def trunk_mains_to_geodataframe(self, properties=None):
         """Serialization of db data to GeoPandas DataFrame.
-        
-        Args:
-              properties: a list of model fields
+
+        Params:
+              properties: list (optional). A list of model fields
         Returns:
-              GeoJSON
+              geoJSON: geoJSON object
         """
 
         qs = self.get_geometry_queryset(properties)
