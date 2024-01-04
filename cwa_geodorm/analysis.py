@@ -23,7 +23,7 @@ def graph_from_trunk_mains():
     gis_to_graph = GisToGraphNetwork()
 
     # for now it only creates the trunk mains networkx graph
-    networkx_graph = gis_to_graph.create_network()
+    networkx_graph = gis_to_graph.create_network(srid=DEFAULT_SRID)
 
     print(networkx_graph)
 
