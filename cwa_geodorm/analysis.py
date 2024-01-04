@@ -20,10 +20,10 @@ from cwa_geod.assets.controllers import TrunkMainsController
 
 
 def graph_from_trunk_mains():
-    gis_to_graph = GisToGraphNetwork()
+    gis_to_graph = GisToGraphNetwork(srid=DEFAULT_SRID)
 
     # for now it only creates the trunk mains networkx graph
-    networkx_graph = gis_to_graph.create_network(srid=DEFAULT_SRID)
+    networkx_graph = gis_to_graph.create_network()
 
     print(networkx_graph)
 
@@ -93,7 +93,7 @@ def graph_from_loggers_demo():
 
 def analysis():
     graph_from_trunk_mains()
-    graph_from_trunk_mains_demo()
+    # graph_from_trunk_mains_demo()
     # graph_from_loggers_demo()
 
 
