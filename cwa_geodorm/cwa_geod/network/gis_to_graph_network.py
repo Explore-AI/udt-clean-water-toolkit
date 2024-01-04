@@ -12,7 +12,12 @@ class GisToGraphNetwork(NetworkController):
         super().__init__(self.srid)
 
     def create_network(self):
-        return self._create_trunk_mains_graph()
+        trunk_mains_nx = self._create_trunk_mains_graph()
+
+        # TODO: geospatial join on all the node assets
+        # TODO: add the nodes to the graph
+
+        return trunk_mains_nx
 
     def _create_trunk_mains_graph(self):
         tm = TrunkMainsController()
