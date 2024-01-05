@@ -15,7 +15,7 @@ These packages can be installed with the instructions in Section 2.
 
 ## 2. Development
 
-It's easiest to develop this module when integrated in another application. See See [app requirements](cwa_geodorm/README.md#2-development).
+It's easiest to develop this module when integrated in another application. See [app development](../cwa_geodorm/README.md#2-development).
 
 
 ## 3. Tests
