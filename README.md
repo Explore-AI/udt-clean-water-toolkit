@@ -78,7 +78,7 @@ See [drf api requirements](api_drf/README.md#1-requirements)
 
 ### cwm
 
-See [cleanwater module development instructions](cwm/README.md#1-development)
+See [cleanwater module development instructions](cwm/README.md#2-development)
 
 ### cwa_geoaorm
 
