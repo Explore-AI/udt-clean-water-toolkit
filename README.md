@@ -49,10 +49,7 @@ Devops tools for toolkit development and deployment.
 
 ### cwm
 
-- pandas
-- geopandas
-- numpy
-- networkx
+See [cleanwater module requirements](cwm/README.md#1-requirements)
 
 ### cwa_geoaorm
 
