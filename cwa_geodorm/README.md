@@ -41,7 +41,7 @@ The following databases are supported by GeoDjango can be used with the app*:
 Create a python3 virtual environment and install required modules. For example using pip:
 
 ```
-# from the cwa_geodorm app root dir
+# from the cwa_geodorm app dir
 
 python3 -m venv venv
 
