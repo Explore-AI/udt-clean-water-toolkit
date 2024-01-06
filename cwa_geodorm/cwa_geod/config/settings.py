@@ -34,6 +34,7 @@ DEBUG = False
 # Application definition
 
 INSTALLED_APPS = [
+    "cwa_geod.core",
     "cwa_geod.assets",
     "cwa_geod.utilities",
     "django.contrib.gis",
