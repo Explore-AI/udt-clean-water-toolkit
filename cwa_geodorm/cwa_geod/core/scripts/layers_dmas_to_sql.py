@@ -1,13 +1,14 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from ..models import DMA
+from cwa_geod.utilities.models import DMA
 
 LAYER_DATA = {
-    "wLogger": [2, ["DMACODE1"]],
-    "wNetworkMeter": [26, ["DMA1CODE", "DMA2CODE"]],
-    "wTrunkMains": [9, ["DMACODE"]],
-    "wHydrant": [28, ["DMACODE"]],
-    "wDistributionMain": [10, ["DMACODE"]],
+    # "wLogger": [2, ["DMACODE1"]],
+    # "wNetworkMeter": [26, ["DMA1CODE", "DMA2CODE"]],
+    # "wTrunkMains": [9, ["DMACODE"]],
+    # "wHydrant": [28, ["DMACODE"]],
+    # "wDistributionMain": [10, ["DMACODE"]],
+    "wNetworkOptValve": [3, ["DMA1CODE", "DMA2CODE"]],
 }
 
 

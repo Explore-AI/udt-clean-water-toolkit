@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal.error import GDALException
-from ...models import DistributionMain
+from cwa_geod.assets.models import DistributionMain
 from cwa_geod.utilities.models import DMA
 
 DISTRIBUTION_MAINS_LAYER_INDEX = 10

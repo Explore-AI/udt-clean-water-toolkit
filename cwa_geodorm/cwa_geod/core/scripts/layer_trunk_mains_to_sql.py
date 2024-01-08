@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal.error import GDALException
-from ...models import TrunkMain
+from cwa_geod.assets.models import TrunkMain
 from cwa_geod.utilities.models import DMA
 
 TRUNK_MAINS_LAYER_INDEX = 9

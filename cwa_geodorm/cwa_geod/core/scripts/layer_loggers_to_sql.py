@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from ...models import Logger
+from cwa_geod.assets.models import Logger
 from cwa_geod.utilities.models import DMA
 
 LOGGER_LAYER_INDEX = 2

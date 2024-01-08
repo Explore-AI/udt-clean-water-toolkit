@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from ...models import Hydrant
+from cwa_geod.assets.models import Hydrant
 from cwa_geod.utilities.models import DMA
 
 HYDRANT_LAYER_INDEX = 28
