@@ -1,6 +1,6 @@
 from cleanwater.controllers.network_controller import NetworkController
 from cwa_geod.assets.controllers import TrunkMainsController
-#from cwa_geod.assets.controllers import DistributionMainsController
+from cwa_geod.assets.controllers import DistributionMainsController
 from cwa_geod.config.settings import DEFAULT_SRID
 
 
@@ -22,5 +22,9 @@ class GisToGraphNetwork(NetworkController):
 
     def _create_trunk_mains_graph(self):
         tm = TrunkMainsController()
+
+        # TODO: union querysets
+        # dm = DistributionMainsController()
+
         trunk_mains = tm.get_geometry_queryset()
         return self.create_pipes_network(trunk_mains)
