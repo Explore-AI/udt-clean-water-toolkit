@@ -20,7 +20,7 @@ class TrunkMainsController(GeoDjangoController):
 
     model = TrunkMain
     srid = DEFAULT_SRID
-    items_limit = 100000  # set default in cofig
+    items_limit = 100000  # set default in config
     default_properties = [
         "id",
         "gisid",
