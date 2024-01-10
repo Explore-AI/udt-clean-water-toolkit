@@ -12,6 +12,33 @@ def clean_water_graph_from_gis_layers():
     # for now it only creates the trunk mains networkx graph
     nx_graph = gis_to_graph.create_network()
 
+    from custom_aggregates import JSONArrayAgg
+    from django.contrib.gis.db.models.functions import Distance
+    from django.contrib.gis.measure import D
+    from django.db.models import Value, JSONField
+    from django.db.models import OuterRef, Subquery
+    from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
+    from cwa_geod.assets.models import Logger
+    from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
+
+    # geom = Logger.objects.first().geometry
+    # x = Logger.objects.filter(geometry__dwithin=(geom, D(m=10000))).values_list(
+    #     Cast(JSONArrayAgg("id"), output_field=JSONField())
+    # )
+
+    # x = (
+    #     Logger.objects.filter(geometry__dwithin=(OuterRef("geometry"), D(m=10000)))
+    #     .values("id")
+    #     .annotate(ids=ArrayAgg("id"))
+    #     .values("ids")
+    # )
+    # TrunkMain.objects.annotate(distances=Subquery(x))
+    import pdb
+
+    # https://stackoverflow.com/questions/49570712/speeding-up-a-django-database-function-for-geographic-interpolation-of-missing-v
+    # https://stackoverflow.com/questions/73668842/django-with-mysql-subquery-returns-more-than-1-row
+    pdb.set_trace()
+
     print(nx_graph)
 
 
