@@ -12,17 +12,18 @@ def clean_water_graph_from_gis_layers():
     # for now it only creates the trunk mains networkx graph
     nx_graph = gis_to_graph.create_network()
 
-    from custom_aggregates import JSONArrayAgg
-    from django.contrib.gis.db.models.functions import Distance
-    from django.contrib.gis.measure import D
-    from django.db.models import Value, JSONField
-    from django.db.models import OuterRef, Subquery
-    from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
-    from cwa_geod.assets.models import Logger
-    from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
+    # from custom_aggregates import JSONArrayAgg
+    # from django.contrib.gis.db.models.functions import Distance
+    # from django.contrib.gis.measure import D
+    # from django.db.models import Value, JSONField
+    # from django.db.models import OuterRef, Subquery
+    # from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
+    # from cwa_geod.assets.models import Logger
+    # from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
 
+    # from cwa_geod.assets.models import TrunkMain
     # from django.db.models import FilteredRelation, Q
-    # TrunkMain.objects.prefetch_related("dma__dma_loggers").annotate(loggers_dist=FilteredRelation("dma__dma_loggers", condition=Q(geometry=D(m=10000))))
+    # x = TrunkMain.objects.prefetch_related("dma__dma_loggers").annotate(loggers_dist=FilteredRelation("dma__dma_loggers", condition=Q(geometry__dwithin=D(m=10000))))
     # geom = Logger.objects.first().geometry
     # x = Logger.objects.filter(geometry__dwithin=(geom, D(m=10000))).values_list(
     #     Cast(JSONArrayAgg("id"), output_field=JSONField())
