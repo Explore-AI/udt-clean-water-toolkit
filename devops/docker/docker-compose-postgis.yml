@@ -11,6 +11,4 @@ services:
       - ./env/.db_env
     ports:
       - 5432:5432
-    volumes:
-      - /opt/udt/data/pgdata:/var/lib/postgresql/data
     image: postgis/postgis

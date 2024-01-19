@@ -36,6 +36,8 @@ def clean_water_graph_from_gis_layers():
     #     .values("ids")
     # )
     # TrunkMain.objects.annotate(distances=Subquery(x))
+    #     subquery = Logger.objects.filter(geometry__dwithin=(OuterRef("geometry"), D(m=10))).annotate(logger_ids=ArrayAgg('id')).values('logger_ids')
+# TrunkMain.objects.annotate(distances=Subquery(subquery))
     import pdb
 
     # https://stackoverflow.com/questions/49570712/speeding-up-a-django-database-function-for-geographic-interpolation-of-missing-v
