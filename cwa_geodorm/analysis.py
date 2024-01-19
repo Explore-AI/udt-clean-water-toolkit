@@ -16,17 +16,29 @@ def clean_water_graph_from_gis_layers():
     from django.contrib.gis.measure import D
     from django.db.models import OuterRef
     from django.contrib.postgres.expressions import ArraySubquery
+    from django.db.models.functions import JSONObject
+    from django.contrib.gis.db.models.functions import LineLocatePoint
     from cwa_geod.assets.models import Logger, TrunkMain
 
-    subquery = Logger.objects.filter(
+    # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
+    # subquery = Logger.objects.filter(
+    #     geometry__dwithin=(OuterRef("geometry"), D(m=1000))
+    # ).values("id", "gisid", "geometry")
+
+    subquery1 = Logger.objects.filter(
         geometry__dwithin=(OuterRef("geometry"), D(m=1000))
-    ).values("id")
-    x = TrunkMain.objects.annotate(logger_ids=ArraySubquery(subquery))
+    ).values(json=JSONObject(id="id", gisid="gisid", geometry="geometry"))
+
+    # subquery2 = (
+    #     Logger.objects.filter(geometry__dwithin=(OuterRef("geometry"), D(m=1000)))
+    #     .annotate(frac=LineLocatePoint(OuterRef("geometry"), geometry))
+    #     .values(json=JSONObject(id="id", gisid="gisid", geometry="geometry"))
+    # )
+
+    x = TrunkMain.objects.annotate(logger_data=ArraySubquery(subquery))
 
     import pdb
 
-    # https://stackoverflow.com/questions/49570712/speeding-up-a-django-database-function-for-geographic-interpolation-of-missing-v
-    # https://stackoverflow.com/questions/73668842/django-with-mysql-subquery-returns-more-than-1-row
     pdb.set_trace()
 
     print(nx_graph)
