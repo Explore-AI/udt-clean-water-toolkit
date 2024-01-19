@@ -18,4 +18,8 @@ These packages can be installed with the instructions in Section 2.
 It's easiest to develop this module when integrated in another application. See [app development](../cwa_geodorm/README.md#2-development).
 
 
+python3 -m pip install build
+
+python3 -m build --wheel
+
 ## 3. Tests

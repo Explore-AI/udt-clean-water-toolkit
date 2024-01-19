@@ -13,31 +13,16 @@ def clean_water_graph_from_gis_layers():
     nx_graph = gis_to_graph.create_network()
 
     # from custom_aggregates import JSONArrayAgg
-    # from django.contrib.gis.db.models.functions import Distance
-    # from django.contrib.gis.measure import D
-    # from django.db.models import Value, JSONField
-    # from django.db.models import OuterRef, Subquery
-    # from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
-    # from cwa_geod.assets.models import Logger
-    # from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
+    from django.contrib.gis.measure import D
+    from django.db.models import OuterRef
+    from django.contrib.postgres.expressions import ArraySubquery
+    from cwa_geod.assets.models import Logger, TrunkMain
 
-    # from cwa_geod.assets.models import TrunkMain
-    # from django.db.models import FilteredRelation, Q
-    # x = TrunkMain.objects.prefetch_related("dma__dma_loggers").annotate(loggers_dist=FilteredRelation("dma__dma_loggers", condition=Q(geometry__dwithin=D(m=10000))))
-    # geom = Logger.objects.first().geometry
-    # x = Logger.objects.filter(geometry__dwithin=(geom, D(m=10000))).values_list(
-    #     Cast(JSONArrayAgg("id"), output_field=JSONField())
-    # )
+    subquery = Logger.objects.filter(
+        geometry__dwithin=(OuterRef("geometry"), D(m=1000))
+    ).values("id")
+    x = TrunkMain.objects.annotate(logger_ids=ArraySubquery(subquery))
 
-    # x = (
-    #     Logger.objects.filter(geometry__dwithin=(OuterRef("geometry"), D(m=10000)))
-    #     .values("id")
-    #     .annotate(ids=ArrayAgg("id"))
-    #     .values("ids")
-    # )
-    # TrunkMain.objects.annotate(distances=Subquery(x))
-    #     subquery = Logger.objects.filter(geometry__dwithin=(OuterRef("geometry"), D(m=10))).annotate(logger_ids=ArrayAgg('id')).values('logger_ids')
-# TrunkMain.objects.annotate(distances=Subquery(subquery))
     import pdb
 
     # https://stackoverflow.com/questions/49570712/speeding-up-a-django-database-function-for-geographic-interpolation-of-missing-v

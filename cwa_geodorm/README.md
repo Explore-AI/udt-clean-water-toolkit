@@ -30,7 +30,7 @@ The following databases are supported by GeoDjango can be used with the app*:
 
 *Please check the functions used in the application have compatability with your selected database. 
 
-`sudo apt-get install binutils libproj-dev gdal-bin libgdal-dev`
+`sudo apt-get install gdal-bin binutils libproj-dev gdal-bin libgdal-dev`
 
 #### Neo4J
 
