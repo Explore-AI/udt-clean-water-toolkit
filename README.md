@@ -102,6 +102,6 @@ See [drf api development instructions](drf_fastapi/README.md#2-development)
 ## 5. Tests
 
 
-## 5. Deployment
+## 6. Deployment
 
 
