@@ -14,6 +14,7 @@ def clean_water_graph_from_gis_layers():
 
     # from custom_aggregates import JSONArrayAgg
     from django.contrib.gis.measure import D
+    from django.db.models import F
     from django.db.models import OuterRef
     from django.contrib.postgres.expressions import ArraySubquery
     from django.db.models.functions import JSONObject
@@ -31,11 +32,15 @@ def clean_water_graph_from_gis_layers():
 
     # subquery2 = (
     #     Logger.objects.filter(geometry__dwithin=(OuterRef("geometry"), D(m=1000)))
-    #     .annotate(frac=LineLocatePoint(OuterRef("geometry"), geometry))
-    #     .values(json=JSONObject(id="id", gisid="gisid", geometry="geometry"))
+    #     .annotate(frac=LineLocatePoint(OuterRef("geometry"), F("geometry")))
+    #     .values(
+    #         json=JSONObject(id="id", gisid="gisid", geometry="geometry", frac="frac")
+    #     )
     # )
 
-    x = TrunkMain.objects.annotate(logger_data=ArraySubquery(subquery))
+    x = TrunkMain.objects.annotate(logger_data=ArraySubquery(subquery1))  # .annotate(
+    # logger_order=ArraySubquery(subquery2)
+    # )
 
     import pdb
 
