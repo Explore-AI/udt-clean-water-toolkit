@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  cwageodormdev:
+    container_name: udtcwageodormdev
+    image: cwa_geodorm_dev
+    build:
+      context: ./
+      dockerfile: Dockerfile_cwa_geodorm_dev
+    links:
+      - udtpostgis
+    volumes:
+      - ../../cwa_geodorm:/opt/udt/cwa_geodorm/
+      - ../../cwm:/opt/udt/cwm/

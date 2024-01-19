@@ -1,14 +1,12 @@
 version: "3"
 
-# docker run --name udtpostgis -e POSTGRES_PASSWORD=123456yellow -v /opt/udt/data/pgdata:/var/lib/postgresql/data -d postgis/postgis
-
 #name: <your project name>
 
 services:
-  postgis:
+  udtpostgis:
     container_name: udtpostgis
-    env_file:
-      - ./env/.db_env
     ports:
       - 5432:5432
+    env_file:
+      - ./env/.db_env
     image: postgis/postgis

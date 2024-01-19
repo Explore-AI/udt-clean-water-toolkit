@@ -19,13 +19,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY__ENV_VAR")
-
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     from dotenv import load_dotenv
 
     load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY__ENV_VAR")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -50,7 +50,7 @@ DATABASES = {
         "USER": os.getenv("POSTGIS_DB_USER__ENV_VAR"),
         "PASSWORD": os.getenv("POSTGIS_DEFAULT_DB_PASSWORD__ENV_VAR"),
         "HOST": os.getenv("POSTGIS_DEFAULT_DB_HOST__ENV_VAR"),
-        "PORT": "5432",
+        "PORT": os.getenv("POSTGIS_DEFAULT_PORT__ENV_VAR"),
     }
 }
 
