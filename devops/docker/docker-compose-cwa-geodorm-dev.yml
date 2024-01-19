@@ -12,3 +12,4 @@ services:
     volumes:
       - ../../cwa_geodorm:/opt/udt/cwa_geodorm/
       - ../../cwm:/opt/udt/cwm/
+      - ../../data:/opt/udt/data/
