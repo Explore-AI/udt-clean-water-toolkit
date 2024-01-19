@@ -9,7 +9,7 @@ source ../docker/env/.db_env
 
 DB_CONTAINER_ID=`docker ps | grep udtpostgis | grep postgis/postgis | awk '{ print $1 }'`
 
-docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "create database udt"
-docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "create user udt with superuser password '${POSTGRES_PASSWORD}'"
+docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create database udt"
+docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create user udt with superuser password '${POSTGRES_PASSWORD}'"
 
 echo "DB intilisation complete."

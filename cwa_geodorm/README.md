@@ -68,9 +68,12 @@ import cleanwater
 Install a postgis database and expose the required port. Before running the `docker-compose` command to setup the postgis DB. you will need set the `POSTGRES_PASSWORD` env var in `devops/docker/env/.db_env`.
 
 ```
-cd devops/docker/
+cd devops/scripts
 
-docker-compose -f docker-compose-postgis.yml up -d
+./postgis_server_setup.sh # install the postgis docker image on the machine
+
+./postgis_db_init.sh # initialise the udt database and user
+
 ```
 
 ## Helpful resources
