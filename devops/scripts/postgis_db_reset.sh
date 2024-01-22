@@ -12,8 +12,8 @@ DB_CONTAINER_ID=`docker ps | grep udtpostgis | grep postgis/postgis | awk '{ pri
 
 #docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "select pg_terminate_backend(pid) from pg_stat_activity where datname='udt_api2';"
 
-docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "drop database udt"
-docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "create database udt"
-docker exec -it ${DB_CONTAINER_ID} psql --user udt -c "create user udt with superuser password '${POSTGRES_PASSWORD}'"
+docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "drop database udt"
+docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create database udt"
+#docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create user udt with superuser password '${POSTGRES_PASSWORD}'"
 
 echo "DB reset complete."
