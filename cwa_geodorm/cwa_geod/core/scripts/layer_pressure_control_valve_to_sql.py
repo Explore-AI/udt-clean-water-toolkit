@@ -19,9 +19,6 @@ class Command(BaseCommand):
         zip_path = kwargs.get("file")
 
         ds = DataSource(zip_path)
-        import pdb
-
-        pdb.set_trace()
         pressure_control_valve_layer = ds[PRESSURE_CONT_VALVE_LAYER_INDEX]
 
         print(
