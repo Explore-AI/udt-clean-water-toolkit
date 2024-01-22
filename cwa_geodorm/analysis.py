@@ -12,7 +12,7 @@ def clean_water_graph_from_gis_layers():
     # for now it only creates the trunk mains networkx graph
     nx_graph = gis_to_graph.create_network()
 
-    # from custom_aggregates import JSONArrayAgg
+    from custom_postgis_functions import LineMerge, DumpGeom
     from django.contrib.gis.measure import D
     from django.db.models import F
     from django.db.models import OuterRef
@@ -22,13 +22,34 @@ def clean_water_graph_from_gis_layers():
     from cwa_geod.assets.models import Logger, TrunkMain
 
     # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-    # subquery = Logger.objects.filter(
-    #     geometry__dwithin=(OuterRef("geometry"), D(m=1000))
-    # ).values("id", "gisid", "geometry")
+    subquery1 = TrunkMain.objects.filter(geometry__touches=OuterRef("geometry")).values(
+        json=JSONObject(
+            id="id",
+            gisid="gisid",
+            geometry="geometry",
+            dma_id="dma",
+            dma_code="dma__code",
+        )
+    )
 
-    subquery1 = Logger.objects.filter(
+    import pdb
+
+    pdb.set_trace()
+
+    subquery2 = Logger.objects.filter(
         geometry__dwithin=(OuterRef("geometry"), D(m=1000))
-    ).values(json=JSONObject(id="id", gisid="gisid", geometry="geometry"))
+    ).values(
+        json=JSONObject(
+            id="id",
+            gisid="gisid",
+            geometry="geometry",
+            dma_id="dma",
+            dma_code="dma__code",
+            location=LineLocatePoint(
+                OuterRef("geometry"), Logger.objects.get(pk=F("id")).geometry
+            ),
+        )
+    )
 
     # subquery2 = (
     #     Logger.objects.filter(geometry__dwithin=(OuterRef("geometry"), D(m=1000)))
@@ -38,9 +59,9 @@ def clean_water_graph_from_gis_layers():
     #     )
     # )
 
-    x = TrunkMain.objects.annotate(logger_data=ArraySubquery(subquery1))  # .annotate(
-    # logger_order=ArraySubquery(subquery2)
-    # )
+    qs = TrunkMain.objects.annotate(
+        trunk_mains_data=ArraySubquery(subquery1), logger_data=ArraySubquery(subquery2)
+    )
 
     import pdb
 

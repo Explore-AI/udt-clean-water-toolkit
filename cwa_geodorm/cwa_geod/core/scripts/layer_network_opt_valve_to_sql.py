@@ -8,6 +8,8 @@ DMA_FIELD_NAME_1 = "DMA1CODE"
 DMA_FIELD_NAME_2 = "DMA2CODE"
 
 
+# for layermapping with foreign key
+# https://stackoverflow.com/questions/21197483/geodjango-layermapping-foreign-key
 class Command(BaseCommand):
     help = "Write Thames Water NetworkOptValve layer data to sql"
 
@@ -29,7 +31,6 @@ class Command(BaseCommand):
         layer_shapes_x = network_valve_layer.get_fields("SHAPEX")
         layer_shapes_y = network_valve_layer.get_fields("SHAPEY")
         layer_dma_codes_1 = network_valve_layer.get_fields(DMA_FIELD_NAME_1)
-        layer_dma_codes_2 = network_valve_layer.get_fields(DMA_FIELD_NAME_2)
         layer_geometries = network_valve_layer.get_geoms()
 
         new_network_valves = []
@@ -38,14 +39,12 @@ class Command(BaseCommand):
             layer_shape_x,
             layer_shape_y,
             layer_dma_code_1,
-            layer_dma_code_2,
             layer_geometry,
         ) in zip(
             layer_gisids,
             layer_shapes_x,
             layer_shapes_y,
             layer_dma_codes_1,
-            layer_dma_codes_2,
             layer_geometries,
         ):
             data = {
@@ -53,20 +52,17 @@ class Command(BaseCommand):
                 "shape_x": layer_shape_x,
                 "shape_y": layer_shape_y,
                 "dma_1": layer_dma_code_1,
-                "dma_2": layer_dma_code_2,
                 "geometry": layer_geometry.wkt,
             }
 
             if not None in data.values():
                 dma_1 = DMA.objects.get(code=data["dma_1"])
-                dma_2 = DMA.objects.get(code=data["dma_2"])
                 data["dma_1"] = dma_1
-                data["dma_2"] = dma_2
+                new_network_valves.append(NetworkOptValve(**data))
 
-            if len(new_network_valves) == 100000:
-                print("aaa")
-                NetworkOptValve.objects.bulk_create(new_network_valves)
-                new_network_valves = []
+                if len(new_network_valves) == 100000:
+                    NetworkOptValve.objects.bulk_create(new_network_valves)
+                    new_network_valves = []
 
         # save the last set of data as it will probably be less than 100000
         if new_network_valves:

@@ -3,7 +3,7 @@ from cwa_geod.utilities.models.dma import DMA
 from cwa_geod.config.settings import DEFAULT_SRID
 
 
-class NetworkOptValve(models.Model):
+class PressureControlValve(models.Model):
     gisid = models.IntegerField(null=False, blank=False, unique=True)
     shape_x = models.FloatField(null=False, blank=False)
     shape_y = models.FloatField(null=False, blank=False)
@@ -11,5 +11,8 @@ class NetworkOptValve(models.Model):
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
     dma_1 = models.ForeignKey(
-        DMA, on_delete=models.CASCADE, related_name="dma_1_network_opt_valves"
+        DMA, on_delete=models.CASCADE, related_name="dma_1_pressure_control_valves"
+    )
+    dma_2 = models.ForeignKey(
+        DMA, on_delete=models.CASCADE, related_name="dma_2_pressure_control_valves"
     )
