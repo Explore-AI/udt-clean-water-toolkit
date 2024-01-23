@@ -12,7 +12,7 @@ Development of a clean water toolkit that combines aspects of a digital twin and
 
 The clean water module is a python package that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network. Provides functional and class based apis for visualisation, analysis, and modelling. 
 
-## 2.2 Applications
+### 2.2 Applications
 
 The `cwa_geoarm` and `cwa_geodorm` are two independent applications. They provide the same functionality.
 
