@@ -20,9 +20,20 @@ class GisToGraphNetwork(NetworkController):
 
         return trunk_mains_nx
 
+    def _generate_dwithin_subquery(self, model, json_fields):
+        from django.contrib.gis.measure import D
+        from django.db.models.functions import JSONObject
+        from django.db.models import OuterRef
+
+        subquery = model.objects.filter(
+            geometry__dwithin=(OuterRef("geometry"), D(m=1))
+        ).values(json=JSONObject(**json_fields))
+        return subquery
+
     def create_network2(self):
         from django.contrib.gis.measure import D
         from django.contrib.postgres.expressions import ArraySubquery
+        from django.db.models import OuterRef
         from django.db.models.functions import JSONObject
         from cwa_geod.assets.models import (
             Logger,
@@ -30,6 +41,7 @@ class GisToGraphNetwork(NetworkController):
             Hydrant,
             PressureFitting,
             PressureControlValve,
+            Chamber,
         )
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
@@ -45,27 +57,39 @@ class GisToGraphNetwork(NetworkController):
             )
         )
 
-        subquery2 = Logger.objects.filter(
+        json_fields = {
+            "id": "id",
+            "gisid": "gisid",
+            "geometry": "geometry",
+            "dma_id": "dma",
+            "dma_code": "dma__code",
+        }
+
+        subquery2 = self._generate_dwithin_subquery(Logger, json_fields)
+        subquery3 = self._generate_dwithin_subquery(Hydrant, json_fields)
+        subquery4 = self._generate_dwithin_subquery(PressureFitting, json_fields)
+
+        subquery5 = PressureControlValve.objects.filter(
             geometry__dwithin=(OuterRef("geometry"), D(m=1))
         ).values(
             json=JSONObject(
                 id="id",
                 gisid="gisid",
                 geometry="geometry",
-                dma_id="dma",
-                dma_code="dma__code",
+                dma_1_id="dma_1",
+                dma_2_id="dma_2",
+                dma_1_code="dma_1__code",
+                dma_2_code="dma_1__code",
             )
         )
 
-        subquery3 = Hydrant.objects.filter(
+        subquery6 = Chamber.objects.filter(
             geometry__dwithin=(OuterRef("geometry"), D(m=1))
         ).values(
             json=JSONObject(
                 id="id",
                 gisid="gisid",
                 geometry="geometry",
-                dma_id="dma",
-                dma_code="dma__code",
             )
         )
 
@@ -73,6 +97,9 @@ class GisToGraphNetwork(NetworkController):
             trunk_mains_data=ArraySubquery(subquery1),
             logger_data=ArraySubquery(subquery2),
             hydrant_data=ArraySubquery(subquery3),
+            pressure_fitting_data=ArraySubquery(subquery4),
+            pressure_valve_data=ArraySubquery(subquery5),
+            chamber_data=ArraySubquery(subquery6),
         )
 
         import pdb

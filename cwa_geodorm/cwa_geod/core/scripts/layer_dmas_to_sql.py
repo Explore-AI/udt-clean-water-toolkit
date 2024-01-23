@@ -3,14 +3,14 @@ from django.contrib.gis.gdal import DataSource
 from cwa_geod.utilities.models import DMA
 
 LAYER_DATA = {
-    "wLogger": [2, ["DMACODE1"]],
+    #    "wLogger": [2, ["DMACODE1"]],
     # "wNetworkMeter": [26, ["DMA1CODE", "DMA2CODE"]],
-    "wTrunkMains": [9, ["DMACODE"]],
-    "wHydrant": [28, ["DMACODE"]],
-    # "wDistributionMain": [10, ["DMACODE"]],
+    # "wTrunkMains": [9, ["DMACODE"]],
+    # "wHydrant": [28, ["DMACODE"]],
+    "wDistributionMain": [10, ["DMACODE"]],
     # "wNetworkOptValve": [3, ["DMA1CODE", "DMA2CODE"]],
-    "wPressureContValve": [22, ["DMA1CODE", "DMA2CODE"]],
-    "PressureFittings": [19, ["DMACODE"]],
+    # "wPressureContValve": [22, ["DMA1CODE", "DMA2CODE"]],
+    # "PressureFittings": [19, ["DMACODE"]],
 }
 
 
