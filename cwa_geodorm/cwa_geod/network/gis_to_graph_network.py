@@ -30,6 +30,16 @@ class GisToGraphNetwork(NetworkController):
         ).values(json=JSONObject(**json_fields))
         return subquery
 
+    def _generate_touches_subquery(self, model, json_fields):
+        from django.contrib.gis.measure import D
+        from django.db.models.functions import JSONObject
+        from django.db.models import OuterRef
+
+        subquery = model.objects.filter(geometry__touches=OuterRef("geometry")).values(
+            json=JSONObject(**json_fields)
+        )
+        return subquery
+
     def create_network2(self):
         from django.contrib.gis.measure import D
         from django.contrib.postgres.expressions import ArraySubquery
@@ -44,19 +54,6 @@ class GisToGraphNetwork(NetworkController):
             Chamber,
         )
 
-        # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        subquery1 = TrunkMain.objects.filter(
-            geometry__touches=OuterRef("geometry")
-        ).values(
-            json=JSONObject(
-                id="id",
-                gisid="gisid",
-                geometry="geometry",
-                dma_id="dma",
-                dma_code="dma__code",
-            )
-        )
-
         json_fields = {
             "id": "id",
             "gisid": "gisid",
@@ -65,6 +62,8 @@ class GisToGraphNetwork(NetworkController):
             "dma_code": "dma__code",
         }
 
+        # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
+        subquery1 = self._generate_touches_subquery(TrunkMain, json_fields):
         subquery2 = self._generate_dwithin_subquery(Logger, json_fields)
         subquery3 = self._generate_dwithin_subquery(Hydrant, json_fields)
         subquery4 = self._generate_dwithin_subquery(PressureFitting, json_fields)
