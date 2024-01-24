@@ -14,7 +14,7 @@ The clean water module is a python package that reads in clean water assett data
 
 ### 2.2 Applications
 
-The `cwa_geoarm` and `cwa_geodorm` are two independent applications. They provide the same functionality.
+The `cwa_geoarm` and `cwa_geodorm` are two independent applications. They provide similar functionality but use different frameworks.
 
 #### cwa_geoaorm
 
@@ -26,7 +26,7 @@ An application of the Clean Water Toolkit. It uses GeoDjango as an ORM. Integrat
 
 ### 2.3 RESTful API apps
 
-The `api_fastapi` and `api_drf` are two independent applications. They provide the same functionality.
+The `api_fastapi` and `api_drf` are two independent applications. They provide similar functionality but use different frameworks.
 
 #### api_fastapi
 
