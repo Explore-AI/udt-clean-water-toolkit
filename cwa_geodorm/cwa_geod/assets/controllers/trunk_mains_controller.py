@@ -38,22 +38,14 @@ class TrunkMainsController(GeoDjangoController):
         "dma__code",
     ]  # should not include the geometry column as per convention
 
-    def _generate_dwithin_subquery(self, qs, json_fields):
-        from django.contrib.gis.measure import D
-        from django.db.models.functions import JSONObject
-        from django.db.models import OuterRef
-
-        subquery = qs.filter(geometry__dwithin=(OuterRef("geometry"), D(m=1))).values(
-            json=JSONObject(**json_fields)
-        )
+    def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
+        subquery = qs.filter(
+            geometry__dwithin=(OuterRef(geometry_field), D(m=1))
+        ).values(json=JSONObject(**json_fields))
         return subquery
 
-    def _generate_touches_subquery(self, qs, json_fields):
-        from django.contrib.gis.measure import D
-        from django.db.models.functions import JSONObject
-        from django.db.models import OuterRef
-
-        subquery = qs.filter(geometry__touches=OuterRef("geometry")).values(
+    def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
+        subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(**json_fields)
         )
         return subquery
@@ -69,7 +61,7 @@ class TrunkMainsController(GeoDjangoController):
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         subquery1 = self._generate_touches_subquery(
-            TrunkMain.objects.all(), json_fields
+            self.model.objects.all(), json_fields
         )
         subquery2 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
         subquery3 = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
@@ -101,7 +93,7 @@ class TrunkMainsController(GeoDjangoController):
             )
         )
 
-        qs = TrunkMain.objects.annotate(
+        qs = self.model.objects.annotate(
             trunk_mains_data=ArraySubquery(subquery1),
             logger_data=ArraySubquery(subquery2),
             hydrant_data=ArraySubquery(subquery3),
