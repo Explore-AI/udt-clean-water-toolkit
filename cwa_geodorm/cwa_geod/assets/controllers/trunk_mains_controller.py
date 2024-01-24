@@ -11,6 +11,7 @@ from cwa_geod.assets.models import (
     PressureFitting,
     PressureControlValve,
     Chamber,
+    NetworkMeter,
 )
 from cwa_geod.config.settings import DEFAULT_SRID
 
@@ -50,7 +51,7 @@ class TrunkMainsController(GeoDjangoController):
         )
         return subquery
 
-    def get_relation_to_point_assets_queryset(self):
+    def _generate_single_dma_asset_subqueries(self):
         json_fields = {
             "id": "id",
             "gisid": "gisid",
@@ -59,7 +60,6 @@ class TrunkMainsController(GeoDjangoController):
             "dma_code": "dma__code",
         }
 
-        # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         subquery1 = self._generate_touches_subquery(
             self.model.objects.all(), json_fields
         )
@@ -69,21 +69,36 @@ class TrunkMainsController(GeoDjangoController):
             PressureFitting.objects.all(), json_fields
         )
 
+        subqueries = {
+            "trunk_mains_data": subquery1,
+            "logger_data": subquery2,
+            "hydrant_data": subquery3,
+            "pressure_fitting_data": subquery4,
+        }
+        return subqueries
+
+    def get_relation_to_point_assets_queryset(self):
+        single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
+
+        json_fields = {
+            "id": "id",
+            "gisid": "gisid",
+            "geometry": "geometry",
+            "dma_1_id": "dma_1",
+            "dma_2_id": "dma_2",
+            "dma_1_code": "dma_1__code",
+            "dma_2_code": "dma_1__code",
+        }
+
         subquery5 = PressureControlValve.objects.filter(
             geometry__dwithin=(OuterRef("geometry"), D(m=1))
-        ).values(
-            json=JSONObject(
-                id="id",
-                gisid="gisid",
-                geometry="geometry",
-                dma_1_id="dma_1",
-                dma_2_id="dma_2",
-                dma_1_code="dma_1__code",
-                dma_2_code="dma_1__code",
-            )
-        )
+        ).values(json=JSONObject(**json_fields))
 
-        subquery6 = Chamber.objects.filter(
+        subquery6 = NetworkMeter.objects.filter(
+            geometry__dwithin=(OuterRef("geometry"), D(m=1))
+        ).values(json=JSONObject(**json_fields))
+
+        subquery7 = Chamber.objects.filter(
             geometry__dwithin=(OuterRef("geometry"), D(m=1))
         ).values(
             json=JSONObject(
@@ -93,13 +108,12 @@ class TrunkMainsController(GeoDjangoController):
             )
         )
 
+        # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.annotate(
-            trunk_mains_data=ArraySubquery(subquery1),
-            logger_data=ArraySubquery(subquery2),
-            hydrant_data=ArraySubquery(subquery3),
-            pressure_fitting_data=ArraySubquery(subquery4),
+            **single_dma_asset_subqueries,
             pressure_valve_data=ArraySubquery(subquery5),
-            chamber_data=ArraySubquery(subquery6),
+            network_meter_data=ArraySubquery(subquery6),
+            chamber_data=ArraySubquery(subquery7),
         )
 
         return qs
