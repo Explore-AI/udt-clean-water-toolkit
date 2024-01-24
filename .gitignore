@@ -171,3 +171,5 @@ app/cwm
 examples
 misc
 postgres-data
+
+.db_env

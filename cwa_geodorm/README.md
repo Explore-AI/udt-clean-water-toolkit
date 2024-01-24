@@ -76,6 +76,11 @@ cd devops/scripts
 
 ```
 
+### 2.3 Environment variables
+
+A `.env` file should be placed in the `cwa_geodorm` app dir.
+
+
 ## Helpful resources
 
 - The [GeoDjango documentation](https://docs.djangoproject.com/en/4.2/ref/contrib/gis/). The tutorial is helpful. The Model, Database, Queryset, and GDAL APIs are used widely in this project and are useful references.
