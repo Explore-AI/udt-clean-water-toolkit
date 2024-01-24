@@ -63,7 +63,7 @@ class GisToGraphNetwork(NetworkController):
         }
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        subquery1 = self._generate_touches_subquery(TrunkMain, json_fields):
+        subquery1 = self._generate_touches_subquery(TrunkMain, json_fields)
         subquery2 = self._generate_dwithin_subquery(Logger, json_fields)
         subquery3 = self._generate_dwithin_subquery(Hydrant, json_fields)
         subquery4 = self._generate_dwithin_subquery(PressureFitting, json_fields)
