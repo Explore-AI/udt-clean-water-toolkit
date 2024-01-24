@@ -77,9 +77,7 @@ class TrunkMainsController(GeoDjangoController):
         }
         return subqueries
 
-    def get_relation_to_point_assets_queryset(self):
-        single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
-
+    def _generate_two_dma_asset_subqueries(self):
         json_fields = {
             "id": "id",
             "gisid": "gisid",
@@ -90,13 +88,23 @@ class TrunkMainsController(GeoDjangoController):
             "dma_2_code": "dma_1__code",
         }
 
-        subquery5 = PressureControlValve.objects.filter(
-            geometry__dwithin=(OuterRef("geometry"), D(m=1))
-        ).values(json=JSONObject(**json_fields))
+        subquery1 = self._generate_dwithin_subquery(
+            PressureControlValve.objects.all(), json_fields
+        )
+        subquery2 = self._generate_dwithin_subquery(
+            NetworkMeter.objects.all(), json_fields
+        )
 
-        subquery6 = NetworkMeter.objects.filter(
-            geometry__dwithin=(OuterRef("geometry"), D(m=1))
-        ).values(json=JSONObject(**json_fields))
+        subqueries = {
+            "pressure_valve_data": subquery1,
+            "network_meter_data": subquery2,
+        }
+
+        return subqueries
+
+    def get_relation_to_point_assets_queryset(self):
+        single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
+        two_dma_asset_subqueries = self._generate_two_dma_asset_subqueries()
 
         subquery7 = Chamber.objects.filter(
             geometry__dwithin=(OuterRef("geometry"), D(m=1))
@@ -111,10 +119,13 @@ class TrunkMainsController(GeoDjangoController):
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.annotate(
             **single_dma_asset_subqueries,
-            pressure_valve_data=ArraySubquery(subquery5),
-            network_meter_data=ArraySubquery(subquery6),
+            **two_dma_asset_subqueries,
             chamber_data=ArraySubquery(subquery7),
         )
+
+        import pdb
+
+        pdb.set_trace()
 
         return qs
 

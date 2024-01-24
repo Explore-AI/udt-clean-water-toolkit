@@ -11,6 +11,8 @@ def clean_water_graph_from_gis_layers():
 
     # for now it only creates the trunk mains networkx graph
     # nx_graph = gis_to_graph.create_network()
+
+    # new trial approach to create network
     nx_graph = gis_to_graph.create_network2()
 
     print(nx_graph)

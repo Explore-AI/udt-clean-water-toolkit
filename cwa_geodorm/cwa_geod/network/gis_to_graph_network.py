@@ -22,9 +22,6 @@ class GisToGraphNetwork(NetworkController):
 
     def create_network2(self):
         qs = self._get_trunk_mains_data()
-        import pdb
-
-        pdb.set_trace()
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
