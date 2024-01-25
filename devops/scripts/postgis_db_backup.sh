@@ -16,4 +16,5 @@ CURRENT_DATETIME=`date "+%m-%d-%Y_%H-%M-%S"`
 BACKUP_FILE_NAME=${DB_BACKUPS_DIR}/udt_postgis_db_backup_${CURRENT_DATETIME}.sql
 
 #https://stackoverflow.com/questions/24718706/backup-restore-a-dockerized-postgresql-database
-docker exec -it ${DB_CONTAINER_ID} pg_dump -U udt -Fc udt > ${BACKUP_FILE_NAME}
+docker exec -it ${DB_CONTAINER_ID} pg_dump -U udt -Fc udt ${BACKUP_FILE_NAME}
+#docker exec -it ${DB_CONTAINER_ID} pg_dump -C -U udt | gzip > ${BACKUP_FILE_NAME}
