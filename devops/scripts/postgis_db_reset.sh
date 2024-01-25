@@ -6,7 +6,7 @@ echo "The following actions will take place:"
 echo "The udt postgis database will be dropped."
 echo "A udt postgis database will be created."
 
-source ../docker/env/.db_env
+source ../docker/env_files/.db_env
 
 DB_CONTAINER_ID=`docker ps | grep udtpostgis | grep postgis/postgis | awk '{ print $1 }'`
 
