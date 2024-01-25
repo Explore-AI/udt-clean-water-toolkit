@@ -25,7 +25,7 @@ class GisToGraphNetwork(NetworkController):
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
-        return tm.get_relation_to_point_assets_queryset()
+        return tm.get_pipe_point_asset_relation_queryset()
 
     def _create_trunk_mains_graph(self):
         tm = TrunkMainsController()

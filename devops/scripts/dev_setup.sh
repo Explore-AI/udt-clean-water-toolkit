@@ -19,7 +19,7 @@ docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../cwm/
 
 ./postgis_db_init.sh
 
-docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
+#docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
 
 echo
 echo "cwa_geodeom app dev setup complete."

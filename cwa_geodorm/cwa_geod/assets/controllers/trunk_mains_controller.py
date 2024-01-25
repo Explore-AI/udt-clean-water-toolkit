@@ -102,7 +102,7 @@ class TrunkMainsController(GeoDjangoController):
 
         return subqueries
 
-    def get_relation_to_point_assets_queryset(self):
+    def get_pipe_point_asset_relation_queryset(self):
         single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
         two_dma_asset_subqueries = self._generate_two_dma_asset_subqueries()
 
