@@ -5,6 +5,7 @@ echo "Ensure all connections to the udt postgis DB are closed."
 echo "The following actions will take place:"
 echo "The udt postgis database will be dropped."
 echo "A udt postgis database will be created."
+echo
 
 source ../docker/env_files/.db_env
 
@@ -16,4 +17,5 @@ docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "drop database udt"
 docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create database udt"
 #docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create user udt with superuser password '${POSTGRES_PASSWORD}'"
 
+echo
 echo "DB reset complete."

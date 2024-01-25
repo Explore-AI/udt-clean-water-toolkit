@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Started udt postgis DB backup. Ensure you have a data/db_backups/ folder in the root directory of this project. If not we will make one."
+echo
 
 BASE_DIR=../..
 DB_BACKUPS_DIR=${BASE_DIR}/data/db_backups
