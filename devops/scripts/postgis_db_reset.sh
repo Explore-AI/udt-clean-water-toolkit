@@ -18,4 +18,4 @@ docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create database udt"
 #docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create user udt with superuser password '${POSTGRES_PASSWORD}'"
 
 echo
-echo "DB reset complete."
+echo "udt DB reset complete."
