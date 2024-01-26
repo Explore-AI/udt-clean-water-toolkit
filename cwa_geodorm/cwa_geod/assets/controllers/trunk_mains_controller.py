@@ -51,6 +51,20 @@ class TrunkMainsController(GeoDjangoController):
         )
         return subquery
 
+    def _generate_no_dma_asset_subqueries(self):
+        json_fields = {
+            "id": "id",
+            "gisid": "gisid",
+            "geometry": "geometry",
+        }
+
+        subquery1 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
+
+        subqueries = {
+            "chamber_data": ArraySubquery(subquery1),
+        }
+        return subqueries
+
     def _generate_single_dma_asset_subqueries(self):
         json_fields = {
             "id": "id",
@@ -70,10 +84,10 @@ class TrunkMainsController(GeoDjangoController):
         )
 
         subqueries = {
-            "trunk_mains_data": subquery1,
-            "logger_data": subquery2,
-            "hydrant_data": subquery3,
-            "pressure_fitting_data": subquery4,
+            "trunk_mains_data": ArraySubquery(subquery1),
+            "logger_data": ArraySubquery(subquery2),
+            "hydrant_data": ArraySubquery(subquery3),
+            "pressure_fitting_data": ArraySubquery(subquery4),
         }
         return subqueries
 
@@ -96,36 +110,23 @@ class TrunkMainsController(GeoDjangoController):
         )
 
         subqueries = {
-            "pressure_valve_data": subquery1,
-            "network_meter_data": subquery2,
+            "pressure_valve_data": ArraySubquery(subquery1),
+            "network_meter_data": ArraySubquery(subquery2),
         }
 
         return subqueries
 
-    def get_pipe_point_asset_relation_queryset(self):
+    def get_pipe_point_relation_queryset(self):
+        no_dma_asset_subqueries = self._generate_no_dma_asset_subqueries()
         single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
         two_dma_asset_subqueries = self._generate_two_dma_asset_subqueries()
 
-        subquery7 = Chamber.objects.filter(
-            geometry__dwithin=(OuterRef("geometry"), D(m=1))
-        ).values(
-            json=JSONObject(
-                id="id",
-                gisid="gisid",
-                geometry="geometry",
-            )
-        )
-
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.annotate(
+            **no_dma_asset_subqueries,
             **single_dma_asset_subqueries,
             **two_dma_asset_subqueries,
-            chamber_data=ArraySubquery(subquery7),
         )
-
-        import pdb
-
-        pdb.set_trace()
 
         return qs
 
@@ -158,7 +159,7 @@ class TrunkMainsController(GeoDjangoController):
         Params:
               properties: list (optional). A list of model fields
         Returns:
-              geoJSON: geoJSON object
+              geoJSON: geoJSON object of TrunkMains
         """
 
         qs = self.get_geometry_queryset(properties)
@@ -166,13 +167,13 @@ class TrunkMainsController(GeoDjangoController):
 
     def trunk_mains_to_geojson2(self, properties=None):
         """Serialization of db data to GeoJSON. Alternate method
-        Slighly faster serialization into geoson compared to 1) for smaller
-        data sets but employs iteration.
+        Slightly faster serialization into geoson compared to trunk_mains_to_geojson()
+        for smaller data sets but employs iteration.
 
         Params:
               properties: list (optional). A list of model fields
         Returns:
-              geoJSON: geoJSON object
+              geoJSON: geoJSON object of TrunkMains
         """
         properties = properties or self.default_properties
         properties = set(properties)
@@ -190,7 +191,7 @@ class TrunkMainsController(GeoDjangoController):
         Params:
               properties: list (optional). A list of model fields
         Returns:
-              geoJSON: geoJSON object
+              geoJSON: geoJSON object of TrunkMains
         """
 
         qs = self.get_geometry_queryset(properties)

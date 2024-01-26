@@ -21,11 +21,12 @@ class GisToGraphNetwork(NetworkController):
         return trunk_mains_nx
 
     def create_network2(self):
-        qs = self._get_trunk_mains_data()
+        trunk_mains_qs = self._get_trunk_mains_data()
+        import pdb; pdb.set_trace()
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
-        return tm.get_pipe_point_asset_relation_queryset()
+        return tm.get_pipe_point_relation_queryset()
 
     def _create_trunk_mains_graph(self):
         tm = TrunkMainsController()
