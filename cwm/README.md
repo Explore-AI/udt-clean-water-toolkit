@@ -27,7 +27,7 @@ python3 -m pip install build
 python3 -m build --wheel
 ```
 
-Then see [app development](../cwa_geodorm/README.md#2-development) for how to run the module.
+Then see [app development](../cwa/cwa_geodjango/README.md#2-development) for how to run the module.
 
 
 ## 3. Tests

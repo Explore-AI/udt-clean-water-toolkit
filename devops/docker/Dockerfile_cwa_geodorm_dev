@@ -15,13 +15,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y \
         libgdal-dev
         #        gunicorn \
 
-RUN mkdir -p /opt/udt/cwa/cwa_geodorm/
+RUN mkdir -p /opt/udt/cwa/cwa_geodjango/
 
 RUN mkdir -p /opt/udt/cwm/
 
 RUN mkdir -p /opt/udt/data/
 
-WORKDIR /opt/udt/cwa/cwa_geodorm/
+WORKDIR /opt/udt/cwa/cwa_geodjango/
 
 
 RUN pip install --upgrade pip

@@ -33,13 +33,13 @@ Create a python3 virtual environment and install required modules. For example u
 ```
 # from project root dir
 
-python3 -m venv api-drf/venv
+python3 -m venv api_drf/venv
 
-source api-drf/venv/bin/activate
+source api/api_drf/venv/bin/activate
 
-pip install -r api-drf/requirements.txt -r api-drf/dev-requirements.txt
+pip install -r api_drf/requirements.txt -r api_drf/dev-requirements.txt
 
-ln -s cwa_geodorm/cleanwaterapp_geod/ ./api_drf
+ln -s cwa/cwa_geodjango/cwa_geod/ ./api_drf
 ```
 
 Install a postgis database and expose the required port. Before running the `docker-compose` command to setup the postgis DB. you will need set the `POSTGRES_PASSWORD` env var in `devops/docker/env/.db_env`.

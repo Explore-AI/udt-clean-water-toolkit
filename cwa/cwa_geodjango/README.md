@@ -41,7 +41,7 @@ The following databases are supported by GeoDjango can be used with the app*:
 Create a python3 virtual environment and install required modules. For example using pip:
 
 ```
-# from the cwa_geodorm app dir
+# from the cwa/cwa_geodjango app dir
 
 python3 -m venv venv
 
@@ -50,7 +50,7 @@ source venv/bin/activate
 pip install -r requirements.txt -r dev-requirements.txt
 ```
 
-Before running the `cwa_geodorm` for development one needs to package and install the `cwm` module in dev mode:
+Before running the `cwa_geodjango` for development one needs to package and install the `cwm` module in dev mode:
 
 ```
 # navigate to the cleanwater module directory

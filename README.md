@@ -16,11 +16,11 @@ The clean water module (cwm) is a python package that reads in clean water asset
 
 The clean water applications (cwa) directory includes two independent applications: `cwa_geoalchemy` and `cwa_geodjango`. The applications provide similar functionality but use different frameworks.
 
-#### cwa_geoaorm
+#### cwa_geoalchemy
 
 An application of the Clean Water Toolkit with GeoAlchemy integration. Includes the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
 
-#### cwa_geodorm
+#### cwa_geodjango
 
 An application of the Clean Water Toolkit. It uses GeoDjango as an ORM. Integrates the `cwm` package and provides functional and class based APIs. It is packaged as a zip file. It can be unpacked and integrated into any other python project or it can be run with the provided shell commands. It is non-graphical. 
 
@@ -92,7 +92,7 @@ pending
 
 ### cwa_geodjango
 
-See [app development instructions](cwa/cwa_geodorm/README.md#2-development)
+See [app development instructions](cwa/cwa_geodjango/README.md#2-development)
 
 ### api_fastapi
 
