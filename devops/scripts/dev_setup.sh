@@ -15,7 +15,7 @@ CWA_GEODORM_CONTAINER_ID=`docker ps | grep udtcwageodormdev | grep cwa_geodorm_d
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -r requirements.txt -r dev-requirements.txt
 
-docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../cwm/
+docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
 
 ./postgis_db_init.sh
 

@@ -10,6 +10,6 @@ services:
     links:
       - udtpostgis
     volumes:
-      - ../../cwa_geodorm:/opt/udt/cwa_geodorm/
+      - ../../cwa/cwa_geodorm:/opt/udt/cwa_geodorm/
       - ../../cwm:/opt/udt/cwm/
       - ../../data:/opt/udt/data/
