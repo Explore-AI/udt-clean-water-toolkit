@@ -8,13 +8,13 @@ Development of a clean water toolkit that combines aspects of a digital twin and
 
 ## 2. Toolkit structure
 
-### 2.1 `cwm` Module
+### 2.1 `cwm` module
 
-The clean water module is a python package that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network. Provides functional and class based apis for visualisation, analysis, and modelling. 
+The clean water module (cwm) is a python package that reads in clean water assett data (in geospatial and/or potentially other formats), performs validation and constructs a network. Provides functional and class based apis for visualisation, analysis, and modelling. 
 
-### 2.2 Applications
+### 2.2 `cwa` applications
 
-The `cwa_geoarm` and `cwa_geodorm` are two independent applications. They provide similar functionality but use different frameworks.
+The clean water applications (cwa) directory includes two independent applications: `cwa_geoalchemy` and `cwa_geodjango`. The applications provide similar functionality but use different frameworks.
 
 #### cwa_geoaorm
 
@@ -26,7 +26,7 @@ An application of the Clean Water Toolkit. It uses GeoDjango as an ORM. Integrat
 
 ### 2.3 RESTful API apps
 
-The `api_fastapi` and `api_drf` are two independent applications. They provide similar functionality but use different frameworks.
+The `api` directory includes two independent RESTful api applications: `api_fastapi` and `api_drf`. They provide similar functionality but use different frameworks.
 
 #### api_fastapi
 
@@ -47,29 +47,33 @@ Devops tools for toolkit development and deployment.
 
 ## 3. Requirements
 
-### cwm
+### 3.1 `cwm` module
 
 See [cleanwater module requirements](cwm/README.md#1-requirements)
 
-### cwa_geoaorm
+### 3.2 `cwa` applications
+
+#### cwa_geoalchemy
 
 pending
 
 <!-- See [app requirements](cwa_geoaorm/README.md#1-requirements) -->
 
-### cwa_geodorm
+#### cwa_geodjango
 
-See [app requirements](cwa_geodorm/README.md#1-requirements)
+See [app requirements](cwa/cwa_geodjango/README.md#1-requirements)
 
-### api_fastapi
+### 3.3 `api` applications
 
-See [fast api requirements](api_fastapi/README.md#1-requirements)
+#### api_fastapi
 
-### api_drf
+See [fast api requirements](api/api_fastapi/README.md#1-requirements)
 
-See [drf api requirements](api_drf/README.md#1-requirements)
+#### api_drf
 
-### devops
+See [drf api requirements](api/api_drf/README.md#1-requirements)
+
+### 3.4 devops
 
 - docker
 - docker-compose
@@ -80,28 +84,28 @@ See [drf api requirements](api_drf/README.md#1-requirements)
 
 See [cleanwater module development instructions](cwm/README.md#2-development)
 
-### cwa_geoaorm
+### cwa_geoalchemy
 
 pending
 
 <!-- See [app requirements](cwa_geoaorm/README.md#1-requirements) -->
 
-### cwa_geodorm
+### cwa_geodjango
 
-See [app development instructions](cwa_geodorm/README.md#2-development)
+See [app development instructions](cwa/cwa_geodorm/README.md#2-development)
 
 ### api_fastapi
 
-See [fast api development instructions](api_fastapi/README.md#2-development)
+See [fast api development instructions](api/api_fastapi/README.md#2-development)
 
 ### api_drf
 
-See [drf api development instructions](drf_fastapi/README.md#2-development)
+See [drf api development instructions](api/drf_fastapi/README.md#2-development)
 
 
 ## 5. Tests
 
 
-## 6. Deployment
+## 6. Build and deployment
 
 
