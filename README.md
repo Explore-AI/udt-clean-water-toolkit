@@ -30,11 +30,11 @@ The `api` directory includes two independent RESTful api applications: `api_fast
 
 #### api_fastapi
 
-An example api application built with FastAPI. Provides a RESTful API interface for the `cwa_geoaorm` application. Also provides additional apis for visualisation, analysis, and modelling.
+An example api application built with FastAPI. Provides a RESTful API interface for the `cwa_geoaorm` app. Also provides additional apis for visualisation, analysis, and modelling.
 
 #### api_drf
 
-An example api application built with djangorestframework. Provides a RESTful API interface for the `cwa_geodorm` module. Also provides additional apis for visualisation, analysis, and modelling.
+An example api application built with djangorestframework. Provides a RESTful API interface for the `cwa_geodorm` app. Also provides additional apis for visualisation, analysis, and modelling.
 
 ### 2.4 ui
 
