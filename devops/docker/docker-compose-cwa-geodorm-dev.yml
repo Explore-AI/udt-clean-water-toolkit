@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  cwageodormdev:
+  cwageodjangodev:
     container_name: udtcwageodjangodev
     image: cwa_geodjango_dev
     build:
