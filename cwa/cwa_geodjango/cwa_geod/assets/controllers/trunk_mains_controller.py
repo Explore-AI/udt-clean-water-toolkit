@@ -7,6 +7,7 @@ from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import (
     Logger,
     TrunkMain,
+    DistributionMain,
     Hydrant,
     PressureFitting,
     PressureControlValve,
@@ -77,17 +78,21 @@ class TrunkMainsController(GeoDjangoController):
         subquery1 = self._generate_touches_subquery(
             self.model.objects.all(), json_fields
         )
-        subquery2 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
-        subquery3 = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
-        subquery4 = self._generate_dwithin_subquery(
+        subquery2 = self._generate_touches_subquery(
+            DistributionMain.objects.all(), json_fields
+        )
+        subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
+        subquery4 = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
+        subquery5 = self._generate_dwithin_subquery(
             PressureFitting.objects.all(), json_fields
         )
 
         subqueries = {
             "trunk_mains_data": ArraySubquery(subquery1),
-            "logger_data": ArraySubquery(subquery2),
-            "hydrant_data": ArraySubquery(subquery3),
-            "pressure_fitting_data": ArraySubquery(subquery4),
+            "distribution_mains_data": ArraySubquery(subquery2),
+            "logger_data": ArraySubquery(subquery3),
+            "hydrant_data": ArraySubquery(subquery4),
+            "pressure_fitting_data": ArraySubquery(subquery5),
         }
         return subqueries
 
