@@ -25,6 +25,9 @@ class GisToGraphNetwork(NetworkController):
         distribution_mains_qs = self._get_distribution_mains_data()
 
         union_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
+
+        # for pipe in union_qs:
+        #     pass
         import pdb
 
         pdb.set_trace()

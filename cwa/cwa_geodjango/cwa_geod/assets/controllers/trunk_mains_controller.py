@@ -2,6 +2,7 @@ from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
 from django.db.models.functions import JSONObject
 from django.db.models import Value, JSONField, OuterRef
 from django.contrib.gis.measure import D
+from django.contrib.gis.db.models.functions import Length
 from django.contrib.postgres.expressions import ArraySubquery
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import (
@@ -128,6 +129,8 @@ class TrunkMainsController(GeoDjangoController):
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.annotate(
+            model=Value("TrunkMain"),
+            length=Length("geometry"),
             **no_dma_asset_subqueries,
             **single_dma_asset_subqueries,
             **two_dma_asset_subqueries,
