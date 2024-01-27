@@ -22,11 +22,20 @@ class GisToGraphNetwork(NetworkController):
 
     def create_network2(self):
         trunk_mains_qs = self._get_trunk_mains_data()
-        import pdb; pdb.set_trace()
+        distribution_mains_qs = self._get_distribution_mains_data()
+
+        union_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
+        import pdb
+
+        pdb.set_trace()
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
         return tm.get_pipe_point_relation_queryset()
+
+    def _get_distribution_mains_data(self):
+        dm = DistributionMainsController()
+        return dm.get_pipe_point_relation_queryset()
 
     def _create_trunk_mains_graph(self):
         tm = TrunkMainsController()
