@@ -2,11 +2,11 @@ version: "3"
 
 services:
   cwageodormdev:
-    container_name: udtcwageodormdev
-    image: cwa_geodorm_dev
+    container_name: udtcwageodjangodev
+    image: cwa_geodjango_dev
     build:
       context: ./
-      dockerfile: Dockerfile_cwa_geodorm_dev
+      dockerfile: Dockerfile_cwa_geodjango_dev
     links:
       - udtpostgis
     volumes:

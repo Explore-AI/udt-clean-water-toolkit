@@ -34,7 +34,7 @@ An example api application built with FastAPI. Provides a RESTful API interface 
 
 #### api_drf
 
-An example api application built with djangorestframework. Provides a RESTful API interface for the `cwa_geodorm` app. Also provides additional apis for visualisation, analysis, and modelling.
+An example api application built with djangorestframework. Provides a RESTful API interface for the `cwa_geodjango` app. Also provides additional apis for visualisation, analysis, and modelling.
 
 ### 2.4 ui
 

@@ -1,4 +1,4 @@
-# cwa_geodorm
+# cwa_geodjango
 
 NB: This document is a work in progress.
 
@@ -78,7 +78,7 @@ cd devops/scripts
 
 ### 2.3 Environment variables
 
-A `.env` file should be placed in the `cwa_geodorm` app dir.
+A `.env` file should be placed in the `cwa_geodjango` app dir.
 
 
 ## Helpful resources
