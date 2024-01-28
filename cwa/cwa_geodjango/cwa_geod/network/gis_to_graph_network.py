@@ -65,24 +65,22 @@ class GisToGraphNetwork(NetworkController):
         return normalised_position_of_pipe_intersections
 
     def _connect_all_pipes(self, pipes_qs):
-        # for pipe in union_qs:
-        #     pass
+        i = 0
+        for pipe in pipes_qs:
+            print(i)
+            connected_pipe_positions1 = self._get_positions_of_pipes_on_pipe(
+                pipe_geom, pipe.trunk_mains_data
+            )
 
-        base_pipe_geom = pipes_qs[100].geometry
+            connected_pipe_positions2 = self._get_positions_of_pipes_on_pipe(
+                pipe_geom, pipe.distribution_mains_data
+            )
 
-        trunk_mains_data = pipes_qs[100].trunk_mains_data
-        connected_pipe_positons1 = self._get_positions_of_pipes_on_pipe(
-            base_pipe_geom, trunk_mains_data
-        )
+            if i == 200:
+                import pdb
 
-        distribution_mains_data = pipes_qs[100].distribution_mains_data
-        connected_pipe_positons2 = self._get_positions_of_pipes_on_pipe(
-            base_pipe_geom, distribution_mains_data
-        )
-
-        import pdb
-
-        pdb.set_trace()
+                pdb.set_trace()
+            i += 1
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
