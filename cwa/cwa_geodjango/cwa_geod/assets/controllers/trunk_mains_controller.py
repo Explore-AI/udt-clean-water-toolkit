@@ -2,7 +2,7 @@ from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
 from django.db.models.functions import JSONObject
 from django.db.models import Value, JSONField, OuterRef
 from django.contrib.gis.measure import D
-from django.contrib.gis.db.models.functions import Length
+from django.contrib.gis.db.models.functions import Length, AsWKT
 from django.contrib.postgres.expressions import ArraySubquery
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import (
@@ -58,6 +58,7 @@ class TrunkMainsController(GeoDjangoController):
             "id": "id",
             "gisid": "gisid",
             "geometry": "geometry",
+            "wkt": AsWKT("geometry"),
         }
 
         subquery1 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
@@ -72,6 +73,7 @@ class TrunkMainsController(GeoDjangoController):
             "id": "id",
             "gisid": "gisid",
             "geometry": "geometry",
+            "wkt": AsWKT("geometry"),
             "dma_id": "dma",
             "dma_code": "dma__code",
         }
@@ -102,6 +104,7 @@ class TrunkMainsController(GeoDjangoController):
             "id": "id",
             "gisid": "gisid",
             "geometry": "geometry",
+            "wkt": AsWKT("geometry"),
             "dma_1_id": "dma_1",
             "dma_2_id": "dma_2",
             "dma_1_code": "dma_1__code",
@@ -131,6 +134,7 @@ class TrunkMainsController(GeoDjangoController):
         qs = self.model.objects.annotate(
             model=Value("TrunkMain"),
             length=Length("geometry"),
+            wkt=AsWKT("geometry"),
             **no_dma_asset_subqueries,
             **single_dma_asset_subqueries,
             **two_dma_asset_subqueries,
