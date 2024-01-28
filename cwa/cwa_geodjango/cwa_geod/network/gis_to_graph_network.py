@@ -30,6 +30,34 @@ class GisToGraphNetwork(NetworkController):
         pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
 
         self._connect_all_pipes(pipes_qs)
+        self._create_graph()
+
+    def _get_connections_points_on_pipe(self, base_pipe_geom, asset_data):
+        normalised_positions = []
+
+        for asset in asset_data:
+            geom = GEOSGeometry(asset["wkt"], srid=self.srid)
+
+            if geom.geom_typeid in [1, 5]:
+                geom = base_pipe_geom.intersection(
+                    geom
+                )  # TODO: handle multiple intersection points
+
+            normalised_position_on_pipe = normalised_point_position_on_line(
+                base_pipe_geom, geom, srid=self.srid
+            )
+
+            bisect.insort(
+                normalised_positions,
+                {
+                    "position": normalised_position_on_pipe,
+                    "data": asset,
+                    "geometry": geom,
+                },
+                key=lambda x: x["position"],
+            )
+
+        return normalised_positions
 
     def _get_positions_of_pipes_on_pipe(self, base_pipe_geom, pipe_data):
         normalised_positions = []
@@ -71,13 +99,53 @@ class GisToGraphNetwork(NetworkController):
         return normalised_positions
 
     def _connect_all_pipes(self, pipes_qs):
-        point_pipe_positions = []
+        all_asset_positions = []
         for pipe in pipes_qs[:999]:
-            pipe_positions = self._get_positions_of_pipes_on_pipe(
-                pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
+            # pipe_positions = self._get_positions_of_pipes_on_pipe(
+            #     pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
+            # )
+
+            asset_data = (
+                pipe.trunk_mains_data
+                + pipe.distribution_mains_data
+                + pipe.chamber_data
+                + pipe.operational_site_data
+                + pipe.network_meter_data
+                + pipe.logger_data
+                + pipe.hydrant_data
+                + pipe.pressure_fitting_data
+                + pipe.pressure_valve_data
             )
 
-            point_pipe_positions.append(pipe_positions)
+            asset_positions = self._get_connections_points_on_pipe(
+                pipe.geometry, asset_data
+            )
+
+            all_asset_positions.append(asset_positions)
+
+        self.all_asset_positions = all_asset_positions
+
+    def _create_graph(self):
+        import networkx as nx
+        import matplotlib.pyplot as plt
+
+        G = nx.Graph()
+        max_node_index = 0
+        for assets in self.all_asset_positions:
+            for asset in assets:
+                max_node_index += 1
+                G.add_node(max_node_index, data=asset["data"])
+
+            G.add_edge(
+                1,
+                2,
+                #                weight=assets[0].geometry.length * assets[0]["position"],
+                data=assets[0]["data"],
+            )
+            # G.add_edge(2, 3, weight=0.1)  # specify edge data
+
+        nx.draw(G)
+        plt.show()
 
         import pdb
 

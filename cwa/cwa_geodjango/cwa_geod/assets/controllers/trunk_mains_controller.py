@@ -43,15 +43,19 @@ class TrunkMainsController(GeoDjangoController):
         "dma__code",
     ]  # should not include the geometry column as per convention
 
-    def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
+    def _generate_dwithin_subquery(
+        self, qs, json_fields, extra_fields={}, geometry_field="geometry"
+    ):
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=1))
-        ).values(json=JSONObject(**json_fields))
+        ).values(json=JSONObject(**json_fields, **extra_fields))
         return subquery
 
-    def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
+    def _generate_touches_subquery(
+        self, qs, json_fields, extra_fields={}, geometry_field="geometry"
+    ):
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
-            json=JSONObject(**json_fields)
+            json=JSONObject(**json_fields, **extra_fields)
         )
         return subquery
 
@@ -139,6 +143,7 @@ class TrunkMainsController(GeoDjangoController):
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.annotate(
             model=Value("TrunkMain"),
+            asset_type=Value("trunk_mains"),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
             **no_dma_asset_subqueries,

@@ -3,3 +3,4 @@ psycopg2-binary==2.9.9
 matplotlib==3.8.2
 momepy==0.7.0
 neo4j==5.16.0
+networkx==3.2.1
