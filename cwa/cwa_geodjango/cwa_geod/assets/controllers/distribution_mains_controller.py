@@ -12,6 +12,7 @@ from cwa_geod.assets.models import (
     Hydrant,
     PressureFitting,
     PressureControlValve,
+    OperationalSite,
     Chamber,
     NetworkMeter,
 )
@@ -62,9 +63,13 @@ class DistributionMainsController(GeoDjangoController):
         }
 
         subquery1 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
+        subquery2 = self._generate_dwithin_subquery(
+            OperationalSite.objects.all(), json_fields
+        )
 
         subqueries = {
             "chamber_data": ArraySubquery(subquery1),
+            "operational_site_data": ArraySubquery(subquery2),
         }
         return subqueries
 

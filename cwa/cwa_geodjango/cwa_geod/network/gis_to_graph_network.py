@@ -1,3 +1,4 @@
+import bisect
 from django.contrib.gis.geos import GEOSGeometry
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
@@ -31,33 +32,52 @@ class GisToGraphNetwork(NetworkController):
         self._connect_all_pipes(pipes_qs)
 
     def _get_positions_of_pipes_on_pipe(self, base_pipe_geom, pipe_data):
-        normalised_position_of_pipe_intersections = []
+        normalised_positions = []
 
         for pipe in pipe_data:
             geom = GEOSGeometry(pipe["wkt"], srid=self.srid)
-            intersection_point = base_pipe_geom.intersection(geom)
+            intersection_point = base_pipe_geom.intersection(
+                geom
+            )  # TODO: handle multiple intersection points
 
             normalised_position_on_pipe = normalised_point_position_on_line(
                 base_pipe_geom, intersection_point, srid=self.srid
             )
-            normalised_position_of_pipe_intersections.append(
-                normalised_position_on_pipe
+
+            bisect.insort(
+                normalised_positions,
+                {"position": normalised_position_on_pipe, "data": pipe},
+                key=lambda x: x["position"],
             )
 
-        return normalised_position_of_pipe_intersections
+        return normalised_positions
+
+    def _get_positions_of_points_on_pipe(self, base_pipe_geom, point_data):
+        normalised_positions = []
+
+        for point in point_data:
+            geom = GEOSGeometry(point["wkt"], srid=self.srid)
+
+            normalised_position_on_pipe = normalised_point_position_on_line(
+                base_pipe_geom, geom, srid=self.srid
+            )
+
+            bisect.insort(
+                normalised_positions,
+                {"position": normalised_position_on_pipe, "data": point},
+                key=lambda x: x["position"],
+            )
+
+        return normalised_positions
 
     def _connect_all_pipes(self, pipes_qs):
-        pipe_positions = []
+        point_pipe_positions = []
         for pipe in pipes_qs[:999]:
-            trunk_mains_positions = self._get_positions_of_pipes_on_pipe(
-                pipe.geometry, pipe.trunk_mains_data
+            pipe_positions = self._get_positions_of_pipes_on_pipe(
+                pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
             )
 
-            distribution_mains_positions = self._get_positions_of_pipes_on_pipe(
-                pipe.geometry, pipe.distribution_mains_data
-            )
-
-            pipe_positions.append(trunk_mains_positions + distribution_mains_positions)
+            point_pipe_positions.append(pipe_positions)
 
         import pdb
 

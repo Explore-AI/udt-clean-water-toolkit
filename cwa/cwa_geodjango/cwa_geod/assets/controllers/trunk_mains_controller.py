@@ -6,14 +6,16 @@ from django.contrib.gis.db.models.functions import Length, AsWKT
 from django.contrib.postgres.expressions import ArraySubquery
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import (
-    Logger,
     TrunkMain,
     DistributionMain,
+    Logger,
     Hydrant,
     PressureFitting,
     PressureControlValve,
+    OperationalSite,
     Chamber,
     NetworkMeter,
+    NetworkOptValve,
 )
 from cwa_geod.config.settings import DEFAULT_SRID
 
@@ -62,9 +64,13 @@ class TrunkMainsController(GeoDjangoController):
         }
 
         subquery1 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
+        subquery2 = self._generate_dwithin_subquery(
+            OperationalSite.objects.all(), json_fields
+        )
 
         subqueries = {
             "chamber_data": ArraySubquery(subquery1),
+            "operational_site_data": ArraySubquery(subquery2),
         }
         return subqueries
 
