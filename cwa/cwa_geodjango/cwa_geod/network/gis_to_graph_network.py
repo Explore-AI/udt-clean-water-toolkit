@@ -66,15 +66,17 @@ class GisToGraphNetwork(NetworkController):
 
     def _connect_all_pipes(self, pipes_qs):
         i = 0
-        for pipe in pipes_qs:
-            print(i)
+        pipe_positions = []
+        for pipe in pipes_qs[:999]:
             connected_pipe_positions1 = self._get_positions_of_pipes_on_pipe(
-                pipe_geom, pipe.trunk_mains_data
+                pipe.geometry, pipe.trunk_mains_data
             )
 
             connected_pipe_positions2 = self._get_positions_of_pipes_on_pipe(
-                pipe_geom, pipe.distribution_mains_data
+                pipe.geometry, pipe.distribution_mains_data
             )
+
+            pipe_positions.append(connected_pipe_positions1 + connected_pipe_positions2)
 
             if i == 200:
                 import pdb
