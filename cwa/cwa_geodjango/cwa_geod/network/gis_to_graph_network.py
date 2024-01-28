@@ -1,5 +1,6 @@
-from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.geos import GEOSGeometry
 from cleanwater.controllers.network_controller import NetworkController
+from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.controllers import TrunkMainsController
 from cwa_geod.assets.controllers import DistributionMainsController
 from cwa_geod.config.settings import DEFAULT_SRID
@@ -29,25 +30,6 @@ class GisToGraphNetwork(NetworkController):
 
         self._connect_all_pipes(pipes_qs)
 
-    def _get_normalised_point_on_pipe(self, line_geom, point_geom):
-        """Get the normalised position of a Point on a pipe relative to the
-        pipe start Point. The pipe start Point is the first set of coordinates
-        in the tuple returned by geometry.coords where geometry is a
-        LineString or MultiLineString
-        """
-
-        start_of_pipe_point = Point(line_geom.coords[0][0], srid=self.srid)
-
-        # https://zach.se/geodesic-distance-between-points-in-geodjango/
-        # TODO: fix below distane calc as not geodesic
-        # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geos/
-        normalised_position_on_pipe1 = 1 - (
-            (line_geom.length - start_of_pipe_point.distance(point_geom))
-            / line_geom.length
-        )
-
-        return normalised_position_on_pipe1
-
     def _get_positions_of_pipes_on_pipe(self, base_pipe_geom, pipe_data):
         normalised_position_of_pipe_intersections = []
 
@@ -55,8 +37,8 @@ class GisToGraphNetwork(NetworkController):
             geom = GEOSGeometry(pipe["wkt"], srid=self.srid)
             intersection_point = base_pipe_geom.intersection(geom)
 
-            normalised_position_on_pipe = self._get_normalised_point_on_pipe(
-                base_pipe_geom, intersection_point
+            normalised_position_on_pipe = normalised_point_position_on_line(
+                base_pipe_geom, intersection_point, srid=self.srid
             )
             normalised_position_of_pipe_intersections.append(
                 normalised_position_on_pipe
@@ -65,24 +47,21 @@ class GisToGraphNetwork(NetworkController):
         return normalised_position_of_pipe_intersections
 
     def _connect_all_pipes(self, pipes_qs):
-        i = 0
         pipe_positions = []
         for pipe in pipes_qs[:999]:
-            connected_pipe_positions1 = self._get_positions_of_pipes_on_pipe(
+            trunk_mains_positions = self._get_positions_of_pipes_on_pipe(
                 pipe.geometry, pipe.trunk_mains_data
             )
 
-            connected_pipe_positions2 = self._get_positions_of_pipes_on_pipe(
+            distribution_mains_positions = self._get_positions_of_pipes_on_pipe(
                 pipe.geometry, pipe.distribution_mains_data
             )
 
-            pipe_positions.append(connected_pipe_positions1 + connected_pipe_positions2)
+            pipe_positions.append(trunk_mains_positions + distribution_mains_positions)
 
-            if i == 200:
-                import pdb
+        import pdb
 
-                pdb.set_trace()
-            i += 1
+        pdb.set_trace()
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
