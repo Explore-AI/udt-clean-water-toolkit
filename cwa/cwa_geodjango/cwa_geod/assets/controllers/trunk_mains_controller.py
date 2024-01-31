@@ -43,19 +43,17 @@ class TrunkMainsController(GeoDjangoController):
         "dma__code",
     ]  # should not include the geometry column as per convention
 
-    def _generate_dwithin_subquery(
-        self, qs, json_fields, extra_fields={}, geometry_field="geometry"
-    ):
+    def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=1))
-        ).values(json=JSONObject(**json_fields, **extra_fields))
+        ).values(
+            json=JSONObject(**json_fields, asset_model_name=Value(qs.model.__name__))
+        )
         return subquery
 
-    def _generate_touches_subquery(
-        self, qs, json_fields, extra_fields={}, geometry_field="geometry"
-    ):
+    def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
-            json=JSONObject(**json_fields, **extra_fields)
+            json=JSONObject(**json_fields, asset_model_name=Value(qs.model.__name__))
         )
         return subquery
 

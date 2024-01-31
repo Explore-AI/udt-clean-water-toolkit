@@ -4,7 +4,11 @@ from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.controllers import TrunkMainsController
 from cwa_geod.assets.controllers import DistributionMainsController
-from cwa_geod.config.settings import DEFAULT_SRID
+from cwa_geod.core.constants import (
+    DEFAULT_SRID,
+    PIPE_ASSETS_MODEL_NAMES,
+    GEOS_LINESTRING_TYPES,
+)
 
 
 class GisToGraphNetwork(NetworkController):
@@ -38,7 +42,7 @@ class GisToGraphNetwork(NetworkController):
         for asset in asset_data:
             geom = GEOSGeometry(asset["wkt"], srid=self.srid)
 
-            if geom.geom_typeid in [1, 5]:
+            if geom.geom_typeid in GEOS_LINESTRING_TYPES:
                 geom = base_pipe_geom.intersection(
                     geom
                 )  # TODO: handle multiple intersection points
@@ -130,19 +134,48 @@ class GisToGraphNetwork(NetworkController):
         import matplotlib.pyplot as plt
 
         G = nx.Graph()
+
         max_node_index = 0
         for assets in self.all_asset_positions:
+            new_node_ids = []
+            # TODO: fix to so that we don't have to do the two loops below
             for asset in assets:
-                max_node_index += 1
-                G.add_node(max_node_index, data=asset["data"])
+                asset_model_name = asset["data"]["asset_model_name"]
 
-            G.add_edge(
-                1,
-                2,
-                #                weight=assets[0].geometry.length * assets[0]["position"],
-                data=assets[0]["data"],
-            )
+                if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
+                    node_type = "pipe_end"
+                else:
+                    node_type = "point_asset"
+
+                sql_id = asset["data"]["id"]
+                gisid = asset["data"]["gisid"]
+                node_id = f"{sql_id}-{gisid}"
+
+                new_node_ids.append(node_id)
+                if not G.has_node(node_id):
+                    G.add_node(
+                        node_id,
+                        asset_model_name=asset_model_name,
+                        node_type=node_type,
+                        sql_id=sql_id,
+                        gisid=gisid,
+                        wkt=asset["data"]["wkt"],
+                        sql_dma_id=asset["data"]["dma_id"],
+                        dma_code=asset["data"]["dma_code"],
+                    )
+
+            # for node in node_ids:
+            #     # G.add_edges_from([(1, 2, {'color': 'blue'}), (2, 3, {'weight': 8})])
+            #     G.add_edge(
+            #         1,
+            #         2,
+            #         #                weight=assets[0].geometry.length * assets[0]["position"],
+            #         data=assets[0]["data"],
+            #     )
             # G.add_edge(2, 3, weight=0.1)  # specify edge data
+            import pdb
+
+            pdb.set_trace()
 
         nx.draw(G)
         plt.show()

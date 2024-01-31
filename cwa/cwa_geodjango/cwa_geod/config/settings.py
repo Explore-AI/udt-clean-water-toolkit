@@ -80,7 +80,7 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-DEFAULT_SRID = 27700
+DEFAULT_SRID = 27700  # TODO: deprectated. DEFAULT_SRID now located in core.constants
 
 LOGGING = {
     "version": 1,
