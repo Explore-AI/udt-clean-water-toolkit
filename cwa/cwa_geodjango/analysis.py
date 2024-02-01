@@ -1,4 +1,5 @@
 import setup  # Required. Do not remove.
+import argparse
 from cwa_geod.config.settings import DEFAULT_SRID
 from cwa_geod.network import GisToGraphNetwork
 
@@ -18,8 +19,26 @@ def clean_water_graph_from_gis_layers():
     print(nx_graph)
 
 
+# TODO: Deprecated. for test purposes only.
+def create_pipes_network():
+    gis_to_graph = GisToGraphNetwork(srid=DEFAULT_SRID)
+    gis_to_graph.create_network()
+
+
 def main():
-    clean_water_graph_from_gis_layers()
+    parser = argparse.ArgumentParser(description="Run Clean Water Toolkit functions")
+
+    parser.add_argument(
+        "--method", help="Convert the gis network to a connected graph network."
+    )
+
+    args = parser.parse_args()
+
+    if args.method == "gis2graph":
+        clean_water_graph_from_gis_layers()
+
+    if args.method == "createpipes":
+        create_pipes_network()
 
 
 main()

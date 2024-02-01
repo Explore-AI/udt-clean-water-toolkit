@@ -204,8 +204,5 @@ class GisToGraphNetwork(NetworkController):
     def _create_trunk_mains_graph(self):
         tm = TrunkMainsController()
 
-        # TODO: union querysets
-        # dm = DistributionMainsController()
-
         trunk_mains = tm.get_geometry_queryset()
         return self.create_pipes_network(trunk_mains)
