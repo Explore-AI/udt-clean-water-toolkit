@@ -102,12 +102,22 @@ class GisToGraphNetwork(NetworkController):
 
         return normalised_positions
 
+    def _get_pipe_data(self, qs_object):
+        pipe_data = {}
+        pipe_data["sql_id"] = qs_object.id
+        pipe_data["gisid"] = qs_object.gisid
+
     def _connect_all_pipes(self, pipes_qs):
         all_asset_positions = []
-        for pipe in pipes_qs[:999]:
+        all_pipe_data = []
+
+        for pipe_qs_object in pipes_qs[:999]:
             # pipe_positions = self._get_positions_of_pipes_on_pipe(
             #     pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
             # )
+
+            pipe_data = self._get_pipe_data(pipe_qs_object)
+            all_pipe_data.append(pipe_data)
 
             asset_data = (
                 pipe.trunk_mains_data
@@ -138,7 +148,6 @@ class GisToGraphNetwork(NetworkController):
 
         G = nx.Graph()
 
-        max_node_index = 0
         for assets in self.all_asset_positions:
             new_node_ids = []
             # TODO: fix to so that we don't have to do the two loops below
