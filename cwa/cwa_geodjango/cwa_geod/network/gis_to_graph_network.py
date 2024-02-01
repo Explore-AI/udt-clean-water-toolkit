@@ -138,9 +138,6 @@ class GisToGraphNetwork(NetworkController):
             all_asset_positions.append(asset_positions)
 
         self.all_asset_positions = all_asset_positions
-        import pdb
-
-        pdb.set_trace()
 
     def _create_graph(self):
         import networkx as nx
