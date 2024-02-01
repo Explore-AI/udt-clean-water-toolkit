@@ -1,5 +1,4 @@
 from geopandas import GeoDataFrame
-from django.db.models.query import QuerySet
 from ..data_managers.network_data_manager import NetworkDataManager
 
 # from ..config.settings import DEFAULT_SRID
