@@ -108,30 +108,6 @@ class GisToGraphNetwork(NetworkController):
             zip(*map(_map_relative_positions_calc, pipes_qs[:1000]))
         )
 
-    # def _calc_pipe_point_relative_positions(self, pipes_qs):
-    #     all_asset_positions = []
-    #     all_pipe_data = []
-
-    #     # TODO: fix slice approach
-    #     for pipe_qs_object in pipes_qs[:1000]:
-    #         # pipe_positions = self._get_positions_of_pipes_on_pipe(
-    #         #     pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
-    #         # )
-
-    #         pipe_data = self._get_pipe_data(pipe_qs_object)
-    #         all_pipe_data.append(pipe_data)
-
-    #         asset_data = self._combine_all_asset_data(pipe_qs_object)
-
-    #         asset_positions = self._get_connections_points_on_pipe(
-    #             pipe_qs_object.geometry, asset_data
-    #         )
-
-    #         all_asset_positions.append(asset_positions)
-
-    #     self.all_asset_positions = all_asset_positions
-    #     self.all_pipe_data = all_pipe_data
-
     def _get_node_type(self, asset_model_name):
         if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
             return "pipe_end"
