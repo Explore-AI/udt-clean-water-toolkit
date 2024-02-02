@@ -195,7 +195,6 @@ class GisToGraphNetwork(NetworkController):
                 node_point_geometries.append(asset["intersection_point_geometry"])
                 new_node_ids.append(new_node_id)
 
-        print("plot")
         pos = nx.get_node_attributes(G, "coords")
         # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
         nx.draw(
