@@ -56,7 +56,7 @@ class GisToGraphNetwork(NetworkController):
                 {
                     "position": normalised_position_on_pipe,
                     "data": asset,
-                    "geometry": geom,
+                    "intersection_point_geometry": geom,
                 },
                 key=lambda x: x["position"],
             )
@@ -172,8 +172,13 @@ class GisToGraphNetwork(NetworkController):
             node_id = f"{sql_id}-{gisid}"
 
             if not G.has_node(node_id):
-                G.add_node(node_id, **pipe_data)
+                G.add_node(
+                    node_id,
+                    coords=pipe_data["geometry"].coords[0][0],
+                    **pipe_data,
+                )
 
+            node_point_geometries = [start_of_line_point]
             new_node_ids = [node_id]
 
             # TODO: fix so that we don't have to do the two loops below
@@ -186,48 +191,53 @@ class GisToGraphNetwork(NetworkController):
                 new_gisid = asset["data"]["gisid"]
                 new_node_id = f"{new_sql_id}-{new_gisid}"
 
-                if not G.has_node(node_id):
+                if not G.has_node(new_node_id):
                     G.add_node(
                         node_id,
                         position=asset["position"],
                         node_type=node_type,
+                        coords=asset["intersection_point_geometry"].coords,
                         **asset["data"],
                     )
 
-                import pdb
-
-                pdb.set_trace()
-                node_1_geometry = 4
-                edge_length = start_of_line_point.distance(point_geom)
+                edge_length = node_point_geometries[-1].distance(
+                    asset["intersection_point_geometry"]
+                )
                 G.add_edge(
                     new_node_ids[-1],
                     new_node_id,
-                    weight=pipe_data["shape_length"] * asset["position"],
+                    weight=edge_length,
                     sql_id=sql_id,
                     gisid=gisid,
                     position=asset["position"],
                 )
+                node_point_geometries.append(asset["intersection_point_geometry"])
                 new_node_ids.append(new_node_id)
 
-            # for node in node_ids:
-            #     # G.add_edges_from([(1, 2, {'color': 'blue'}), (2, 3, {'weight': 8})])
-            #     G.add_edge(
-            #         1,
-            #         2,
-            #         #                weight=assets[0].geometry.length * assets[0]["position"],
-            #         data=assets[0]["data"],
-            #     )
-            # G.add_edge(2, 3, weight=0.1)  # specify edge data
+            print(G.edges)
+            print(G.nodes)
+
+            # pos = nx.get_node_attributes(G, "coords")
+            # import pdb
+
+            # pdb.set_trace()
+            # nx.draw(
+            #     G,
+            #     pos=pos,
+            #     with_labels=True,
+            #     node_color="orange",
+            #     node_size=400,
+            #     edge_color="black",
+            #     linewidths=1,
+            #     font_size=15,
+            # )
+            # labels = nx.get_edge_attributes(G, "weight")
+            # nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+            # plt.show()
+
             import pdb
 
             pdb.set_trace()
-
-        nx.draw(G)
-        plt.show()
-
-        import pdb
-
-        pdb.set_trace()
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
