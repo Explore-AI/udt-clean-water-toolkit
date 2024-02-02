@@ -19,6 +19,7 @@ class GisToGraphNetwork(NetworkController):
 
     def __init__(self, srid=None):
         self.srid = srid or DEFAULT_SRID
+        self.G = nx.Graph()
         super().__init__(self.srid)
 
     def create_network(self):
@@ -114,7 +115,26 @@ class GisToGraphNetwork(NetworkController):
 
         return "point_asset"
 
+    def _set_pipe_relations(self):
+        def _map_pipe_relations(pipe_data, assets_data):
+            sql_id = pipe_data["sql_id"]
+            gisid = pipe_data["gisid"]
+            start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
+            node_id = f"{sql_id}-{gisid}"
+
+            if not G.has_node(node_id):
+                G.add_node(
+                    node_id,
+                    coords=pipe_data["geometry"].coords[0][0],
+                    **pipe_data,
+                )
+
+        x = list(map(_map_pipe_relations, self.all_pipe_data, self.all_asset_positions))
+
     def _create_networkx_graph(self):
+        self._set_pipe_relations()
+
+    def _create_networkx_graph1(self):
         G = nx.Graph()
 
         pipes_and_assets_position_data = zip(
