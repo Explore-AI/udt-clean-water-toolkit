@@ -172,6 +172,7 @@ class GisToGraphNetwork(NetworkController):
             node_id = f"{sql_id}-{gisid}"
 
             if not G.has_node(node_id):
+                print("sdfsdfs", node_id)
                 G.add_node(
                     node_id,
                     coords=pipe_data["geometry"].coords[0][0],
@@ -193,7 +194,7 @@ class GisToGraphNetwork(NetworkController):
 
                 if not G.has_node(new_node_id):
                     G.add_node(
-                        node_id,
+                        new_node_id,
                         position=asset["position"],
                         node_type=node_type,
                         coords=asset["intersection_point_geometry"].coords,
@@ -203,6 +204,7 @@ class GisToGraphNetwork(NetworkController):
                 edge_length = node_point_geometries[-1].distance(
                     asset["intersection_point_geometry"]
                 )
+
                 G.add_edge(
                     new_node_ids[-1],
                     new_node_id,
@@ -217,23 +219,18 @@ class GisToGraphNetwork(NetworkController):
             print(G.edges)
             print(G.nodes)
 
-            # pos = nx.get_node_attributes(G, "coords")
-            # import pdb
-
-            # pdb.set_trace()
-            # nx.draw(
-            #     G,
-            #     pos=pos,
-            #     with_labels=True,
-            #     node_color="orange",
-            #     node_size=400,
-            #     edge_color="black",
-            #     linewidths=1,
-            #     font_size=15,
-            # )
-            # labels = nx.get_edge_attributes(G, "weight")
-            # nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
-            # plt.show()
+            pos = nx.get_node_attributes(G, "coords")
+            nx.draw(
+                G,
+                pos=pos,
+                # with_labels=True,
+                # node_color="blue",
+                node_size=100,
+                # edge_color="black",
+                linewidths=1,
+                font_size=15,
+            )
+            plt.show()
 
             import pdb
 
