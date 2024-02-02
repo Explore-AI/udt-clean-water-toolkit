@@ -1,0 +1,136 @@
+import bisect
+from django.contrib.gis.geos import GEOSGeometry, Point
+import networkx as nx
+import matplotlib.pyplot as plt
+from . import GisToGraph
+from cleanwater.core.utils import normalised_point_position_on_line
+from cwa_geod.assets.controllers import TrunkMainsController
+from cwa_geod.assets.controllers import DistributionMainsController
+from cwa_geod.core.constants import (
+    DEFAULT_SRID,
+    PIPE_ASSETS_MODEL_NAMES,
+    GEOS_LINESTRING_TYPES,
+)
+
+
+class GisToNetworkX(GisToGraph):
+    """Create a graph network of assets from a geospatial
+    network of assets"""
+
+    def __init__(self, srid=None):
+        self.srid = srid or DEFAULT_SRID
+        self.G = nx.Graph()
+        super().__init__(self.srid)
+
+    def create_network(self):
+        trunk_mains_nx = self.create_trunk_mains_graph()
+
+        # TODO: geospatial join on all the node assets
+        # TODO: add the nodes to the graph
+
+        return trunk_mains_nx
+
+    def create_network2(self):
+        trunk_mains_qs = self.get_trunk_mains_data()
+        distribution_mains_qs = self.get_distribution_mains_data()
+
+        pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
+
+        self._calc_pipe_point_relative_positions(pipes_qs)
+        self._create_networkx_graph1()
+
+    def _set_pipe_relations(self):
+        def _map_pipe_relations(pipe_data, assets_data):
+            sql_id = pipe_data["sql_id"]
+            gisid = pipe_data["gisid"]
+            start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
+            node_id = f"{sql_id}-{gisid}"
+
+            if not self.G.has_node(node_id):
+                self.G.add_node(
+                    node_id,
+                    coords=pipe_data["geometry"].coords[0][0],
+                    **pipe_data,
+                )
+            import pdb
+
+            pdb.set_trace()
+
+        x = list(map(_map_pipe_relations, self.all_pipe_data, self.all_asset_positions))
+
+    def _create_networkx_graph(self):
+        self._set_pipe_relations()
+
+    def _create_networkx_graph1(self):
+        G = nx.Graph()
+
+        pipes_and_assets_position_data = zip(
+            self.all_pipe_data, self.all_asset_positions
+        )
+
+        for pipe_data, assets_data in pipes_and_assets_position_data:
+            sql_id = pipe_data["sql_id"]
+            gisid = pipe_data["gisid"]
+            start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
+            node_id = f"{sql_id}-{gisid}"
+
+            if not G.has_node(node_id):
+                G.add_node(
+                    node_id,
+                    coords=pipe_data["geometry"].coords[0][0],
+                    **pipe_data,
+                )
+
+            node_point_geometries = [start_of_line_point]
+            new_node_ids = [node_id]
+
+            # TODO: fix so that we don't have to do the two loops below
+            for asset in assets_data:
+                asset_model_name = asset["data"]["asset_model_name"]
+
+                node_type = self._get_node_type(asset_model_name)
+
+                new_sql_id = asset["data"]["id"]
+                new_gisid = asset["data"]["gisid"]
+                new_node_id = f"{new_sql_id}-{new_gisid}"
+
+                if not G.has_node(new_node_id):
+                    G.add_node(
+                        new_node_id,
+                        position=asset["position"],
+                        node_type=node_type,
+                        coords=asset["intersection_point_geometry"].coords,
+                        **asset["data"],
+                    )
+
+                edge_length = node_point_geometries[-1].distance(
+                    asset["intersection_point_geometry"]
+                )
+
+                G.add_edge(
+                    new_node_ids[-1],
+                    new_node_id,
+                    weight=edge_length,
+                    sql_id=sql_id,
+                    gisid=gisid,
+                    position=asset["position"],
+                )
+                node_point_geometries.append(asset["intersection_point_geometry"])
+                new_node_ids.append(new_node_id)
+
+        pos = nx.get_node_attributes(G, "coords")
+        # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
+        nx.draw(
+            G,
+            pos=pos,
+            node_size=10,
+            linewidths=1,
+            font_size=15,
+        )
+        plt.show()
+
+        # use when setting up multiprocessing
+        # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
+        import pdb
+
+        pdb.set_trace()
