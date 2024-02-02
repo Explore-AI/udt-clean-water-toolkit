@@ -139,8 +139,7 @@ class DistributionMainsController(GeoDjangoController):
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.annotate(
-            model=Value("DistributionMain"),
-            asset_type=Value("distribution_mains"),
+            asset_model_name=Value("DistributionMain"),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
             **no_dma_asset_subqueries,

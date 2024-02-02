@@ -1,5 +1,5 @@
 import bisect
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, Point
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.controllers import TrunkMainsController
@@ -45,7 +45,7 @@ class GisToGraphNetwork(NetworkController):
             if geom.geom_typeid in GEOS_LINESTRING_TYPES:
                 geom = base_pipe_geom.intersection(
                     geom
-                )  # TODO: handle multiple intersection points
+                )  # TODO: handle multiple intersections at single point
 
             normalised_position_on_pipe = normalised_point_position_on_line(
                 base_pipe_geom, geom, srid=self.srid
@@ -106,6 +106,15 @@ class GisToGraphNetwork(NetworkController):
         pipe_data = {}
         pipe_data["sql_id"] = qs_object.id
         pipe_data["gisid"] = qs_object.gisid
+        pipe_data["asset_model_name"] = qs_object.asset_model_name
+        pipe_data["length"] = qs_object.length
+        pipe_data["shape_length"] = qs_object.shape_length
+        pipe_data["wkt"] = qs_object.wkt
+        pipe_data["dma_code"] = qs_object.dma.code
+        pipe_data["dma_id"] = qs_object.dma_id
+        pipe_data["geometry"] = qs_object.geometry
+
+        return pipe_data
 
     def _connect_all_pipes(self, pipes_qs):
         all_asset_positions = []
@@ -120,24 +129,31 @@ class GisToGraphNetwork(NetworkController):
             all_pipe_data.append(pipe_data)
 
             asset_data = (
-                pipe.trunk_mains_data
-                + pipe.distribution_mains_data
-                + pipe.chamber_data
-                + pipe.operational_site_data
-                + pipe.network_meter_data
-                + pipe.logger_data
-                + pipe.hydrant_data
-                + pipe.pressure_fitting_data
-                + pipe.pressure_valve_data
+                pipe_qs_object.trunk_mains_data
+                + pipe_qs_object.distribution_mains_data
+                + pipe_qs_object.chamber_data
+                + pipe_qs_object.operational_site_data
+                + pipe_qs_object.network_meter_data
+                + pipe_qs_object.logger_data
+                + pipe_qs_object.hydrant_data
+                + pipe_qs_object.pressure_fitting_data
+                + pipe_qs_object.pressure_valve_data
             )
 
             asset_positions = self._get_connections_points_on_pipe(
-                pipe.geometry, asset_data
+                pipe_qs_object.geometry, asset_data
             )
 
             all_asset_positions.append(asset_positions)
 
         self.all_asset_positions = all_asset_positions
+        self.all_pipe_data = all_pipe_data
+
+    def _get_node_type(self, asset_model_name):
+        if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
+            return "pipe_end"
+
+        return "point_asset"
 
     def _create_graph(self):
         import networkx as nx
@@ -145,33 +161,53 @@ class GisToGraphNetwork(NetworkController):
 
         G = nx.Graph()
 
-        for assets in self.all_asset_positions:
-            new_node_ids = []
-            # TODO: fix to so that we don't have to do the two loops below
-            for asset in assets:
+        pipes_and_assets_position_data = zip(
+            self.all_pipe_data, self.all_asset_positions
+        )
+
+        for pipe_data, assets_data in pipes_and_assets_position_data:
+            sql_id = pipe_data["sql_id"]
+            gisid = pipe_data["gisid"]
+            start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
+            node_id = f"{sql_id}-{gisid}"
+
+            if not G.has_node(node_id):
+                G.add_node(node_id, **pipe_data)
+
+            new_node_ids = [node_id]
+
+            # TODO: fix so that we don't have to do the two loops below
+            for asset in assets_data:
                 asset_model_name = asset["data"]["asset_model_name"]
 
-                if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
-                    node_type = "pipe_end"
-                else:
-                    node_type = "point_asset"
+                node_type = self._get_node_type(asset_model_name)
 
-                sql_id = asset["data"]["id"]
-                gisid = asset["data"]["gisid"]
-                node_id = f"{sql_id}-{gisid}"
+                new_sql_id = asset["data"]["id"]
+                new_gisid = asset["data"]["gisid"]
+                new_node_id = f"{new_sql_id}-{new_gisid}"
 
-                new_node_ids.append(node_id)
                 if not G.has_node(node_id):
                     G.add_node(
                         node_id,
-                        asset_model_name=asset_model_name,
+                        position=asset["position"],
                         node_type=node_type,
-                        sql_id=sql_id,
-                        gisid=gisid,
-                        wkt=asset["data"]["wkt"],
-                        sql_dma_id=asset["data"]["dma_id"],
-                        dma_code=asset["data"]["dma_code"],
+                        **asset["data"],
                     )
+
+                import pdb
+
+                pdb.set_trace()
+                node_1_geometry = 4
+                edge_length = start_of_line_point.distance(point_geom)
+                G.add_edge(
+                    new_node_ids[-1],
+                    new_node_id,
+                    weight=pipe_data["shape_length"] * asset["position"],
+                    sql_id=sql_id,
+                    gisid=gisid,
+                    position=asset["position"],
+                )
+                new_node_ids.append(new_node_id)
 
             # for node in node_ids:
             #     # G.add_edges_from([(1, 2, {'color': 'blue'}), (2, 3, {'weight': 8})])
