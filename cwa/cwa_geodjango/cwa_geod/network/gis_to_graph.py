@@ -1,7 +1,5 @@
 import bisect
-from django.contrib.gis.geos import GEOSGeometry, Point
-import networkx as nx
-import matplotlib.pyplot as plt
+from django.contrib.gis.geos import GEOSGeometry
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.controllers import TrunkMainsController
@@ -19,7 +17,6 @@ class GisToGraph(NetworkController):
 
     def __init__(self, srid=None):
         self.srid = srid or DEFAULT_SRID
-        self.G = nx.Graph()
         super().__init__(self.srid)
 
     def create_network(self):
@@ -93,7 +90,7 @@ class GisToGraph(NetworkController):
             + pipe_qs_object.pressure_valve_data
         )
 
-    def _calc_pipe_point_relative_positions(self, pipes_qs):
+    def calc_pipe_point_relative_positions(self, pipes_qs):
         def _map_relative_positions_calc(pipe_qs_object):
             pipe_data = self._get_pipe_data(pipe_qs_object)
             asset_data = self._combine_all_asset_data(pipe_qs_object)

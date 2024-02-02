@@ -1,16 +1,8 @@
-import bisect
-from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.geos import Point
 import networkx as nx
 import matplotlib.pyplot as plt
 from . import GisToGraph
-from cleanwater.core.utils import normalised_point_position_on_line
-from cwa_geod.assets.controllers import TrunkMainsController
-from cwa_geod.assets.controllers import DistributionMainsController
-from cwa_geod.core.constants import (
-    DEFAULT_SRID,
-    PIPE_ASSETS_MODEL_NAMES,
-    GEOS_LINESTRING_TYPES,
-)
+from cwa_geod.core.constants import DEFAULT_SRID
 
 
 class GisToNetworkX(GisToGraph):
@@ -36,11 +28,45 @@ class GisToNetworkX(GisToGraph):
 
         pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
 
-        self._calc_pipe_point_relative_positions(pipes_qs)
-        self._create_networkx_graph1()
+        self.calc_pipe_point_relative_positions(pipes_qs)
+        self._create_networkx_graph()
 
-    def _set_pipe_relations(self):
-        def _map_pipe_relations(pipe_data, assets_data):
+    def _set_connected_asset_relations(self, assets_data):
+        def _map_connected_asset_relations(asset_data):
+            asset_model_name = asset_data["data"]["asset_model_name"]
+
+            node_type = self._get_node_type(asset_model_name)
+
+            new_sql_id = asset_data["data"]["id"]
+            new_gisid = asset_data["data"]["gisid"]
+            new_node_id = f"{new_sql_id}-{new_gisid}"
+
+            if not self.G.has_node(new_node_id):
+                self.G.add_node(
+                    new_node_id,
+                    position=asset_data["position"],
+                    node_type=node_type,
+                    coords=asset_data["intersection_point_geometry"].coords,
+                    **asset_data["data"],
+                )
+
+            edge_length = node_point_geometries[-1].distance(
+                asset_data["intersection_point_geometry"]
+            )
+
+            self.G.add_edge(
+                new_node_ids[-1],
+                new_node_id,
+                weight=edge_length,
+                sql_id=sql_id,
+                gisid=gisid,
+                position=asset["position"],
+            )
+
+        x = list(map(_map_connected_asset_relations, assets_data))
+
+    def _set_pipe_connected_asset_relations(self):
+        def _map_pipe_connected_asset_relations(pipe_data, assets_data):
             sql_id = pipe_data["sql_id"]
             gisid = pipe_data["gisid"]
             start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
@@ -52,14 +78,22 @@ class GisToNetworkX(GisToGraph):
                     coords=pipe_data["geometry"].coords[0][0],
                     **pipe_data,
                 )
+
+            self._set_connected_asset_relations(self, assets_data, start_of_line_point)
             import pdb
 
             pdb.set_trace()
 
-        x = list(map(_map_pipe_relations, self.all_pipe_data, self.all_asset_positions))
+        x = list(
+            map(
+                _map_pipe_connected_asset_relations,
+                self.all_pipe_data,
+                self.all_asset_positions,
+            )
+        )
 
     def _create_networkx_graph(self):
-        self._set_pipe_relations()
+        self._set_pipe_connected_asset_relations()
 
     def _create_networkx_graph1(self):
         G = nx.Graph()
