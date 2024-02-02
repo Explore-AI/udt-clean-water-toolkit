@@ -79,39 +79,58 @@ class GisToGraphNetwork(NetworkController):
 
         return pipe_data
 
+    def _combine_all_asset_data(self, pipe_qs_object):
+        return (
+            pipe_qs_object.trunk_mains_data
+            + pipe_qs_object.distribution_mains_data
+            + pipe_qs_object.chamber_data
+            + pipe_qs_object.operational_site_data
+            + pipe_qs_object.network_meter_data
+            + pipe_qs_object.logger_data
+            + pipe_qs_object.hydrant_data
+            + pipe_qs_object.pressure_fitting_data
+            + pipe_qs_object.pressure_valve_data
+        )
+
     def _calc_pipe_point_relative_positions(self, pipes_qs):
-        all_asset_positions = []
-        all_pipe_data = []
-
-        # TODO: fix slice approach
-        for pipe_qs_object in pipes_qs[:10000]:
-            # pipe_positions = self._get_positions_of_pipes_on_pipe(
-            #     pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
-            # )
-
+        def _map_relative_positions_calc(pipe_qs_object):
             pipe_data = self._get_pipe_data(pipe_qs_object)
-            all_pipe_data.append(pipe_data)
-
-            asset_data = (
-                pipe_qs_object.trunk_mains_data
-                + pipe_qs_object.distribution_mains_data
-                + pipe_qs_object.chamber_data
-                + pipe_qs_object.operational_site_data
-                + pipe_qs_object.network_meter_data
-                + pipe_qs_object.logger_data
-                + pipe_qs_object.hydrant_data
-                + pipe_qs_object.pressure_fitting_data
-                + pipe_qs_object.pressure_valve_data
-            )
+            asset_data = self._combine_all_asset_data(pipe_qs_object)
 
             asset_positions = self._get_connections_points_on_pipe(
                 pipe_qs_object.geometry, asset_data
             )
 
-            all_asset_positions.append(asset_positions)
+            return pipe_data, asset_positions
 
-        self.all_asset_positions = all_asset_positions
-        self.all_pipe_data = all_pipe_data
+        # TODO: fix slice approach
+        self.all_pipe_data, self.all_asset_positions = list(
+            zip(*map(_map_relative_positions_calc, pipes_qs[:1000]))
+        )
+
+    # def _calc_pipe_point_relative_positions(self, pipes_qs):
+    #     all_asset_positions = []
+    #     all_pipe_data = []
+
+    #     # TODO: fix slice approach
+    #     for pipe_qs_object in pipes_qs[:1000]:
+    #         # pipe_positions = self._get_positions_of_pipes_on_pipe(
+    #         #     pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
+    #         # )
+
+    #         pipe_data = self._get_pipe_data(pipe_qs_object)
+    #         all_pipe_data.append(pipe_data)
+
+    #         asset_data = self._combine_all_asset_data(pipe_qs_object)
+
+    #         asset_positions = self._get_connections_points_on_pipe(
+    #             pipe_qs_object.geometry, asset_data
+    #         )
+
+    #         all_asset_positions.append(asset_positions)
+
+    #     self.all_asset_positions = all_asset_positions
+    #     self.all_pipe_data = all_pipe_data
 
     def _get_node_type(self, asset_model_name):
         if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
@@ -181,7 +200,7 @@ class GisToGraphNetwork(NetworkController):
         # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
         nx.draw(
             G,
-            # pos=pos,
+            pos=pos,
             node_size=10,
             linewidths=1,
             font_size=15,
