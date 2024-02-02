@@ -1,5 +1,7 @@
 import bisect
 from django.contrib.gis.geos import GEOSGeometry, Point
+import networkx as nx
+import matplotlib.pyplot as plt
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.controllers import TrunkMainsController
@@ -33,8 +35,8 @@ class GisToGraphNetwork(NetworkController):
 
         pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
 
-        self._connect_all_pipes(pipes_qs)
-        self._create_graph()
+        self._calc_pipe_point_relative_positions(pipes_qs)
+        self._create_networkx_graph()
 
     def _get_connections_points_on_pipe(self, base_pipe_geom, asset_data):
         normalised_positions = []
@@ -63,45 +65,6 @@ class GisToGraphNetwork(NetworkController):
 
         return normalised_positions
 
-    def _get_positions_of_pipes_on_pipe(self, base_pipe_geom, pipe_data):
-        normalised_positions = []
-
-        for pipe in pipe_data:
-            geom = GEOSGeometry(pipe["wkt"], srid=self.srid)
-            intersection_point = base_pipe_geom.intersection(
-                geom
-            )  # TODO: handle multiple intersection points
-
-            normalised_position_on_pipe = normalised_point_position_on_line(
-                base_pipe_geom, intersection_point, srid=self.srid
-            )
-
-            bisect.insort(
-                normalised_positions,
-                {"position": normalised_position_on_pipe, "data": pipe},
-                key=lambda x: x["position"],
-            )
-
-        return normalised_positions
-
-    def _get_positions_of_points_on_pipe(self, base_pipe_geom, point_data):
-        normalised_positions = []
-
-        for point in point_data:
-            geom = GEOSGeometry(point["wkt"], srid=self.srid)
-
-            normalised_position_on_pipe = normalised_point_position_on_line(
-                base_pipe_geom, geom, srid=self.srid
-            )
-
-            bisect.insort(
-                normalised_positions,
-                {"position": normalised_position_on_pipe, "data": point},
-                key=lambda x: x["position"],
-            )
-
-        return normalised_positions
-
     def _get_pipe_data(self, qs_object):
         pipe_data = {}
         pipe_data["sql_id"] = qs_object.id
@@ -116,7 +79,7 @@ class GisToGraphNetwork(NetworkController):
 
         return pipe_data
 
-    def _connect_all_pipes(self, pipes_qs):
+    def _calc_pipe_point_relative_positions(self, pipes_qs):
         all_asset_positions = []
         all_pipe_data = []
 
@@ -156,18 +119,13 @@ class GisToGraphNetwork(NetworkController):
 
         return "point_asset"
 
-    def _create_graph(self):
-        import networkx as nx
-        import matplotlib.pyplot as plt
-
+    def _create_networkx_graph(self):
         G = nx.Graph()
 
         pipes_and_assets_position_data = zip(
             self.all_pipe_data, self.all_asset_positions
         )
 
-        i = 0
-        print(len(self.all_pipe_data), len(self.all_asset_positions))
         for pipe_data, assets_data in pipes_and_assets_position_data:
             sql_id = pipe_data["sql_id"]
             gisid = pipe_data["gisid"]
@@ -217,25 +175,24 @@ class GisToGraphNetwork(NetworkController):
                 )
                 node_point_geometries.append(asset["intersection_point_geometry"])
                 new_node_ids.append(new_node_id)
-            i += 1
 
-            if i == 10000:
-                # pos = nx.get_node_attributes(G, "coords")
-                # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
-                # nx.draw(
-                #     G,
-                #     pos=pos,
-                #     node_size=10,
-                #     linewidths=1,
-                #     font_size=15,
-                # )
-                # plt.show()
+        print("plot")
+        pos = nx.get_node_attributes(G, "coords")
+        # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
+        nx.draw(
+            G,
+            # pos=pos,
+            node_size=10,
+            linewidths=1,
+            font_size=15,
+        )
+        plt.show()
 
-                # use when setting up multiprocessing
-                # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
-                import pdb
+        # use when setting up multiprocessing
+        # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
+        import pdb
 
-                pdb.set_trace()
+        pdb.set_trace()
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
