@@ -65,7 +65,7 @@ class GisToGraph(NetworkController):
 
     def _get_pipe_data(self, qs_object):
         pipe_data = {}
-        pipe_data["sql_id"] = qs_object.id
+        pipe_data["asset_id"] = qs_object.id
         pipe_data["gisid"] = qs_object.gisid
         pipe_data["asset_model_name"] = qs_object.asset_model_name
         pipe_data["length"] = qs_object.length

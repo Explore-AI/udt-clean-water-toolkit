@@ -37,9 +37,9 @@ class GisToNetworkX(GisToGraph):
 
             node_type = self._get_node_type(asset_model_name)
 
-            new_sql_id = asset_data["data"]["id"]
+            new_asset_id = asset_data["data"]["id"]
             new_gisid = asset_data["data"]["gisid"]
-            new_node_id = f"{new_sql_id}-{new_gisid}"
+            new_node_id = f"{new_asset_id}-{new_gisid}"
 
             if not self.G.has_node(new_node_id):
                 self.G.add_node(
@@ -58,7 +58,7 @@ class GisToNetworkX(GisToGraph):
                 new_node_ids[-1],
                 new_node_id,
                 weight=edge_length,
-                sql_id=sql_id,
+                asset_id=asset_id,
                 gisid=gisid,
                 position=asset["position"],
             )
@@ -67,10 +67,10 @@ class GisToNetworkX(GisToGraph):
 
     def _set_pipe_connected_asset_relations(self):
         def _map_pipe_connected_asset_relations(pipe_data, assets_data):
-            sql_id = pipe_data["sql_id"]
+            asset_id = pipe_data["asset_id"]
             gisid = pipe_data["gisid"]
             start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
-            node_id = f"{sql_id}-{gisid}"
+            node_id = f"{asset_id}-{gisid}"
 
             if not self.G.has_node(node_id):
                 self.G.add_node(
@@ -103,10 +103,10 @@ class GisToNetworkX(GisToGraph):
         )
 
         for pipe_data, assets_data in pipes_and_assets_position_data:
-            sql_id = pipe_data["sql_id"]
+            asset_id = pipe_data["asset_id"]
             gisid = pipe_data["gisid"]
             start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
-            node_id = f"{sql_id}-{gisid}"
+            node_id = f"{asset_id}-{gisid}"
 
             if not G.has_node(node_id):
                 G.add_node(
@@ -124,9 +124,9 @@ class GisToNetworkX(GisToGraph):
 
                 node_type = self._get_node_type(asset_model_name)
 
-                new_sql_id = asset["data"]["id"]
+                new_asset_id = asset["data"]["id"]
                 new_gisid = asset["data"]["gisid"]
-                new_node_id = f"{new_sql_id}-{new_gisid}"
+                new_node_id = f"{new_asset_id}-{new_gisid}"
 
                 if not G.has_node(new_node_id):
                     G.add_node(
@@ -145,7 +145,7 @@ class GisToNetworkX(GisToGraph):
                     new_node_ids[-1],
                     new_node_id,
                     weight=edge_length,
-                    sql_id=sql_id,
+                    asset_id=asset_id,
                     gisid=gisid,
                     position=asset["position"],
                 )
