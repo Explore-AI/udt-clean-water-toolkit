@@ -120,7 +120,8 @@ class GisToGraphNetwork(NetworkController):
         all_asset_positions = []
         all_pipe_data = []
 
-        for pipe_qs_object in pipes_qs[:999]:
+        # TODO: fix slice approach
+        for pipe_qs_object in pipes_qs[:10000]:
             # pipe_positions = self._get_positions_of_pipes_on_pipe(
             #     pipe.geometry, pipe.trunk_mains_data + pipe.distribution_mains_data
             # )
@@ -165,6 +166,8 @@ class GisToGraphNetwork(NetworkController):
             self.all_pipe_data, self.all_asset_positions
         )
 
+        i = 0
+        print(len(self.all_pipe_data), len(self.all_asset_positions))
         for pipe_data, assets_data in pipes_and_assets_position_data:
             sql_id = pipe_data["sql_id"]
             gisid = pipe_data["gisid"]
@@ -172,7 +175,6 @@ class GisToGraphNetwork(NetworkController):
             node_id = f"{sql_id}-{gisid}"
 
             if not G.has_node(node_id):
-                print("sdfsdfs", node_id)
                 G.add_node(
                     node_id,
                     coords=pipe_data["geometry"].coords[0][0],
@@ -215,26 +217,25 @@ class GisToGraphNetwork(NetworkController):
                 )
                 node_point_geometries.append(asset["intersection_point_geometry"])
                 new_node_ids.append(new_node_id)
+            i += 1
 
-            print(G.edges)
-            print(G.nodes)
+            if i == 10000:
+                # pos = nx.get_node_attributes(G, "coords")
+                # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
+                # nx.draw(
+                #     G,
+                #     pos=pos,
+                #     node_size=10,
+                #     linewidths=1,
+                #     font_size=15,
+                # )
+                # plt.show()
 
-            pos = nx.get_node_attributes(G, "coords")
-            nx.draw(
-                G,
-                pos=pos,
-                # with_labels=True,
-                # node_color="blue",
-                node_size=100,
-                # edge_color="black",
-                linewidths=1,
-                font_size=15,
-            )
-            plt.show()
+                # use when setting up multiprocessing
+                # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
+                import pdb
 
-            import pdb
-
-            pdb.set_trace()
+                pdb.set_trace()
 
     def _get_trunk_mains_data(self):
         tm = TrunkMainsController()
