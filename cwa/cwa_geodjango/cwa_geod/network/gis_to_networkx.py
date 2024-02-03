@@ -47,8 +47,8 @@ class GisToNetworkX(GisToGraph):
             new_gisid = asset["data"]["gisid"]
             new_node_id = f"{new_asset_id}-{new_gisid}"
 
-            if not G.has_node(new_node_id):
-                G.add_node(
+            if not self.G.has_node(new_node_id):
+                self.G.add_node(
                     new_node_id,
                     position=asset["position"],
                     node_type=node_type,
@@ -60,13 +60,13 @@ class GisToNetworkX(GisToGraph):
                 asset["intersection_point_geometry"]
             )
 
-            G.add_edge(
+            self.G.add_edge(
                 new_node_ids[-1],
                 new_node_id,
                 weight=edge_length,
                 asset_id=pipe_data["asset_id"],
                 gisid=pipe_data["gisid"],
-                position=asset["position"],
+                normalised_position_on_pipe=asset["position"],
             )
             node_point_geometries.append(asset["intersection_point_geometry"])
             new_node_ids.append(new_node_id)
