@@ -139,7 +139,7 @@ class TrunkMainsController(GeoDjangoController):
         two_dma_asset_subqueries = self._generate_two_dma_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.annotate(
+        qs = self.model.objects.select_related("dma").annotate(
             asset_model_name=Value("TrunkMain"),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),

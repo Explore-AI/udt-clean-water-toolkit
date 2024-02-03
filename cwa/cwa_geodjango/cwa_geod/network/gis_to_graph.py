@@ -1,4 +1,5 @@
 import bisect
+import multiprocessing as mp
 from django.contrib.gis.geos import GEOSGeometry
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
@@ -64,6 +65,7 @@ class GisToGraph(NetworkController):
         return normalised_positions
 
     def _get_pipe_data(self, qs_object):
+        print(qs_object)
         pipe_data = {}
         pipe_data["asset_id"] = qs_object.id
         pipe_data["gisid"] = qs_object.gisid
@@ -90,21 +92,42 @@ class GisToGraph(NetworkController):
             + pipe_qs_object.pressure_valve_data
         )
 
-    def calc_pipe_point_relative_positions(self, pipes_qs):
-        def _map_relative_positions_calc(pipe_qs_object):
-            pipe_data = self._get_pipe_data(pipe_qs_object)
-            asset_data = self._combine_all_asset_data(pipe_qs_object)
+    def _map_relative_positions_calc(self, pipe_qs_object):
+        pipe_data = self._get_pipe_data(pipe_qs_object)
+        asset_data = self._combine_all_asset_data(pipe_qs_object)
 
-            asset_positions = self._get_connections_points_on_pipe(
-                pipe_qs_object.geometry, asset_data
+        asset_positions = self._get_connections_points_on_pipe(
+            pipe_qs_object.geometry, asset_data
+        )
+
+        return pipe_data, asset_positions
+
+    def calc_pipe_point_relative_positions(self, pipes_qs):
+        from timeit import default_timer as timer
+
+        # start = timer()
+        # # TODO: fix slice approach
+        # self.all_pipe_data, self.all_asset_positions = list(
+        #     zip(*map(self._map_relative_positions_calc, pipes_qs[:1000]))
+        # )
+        # end = timer()
+        # print(end - start)
+
+        start = timer()
+
+        qs_list = [
+            pipes_qs[:1000],
+            pipes_qs[1000:2000],
+            pipes_qs[2000:3000],
+            pipes_qs[3000:4000],
+        ]
+        with mp.Pool(4) as pool:
+            self.all_pipe_data, self.all_asset_positions = list(
+                zip(*pool.map(self._map_relative_positions_calc, qs_list))
             )
 
-            return pipe_data, asset_positions
-
-        # TODO: fix slice approach
-        self.all_pipe_data, self.all_asset_positions = list(
-            zip(*map(_map_relative_positions_calc, pipes_qs[:10000]))
-        )
+        end = timer()
+        print(end - start)
 
     def _get_node_type(self, asset_model_name):
         if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
