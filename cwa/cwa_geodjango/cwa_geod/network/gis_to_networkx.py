@@ -33,7 +33,9 @@ class GisToNetworkX(GisToGraph):
 
     def _set_connected_asset_relations(self, pipe_data, assets_data):
         node_id = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
-        start_of_line_point = Point(pipe_data["geometry"].coords[0][0], srid=27700)
+        start_of_line_point = Point(
+            pipe_data["geometry"].coords[0][0], srid=DEFAULT_SRID
+        )
 
         node_point_geometries = [start_of_line_point]
         new_node_ids = [node_id]
@@ -76,9 +78,7 @@ class GisToNetworkX(GisToGraph):
 
         #     node_type = self._get_node_type(asset_model_name)
 
-        #     new_asset_id = asset_data["data"]["id"]
-        #     new_gisid = asset_data["data"]["gisid"]
-        #     new_node_id = f"{new_asset_id}-{new_gisid}"
+        #     ne
 
         #     if not self.G.has_node(new_node_id):
         #         self.G.add_node(
@@ -117,11 +117,7 @@ class GisToNetworkX(GisToGraph):
 
             self._set_connected_asset_relations(pipe_data, assets_data)
 
-            import pdb
-
-            pdb.set_trace()
-
-        x = list(
+        list(
             map(
                 _map_pipe_connected_asset_relations,
                 self.all_pipe_data,
@@ -129,12 +125,21 @@ class GisToNetworkX(GisToGraph):
             )
         )
 
+        # pos = nx.get_node_attributes(self.G, "coords")
+        # # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
+        # nx.draw(
+        #     self.G,
+        #     pos=pos,
+        #     node_size=10,
+        #     linewidths=1,
+        #     font_size=15,
+        # )
+        # plt.show()
+
     def _create_networkx_graph(self):
         self._set_pipe_connected_asset_relations()
 
     def _create_networkx_graph1(self):
-        G = nx.Graph()
-
         pipes_and_assets_position_data = zip(
             self.all_pipe_data, self.all_asset_positions
         )
@@ -186,22 +191,20 @@ class GisToNetworkX(GisToGraph):
                     gisid=gisid,
                     position=asset["position"],
                 )
+
                 node_point_geometries.append(asset["intersection_point_geometry"])
                 new_node_ids.append(new_node_id)
 
-        pos = nx.get_node_attributes(G, "coords")
+        # pos = nx.get_node_attributes(G, "coords")
         # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
-        nx.draw(
-            G,
-            pos=pos,
-            node_size=10,
-            linewidths=1,
-            font_size=15,
-        )
-        plt.show()
+        # nx.draw(
+        #     G,
+        #     pos=pos,
+        #     node_size=10,
+        #     linewidths=1,
+        #     font_size=15,
+        # )
+        # plt.show()
 
         # use when setting up multiprocessing
         # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
-        import pdb
-
-        pdb.set_trace()

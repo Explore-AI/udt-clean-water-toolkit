@@ -103,7 +103,7 @@ class GisToGraph(NetworkController):
 
         # TODO: fix slice approach
         self.all_pipe_data, self.all_asset_positions = list(
-            zip(*map(_map_relative_positions_calc, pipes_qs[:1000]))
+            zip(*map(_map_relative_positions_calc, pipes_qs[:10000]))
         )
 
     def _get_node_type(self, asset_model_name):
