@@ -1,0 +1,9 @@
+POSTGRES_DB=udt
+POSTGRES_USER=udt
+POSTGRES_PASS=docker
+FORCE_SSL=TRUE
+# DB Backup env specific more info https://github.com/kartoza/docker-pg-backup
+DUMPPREFIX=PG_
+POSTGRES_HOST=udtpostgis
+POSTGRES_PORT=5432
+RUN_AS_ROOT=true

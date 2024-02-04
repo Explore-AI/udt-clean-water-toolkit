@@ -1,14 +1,41 @@
 version: "3"
 
+volumes:
+  db-backups:
+  db-data:
+
 services:
+  udtpostgis:
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./env_files/.db_env
+    volumes:
+      - db-data:/var/lib/postgresql
+    image: kartoza/postgis:16-3.4
+    restart: on-failure
+    healthcheck:
+      test: "PGPASSWORD=docker pg_isready -h 127.0.0.1 -U udt -d udt"
+
+  dbbackups:
+    image: kartoza/pg-backup:16-3.4
+    volumes:
+      - db-backups:/backups
+    env_file:
+      - ./env_files/.db_env
+    restart: on-failure
+    depends_on:
+      udtpostgis:
+        condition: service_healthy
+
   cwageodjangodev:
-    container_name: udtcwageodjangodev
     image: cwa_geodjango_dev
     build:
       context: ./
       dockerfile: Dockerfile_cwa_geodjango_dev
-    links:
-      - udtpostgis
+    depends_on:
+      udtpostgis:
+        condition: service_healthy
     volumes:
       - ../../cwa/cwa_geodjango:/opt/udt/cwa/cwa_geodjango/
       - ../../cwm:/opt/udt/cwm/

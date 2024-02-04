@@ -9,17 +9,24 @@ echo "pip packages will be installed for the cwa_geodjango app."
 echo "pip packages will be installed for the cwm in dev mode."
 echo
 
-docker-compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml up -d
+# Usage ./dev_setup.sh $1 where $1 is the version of docker-compose in use i.e ./dev_setup.sh docker-compose
 
-CWA_GEODORM_CONTAINER_ID=`docker ps | grep udtcwageodjangodev | grep cwa_geodjango_dev | awk '{ print $1 }'`
+VERSION='docker compose'
 
-docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -r requirements.txt -r dev-requirements.txt
+if [ -n "$1" ]; then
+    VERSION=$1
+fi
 
-docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
+pushd ../docker/ || exit
 
-./postgis_db_init.sh
+${VERSION} -f docker-compose-cwa-geodjango-dev.yml up -d --build
 
-#docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
+# TODO Add the below commands to dockerfile and run as build step
+${VERSION} -f docker-compose-cwa-geodjango-dev.yml exec cwageodjangodev pip install -r requirements.txt -r dev-requirements.txt
 
+${VERSION} -f docker-compose-cwa-geodjango-dev.yml exec  cwageodjangodev pip install -e ../../cwm/
+
+#${VERSION} -f docker-compose-cwa-geodjango-dev exec -it cwageodjangodev python3 main.py migrate
+popd ../scripts/ || exit
 echo
 echo "cwa_geodjango app dev setup complete."

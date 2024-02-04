@@ -173,3 +173,5 @@ misc
 postgres-data
 
 .db_env
+devops/docker/env_files/.db_env
+.idea/
