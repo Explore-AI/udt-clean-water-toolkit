@@ -13,29 +13,9 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraph(NetworkController):
-    """Create a graph network of assets from a geospatial
-    network of assets"""
-
     def __init__(self, srid=None):
         self.srid = srid or DEFAULT_SRID
         super().__init__(self.srid)
-
-    def create_network(self):
-        trunk_mains_nx = self._create_trunk_mains_graph()
-
-        # TODO: geospatial join on all the node assets
-        # TODO: add the nodes to the graph
-
-        return trunk_mains_nx
-
-    def create_network2(self):
-        trunk_mains_qs = self._get_trunk_mains_data()
-        distribution_mains_qs = self._get_distribution_mains_data()
-
-        pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
-
-        self._calc_pipe_point_relative_positions(pipes_qs)
-        self._create_networkx_graph()
 
     def _get_connections_points_on_pipe(self, base_pipe_geom, asset_data):
         normalised_positions = []
@@ -65,7 +45,6 @@ class GisToGraph(NetworkController):
         return normalised_positions
 
     def _get_pipe_data(self, qs_object):
-        print(qs_object)
         pipe_data = {}
         pipe_data["asset_id"] = qs_object.id
         pipe_data["gisid"] = qs_object.gisid
@@ -105,29 +84,29 @@ class GisToGraph(NetworkController):
     def calc_pipe_point_relative_positions(self, pipes_qs):
         from timeit import default_timer as timer
 
-        # start = timer()
-        # # TODO: fix slice approach
-        # self.all_pipe_data, self.all_asset_positions = list(
-        #     zip(*map(self._map_relative_positions_calc, pipes_qs[:1000]))
-        # )
-        # end = timer()
-        # print(end - start)
-
         start = timer()
-
-        qs_list = [
-            pipes_qs[:1000],
-            pipes_qs[1000:2000],
-            pipes_qs[2000:3000],
-            pipes_qs[3000:4000],
-        ]
-        with mp.Pool(4) as pool:
-            self.all_pipe_data, self.all_asset_positions = list(
-                zip(*pool.map(self._map_relative_positions_calc, qs_list))
-            )
-
+        # TODO: fix slice approach
+        self.all_pipe_data, self.all_asset_positions = list(
+            zip(*map(self._map_relative_positions_calc, pipes_qs[:1000]))
+        )
         end = timer()
         print(end - start)
+
+        # start = timer()
+
+        # qs_list = [
+        #     pipes_qs[:1000],
+        #     pipes_qs[1000:2000],
+        #     pipes_qs[2000:3000],
+        #     pipes_qs[3000:4000],
+        # ]
+        # with mp.Pool(4) as pool:
+        #     self.all_pipe_data, self.all_asset_positions = list(
+        #         zip(*pool.map(self._map_relative_positions_calc, qs_list))
+        #     )
+
+        # end = timer()
+        # print(end - start)
 
     def _get_node_type(self, asset_model_name):
         if asset_model_name in PIPE_ASSETS_MODEL_NAMES:

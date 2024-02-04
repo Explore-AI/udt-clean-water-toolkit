@@ -6,7 +6,7 @@ from cwa_geod.core.constants import DEFAULT_SRID
 
 
 class GisToNetworkX(GisToGraph):
-    """Create a graph network of assets from a geospatial
+    """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
     def __init__(self, srid=None):
