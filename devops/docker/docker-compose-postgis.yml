@@ -5,6 +5,7 @@ version: "3"
 services:
   udtpostgis:
     container_name: udtpostgis
+    platform: linux/amd64
     ports:
       - 5432:5432
     env_file:
