@@ -1,5 +1,7 @@
 from django.contrib.gis.geos import Point
+from typing import Any, Dict, List
 import networkx as nx
+# from networkx import Graph # to reference directly
 import matplotlib.pyplot as plt
 from . import GisToGraph
 from cwa_geod.core.constants import DEFAULT_SRID
@@ -9,12 +11,12 @@ class GisToNetworkX(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid=None):
+    def __init__(self, srid: int | None = None) -> None:
         self.srid = srid or DEFAULT_SRID
         self.G = nx.Graph()
         super().__init__(self.srid)
 
-    def create_network(self):
+    def create_network(self) -> nx.Graph:
         trunk_mains_nx = self.create_trunk_mains_graph()
 
         # TODO: geospatial join on all the node assets
@@ -22,7 +24,7 @@ class GisToNetworkX(GisToGraph):
 
         return trunk_mains_nx
 
-    def create_network2(self):
+    def create_network2(self) -> nx.Graph:
         trunk_mains_qs = self.get_trunk_mains_data()
         distribution_mains_qs = self.get_distribution_mains_data()
 
@@ -32,7 +34,9 @@ class GisToNetworkX(GisToGraph):
         self._create_networkx_graph()
         return self.G
 
-    def _set_connected_asset_relations(self, pipe_data, assets_data):
+    def _set_connected_asset_relations(
+        self, pipe_data: Dict[str, Any], assets_data: List[Dict[str, Any]]
+    ) -> None:
         node_id = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
         start_of_line_point = Point(
             pipe_data["geometry"].coords[0][0], srid=DEFAULT_SRID
@@ -74,7 +78,7 @@ class GisToNetworkX(GisToGraph):
             node_point_geometries.append(asset["intersection_point_geometry"])
             new_node_ids.append(new_node_id)
 
-    def _set_pipe_connected_asset_relations(self):
+    def _set_pipe_connected_asset_relations(self) -> None:
         def _map_pipe_connected_asset_relations(pipe_data, assets_data):
             node_id = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
 

@@ -8,7 +8,6 @@ from cwa_geod.network import GisToNetworkX
 
 #@init_graphdb
 def cleanwater_gis2nx():
-    import pdb; pdb.set_trace()
 
     gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
     nx_graph = gis_to_nx.create_network2()
