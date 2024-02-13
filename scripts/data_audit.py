@@ -5,7 +5,7 @@ import timeit
 def report_generator(layer_path):
     print("Auditing DB")
     f = open("/Users/chelsea/Documents/db_audit.txt", "w")
-    print(f'Report for DB {layer_path} /n')
+    f.write(f'Report for DB {layer_path} /n')
     layers = fiona.listlayers(layer_path)
     layers_filtered = [l for l in layers if not l.endswith('Anno') and l.startswith('w')]
     for l in layers_filtered:
@@ -35,13 +35,13 @@ def report_generator(layer_path):
         for col in layer_gdf.columns:
             try:
                 col_info[col] = [layer_gdf[col].isnull().sum() * 100 / len(layer_gdf), layer_gdf[col].dtype]
-                print(f"{col}  {str(round(col_info[col][0], 2))}  {col_info[col][1]} /n")
+                f.write(f"{col}  {str(round(col_info[col][0], 2))}  {col_info[col][1]} /n")
             except Exception as ex: 
                 reason = f"couldnt process column {col}, reason {ex}"
         layer_info[l].append(col_info)  
         end = timeit.timeit()
         time_for_layer = end - start
-        print(f"Audited layer {l}, took {time_for_layer}")
+        f.write(f"Audited layer {l}, took {time_for_layer}")
     f.close() 
     print("DB Audited")
 
