@@ -1,8 +1,10 @@
 import os
 import geopandas as gpd
+from geopandas import GeoDataFrame
 from cleanwater.exceptions import LayerLoadException
 from cleanwater.serializers import GeoDjangoSerializer
 from .base_data_manager import BaseDataManager
+from django.db.models.query import QuerySet
 
 
 class GeoDjangoDataManager(BaseDataManager, GeoDjangoSerializer):
@@ -21,10 +23,12 @@ class GeoDjangoDataManager(BaseDataManager, GeoDjangoSerializer):
                 f"Layer cannot be identified with provided name: {layer_name}"
             )
 
-    def django_queryset_to_geodataframe(self, qs, srid=None):
+    def django_queryset_to_geodataframe(
+        self, qs: QuerySet, srid: int = None
+    ) -> GeoDataFrame:
         # TODO: this class should probably not be instantiated here
 
-        srid = srid or self.srid
+        srid: int | None = srid or self.srid
+        data: str = self.queryset_to_geojson(qs, srid)
 
-        data = self.queryset_to_geojson(qs, srid)
         return gpd.read_file(data)

@@ -12,7 +12,7 @@ class NetworkController(NetworkDataManager):
     def __init__(self, srid=None):
         self.srid = srid  # or DEFAULT_SRID
 
-    def create_pipes_network(self, datasource, srid=None):
+    def create_pipes_network(self, datasource: QuerySet | GeoDataFrame, srid=None):
         """
         Convert a pipe gis object to a networkx graph
 
@@ -21,7 +21,6 @@ class NetworkController(NetworkDataManager):
         geopandas dataframe"""
 
         srid = srid or self.srid
-
         if isinstance(datasource, QuerySet):
             gdf = self.django_queryset_to_geodataframe(datasource, srid=None)
             return self.gdf_lines_to_nx_graph(gdf)
