@@ -18,12 +18,11 @@ def cleanwater_gis2nx() -> None:
 # TODO: Deprecated. for test purposes only.
 def create_pipes_network() -> None:
     # for now it only creates the trunk mains networkx graph
-
     # gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
     gis_to_nx: GisToNetworkX = GisToNetworkX(srid=DEFAULT_SRID)
     gis_to_nx.create_network()
 
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser(description="Run Clean Water Toolkit functions")
 
     parser.add_argument(

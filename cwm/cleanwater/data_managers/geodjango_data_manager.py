@@ -5,6 +5,7 @@ from cleanwater.exceptions import LayerLoadException
 from cleanwater.serializers import GeoDjangoSerializer
 from .base_data_manager import BaseDataManager
 from django.db.models.query import QuerySet
+from networkx import Graph
 
 
 class GeoDjangoDataManager(BaseDataManager, GeoDjangoSerializer):
