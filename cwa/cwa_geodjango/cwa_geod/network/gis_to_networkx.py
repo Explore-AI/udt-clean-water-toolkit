@@ -11,19 +11,20 @@ class GisToNetworkX(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid: int | None = None) -> None:
-        self.srid = srid or DEFAULT_SRID
+    def __init__(self, srid: int) -> None:
+        # self.srid = srid or DEFAULT_SRID
+        self.srid: int = srid or DEFAULT_SRID
         # self.G = nx.Graph()
-        self.G = Graph()
+        self.G: Graph = Graph()
         super().__init__(self.srid)
 
     def create_network(self) -> Graph:
-        trunk_mains_nx = self.create_trunk_mains_graph()
+        trunk_mains_nx: Graph = self.create_trunk_mains_graph()
 
         # TODO: geospatial join on all the node assets
         # TODO: add the nodes to the graph
-
-        return trunk_mains_nx
+        # import pdb; pdb.set_trace()
+        # return trunk_mains_nx
 
     # def create_network2(self) -> nx.Graph:
     def create_network2(self) -> Graph:

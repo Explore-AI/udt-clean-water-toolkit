@@ -10,7 +10,8 @@ from cwa_geod.network import GisToNetworkX
 def cleanwater_gis2nx() -> None:
     import pdb; pdb.set_trace()
 
-    gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
+    # gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
+    gis_to_nx: GisToNetworkX = GisToNetworkX(srid=DEFAULT_SRID)
     nx_graph = gis_to_nx.create_network2()
 
     print("Created Graph:", nx_graph)
@@ -20,9 +21,9 @@ def cleanwater_gis2nx() -> None:
 def create_pipes_network() -> None:
     # for now it only creates the trunk mains networkx graph
 
-    gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
+    # gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
+    gis_to_nx: GisToNetworkX = GisToNetworkX(srid=DEFAULT_SRID)
     gis_to_nx.create_network()
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run Clean Water Toolkit functions")
@@ -38,6 +39,5 @@ def main() -> None:
 
     if args.method == "createpipes":
         create_pipes_network()
-
 
 main()

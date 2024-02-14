@@ -123,7 +123,8 @@ class GisToGraph(NetworkController):
         return dm.get_pipe_point_relation_queryset()
 
     def create_trunk_mains_graph(self):
-        tm = TrunkMainsController()
+        tm: TrunkMainsController = TrunkMainsController()
 
         trunk_mains = tm.get_geometry_queryset()
+        # import pdb; pdb.set_trace()
         return self.create_pipes_network(trunk_mains)
