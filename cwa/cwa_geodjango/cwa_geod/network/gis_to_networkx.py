@@ -1,7 +1,7 @@
 from django.contrib.gis.geos import Point
 from typing import Any, Dict, List
-import networkx as nx
-# from networkx import Graph # to reference directly
+# import networkx as nx
+from networkx import Graph
 import matplotlib.pyplot as plt
 from . import GisToGraph
 from cwa_geod.core.constants import DEFAULT_SRID
@@ -13,10 +13,11 @@ class GisToNetworkX(GisToGraph):
 
     def __init__(self, srid: int | None = None) -> None:
         self.srid = srid or DEFAULT_SRID
-        self.G = nx.Graph()
+        # self.G = nx.Graph()
+        self.G = Graph()
         super().__init__(self.srid)
 
-    def create_network(self) -> nx.Graph:
+    def create_network(self) -> Graph:
         trunk_mains_nx = self.create_trunk_mains_graph()
 
         # TODO: geospatial join on all the node assets
@@ -24,7 +25,8 @@ class GisToNetworkX(GisToGraph):
 
         return trunk_mains_nx
 
-    def create_network2(self) -> nx.Graph:
+    # def create_network2(self) -> nx.Graph:
+    def create_network2(self) -> Graph:
         trunk_mains_qs = self.get_trunk_mains_data()
         distribution_mains_qs = self.get_distribution_mains_data()
 
@@ -110,7 +112,7 @@ class GisToNetworkX(GisToGraph):
         # )
         # plt.show()
 
-    def _create_networkx_graph(self):
+    def _create_networkx_graph(self) -> None:
         self._set_pipe_connected_asset_relations()
         # use when setting up multiprocessing
         # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
