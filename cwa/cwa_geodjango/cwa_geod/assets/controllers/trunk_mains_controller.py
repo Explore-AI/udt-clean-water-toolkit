@@ -1,6 +1,7 @@
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
 from django.db.models.functions import JSONObject
 from django.db.models import Value, JSONField, OuterRef
+from django.db.models.query import QuerySet
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Length, AsWKT
 from django.contrib.postgres.expressions import ArraySubquery
@@ -150,12 +151,11 @@ class TrunkMainsController(GeoDjangoController):
 
         return qs
 
-    def get_geometry_queryset(self, properties=None):
-        properties = properties or self.default_properties
-        properties = set(properties)
-        json_properties = dict(zip(properties, properties))
-
-        qs = (
+    def get_geometry_queryset(self, properties=None) -> QuerySet:
+        properties: list = properties or self.default_properties
+        properties: set = set(properties)
+        json_properties: dict = dict(zip(properties, properties))
+        qs: QuerySet = (
             self.model.objects.values(*properties)
             .annotate(
                 geojson=JSONObject(

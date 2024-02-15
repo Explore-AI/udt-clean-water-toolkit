@@ -1,6 +1,7 @@
 import bisect
 import multiprocessing as mp
 from django.contrib.gis.geos import GEOSGeometry
+from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.controllers import TrunkMainsController
@@ -10,10 +11,12 @@ from cwa_geod.core.constants import (
     PIPE_ASSETS_MODEL_NAMES,
     GEOS_LINESTRING_TYPES,
 )
+from networkx import Graph
+
 
 
 class GisToGraph(NetworkController):
-    def __init__(self, srid=None) -> None:
+    def __init__(self, srid=None):
         self.srid = srid or DEFAULT_SRID
         super().__init__(self.srid)
 
@@ -114,16 +117,15 @@ class GisToGraph(NetworkController):
         return "point_asset"
 
     def get_trunk_mains_data(self):
-        tm = TrunkMainsController()
+        tm: TrunkMainsController = TrunkMainsController()
         return tm.get_pipe_point_relation_queryset()
 
     def get_distribution_mains_data(self):
-        dm = DistributionMainsController()
+        dm: DistributionMainsController = DistributionMainsController()
         return dm.get_pipe_point_relation_queryset()
 
-    def create_trunk_mains_graph(self):
+    def create_trunk_mains_graph(self) -> Graph:
         tm: TrunkMainsController = TrunkMainsController()
 
-        trunk_mains = tm.get_geometry_queryset()
-        # import pdb; pdb.set_trace()
+        trunk_mains: QuerySet = tm.get_geometry_queryset()
         return self.create_pipes_network(trunk_mains)

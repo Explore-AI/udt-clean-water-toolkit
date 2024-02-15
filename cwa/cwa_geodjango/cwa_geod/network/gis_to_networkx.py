@@ -1,7 +1,4 @@
 from django.contrib.gis.geos import Point
-from typing import Any, Dict, List
-
-# import networkx as nx
 from networkx import Graph
 import matplotlib.pyplot as plt
 from . import GisToGraph
@@ -12,7 +9,7 @@ class GisToNetworkX(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid: int) -> None:
+    def __init__(self, srid: int):
         self.srid: int = srid or DEFAULT_SRID
         self.G: Graph = Graph()
         super().__init__(self.srid)
@@ -23,7 +20,6 @@ class GisToNetworkX(GisToGraph):
         # TODO: add the nodes to the graph
         return trunk_mains_nx
 
-    # def create_network2(self) -> nx.Graph:
     def create_network2(self) -> Graph:
         trunk_mains_qs = self.get_trunk_mains_data()
         distribution_mains_qs = self.get_distribution_mains_data()
