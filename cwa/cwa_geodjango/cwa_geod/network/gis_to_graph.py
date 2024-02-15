@@ -19,7 +19,6 @@ class GisToGraph(NetworkController):
 
     def _get_connections_points_on_pipe(self, base_pipe_geom, asset_data):
         normalised_positions = []
-
         for asset in asset_data:
             geom = GEOSGeometry(asset["wkt"], srid=self.srid)
 

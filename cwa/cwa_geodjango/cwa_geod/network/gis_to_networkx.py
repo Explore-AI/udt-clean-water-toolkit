@@ -1,5 +1,6 @@
 from django.contrib.gis.geos import Point
 from typing import Any, Dict, List
+
 # import networkx as nx
 from networkx import Graph
 import matplotlib.pyplot as plt
@@ -12,19 +13,15 @@ class GisToNetworkX(GisToGraph):
     network of assets"""
 
     def __init__(self, srid: int) -> None:
-        # self.srid = srid or DEFAULT_SRID
         self.srid: int = srid or DEFAULT_SRID
-        # self.G = nx.Graph()
         self.G: Graph = Graph()
         super().__init__(self.srid)
 
     def create_network(self) -> Graph:
         trunk_mains_nx: Graph = self.create_trunk_mains_graph()
-
         # TODO: geospatial join on all the node assets
         # TODO: add the nodes to the graph
-        # import pdb; pdb.set_trace()
-        # return trunk_mains_nx
+        return trunk_mains_nx
 
     # def create_network2(self) -> nx.Graph:
     def create_network2(self) -> Graph:
@@ -37,14 +34,11 @@ class GisToNetworkX(GisToGraph):
         self._create_networkx_graph()
         return self.G
 
-    def _set_connected_asset_relations(
-        self, pipe_data: Dict[str, Any], assets_data: List[Dict[str, Any]]
-    ) -> None:
+    def _set_connected_asset_relations(self, pipe_data, assets_data) -> None:
         node_id = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
         start_of_line_point = Point(
             pipe_data["geometry"].coords[0][0], srid=DEFAULT_SRID
         )
-
         node_point_geometries = [start_of_line_point]
         new_node_ids = [node_id]
 

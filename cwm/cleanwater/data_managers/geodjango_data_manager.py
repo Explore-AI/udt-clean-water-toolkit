@@ -16,7 +16,6 @@ class GeoDjangoDataManager(BaseDataManager, GeoDjangoSerializer):
     def gdb_zip_to_gdf_layer(self, zip_path: str, layer_name: str):
         if not os.path.exists(zip_path):
             raise Exception("gdf file not found")
-
         try:
             return gpd.read_file(zip_path, layer=layer_name)
         except ValueError:

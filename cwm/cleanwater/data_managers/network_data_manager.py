@@ -6,7 +6,7 @@ from . import BaseDataManager, GeoDjangoDataManager
 
 # TO DO: fixing inheritence in data managers
 class NetworkDataManager(GeoDjangoDataManager):
-    def gdf_lines_to_nx_graph(self, geodataframe: GeoDataFrame, method: str = "momepy") -> Graph:
+    def gdf_lines_to_nx_graph(self, geodataframe: GeoDataFrame, method: str = "momepy") -> Graph | None:
         """Convert a geopandas dataframe with lines or multilines
         only to a networkx graph"""
         if method == "momepy":
