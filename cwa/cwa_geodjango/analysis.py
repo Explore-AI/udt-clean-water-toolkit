@@ -2,6 +2,7 @@ import setup  # Required. Do not remove.
 import argparse
 from cwa_geod.config.settings import DEFAULT_SRID
 from cwa_geod.network import GisToNetworkX
+from networkx import Graph
 #    from cwa_geod.config.db.graph_db import init_graphdb
 
 # See examples folder
@@ -10,7 +11,7 @@ from cwa_geod.network import GisToNetworkX
 def cleanwater_gis2nx() -> None:
     # gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
     gis_to_nx: GisToNetworkX = GisToNetworkX(srid=DEFAULT_SRID)
-    nx_graph = gis_to_nx.create_network2()
+    nx_graph: Graph = gis_to_nx.create_network2()
 
     print("Created Graph:", nx_graph)
 

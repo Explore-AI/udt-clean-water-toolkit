@@ -1,4 +1,5 @@
 from django.contrib.gis.geos import Point
+from django.db.models.query import QuerySet
 from networkx import Graph
 import matplotlib.pyplot as plt
 from . import GisToGraph
@@ -21,10 +22,10 @@ class GisToNetworkX(GisToGraph):
         return trunk_mains_nx
 
     def create_network2(self) -> Graph:
-        trunk_mains_qs = self.get_trunk_mains_data()
-        distribution_mains_qs = self.get_distribution_mains_data()
+        trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
+        distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
 
-        pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
+        pipes_qs: QuerySet = trunk_mains_qs.union(distribution_mains_qs, all=True)
 
         self.calc_pipe_point_relative_positions(pipes_qs)
         self._create_networkx_graph()

@@ -1,10 +1,12 @@
 import bisect
 import multiprocessing as mp
 from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import MultiLineString
 from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.controllers import TrunkMainsController
+from cwa_geod.assets.models.trunk_main import TrunkMain
 from cwa_geod.assets.controllers import DistributionMainsController
 from cwa_geod.core.constants import (
     DEFAULT_SRID,
@@ -20,8 +22,8 @@ class GisToGraph(NetworkController):
         self.srid = srid or DEFAULT_SRID
         super().__init__(self.srid)
 
-    def _get_connections_points_on_pipe(self, base_pipe_geom, asset_data):
-        normalised_positions = []
+    def _get_connections_points_on_pipe(self, base_pipe_geom: MultiLineString, asset_data: list):
+        normalised_positions: list = []
         for asset in asset_data:
             geom = GEOSGeometry(asset["wkt"], srid=self.srid)
 
@@ -46,8 +48,8 @@ class GisToGraph(NetworkController):
 
         return normalised_positions
 
-    def _get_pipe_data(self, qs_object):
-        pipe_data = {}
+    def _get_pipe_data(self, qs_object: TrunkMain):
+        pipe_data: dict = {}
         pipe_data["asset_id"] = qs_object.id
         pipe_data["gisid"] = qs_object.gisid
         pipe_data["asset_model_name"] = qs_object.asset_model_name
@@ -60,7 +62,7 @@ class GisToGraph(NetworkController):
 
         return pipe_data
 
-    def _combine_all_asset_data(self, pipe_qs_object):
+    def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
         return (
             pipe_qs_object.trunk_mains_data
             + pipe_qs_object.distribution_mains_data
@@ -73,25 +75,26 @@ class GisToGraph(NetworkController):
             + pipe_qs_object.pressure_valve_data
         )
 
-    def _map_relative_positions_calc(self, pipe_qs_object):
-        pipe_data = self._get_pipe_data(pipe_qs_object)
-        asset_data = self._combine_all_asset_data(pipe_qs_object)
+    def _map_relative_positions_calc(self, pipe_qs_object: TrunkMain):
+        pipe_data: dict = self._get_pipe_data(pipe_qs_object)
+        asset_data: list = self._combine_all_asset_data(pipe_qs_object)
 
-        asset_positions = self._get_connections_points_on_pipe(
+        asset_positions: list = self._get_connections_points_on_pipe( #here
             pipe_qs_object.geometry, asset_data
         )
+        # import pdb; pdb.set_trace()
 
         return pipe_data, asset_positions
 
-    def calc_pipe_point_relative_positions(self, pipes_qs):
+    def calc_pipe_point_relative_positions(self, pipes_qs: QuerySet):
         from timeit import default_timer as timer
 
-        start = timer()
+        start: float = timer()
         # TODO: fix slice approach
         self.all_pipe_data, self.all_asset_positions = list(
             zip(*map(self._map_relative_positions_calc, pipes_qs[:1000]))
         )
-        end = timer()
+        end: float = timer()
         print(end - start)
 
         # start = timer()
@@ -116,11 +119,11 @@ class GisToGraph(NetworkController):
 
         return "point_asset"
 
-    def get_trunk_mains_data(self):
+    def get_trunk_mains_data(self) -> QuerySet:
         tm: TrunkMainsController = TrunkMainsController()
         return tm.get_pipe_point_relation_queryset()
 
-    def get_distribution_mains_data(self):
+    def get_distribution_mains_data(self) -> QuerySet:
         dm: DistributionMainsController = DistributionMainsController()
         return dm.get_pipe_point_relation_queryset()
 
