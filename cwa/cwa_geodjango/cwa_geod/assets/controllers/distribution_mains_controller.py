@@ -1,6 +1,7 @@
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
 from django.db.models.functions import JSONObject
 from django.db.models import Value, JSONField, OuterRef
+from django.db.models.query import QuerySet
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Length, AsWKT
 from django.contrib.postgres.expressions import ArraySubquery
@@ -56,27 +57,27 @@ class DistributionMainsController(GeoDjangoController):
         )
         return subquery
 
-    def _generate_no_dma_asset_subqueries(self):
-        json_fields = {
+    def _generate_no_dma_asset_subqueries(self) -> dict:
+        json_fields: dict = {
             "id": "id",
             "gisid": "gisid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
         }
 
-        subquery1 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
-        subquery2 = self._generate_dwithin_subquery(
+        subquery1: QuerySet = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
+        subquery2: QuerySet = self._generate_dwithin_subquery(
             OperationalSite.objects.all(), json_fields
         )
 
-        subqueries = {
+        subqueries: dict = {
             "chamber_data": ArraySubquery(subquery1),
             "operational_site_data": ArraySubquery(subquery2),
         }
         return subqueries
 
-    def _generate_single_dma_asset_subqueries(self):
-        json_fields = {
+    def _generate_single_dma_asset_subqueries(self) -> dict:
+        json_fields: dict = {
             "id": "id",
             "gisid": "gisid",
             "geometry": "geometry",
@@ -85,19 +86,19 @@ class DistributionMainsController(GeoDjangoController):
             "dma_code": "dma__code",
         }
 
-        subquery1 = self._generate_touches_subquery(
+        subquery1: QuerySet = self._generate_touches_subquery(
             self.model.objects.all(), json_fields
         )
-        subquery2 = self._generate_touches_subquery(
+        subquery2: QuerySet = self._generate_touches_subquery(
             TrunkMain.objects.all(), json_fields
         )
-        subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
-        subquery4 = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
-        subquery5 = self._generate_dwithin_subquery(
+        subquery3: QuerySet = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
+        subquery4: QuerySet = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
+        subquery5: QuerySet = self._generate_dwithin_subquery(
             PressureFitting.objects.all(), json_fields
         )
 
-        subqueries = {
+        subqueries: dict = {
             "distribution_mains_data": ArraySubquery(subquery1),
             "trunk_mains_data": ArraySubquery(subquery2),
             "logger_data": ArraySubquery(subquery3),
@@ -107,7 +108,7 @@ class DistributionMainsController(GeoDjangoController):
         return subqueries
 
     def _generate_two_dma_asset_subqueries(self):
-        json_fields = {
+        json_fields: dict = {
             "id": "id",
             "gisid": "gisid",
             "geometry": "geometry",
@@ -118,27 +119,27 @@ class DistributionMainsController(GeoDjangoController):
             "dma_2_code": "dma_1__code",
         }
 
-        subquery1 = self._generate_dwithin_subquery(
+        subquery1: QuerySet = self._generate_dwithin_subquery(
             PressureControlValve.objects.all(), json_fields
         )
-        subquery2 = self._generate_dwithin_subquery(
+        subquery2: QuerySet = self._generate_dwithin_subquery(
             NetworkMeter.objects.all(), json_fields
         )
 
-        subqueries = {
+        subqueries: dict = {
             "pressure_valve_data": ArraySubquery(subquery1),
             "network_meter_data": ArraySubquery(subquery2),
         }
-
+        # import pdb; pdb.set_trace() #here
         return subqueries
 
-    def get_pipe_point_relation_queryset(self):
-        no_dma_asset_subqueries = self._generate_no_dma_asset_subqueries()
-        single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
-        two_dma_asset_subqueries = self._generate_two_dma_asset_subqueries()
+    def get_pipe_point_relation_queryset(self) -> QuerySet:
+        no_dma_asset_subqueries: dict = self._generate_no_dma_asset_subqueries()
+        single_dma_asset_subqueries: dict = self._generate_single_dma_asset_subqueries() #here
+        two_dma_asset_subqueries: dict = self._generate_two_dma_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.select_related("dma").annotate(
+        qs: QuerySet = self.model.objects.select_related("dma").annotate(
             asset_model_name=Value("DistributionMain"),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
@@ -146,7 +147,7 @@ class DistributionMainsController(GeoDjangoController):
             **single_dma_asset_subqueries,
             **two_dma_asset_subqueries,
         )
-
+        # import pdb; pdb.set_trace()
         return qs
 
     def get_geometry_queryset(self, properties=None):

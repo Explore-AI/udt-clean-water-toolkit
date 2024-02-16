@@ -148,7 +148,7 @@ class TrunkMainsController(GeoDjangoController):
             **single_dma_asset_subqueries,
             **two_dma_asset_subqueries,
         )
-
+        
         return qs
 
     def get_geometry_queryset(self, properties=None) -> QuerySet:
