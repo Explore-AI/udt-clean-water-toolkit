@@ -10,7 +10,8 @@ array=(wChamber wDistributionMain wHydrant wLogger wNetworkMeter wNetworkOptValv
 # Define columns needed to be converted for each column. Shape is the name of the geom column
 dictionary["wChamber"]="GISID,shape"
 dictionary["wDistributionMain"]="GISID,shape"
-dictionary["wHydrant wLogger"]="GISID,shape"
+dictionary["wHydrant"]="GISID,shape"
+dictionary["wLogger"]="GISID,shape"
 dictionary["wNetworkMeter"]="GISID,shape"
 dictionary["wNetworkOptValve"]="GISID,shape"
 dictionary["wOperationalSite"]="GISID,shape"
