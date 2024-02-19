@@ -31,22 +31,21 @@ class GisToNetworkX(GisToGraph):
         self._create_networkx_graph()
         return self.G
 
-    def _set_connected_asset_relations(self, pipe_data, assets_data) -> None:
-        node_id = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
-        start_of_line_point = Point(
+    def _set_connected_asset_relations(self, pipe_data: dict, assets_data: list) -> None:
+        node_id: str = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
+        start_of_line_point: Point = Point(
             pipe_data["geometry"].coords[0][0], srid=DEFAULT_SRID
         )
-        node_point_geometries = [start_of_line_point]
-        new_node_ids = [node_id]
-
+        node_point_geometries: list = [start_of_line_point]
+        new_node_ids: list = [node_id]
         for asset in assets_data:
-            asset_model_name = asset["data"]["asset_model_name"]
+            asset_model_name: str = asset["data"]["asset_model_name"]
 
-            node_type = self._get_node_type(asset_model_name)
+            node_type: str = self._get_node_type(asset_model_name)
 
-            new_asset_id = asset["data"]["id"]
-            new_gisid = asset["data"]["gisid"]
-            new_node_id = f"{new_asset_id}-{new_gisid}"
+            new_asset_id: int = asset["data"]["id"]
+            new_gisid: int = asset["data"]["gisid"]
+            new_node_id: str = f"{new_asset_id}-{new_gisid}"
 
             if not self.G.has_node(new_node_id):
                 self.G.add_node(
@@ -57,7 +56,7 @@ class GisToNetworkX(GisToGraph):
                     **asset["data"],
                 )
 
-            edge_length = node_point_geometries[-1].distance(
+            edge_length: float = node_point_geometries[-1].distance(
                 asset["intersection_point_geometry"]
             )
 
@@ -73,9 +72,8 @@ class GisToNetworkX(GisToGraph):
             new_node_ids.append(new_node_id)
 
     def _set_pipe_connected_asset_relations(self) -> None:
-        def _map_pipe_connected_asset_relations(pipe_data, assets_data):
-            node_id = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
-
+        def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
+            node_id: str = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
             if not self.G.has_node(node_id):
                 self.G.add_node(
                     node_id,

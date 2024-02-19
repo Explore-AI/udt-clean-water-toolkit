@@ -22,17 +22,17 @@ class GisToGraph(NetworkController):
         self.srid = srid or DEFAULT_SRID
         super().__init__(self.srid)
 
-    def _get_connections_points_on_pipe(self, base_pipe_geom: MultiLineString, asset_data: list):
+    def _get_connections_points_on_pipe(self, base_pipe_geom: MultiLineString, asset_data: list) -> list:
         normalised_positions: list = []
         for asset in asset_data:
-            geom = GEOSGeometry(asset["wkt"], srid=self.srid)
+            geom: MultiLineString = GEOSGeometry(asset["wkt"], srid=self.srid)
 
             if geom.geom_typeid in GEOS_LINESTRING_TYPES:
                 geom = base_pipe_geom.intersection(
                     geom
                 )  # TODO: handle multiple intersections at single point
 
-            normalised_position_on_pipe = normalised_point_position_on_line(
+            normalised_position_on_pipe: float = normalised_point_position_on_line(
                 base_pipe_geom, geom, srid=self.srid
             )
 
@@ -45,10 +45,9 @@ class GisToGraph(NetworkController):
                 },
                 key=lambda x: x["position"],
             )
-
         return normalised_positions
 
-    def _get_pipe_data(self, qs_object: TrunkMain):
+    def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
         pipe_data: dict = {}
         pipe_data["asset_id"] = qs_object.id
         pipe_data["gisid"] = qs_object.gisid
@@ -75,18 +74,16 @@ class GisToGraph(NetworkController):
             + pipe_qs_object.pressure_valve_data
         )
 
-    def _map_relative_positions_calc(self, pipe_qs_object: TrunkMain):
+    def _map_relative_positions_calc(self, pipe_qs_object: TrunkMain) -> tuple[dict, list]:
         pipe_data: dict = self._get_pipe_data(pipe_qs_object)
         asset_data: list = self._combine_all_asset_data(pipe_qs_object)
 
-        asset_positions: list = self._get_connections_points_on_pipe( #here
+        asset_positions: list = self._get_connections_points_on_pipe(
             pipe_qs_object.geometry, asset_data
         )
-        # import pdb; pdb.set_trace()
-
         return pipe_data, asset_positions
 
-    def calc_pipe_point_relative_positions(self, pipes_qs: QuerySet):
+    def calc_pipe_point_relative_positions(self, pipes_qs: QuerySet) -> None:
         from timeit import default_timer as timer
 
         start: float = timer()
@@ -113,7 +110,7 @@ class GisToGraph(NetworkController):
         # end = timer()
         # print(end - start)
 
-    def _get_node_type(self, asset_model_name):
+    def _get_node_type(self, asset_model_name: str) -> str:
         if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
             return "pipe_end"
 

@@ -151,7 +151,7 @@ class TrunkMainsController(GeoDjangoController):
         
         return qs
 
-    def get_geometry_queryset(self, properties=None) -> QuerySet:
+    def get_geometry_queryset(self, properties: list = None) -> QuerySet:
         properties: list = properties or self.default_properties
         properties: set = set(properties)
         json_properties: dict = dict(zip(properties, properties))
