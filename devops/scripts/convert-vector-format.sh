@@ -1,5 +1,5 @@
 #!/bin/bash
-DATA_PATH=/gis/Downloads/sandtech/CW_20231108_060001.gdb
+DATA_PATH=/tmp/CW_20231108_060001.gdb
 
 if [ -n "$1" ];then
 	DATA_PATH=$1
