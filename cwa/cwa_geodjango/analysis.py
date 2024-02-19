@@ -11,7 +11,6 @@ def cleanwater_gis2nx() -> None:
     # gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
     gis_to_nx: GisToNetworkX = GisToNetworkX(srid=DEFAULT_SRID)
     nx_graph: Graph = gis_to_nx.create_network2()
-    import pdb; pdb.set_trace()
     print("Created Graph:", nx_graph)
 
     # pos = nx.get_node_attributes(nx_graph, "coords")

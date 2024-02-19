@@ -107,7 +107,7 @@ class DistributionMainsController(GeoDjangoController):
         }
         return subqueries
 
-    def _generate_two_dma_asset_subqueries(self):
+    def _generate_two_dma_asset_subqueries(self) -> dict:
         json_fields: dict = {
             "id": "id",
             "gisid": "gisid",
@@ -130,12 +130,11 @@ class DistributionMainsController(GeoDjangoController):
             "pressure_valve_data": ArraySubquery(subquery1),
             "network_meter_data": ArraySubquery(subquery2),
         }
-        # import pdb; pdb.set_trace() #here
         return subqueries
 
     def get_pipe_point_relation_queryset(self) -> QuerySet:
         no_dma_asset_subqueries: dict = self._generate_no_dma_asset_subqueries()
-        single_dma_asset_subqueries: dict = self._generate_single_dma_asset_subqueries() #here
+        single_dma_asset_subqueries: dict = self._generate_single_dma_asset_subqueries()
         two_dma_asset_subqueries: dict = self._generate_two_dma_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
