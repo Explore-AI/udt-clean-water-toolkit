@@ -8,7 +8,8 @@ fi
 directory=$(dirname "$DATA_PATH")
 pushd "${directory}" || exit
 if [ -f DMA.csv ];then
-ogr2ogr -progress --config PG_USE_COPY YES -f GPKG data.gpkg  -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "dma" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 DMA.csv -oo AUTODETECT_TYPE=YES --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid
+  ogr2ogr -progress --config PG_USE_COPY YES -f GPKG data.gpkg  -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "dma" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 DMA.csv -oo AUTODETECT_TYPE=YES --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid --config OGR-SQLITE-CACHE 2000 --config OGR_SQLITE_SYNCHRONOUS OFF --config OGR_GPKG_NUM_THREADS ALL_CPUS
+
 fi
 
 declare -A dictionary
@@ -51,31 +52,53 @@ for layer in "${!dictionary[@]}"; do
     final_sql="SELECT $sql_statement FROM $layer"
 
     # Final SQL command
-    command="ogr2ogr -progress --config PG_USE_COPY YES -f GPKG data.gpkg  ${DATA_PATH} ${layer} -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "${layer}" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 -nlt ${GEOM_TYPE} -dialect sqlite -sql \"$final_sql\" --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid"
-
+    command="ogr2ogr -progress --config PG_USE_COPY YES -f GPKG data.gpkg  ${DATA_PATH} ${layer} -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "${layer}" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 -nlt ${GEOM_TYPE} -dialect sqlite -sql \"$final_sql\" --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid --config OGR-SQLITE-CACHE 2000 --config OGR_SQLITE_SYNCHRONOUS OFF --config OGR_GPKG_NUM_THREADS ALL_CPUS"
     # evaluate the ogr2ogr command
     eval "$command"
 done
 
 # Cleanup data
 cat > cleanup.sql <<EOF
--- load sqlite spatial extensions
 SELECT load_extension("mod_spatialite");
+
+CREATE INDEX idx_dmaareacode
+ON dma (dmaareacode);
+
+CREATE INDEX idx_dmacode
+ON "wTrunkMain" ("DMACODE");
 --Update DMA records
-update wTrunkMain set "DMACODE" = sub."DMAAREACODE" FROM
-(SELECT a."DMAAREACODE"
-FROM dma as a
-JOIN wTrunkMain b
-ON ST_INTERSECTS(a.geom,b.geom))  sub
-where wTrunkMain."DMACODE" is null;
+
+UPDATE "wTrunkMain"
+SET "DMACODE" = sub.dmaareacode
+
+FROM (SELECT distinct a.dmaareacode
+    FROM dma AS a
+    JOIN "wTrunkMain" AS b
+    ON st_intersects(a.geom ,b.geom)
+	where b."DMACODE" IS NULL) AS sub
+WHERE "wTrunkMain"."DMACODE" is null;
 
 --Delete disjoint records
 DELETE FROM wChamber where "GISID" not in
 (SELECT a."GISID" from wChamber a
 join dma b
-on st_intersects(a.geometry,b.geometry));
+on st_intersects(a.geom,b.geom));
+
+-- Chamber doesn't have DMA code
+ALTER table "wChamber" add column "DMACODE" text;
+UPDATE "wChamber"
+SET "DMACODE" = sub.dmaareacode
+
+FROM (SELECT distinct a.dmaareacode
+    FROM dma AS a
+    JOIN "wChamber" AS b
+    ON st_intersects(a.geom ,b.geom)
+	where b."DMACODE" IS NULL) AS sub
+WHERE "wChamber"."DMACODE" is null;
+
 
 EOF
+
 
 # Check if SQLite3 is installed to run SQL against geopackage
 if dpkg -l | grep -q "sqlite3"; then
