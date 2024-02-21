@@ -127,6 +127,7 @@ class GisToGraph(NetworkController):
         dm: DistributionMainsController = DistributionMainsController()
         return dm.get_pipe_point_relation_queryset()
 
+    # TODO: remove from here as it contains specific nx methods
     def create_trunk_mains_graph(self) -> Graph:
         tm: TrunkMainsController = TrunkMainsController()
 
