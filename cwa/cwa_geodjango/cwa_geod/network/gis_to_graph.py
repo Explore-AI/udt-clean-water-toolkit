@@ -132,3 +132,11 @@ class GisToGraph(NetworkController):
 
         trunk_mains: QuerySet = tm.get_geometry_queryset()
         return self.create_pipes_network(trunk_mains)
+
+    def set_srid(self, srid: int):
+        """Set or change the global srid"""
+        self.srid = srid
+
+    def get_srid(self):
+        """Get the currently used global srid"""
+        return self.srid
