@@ -1,7 +1,6 @@
 from django.contrib.gis.geos import Point
 from django.db.models.query import QuerySet
 from networkx import Graph
-import matplotlib.pyplot as plt
 from . import GisToGraph
 from cwa_geod.core.constants import DEFAULT_SRID
 
@@ -31,7 +30,9 @@ class GisToNetworkX(GisToGraph):
         self._create_networkx_graph()
         return self.G
 
-    def _set_connected_asset_relations(self, pipe_data: dict, assets_data: list) -> None:
+    def _set_connected_asset_relations(
+        self, pipe_data: dict, assets_data: list
+    ) -> None:
         node_id: str = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
         start_of_line_point: Point = Point(
             pipe_data["geometry"].coords[0][0], srid=DEFAULT_SRID
