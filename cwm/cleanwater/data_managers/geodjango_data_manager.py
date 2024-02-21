@@ -13,7 +13,7 @@ class GeoDjangoDataManager(BaseDataManager, GeoDjangoSerializer):
 
     srid = 27700  # TODO: set default srid in config
 
-    def gdb_zip_to_gdf_layer(self, zip_path: str, layer_name: str):
+    def gdb_zip_to_gdf_layer(self, zip_path: str, layer_name: str) -> GeoDataFrame:
         if not os.path.exists(zip_path):
             raise Exception("gdf file not found")
         try:
