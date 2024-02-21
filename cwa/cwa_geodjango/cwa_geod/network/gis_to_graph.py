@@ -1,7 +1,7 @@
 import bisect
 import multiprocessing as mp
-from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.geos import MultiLineString
+from networkx import Graph
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString
 from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
@@ -13,7 +13,6 @@ from cwa_geod.core.constants import (
     PIPE_ASSETS_MODEL_NAMES,
     GEOS_LINESTRING_TYPES,
 )
-from networkx import Graph
 
 
 class GisToGraph(NetworkController):
