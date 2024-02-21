@@ -16,14 +16,16 @@ from cwa_geod.core.constants import (
 from networkx import Graph
 
 
-
 class GisToGraph(NetworkController):
     def __init__(self, srid=None):
         self.srid = srid or DEFAULT_SRID
         super().__init__(self.srid)
 
-    def _get_connections_points_on_pipe(self, base_pipe_geom: MultiLineString, asset_data: list) -> list:
+    def _get_connections_points_on_pipe(
+        self, base_pipe_geom: MultiLineString, asset_data: list
+    ) -> list:
         normalised_positions: list = []
+
         for asset in asset_data:
             geom: MultiLineString = GEOSGeometry(asset["wkt"], srid=self.srid)
 
@@ -74,7 +76,9 @@ class GisToGraph(NetworkController):
             + pipe_qs_object.pressure_valve_data
         )
 
-    def _map_relative_positions_calc(self, pipe_qs_object: TrunkMain) -> tuple[dict, list]:
+    def _map_relative_positions_calc(
+        self, pipe_qs_object: TrunkMain
+    ) -> tuple[dict, list]:
         pipe_data: dict = self._get_pipe_data(pipe_qs_object)
         asset_data: list = self._combine_all_asset_data(pipe_qs_object)
 

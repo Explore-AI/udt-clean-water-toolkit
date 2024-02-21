@@ -5,8 +5,6 @@ from cwa_geod.network import GisToNetworkX
 from networkx import Graph
 #    from cwa_geod.config.db.graph_db import init_graphdb
 
-# See examples folder
-
 def cleanwater_gis2nx() -> None:
     # gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
     gis_to_nx: GisToNetworkX = GisToNetworkX(srid=DEFAULT_SRID)
