@@ -1,5 +1,5 @@
 from django.contrib.gis.db import models
-from cwa_geod.utilities.models.dma import DMA
+from cwa_geod.utilities.models import DMA
 from cwa_geod.config.settings import DEFAULT_SRID
 
 
@@ -8,6 +8,4 @@ class PressureControlValve(models.Model):
     geometry = models.PointField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
-    dma = models.ManyToManyField(
-        DMA, on_delete=models.RESTRICT, related_name="dma_pressure_control_valves"
-    )
+    dma = models.ManyToManyField(DMA, related_name="dma_pressure_control_valves")
