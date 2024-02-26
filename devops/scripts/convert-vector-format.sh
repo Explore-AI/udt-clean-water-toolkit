@@ -43,7 +43,7 @@ dictionary["wTrunkMain"]="GISID,SUBTYPECD,LIFECYCLESTATUS,MEASUREDLENGTH,MAINOWN
 for layer in "${!dictionary[@]}"; do
     # It seems line layers are stored as multi curve and others can be stored as multi
 	if [[ $layer == 'wDistributionMain' || $layer == 'wTrunkMain' ]];then
-		GEOM_TYPE='MULTICURVE'
+		GEOM_TYPE='CONVERT_TO_LINEAR'
 	else
 		GEOM_TYPE='PROMOTE_TO_MULTI'
 	fi
