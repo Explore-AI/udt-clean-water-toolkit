@@ -21,7 +21,7 @@ class Command(BaseCommand):
         layer_index = kwargs.get("layer_index")
 
         ds = DataSource(zip_path)
-        trunk_main_layer = ds[4]
+        trunk_main_layer = ds[layer_index]
 
         layer_gis_ids = trunk_main_layer.get_fields("GISID")
         layer_geometries = trunk_main_layer.get_geoms()
