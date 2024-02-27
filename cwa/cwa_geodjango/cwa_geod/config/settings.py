@@ -96,6 +96,11 @@ LOGGING = {
     },
 }
 
+UTILITIES = [
+    ("THAMES WATER", "thames_water"),
+    ("SEVERN TRENT WATER", "severn_trent_water"),
+]
+
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEBUG = True
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)

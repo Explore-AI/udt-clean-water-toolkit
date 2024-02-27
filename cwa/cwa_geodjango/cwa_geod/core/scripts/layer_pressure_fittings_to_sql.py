@@ -11,44 +11,34 @@ class Command(BaseCommand):
     help = "Write Thames Water pressure fitting layer data to sql"
 
     def add_arguments(self, parser):
-        parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
+        parser.add_argument("-f", "--file", type=str, help="Path to vector data source")
+        parser.add_argument("-x", "--layer_index", type=str, help="Layer index")
 
     ### Attempt using bulk create
     def handle(self, *args, **kwargs):
         zip_path = kwargs.get("file")
+        layer_index = kwargs.get("layer_index")
 
         ds = DataSource(zip_path)
-        pressure_fitting_layer = ds[PRESSURE_FITTING_LAYER_INDEX]
+        pressure_fitting_layer = ds[layer_index]
+
+        layer_gisids = pressure_fitting_layer.get_fields("GISID")
+        layer_geometries = pressure_fitting_layer.get_geoms()
 
         print(
             f"There are {pressure_fitting_layer.num_feat} features. Large numbers of features will take a long time to save."
         )
 
-        layer_gisids = pressure_fitting_layer.get_fields("GISID")
-        layer_shapes_x = pressure_fitting_layer.get_fields("SHAPEX")
-        layer_shapes_y = pressure_fitting_layer.get_fields("SHAPEY")
-        layer_dma_codes = pressure_fitting_layer.get_fields(DMA_FIELD_NAME)
-        layer_geometries = pressure_fitting_layer.get_geoms()
-
         new_pressure_fittings = []
         for (
             layer_gisid,
-            layer_shape_x,
-            layer_shape_y,
-            layer_dma_code,
             layer_geometry,
         ) in zip(
             layer_gisids,
-            layer_shapes_x,
-            layer_shapes_y,
-            layer_dma_codes,
             layer_geometries,
         ):
             data = {
                 "gisid": layer_gisid,
-                "shape_x": layer_shape_x,
-                "shape_y": layer_shape_y,
-                "dma": layer_dma_code,
                 "geometry": layer_geometry.wkt,
             }
 
