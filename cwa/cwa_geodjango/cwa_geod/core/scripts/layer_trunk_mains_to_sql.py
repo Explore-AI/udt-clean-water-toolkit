@@ -13,26 +13,31 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
-        parser.add_argument("-x", "--index", type=str, help="Layer index")
+        parser.add_argument("-x", "--index", type=int, help="Layer index")
 
-    ### This method doesn't work because of errors in the geometry object
     def handle(self, *args, **kwargs):
         zip_path = kwargs.get("file")
-        layer_index = kwargs.get("layer_index")
+        layer_index = kwargs.get("index")
 
         ds = DataSource(zip_path)
+
         trunk_main_layer = ds[layer_index]
 
         layer_gis_ids = trunk_main_layer.get_fields("GISID")
         layer_geometries = trunk_main_layer.get_geoms()
 
         new_trunk_mains = []
-        for gid, geometry in zip(layer_gis_ids, layer_geometries):
-            dmas = DMA.objects.filter(geometry_multipolygon__intersects=geometry)
+        for gid, geom in zip(layer_gis_ids, layer_geometries):
+            import pdb
 
-            new_trunk_main = TrunkMain(gid=gid, geometry=geometry, dma=dmas)
+            pdb.set_trace()
+            dmas = DMA.objects.filter(geometry__intersects=geom)
+
+            new_trunk_main = TrunkMain(gid=gid, geometry=geom, dma=dmas)
             new_trunk_mains.append(new_trunk_main)
+            import pdb
 
+            pdb.set_trace()
             if len(new_trunk_mains) == 100000:
                 TrunkMain.objects.bulk_create(new_trunk_mains)
                 new_trunk_mains = []
