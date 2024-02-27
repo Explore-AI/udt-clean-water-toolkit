@@ -4,9 +4,6 @@ from django.contrib.gis.gdal.error import GDALException
 from cwa_geod.assets.models import TrunkMain
 from cwa_geod.utilities.models import DMA
 
-TRUNK_MAINS_LAYER_INDEX = 4
-DMA_FIELD_NAME = "DMACODE"
-
 
 class Command(BaseCommand):
     help = "Write Thames Water trunk mains layer data to sql"
