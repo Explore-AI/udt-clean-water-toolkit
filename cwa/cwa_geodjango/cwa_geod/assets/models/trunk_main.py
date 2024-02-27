@@ -4,7 +4,7 @@ from cwa_geod.config.settings import DEFAULT_SRID
 
 
 class TrunkMain(models.Model):
-    gisid = models.IntegerField(null=False, blank=False, unique=True)
+    gid = models.IntegerField(null=False, blank=False, unique=True)
     geometry = models.MultiLineStringField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )

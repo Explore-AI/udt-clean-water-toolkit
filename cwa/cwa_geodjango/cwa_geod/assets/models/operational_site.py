@@ -4,7 +4,7 @@ from cwa_geod.utilities.models import DMA
 
 
 class OperationalSite(models.Model):
-    gisid = models.IntegerField(null=False, blank=False, unique=True)
+    gid = models.IntegerField(null=False, blank=False, unique=True)
     geometry = models.PointField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
