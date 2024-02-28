@@ -1,6 +1,6 @@
-from neomodel import StructuredNode, StringProperty
+from neomodel import StructuredRel, StringProperty
 
 
-class Hydrant(StructuredNode):
+class TrunkMain(StructuredRel):
     gid = StringProperty(unique_index=True, required=True)
     dmas = StringProperty(unique_index=True, required=True)
