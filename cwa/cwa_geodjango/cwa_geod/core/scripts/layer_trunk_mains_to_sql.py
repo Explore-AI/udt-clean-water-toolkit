@@ -25,10 +25,7 @@ class Command(BaseCommand):
 
         new_trunk_mains = []
         for gid, geom in zip(layer_gis_ids, layer_geometries):
-            import pdb
-
-            pdb.set_trace()
-            dmas = DMA.objects.filter(geometry__intersects=geom)
+            dmas = DMA.objects.filter(geometry__intersects=geom.wkt)
 
             new_trunk_main = TrunkMain(gid=gid, geometry=geom, dma=dmas)
             new_trunk_mains.append(new_trunk_main)
