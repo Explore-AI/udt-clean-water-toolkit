@@ -13,6 +13,8 @@ import os
 import platform
 from pathlib import Path
 
+from neomodel import config as neo_config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -55,6 +57,7 @@ DATABASES = {
 }
 
 # currently only works with neo4j
+# TO DO: cleanup how this is used
 GRAPH_DATABASES = {
     "default": {
         "HOST": "http://localhost",
@@ -63,6 +66,13 @@ GRAPH_DATABASES = {
         "PASSWORD": os.getenv("NEO4J_PASSWORD"),
     }
 }
+
+default_graph_db = GRAPH_DATABASES["default"]
+graph_uri = f"{default_graph_db.get('HOST')}:{default_graph_db.get('PORT')}"
+graph_db_user = default_graph_db.get("USER")
+graph_password = default_graph_db.get("PASSWORD")
+
+neo_config.DATABASE_URL = f"bolt://{graph_db_user}:{graph_password}@{graph_uri}"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

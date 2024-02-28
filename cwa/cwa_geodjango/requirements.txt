@@ -3,4 +3,6 @@ psycopg2-binary==2.9.9
 matplotlib==3.8.2
 momepy==0.7.0
 neo4j==5.16.0
+neomodel==5.2.1
+neomodel['extras']==5.2.1
 networkx==3.2.1
