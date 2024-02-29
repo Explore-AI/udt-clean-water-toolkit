@@ -1,9 +1,8 @@
-from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
-from django.db.models.functions import JSONObject
 from django.db.models import Value, JSONField, OuterRef
+from django.db.models.functions import JSONObject
 from django.db.models.query import QuerySet
 from django.contrib.gis.measure import D
-from django.contrib.gis.db.models.functions import Length, AsWKT
+from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWKT
 from django.contrib.postgres.expressions import ArraySubquery
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import (
@@ -22,12 +21,10 @@ from cwa_geod.config.settings import DEFAULT_SRID
 
 
 class TrunkMainsController(GeoDjangoController):
-    """Convert trunk_mains data to geoJSON. Please look into
-    structore of geoJSON object. Also, see these refs
-    for a guide on how the geojson is contructed.
+    """Convert trunk_mains data to Queryset or GeoJSON.
 
+    Refs on how the GeoJSON is constructed.
     AsGeoJson query combined with json to build object
-
     https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
     https://postgis.net/docs/ST_AsGeoJSON.html
     https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
@@ -36,17 +33,15 @@ class TrunkMainsController(GeoDjangoController):
     model = TrunkMain
     srid = DEFAULT_SRID
     # items_limit = 100000  # TODO: set default in config
+    WITHIN_DISTANCE = 1000
     default_properties = [
         "id",
-        "gisid",
-        "shape_length",
-        "dma_id",
-        "dma__code",
+        "gid",
     ]  # should not include the geometry column as per convention
 
     def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(
-            geometry__dwithin=(OuterRef(geometry_field), D(m=1))
+            geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
         ).values(
             json=JSONObject(**json_fields, asset_model_name=Value(qs.model.__name__))
         )
@@ -61,7 +56,7 @@ class TrunkMainsController(GeoDjangoController):
     def _generate_no_dma_asset_subqueries(self):
         json_fields = {
             "id": "id",
-            "gisid": "gisid",
+            "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
         }
@@ -80,7 +75,7 @@ class TrunkMainsController(GeoDjangoController):
     def _generate_single_dma_asset_subqueries(self):
         json_fields = {
             "id": "id",
-            "gisid": "gisid",
+            "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "dma_id": "dma",
@@ -111,7 +106,7 @@ class TrunkMainsController(GeoDjangoController):
     def _generate_two_dma_asset_subqueries(self):
         json_fields = {
             "id": "id",
-            "gisid": "gisid",
+            "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "dma_1_id": "dma_1",
@@ -134,27 +129,86 @@ class TrunkMainsController(GeoDjangoController):
 
         return subqueries
 
+    def _generate_asset_subqueries(self):
+        json_fields = {
+            "id": "id",
+            "gid": "gid",
+            "geometry": "geometry",
+            "wkt": AsWKT("geometry"),
+            "dmas": "dmas",
+        }
+
+        subquery1 = self._generate_touches_subquery(
+            self.model.objects.all(), json_fields
+        )
+        subquery2 = self._generate_touches_subquery(
+            DistributionMain.objects.all(), json_fields
+        )
+
+        subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
+
+        subquery4 = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
+
+        subquery5 = self._generate_dwithin_subquery(
+            PressureFitting.objects.all(), json_fields
+        )
+
+        subquery6 = self._generate_dwithin_subquery(
+            PressureControlValve.objects.all(), json_fields
+        )
+        subquery7 = self._generate_dwithin_subquery(
+            NetworkMeter.objects.all(), json_fields
+        )
+
+        subquery8 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
+
+        subquery9 = self._generate_dwithin_subquery(
+            OperationalSite.objects.all(), json_fields
+        )
+
+        # https://stackoverflow.com/questions/72450598/selecting-first-item-in-a-subquery-of-many-to-many-relationship-in-django
+        # .alias(first_book_category_id=Book.categories.through.objects.filter(book_id=OuterRef('book_id')).values('id')[:1])
+
+        subqueries = {
+            "trunk_mains_data": ArraySubquery(subquery1),
+            "distribution_mains_data": ArraySubquery(subquery2),
+            "logger_data": ArraySubquery(subquery3),
+            "hydrant_data": ArraySubquery(subquery4),
+            "pressure_fitting_data": ArraySubquery(subquery5),
+            "pressure_valve_data": ArraySubquery(subquery6),
+            "network_meter_data": ArraySubquery(subquery7),
+            "chamber_data": ArraySubquery(subquery8),
+            "operational_site_data": ArraySubquery(subquery9),
+        }
+        return subqueries
+
     def get_pipe_point_relation_queryset(self):
-        no_dma_asset_subqueries = self._generate_no_dma_asset_subqueries()
-        single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
-        two_dma_asset_subqueries = self._generate_two_dma_asset_subqueries()
+        # no_dma_asset_subqueries = self._generate_no_dma_asset_subqueries()
+        # single_dma_asset_subqueries = self._generate_single_dma_asset_subqueries()
+        # two_dma_asset_subqueries = self._generate_two_dma_asset_subqueries()
+        asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.select_related("dma").annotate(
+        qs = self.model.objects.prefetch_related("dmas").annotate(
             asset_model_name=Value("TrunkMain"),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
-            **no_dma_asset_subqueries,
-            **single_dma_asset_subqueries,
-            **two_dma_asset_subqueries,
+            # **no_dma_asset_subqueries,
+            # **single_dma_asset_subqueries,
+            # **two_dma_asset_subqueries,
+            **asset_subqueries
         )
-        
+        import pdb
+
+        pdb.set_trace()
+
         return qs
 
-    def get_geometry_queryset(self, properties: list = None) -> QuerySet:
-        properties: list = properties or self.default_properties
-        properties: set = set(properties)
-        json_properties: dict = dict(zip(properties, properties))
+    def get_geometry_queryset(self, properties=None) -> QuerySet:
+        properties = properties or self.default_properties
+        properties = set(properties)
+        json_properties = dict(zip(properties, properties))
+
         qs: QuerySet = (
             self.model.objects.values(*properties)
             .annotate(
