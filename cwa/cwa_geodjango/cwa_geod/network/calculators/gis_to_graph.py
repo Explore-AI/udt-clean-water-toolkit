@@ -55,7 +55,9 @@ class GisToGraph(NetworkController):
         pipe_data["asset_model_name"] = qs_object.asset_model_name
         pipe_data["length"] = qs_object.length
         pipe_data["wkt"] = qs_object.wkt
-        pipe_data["dma_ids"] = qs_object.dmas
+        pipe_data["dma_ids"] = list(qs_object.dmas.values_list("id", flat=True))
+        pipe_data["dma_codes"] = list(qs_object.dmas.values_list("code", flat=True))
+        pipe_data["dma_names"] = list(qs_object.dmas.values_list("name", flat=True))
         pipe_data["geometry"] = qs_object.geometry
 
         return pipe_data

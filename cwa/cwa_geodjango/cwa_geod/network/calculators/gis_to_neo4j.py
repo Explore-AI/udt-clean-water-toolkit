@@ -36,6 +36,9 @@ class GisToNeo4J(GisToGraph):
         """
 
         def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
+            import pdb
+
+            pdb.set_trace()
             self.G.add_node(
                 node_id,
                 coords=pipe_data["geometry"].coords[0][0],

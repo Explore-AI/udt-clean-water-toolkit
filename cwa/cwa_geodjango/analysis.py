@@ -20,7 +20,7 @@ def cleanwater_gis2nx() -> None:
 
 def cleanwater_gis2neo4j() -> None:
     gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID)
-    neo4j_graph = gis_to_neo4j.create_network2()
+    neo4j_graph = gis_to_neo4j.create_network()
 
 
 # TODO: Deprecated. for test purposes only.
@@ -40,6 +40,9 @@ def main():
 
     if args.method == "gis2nx":
         cleanwater_gis2nx()
+
+    if args.method == "gis2neo4j":
+        cleanwater_gis2neo4j()
 
     if args.method == "createpipes":
         create_pipes_network()
