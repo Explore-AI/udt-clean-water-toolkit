@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.gdal.error import GDALException
+from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import TrunkMain
 from cwa_geod.utilities.models import DMA
 
@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = "Write Thames Water trunk mains layer data to sql"
 
     def add_arguments(self, parser):
-        parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
+        parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
         parser.add_argument("-x", "--index", type=int, help="Layer index")
 
     def handle(self, *args, **kwargs):
@@ -18,24 +18,29 @@ class Command(BaseCommand):
 
         ds = DataSource(zip_path)
 
-        trunk_main_layer = ds[layer_index]
+        print(
+            f"""There are {ds[layer_index].num_feat} features.
+            Large numbers of features will take a long time to save."""
+        )
 
-        layer_gis_ids = trunk_main_layer.get_fields("GISID")
-        layer_geometries = trunk_main_layer.get_geoms()
+        layer_mapping = {
+            "gid": "GISID",
+            "geometry": "MULTILINESTRING",
+        }
 
-        new_trunk_mains = []
-        for gid, geom in zip(layer_gis_ids, layer_geometries):
-            dmas = DMA.objects.filter(geometry__intersects=geom.wkt)
+        lm = LayerMapping(
+            TrunkMain, ds, layer_mapping, layer=layer_index, transform=False
+        )
+        lm.save(strict=True)
 
-            new_trunk_main = TrunkMain(gid=gid, geometry=geom, dma=dmas)
-            new_trunk_mains.append(new_trunk_main)
-            import pdb
+        for trunk_main in TrunkMain.objects.only("id", "geometry"):
+            wkt = trunk_main.geometry.wkt
 
-            pdb.set_trace()
-            if len(new_trunk_mains) == 100000:
-                TrunkMain.objects.bulk_create(new_trunk_mains)
-                new_trunk_mains = []
+            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
+                "pk", flat=True
+            )
 
-        # save the last set of data as it will probably be less than 100000
-        if new_trunk_mains:
-            TrunkMain.objects.bulk_create(new_trunk_mains)
+            if not dma_ids:
+                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+
+            trunk_main.dmas.add(*list(dma_ids))

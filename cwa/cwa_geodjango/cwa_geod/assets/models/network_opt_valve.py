@@ -9,3 +9,5 @@ class NetworkOptValve(models.Model):
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
     dmas = models.ManyToManyField(DMA, related_name="dma_network_opt_valves")
+    modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)

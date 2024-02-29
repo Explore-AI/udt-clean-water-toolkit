@@ -24,8 +24,8 @@ class Command(BaseCommand):
         # Create a dummy dma as not all assets fall within a dma
         DMA.objects.create(
             utility=utility,
-            name=r"N/A",
-            code=r"N/A",
+            name=r"undefined",
+            code=r"undefined",
             geometry=GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID),
         )
 
