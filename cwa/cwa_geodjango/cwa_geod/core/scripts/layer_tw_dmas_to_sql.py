@@ -21,8 +21,15 @@ class Command(BaseCommand):
 
         utility = Utility.objects.get_or_create(name="THAMES WATER")[0]
 
-        new_dmas = []
+        # Create a dummy dma as not all assets fall within a dma
+        DMA.objects.create(
+            utility=utility,
+            name=r"N/A",
+            code=r"N/A",
+            geometry=GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID),
+        )
 
+        new_dmas = []
         with open(dma_file) as infile:
             csv_reader = csv.reader(infile, delimiter=",")
             next(csv_reader)
