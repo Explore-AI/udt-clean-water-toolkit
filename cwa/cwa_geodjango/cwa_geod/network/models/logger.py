@@ -1,6 +1,5 @@
-from .point_node import PointNode
-from .hydrant import Hydrant
+from .point_asset import PointAsset
 
 
-class Logger(PointNode):
-    name = "hydrant"
+class Logger(PointAsset):
+    name = "logger"

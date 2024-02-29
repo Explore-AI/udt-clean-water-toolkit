@@ -1,5 +1,5 @@
-from .point_node import PointNode
+from .point_asset import PointAsset
 
 
-class Hydrant(PointNode):
+class Hydrant(PointAsset):
     name = "hydrant"
