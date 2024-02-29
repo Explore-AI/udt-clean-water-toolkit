@@ -14,13 +14,13 @@ class GisToNetworkX(GisToGraph):
         self.G: Graph = Graph()
         super().__init__(self.srid)
 
-    def create_network(self) -> Graph:
+    def create_network2(self) -> Graph:
         trunk_mains_nx: Graph = self.create_trunk_mains_graph()
         # TODO: geospatial join on all the node assets
         # TODO: add the nodes to the graph
         return trunk_mains_nx
 
-    def create_network2(self) -> Graph:
+    def create_network(self) -> Graph:
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
         distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
 
