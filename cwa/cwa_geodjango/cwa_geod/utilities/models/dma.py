@@ -13,6 +13,8 @@ class DMA(models.Model):
     geometry = models.MultiPolygonField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
+    modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
     def __str__(self):
         return self.code

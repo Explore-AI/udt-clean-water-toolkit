@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         print(
             f"""There are {ds[layer_index].num_feat} features.
-            Large numbers of features will take a long time to save."""
+Large numbers of features will take a long time to save."""
         )
 
         layer_mapping = {
