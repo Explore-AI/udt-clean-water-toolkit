@@ -118,6 +118,7 @@ class DistributionMainsController(GeoDjangoController):
             wkt=AsWKT("geometry"),
             **asset_subqueries
         )
+        return qs
 
     def get_geometry_queryset(self, properties=None) -> QuerySet:
         properties = properties or self.default_properties

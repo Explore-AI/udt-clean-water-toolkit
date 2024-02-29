@@ -33,7 +33,7 @@ class GisToNetworkX(GisToGraph):
     def _set_connected_asset_relations(
         self, pipe_data: dict, assets_data: list
     ) -> None:
-        node_id: str = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
+        node_id: str = f"{pipe_data['id']}-{pipe_data['gid']}"
         start_of_line_point: Point = Point(
             pipe_data["geometry"].coords[0][0], srid=DEFAULT_SRID
         )
@@ -44,9 +44,9 @@ class GisToNetworkX(GisToGraph):
 
             node_type: str = self._get_node_type(asset_model_name)
 
-            new_asset_id: int = asset["data"]["id"]
-            new_gisid: int = asset["data"]["gisid"]
-            new_node_id: str = f"{new_asset_id}-{new_gisid}"
+            new_id: int = asset["data"]["id"]
+            new_gid: int = asset["data"]["gid"]
+            new_node_id: str = f"{new_id}-{new_gid}"
 
             if not self.G.has_node(new_node_id):
                 self.G.add_node(
@@ -65,8 +65,8 @@ class GisToNetworkX(GisToGraph):
                 new_node_ids[-1],
                 new_node_id,
                 weight=edge_length,
-                asset_id=pipe_data["asset_id"],
-                gisid=pipe_data["gisid"],
+                id=pipe_data["id"],
+                gid=pipe_data["gid"],
                 normalised_position_on_pipe=asset["position"],
             )
             node_point_geometries.append(asset["intersection_point_geometry"])
@@ -74,7 +74,7 @@ class GisToNetworkX(GisToGraph):
 
     def _set_pipe_connected_asset_relations(self) -> None:
         def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
-            node_id: str = f"{pipe_data['asset_id']}-{pipe_data['gisid']}"
+            node_id: str = f"{pipe_data['id']}-{pipe_data['gid']}"
             if not self.G.has_node(node_id):
                 self.G.add_node(
                     node_id,
