@@ -73,6 +73,16 @@ class GisToNetworkX(GisToGraph):
             new_node_ids.append(new_node_id)
 
     def _set_pipe_connected_asset_relations(self) -> None:
+        """Connect pipes with related pipe and point assets.
+        Uses a map generator to operate on the pipe and asset
+        data.
+
+        Params:
+              None
+        Returns:
+              None
+        """
+
         def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
             node_id: str = f"{pipe_data['id']}-{pipe_data['gid']}"
             if not self.G.has_node(node_id):
@@ -91,17 +101,6 @@ class GisToNetworkX(GisToGraph):
                 self.all_asset_positions,
             )
         )
-
-        # pos = nx.get_node_attributes(self.G, "coords")
-        # # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
-        # nx.draw(
-        #     self.G,
-        #     pos=pos,
-        #     node_size=10,
-        #     linewidths=1,
-        #     font_size=15,
-        # )
-        # plt.show()
 
     def _create_networkx_graph(self) -> None:
         self._set_pipe_connected_asset_relations()

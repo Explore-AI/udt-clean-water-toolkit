@@ -23,6 +23,31 @@ class GisToNeo4J(GisToGraph):
 
     def _create_neo4j_graph(self) -> None:
         self._set_pipe_connected_asset_relations()
-        import pdb
 
-        pdb.set_trace()
+    def _set_pipe_connected_asset_relations(self) -> None:
+        """Connect pipes with related pipe and point assets.
+        Uses a map generator to operate on the pipe and asset
+        data.
+
+        Params:
+              None
+        Returns:
+              None
+        """
+
+        def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
+            self.G.add_node(
+                node_id,
+                coords=pipe_data["geometry"].coords[0][0],
+                **pipe_data,
+            )
+
+            self._set_connected_asset_relations(pipe_data, assets_data)
+
+        list(
+            map(
+                _map_pipe_connected_asset_relations,
+                self.all_pipe_data,
+                self.all_asset_positions,
+            )
+        )
