@@ -31,8 +31,7 @@ class Command(BaseCommand):
 
         new_trunk_mains = []
         for gid, geom in zip(layer_gis_ids, layer_geometries):
-            dma_wkt = "%s" % geom.wkt
-            dma_intersection = DMA.objects.filter(geometry__intersects=dma_wkt)
+            dma_intersection = DMA.objects.filter(geometry__intersects=geom.wkt)
 
             if not dma_intersection:
                 dma_intersection = 'NA'
