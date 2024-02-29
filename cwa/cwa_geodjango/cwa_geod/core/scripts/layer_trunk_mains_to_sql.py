@@ -13,10 +13,10 @@ class Command(BaseCommand):
         parser.add_argument("-x", "--index", type=int, help="Layer index")
 
     def handle(self, *args, **kwargs):
-        zip_path = kwargs.get("file")
+        ds_path = kwargs.get("file")
         layer_index = kwargs.get("index")
 
-        ds = DataSource(zip_path)
+        ds = DataSource(ds_path)
 
         print(
             f"""There are {ds[layer_index].num_feat} features.

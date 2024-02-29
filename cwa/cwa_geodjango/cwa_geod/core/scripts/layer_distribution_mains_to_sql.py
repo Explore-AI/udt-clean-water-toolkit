@@ -1,58 +1,46 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.gdal.error import GDALException
+from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import DistributionMain
 from cwa_geod.utilities.models import DMA
 
-DISTRIBUTION_MAINS_LAYER_INDEX = 10
-DMA_FIELD_NAME = "DMACODE"
-
 
 class Command(BaseCommand):
-    help = "Write Thames Water distritribition mains layer data to sql"
+    help = "Write Thames Water distribution mains layer data to sql"
 
     def add_arguments(self, parser):
-        parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
+        parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
+        parser.add_argument("-x", "--index", type=int, help="Layer index")
 
     def handle(self, *args, **kwargs):
-        zip_path = kwargs.get("file")
+        ds_path = kwargs.get("file")
+        layer_index = kwargs.get("index")
 
-        ds = DataSource(zip_path)
-        distribution_mains_layer = ds[DISTRIBUTION_MAINS_LAYER_INDEX]
+        ds = DataSource(ds_path)
 
         print(
-            f"There are {distribution_mains_layer.num_feat} features. Large numbers of features will take a long time to save."
+            f"""There are {ds[layer_index].num_feat} features.
+Large numbers of features will take a long time to save."""
         )
 
-        new_distribution_mains = []
-        for feature in distribution_mains_layer:
-            gisid = feature.get("GISID")
-            dma_code = feature.get(DMA_FIELD_NAME)
-            shape_length = feature.get("SHAPE_Length")
+        layer_mapping = {
+            "gid": "GISID",
+            "geometry": "MULTILINESTRING",
+        }
 
-            # Had to to the except as got this error:
-            # django.contrib.gis.gdal.error.GDALException: Invalid OGR Integer Type: 11
-            try:
-                geometry = feature.geom
-            except GDALException:
-                continue
+        lm = LayerMapping(
+            DistributionMain, ds, layer_mapping, layer=layer_index, transform=False
+        )
+        lm.save(strict=True, step=100000)
 
-            data = {
-                "gisid": gisid,
-                "dma": dma_code,
-                "shape_length": shape_length,
-                "geometry": geometry.wkt,
-            }
+        for distribution_main in DistributionMain.objects.only("id", "geometry"):
+            wkt = distribution_main.geometry.wkt
 
-            if not None in data.values():
-                dma = DMA.objects.get(code=data["dma"])
-                data["dma"] = dma
-                new_distribution_mains.append(DistributionMain(**data))
+            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
+                "pk", flat=True
+            )
 
-            if len(new_distribution_mains) == 100000:
-                DistributionMain.objects.bulk_create(new_distribution_mains)
-                new_distribution_mains = []
+            if not dma_ids:
+                dma_ids = [DMA.objects.get(name=r"undefined").pk]
 
-        # save the last set of data as it will probably be less than 100000
-        if new_distribution_mains:
-            DistributionMain.objects.bulk_create(new_distribution_mains)
+            distribution_main.dmas.add(*list(dma_ids))

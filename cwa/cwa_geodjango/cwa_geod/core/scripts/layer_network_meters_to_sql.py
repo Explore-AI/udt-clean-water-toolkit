@@ -1,70 +1,46 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import NetworkMeter
 from cwa_geod.utilities.models import DMA
-
-NETWORK_METERS_LAYER_INDEX = 26
-DMA_FIELD_NAME_1 = "DMA1CODE"
-DMA_FIELD_NAME_2 = "DMA2CODE"
 
 
 class Command(BaseCommand):
     help = "Write Thames Water network meter layer data to sql"
 
     def add_arguments(self, parser):
-        parser.add_argument("-f", "--file", type=str, help="Path to gdb.zip")
+        parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
+        parser.add_argument("-x", "--index", type=int, help="Layer index")
 
-    ### Attempt using bulk create
     def handle(self, *args, **kwargs):
-        zip_path = kwargs.get("file")
+        ds_path = kwargs.get("file")
+        layer_index = kwargs.get("index")
 
-        ds = DataSource(zip_path)
-        network_meter_layer = ds[NETWORK_METERS_LAYER_INDEX]
+        ds = DataSource(ds_path)
 
         print(
-            f"There are {network_meter_layer.num_feat} features. Large numbers of features will take a long time to save."
+            f"""There are {ds[layer_index].num_feat} features.
+Large numbers of features will take a long time to save."""
         )
 
-        layer_gisids = network_meter_layer.get_fields("GISID")
-        layer_shapes_x = network_meter_layer.get_fields("SHAPEX")
-        layer_shapes_y = network_meter_layer.get_fields("SHAPEY")
-        layer_dma_codes_1 = network_meter_layer.get_fields(DMA_FIELD_NAME_1)
-        layer_dma_codes_2 = network_meter_layer.get_fields(DMA_FIELD_NAME_2)
-        layer_geometries = network_meter_layer.get_geoms()
+        layer_mapping = {
+            "gid": "GISID",
+            "geometry": "POINT",
+        }
 
-        new_network_meters = []
-        zipped_layer_data = zip(
-            layer_gisids,
-            layer_shapes_x,
-            layer_shapes_y,
-            layer_dma_codes_1,
-            layer_dma_codes_2,
-            layer_geometries,
+        lm = LayerMapping(
+            NetworkMeter, ds, layer_mapping, layer=layer_index, transform=False
         )
+        lm.save(strict=True)
 
-        for (
-            layer_gisid,
-            layer_shape_x,
-            layer_shape_y,
-            layer_dma_code_1,
-            layer_dma_code_2,
-            layer_geometry,
-        ) in zipped_layer_data:
-            data = {
-                "gisid": layer_gisid,
-                "shape_x": layer_shape_x,
-                "shape_y": layer_shape_y,
-                "dma_1": layer_dma_code_1,
-                "dma_2": layer_dma_code_2,
-                "geometry": layer_geometry.wkt,
-            }
+        for network_meter in NetworkMeter.objects.only("id", "geometry"):
+            wkt = network_meter.geometry.wkt
 
-            if not None in data.values():
-                dma_1 = DMA.objects.get(code=data["dma_1"])
-                dma_2 = DMA.objects.get(code=data["dma_2"])
-                data["dma_1"] = dma_1
-                data["dma_2"] = dma_2
+            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
+                "pk", flat=True
+            )
 
-                new_network_meters.append(NetworkMeter(**data))
+            if not dma_ids:
+                dma_ids = [DMA.objects.get(name=r"undefined").pk]
 
-        NetworkMeter.objects.bulk_create(new_network_meters)
+            network_meter.dmas.add(*list(dma_ids))
