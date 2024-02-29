@@ -1,6 +1,5 @@
-from neomodel import StructuredRel, StringProperty
+from .pipe_relation import PipeRelation
 
 
-class TrunkMain(StructuredRel):
-    gid = StringProperty(unique_index=True, required=True)
-    dmas = StringProperty(unique_index=True, required=True)
+class TrunkMain(PipeRelation):
+    name = "trunk_main"
