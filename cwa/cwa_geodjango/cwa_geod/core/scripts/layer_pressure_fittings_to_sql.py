@@ -1,50 +1,46 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import PressureFitting
 from cwa_geod.utilities.models import DMA
-
-PRESSURE_FITTING_LAYER_INDEX = 19
-DMA_FIELD_NAME = "DMACODE"
 
 
 class Command(BaseCommand):
     help = "Write Thames Water pressure fitting layer data to sql"
 
     def add_arguments(self, parser):
-        parser.add_argument("-f", "--file", type=str, help="Path to vector data source")
-        parser.add_argument("-x", "--layer_index", type=str, help="Layer index")
+        parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
+        parser.add_argument("-x", "--index", type=int, help="Layer index")
 
-    ### Attempt using bulk create
     def handle(self, *args, **kwargs):
-        zip_path = kwargs.get("file")
-        layer_index = kwargs.get("layer_index")
+        ds_path = kwargs.get("file")
+        layer_index = kwargs.get("index")
 
-        ds = DataSource(zip_path)
-        pressure_fitting_layer = ds[layer_index]
-
-        layer_gisids = pressure_fitting_layer.get_fields("GISID")
-        layer_geometries = pressure_fitting_layer.get_geoms()
+        ds = DataSource(ds_path)
 
         print(
-            f"There are {pressure_fitting_layer.num_feat} features. Large numbers of features will take a long time to save."
+            f"""There are {ds[layer_index].num_feat} features.
+Large numbers of features will take a long time to save."""
         )
 
-        new_pressure_fittings = []
-        for (
-            layer_gisid,
-            layer_geometry,
-        ) in zip(
-            layer_gisids,
-            layer_geometries,
-        ):
-            data = {
-                "gisid": layer_gisid,
-                "geometry": layer_geometry.wkt,
-            }
+        layer_mapping = {
+            "gid": "GISID",
+            "geometry": "POINT",
+        }
 
-            if not None in data.values():
-                dma = DMA.objects.get(code=data["dma"])
-                data["dma"] = dma
-                new_pressure_fittings.append(PressureFitting(**data))
+        lm = LayerMapping(
+            PressureFitting, ds, layer_mapping, layer=layer_index, transform=False
+        )
+        lm.save(strict=True)
 
-        PressureFitting.objects.bulk_create(new_pressure_fittings)
+        for pressure_fitting in PressureFitting.objects.only("id", "geometry"):
+            wkt = pressure_fitting.geometry.wkt
+
+            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
+                "pk", flat=True
+            )
+
+            if not dma_ids:
+                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+
+            pressure_fitting.dmas.add(*list(dma_ids))
