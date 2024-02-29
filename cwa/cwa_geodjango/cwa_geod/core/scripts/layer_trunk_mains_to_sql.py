@@ -1,8 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.gdal.error import GDALException
 from cwa_geod.assets.models import TrunkMain
 from cwa_geod.utilities.models import DMA
+
+
+TRUNK_MAINS_LAYER_INDEX = 4
+DMA_FIELD_NAME = "DMACODE"
 
 
 class Command(BaseCommand):
@@ -13,6 +16,9 @@ class Command(BaseCommand):
         parser.add_argument("-x", "--index", type=int, help="Layer index")
 
     def handle(self, *args, **kwargs):
+        import pdb
+        pdb.set_trace()
+
         zip_path = kwargs.get("file")
         layer_index = kwargs.get("index")
 
@@ -25,17 +31,24 @@ class Command(BaseCommand):
 
         new_trunk_mains = []
         for gid, geom in zip(layer_gis_ids, layer_geometries):
-            dmas = DMA.objects.filter(geometry__intersects=geom.wkt)
+            dma_wkt = "%s" % geom.wkt
+            dma_intersection = DMA.objects.filter(geometry__intersects=dma_wkt)
 
-            new_trunk_main = TrunkMain(gid=gid, geometry=geom, dma=dmas)
+            if not dma_intersection:
+                dma_intersection = 'NA'
+
+            new_trunk_main = TrunkMain(gid=gid, geometry=geom.wkt)
+            new_trunk_main.save()
+
+            if dma_intersection and dma_intersection != 'NA':
+                new_trunk_main.dma.add(dma_intersection)
+                print(new_trunk_main.dma)
+
             new_trunk_mains.append(new_trunk_main)
-            import pdb
 
-            pdb.set_trace()
             if len(new_trunk_mains) == 100000:
                 TrunkMain.objects.bulk_create(new_trunk_mains)
                 new_trunk_mains = []
 
-        # save the last set of data as it will probably be less than 100000
         if new_trunk_mains:
             TrunkMain.objects.bulk_create(new_trunk_mains)
