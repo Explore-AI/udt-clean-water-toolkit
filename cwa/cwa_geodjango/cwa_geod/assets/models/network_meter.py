@@ -8,4 +8,4 @@ class NetworkMeter(models.Model):
     geometry = models.PointField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
-    dma = models.ManyToManyField(DMA, related_name="dma_network_meters")
+    dmas = models.ManyToManyField(DMA, related_name="dma_network_meters")

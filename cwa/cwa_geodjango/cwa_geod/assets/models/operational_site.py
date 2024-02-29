@@ -8,4 +8,4 @@ class OperationalSite(models.Model):
     geometry = models.PointField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
-    dma = models.ManyToManyField(DMA, related_name="dma_operational_sites")
+    dmas = models.ManyToManyField(DMA, related_name="dma_operational_sites")

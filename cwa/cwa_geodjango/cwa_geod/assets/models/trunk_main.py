@@ -8,4 +8,4 @@ class TrunkMain(models.Model):
     geometry = models.MultiLineStringField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
-    dma = models.ManyToManyField(DMA, related_name="dma_trunk_mains")
+    dmas = models.ManyToManyField(DMA, related_name="dma_trunk_mains")
