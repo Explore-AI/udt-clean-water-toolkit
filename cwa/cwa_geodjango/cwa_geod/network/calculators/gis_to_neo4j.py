@@ -1,6 +1,7 @@
 from django.db.models.query import QuerySet
 from . import GisToGraph
 from cwa_geod.core.constants import DEFAULT_SRID
+from ..models import TrunkMain, Hydrant, Logger, NetworkMeter
 
 
 class GisToNeo4J(GisToGraph):
@@ -21,12 +22,9 @@ class GisToNeo4J(GisToGraph):
 
         self._create_neo4j_graph()
 
-    def _create_neo4j_graph(self) -> None:
-        self._set_pipe_connected_asset_relations()
-
     def _set_pipe_connected_asset_relations(self) -> None:
         """Connect pipes with related pipe and point assets.
-        Uses a map generator to operate on the pipe and asset
+        Uses a map method to operate on the pipe and asset
         data.
 
         Params:
@@ -54,3 +52,6 @@ class GisToNeo4J(GisToGraph):
                 self.all_asset_positions,
             )
         )
+
+    def _create_neo4j_graph(self) -> None:
+        self._set_pipe_connected_asset_relations()

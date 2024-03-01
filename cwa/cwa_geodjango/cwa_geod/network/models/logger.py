@@ -2,4 +2,5 @@ from .point_asset import PointAsset
 
 
 class Logger(PointAsset):
-    name = "logger"
+    class Meta:
+        asset_name = "logger"
