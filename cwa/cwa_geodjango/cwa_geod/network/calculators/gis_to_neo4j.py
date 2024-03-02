@@ -1,4 +1,6 @@
+import json
 from django.db.models.query import QuerySet
+from neomodel.contrib.spatial_properties import NeomodelPoint
 from . import GisToGraph
 from cwa_geod.core.constants import DEFAULT_SRID
 from ..models import *
@@ -71,11 +73,22 @@ class GisToNeo4J(GisToGraph):
             pipe_end_gid = PointNode.nodes.filter(gid=pipe_gid).all(lazy=True)
 
             if not pipe_end_gid:
-                pipe_model = self.pipe_name_model_mapping(pipe_data["asset_name"])
+                dma_data = [
+                    {"code": dma_code, "name": dma_name}
+                    for dma_code, dma_name in zip(
+                        pipe_data["dma_codes"], pipe_data["dma_names"]
+                    )
+                ]
+
+                dma_json = json.dumps(dma_data)
+                coords = NeomodelPoint(pipe_data["geometry"].coords[0][0], crs="wgs-84")
                 import pdb
 
                 pdb.set_trace()
-                pipe_model.create(gid=pipe_gid)
+                PipeEnd.create({"gid": pipe_gid, "dmas": dma_json, "coords": coords})
+                import pdb
+
+                pdb.set_trace()
 
             # self.G.add_node(
             #     node_id,

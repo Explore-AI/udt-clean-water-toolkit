@@ -113,7 +113,8 @@ class GisToGraph(NetworkController):
         # end = timer()
         # print(end - start)
 
-    def _get_node_type(self, asset_name: str) -> str:
+    @staticmethod
+    def _get_node_type(asset_name: str) -> str:
         if asset_name in PIPE_ASSETS_MODEL_NAMES:
             return "pipe_end"
 
