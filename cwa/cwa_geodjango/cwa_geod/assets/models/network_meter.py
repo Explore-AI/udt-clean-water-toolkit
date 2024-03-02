@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from cwa_geod.utilities.models import DMA
-from cwa_geod.core.constants import DEFAULT_SRID
+from cwa_geod.core.constants import DEFAULT_SRID, NETWORK_METER_NAME
 
 
 class NetworkMeter(models.Model):
@@ -11,3 +11,6 @@ class NetworkMeter(models.Model):
     dmas = models.ManyToManyField(DMA, related_name="dma_network_meters")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
+
+    class Meta:
+        asset_name = NETWORK_METER_NAME
