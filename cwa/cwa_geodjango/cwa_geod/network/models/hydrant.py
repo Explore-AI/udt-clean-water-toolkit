@@ -1,6 +1,7 @@
 from .point_asset import PointAsset
+from cwa_geod.core.constants import HYDRANT_NAME
 
 
 class Hydrant(PointAsset):
-    class Meta:
-        asset_name = "hydrant"
+    class AssetMeta:
+        asset_name = HYDRANT_NAME

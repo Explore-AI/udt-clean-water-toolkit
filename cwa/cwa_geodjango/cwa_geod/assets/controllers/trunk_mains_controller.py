@@ -42,13 +42,17 @@ class TrunkMainsController(GeoDjangoController):
     def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
-        ).values(json=JSONObject(**json_fields, asset_name=Value(qs.model.asset_name)))
+        ).values(
+            json=JSONObject(
+                **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
+            )
+        )
         return subquery
 
     def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(
-                **json_fields, asset_name=Value(self.model.Meta.asset_name_)
+                **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
             )
         )
         return subquery
@@ -113,7 +117,7 @@ class TrunkMainsController(GeoDjangoController):
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.prefetch_related("dmas").annotate(
-            asset_name=Value(self.model.Meta.asset_name),
+            asset_name=Value(self.model.AssetMeta.asset_name),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
             **asset_subqueries

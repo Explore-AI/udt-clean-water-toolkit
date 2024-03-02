@@ -52,7 +52,7 @@ class GisToGraph(NetworkController):
         pipe_data: dict = {}
         pipe_data["id"] = qs_object.id
         pipe_data["gid"] = qs_object.gid
-        pipe_data["asset_model_name"] = qs_object.asset_model_name
+        pipe_data["asset_name"] = qs_object.asset_name
         pipe_data["length"] = qs_object.length
         pipe_data["wkt"] = qs_object.wkt
         pipe_data["dma_ids"] = list(qs_object.dmas.values_list("id", flat=True))
@@ -113,8 +113,8 @@ class GisToGraph(NetworkController):
         # end = timer()
         # print(end - start)
 
-    def _get_node_type(self, asset_model_name: str) -> str:
-        if asset_model_name in PIPE_ASSETS_MODEL_NAMES:
+    def _get_node_type(self, asset_name: str) -> str:
+        if asset_name in PIPE_ASSETS_MODEL_NAMES:
             return "pipe_end"
 
         return "point_asset"

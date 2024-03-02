@@ -1,5 +1,5 @@
 from django.db import models
-from cwa_geod.config.settings import UTILITIES
+from cwa_geod.core.constants import UTILITIES
 
 
 class Utility(models.Model):

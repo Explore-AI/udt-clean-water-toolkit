@@ -40,9 +40,9 @@ class GisToNetworkX(GisToGraph):
         node_point_geometries: list = [start_of_line_point]
         new_node_ids: list = [node_id]
         for asset in assets_data:
-            asset_model_name: str = asset["data"]["asset_model_name"]
+            asset_name: str = asset["data"]["asset_name"]
 
-            node_type: str = self._get_node_type(asset_model_name)
+            node_type: str = self._get_node_type(asset_name)
 
             new_id: int = asset["data"]["id"]
             new_gid: int = asset["data"]["gid"]

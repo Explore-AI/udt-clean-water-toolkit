@@ -12,5 +12,5 @@ class NetworkMeter(models.Model):
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
-    class Meta:
+    class AssetMeta:
         asset_name = NETWORK_METER_NAME

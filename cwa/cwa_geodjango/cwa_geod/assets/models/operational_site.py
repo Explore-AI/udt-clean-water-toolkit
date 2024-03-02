@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
-from cwa_geod.core.constants import DEFAULT_SRID
-from cwa_geod.utilities.models import DMA, OPERATIONAL_SITE_NAME
+from cwa_geod.core.constants import DEFAULT_SRID, OPERATIONAL_SITE_NAME
+from cwa_geod.utilities.models import DMA
 
 
 class OperationalSite(models.Model):
@@ -12,5 +12,5 @@ class OperationalSite(models.Model):
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
-    class Meta:
+    class AssetMeta:
         asset_name = OPERATIONAL_SITE_NAME
