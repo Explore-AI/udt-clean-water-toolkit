@@ -91,8 +91,6 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-DEFAULT_SRID = 27700  # TODO: deprectated. DEFAULT_SRID now located in core.constants
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -106,11 +104,6 @@ LOGGING = {
         "level": "INFO",
     },
 }
-
-UTILITIES = [
-    ("THAMES WATER", "thames_water"),
-    ("SEVERN TRENT WATER", "severn_trent_water"),
-]
 
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEBUG = True

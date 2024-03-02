@@ -1,6 +1,6 @@
 import setup  # Required. Do not remove.
 import argparse
-from cwa_geod.config.settings import DEFAULT_SRID
+from cwa_geod.core.constants import DEFAULT_SRID
 from cwa_geod.network.calculators import GisToNetworkX
 from cwa_geod.network.calculators import GisToNeo4J
 

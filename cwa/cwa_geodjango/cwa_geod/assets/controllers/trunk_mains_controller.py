@@ -17,7 +17,7 @@ from cwa_geod.assets.models import (
     NetworkMeter,
     NetworkOptValve,
 )
-from cwa_geod.config.settings import DEFAULT_SRID
+from cwa_geod.core.constants import DEFAULT_SRID
 
 
 class TrunkMainsController(GeoDjangoController):
@@ -42,14 +42,14 @@ class TrunkMainsController(GeoDjangoController):
     def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
-        ).values(
-            json=JSONObject(**json_fields, asset_model_name=Value(qs.model.__name__))
-        )
+        ).values(json=JSONObject(**json_fields, asset_name=Value(qs.model.asset_name)))
         return subquery
 
     def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
-            json=JSONObject(**json_fields, asset_model_name=Value(qs.model.__name__))
+            json=JSONObject(
+                **json_fields, asset_name=Value(self.model.Meta.asset_name_)
+            )
         )
         return subquery
 
@@ -113,7 +113,7 @@ class TrunkMainsController(GeoDjangoController):
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.prefetch_related("dmas").annotate(
-            asset_model_name=Value("TrunkMain"),
+            asset_name=Value(self.model.Meta.asset_name),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
             **asset_subqueries

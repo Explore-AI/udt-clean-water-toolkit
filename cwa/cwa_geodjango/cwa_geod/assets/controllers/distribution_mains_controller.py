@@ -17,7 +17,7 @@ from cwa_geod.assets.models import (
     NetworkMeter,
     NetworkOptValve,
 )
-from cwa_geod.config.settings import DEFAULT_SRID
+from cwa_geod.core.constants import DEFAULT_SRID
 
 
 class DistributionMainsController(GeoDjangoController):

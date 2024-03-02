@@ -1,5 +1,5 @@
 from django.contrib.gis.db import models
-from cwa_geod.config.settings import DEFAULT_SRID
+from cwa_geod.core.constants import DEFAULT_SRID
 from cwa_geod.utilities.models import DMA
 
 
