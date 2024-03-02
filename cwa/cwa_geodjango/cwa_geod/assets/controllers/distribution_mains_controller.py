@@ -5,18 +5,7 @@ from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWKT
 from django.contrib.postgres.expressions import ArraySubquery
 from cleanwater.controllers import GeoDjangoController
-from cwa_geod.assets.models import (
-    TrunkMain,
-    DistributionMain,
-    Logger,
-    Hydrant,
-    PressureFitting,
-    PressureControlValve,
-    OperationalSite,
-    Chamber,
-    NetworkMeter,
-    NetworkOptValve,
-)
+from cwa_geod.assets.models import *
 from cwa_geod.core.constants import DEFAULT_SRID
 
 

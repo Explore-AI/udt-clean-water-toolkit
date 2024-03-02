@@ -1,3 +1,6 @@
+### For storing constants only
+### Do not import app objects into this file to avoid circular imports
+
 DEFAULT_SRID = 27700
 
 TRUNK_MAIN_NAME = "trunk_main"

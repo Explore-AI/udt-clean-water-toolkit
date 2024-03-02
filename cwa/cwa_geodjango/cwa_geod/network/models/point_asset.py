@@ -1,8 +1,6 @@
-from neomodel import StructuredNode, StringProperty, Relationship
-from .trunk_main import TrunkMain
+from neomodel import StringProperty
+from .point_node import PointNode
 
 
-class PointAsset(StructuredNode):
-    gid = StringProperty(unique_index=True, required=True)
+class PointAsset(PointNode):
     dmas = StringProperty(required=True)
-    trunk_main = Relationship("PointNode", "TRUNKMAIN", model=TrunkMain)

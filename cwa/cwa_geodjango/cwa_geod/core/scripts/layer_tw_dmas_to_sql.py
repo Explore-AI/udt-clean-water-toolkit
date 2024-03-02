@@ -19,7 +19,7 @@ class Command(BaseCommand):
         dma_code_idx = 2
         geom_column_idx = 3
 
-        utility = Utility.objects.get_or_create(name="THAMES WATER")[0]
+        utility, _ = Utility.objects.get_or_create(name="THAMES WATER")
 
         # Create a dummy dma as not all assets fall within a dma
         DMA.objects.create(
