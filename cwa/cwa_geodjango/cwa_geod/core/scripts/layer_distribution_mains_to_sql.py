@@ -3,6 +3,8 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import DistributionMain
 from cwa_geod.utilities.models import DMA
+from django.db import transaction, IntegrityError
+from django.core.exceptions import ValidationError
 
 
 class Command(BaseCommand):
@@ -31,7 +33,18 @@ Large numbers of features will take a long time to save."""
         lm = LayerMapping(
             DistributionMain, ds, layer_mapping, layer=layer_index, transform=False
         )
-        lm.save(strict=True, step=100000)
+        lyr = ds[layer_index]
+        for feat in lyr:
+            gid = feat.get("GISID")
+            if DistributionMain.objects.filter(gid=gid).exists():
+                continue
+
+            try:
+                lm.save(strict=True, fid_range=(feat.fid, feat.fid + 1), step=1000000)
+            except IntegrityError as err:
+                if "identifier" in str(err):
+                    raise ValidationError({"identifier": "This identifier is already in use."}) from err
+                raise err
 
         for distribution_main in DistributionMain.objects.only("id", "geometry"):
             wkt = distribution_main.geometry.wkt
