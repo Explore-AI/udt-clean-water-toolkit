@@ -23,6 +23,10 @@ PRESSURE_CONTROL_VALVE_NAME = "pressure_control_valve"
 
 PRESSURE_FITTING_NAME = "pressure_fitting"
 
+PIPE_END__NAME = "pipe_end"
+
+POINT_ASSET__NAME = "point_asset"
+
 PIPE_ASSETS__NAMES = [
     (TRUNK_MAIN__NAME, "Trunk Main"),
     (DISTRIBUTION_MAIN__NAME, "Distribution Main"),

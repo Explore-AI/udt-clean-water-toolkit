@@ -8,3 +8,7 @@ class PipeEnd(PointNode):
 
     class AssetMeta:
         asset_name = "pipe_end"
+
+    @staticmethod
+    def get_all_pipe_models():
+        pass

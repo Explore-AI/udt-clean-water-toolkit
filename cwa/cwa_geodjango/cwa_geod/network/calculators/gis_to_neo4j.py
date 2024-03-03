@@ -1,21 +1,16 @@
 import json
 from django.db.models.query import QuerySet
 from neomodel.contrib.spatial_properties import NeomodelPoint
+from cleanwater.exceptions import InvalidNodeException, InvalidPipeException
 from . import GisToGraph
-from cwa_geod.core.constants import DEFAULT_SRID
-from ..models import *
-from ..models.point_node import PointNode
-
-ASSET_MODELS = [
-    Logger,
-    Hydrant,
-    PressureFitting,
-    PressureControlValve,
-    OperationalSite,
-    Chamber,
-    NetworkMeter,
-    NetworkOptValve,
-]
+from cwa_geod.core.constants import (
+    DEFAULT_SRID,
+    TRUNK_MAIN__NAME,
+    DISTRIBUTION_MAIN__NAME,
+    PIPE_END__NAME,
+    POINT_ASSET__NAME,
+)
+from ..models import PointAsset, PipeEnd
 
 
 class GisToNeo4J(GisToGraph):
@@ -37,14 +32,6 @@ class GisToNeo4J(GisToGraph):
         self._create_neo4j_graph()
 
     @staticmethod
-    def asset_name_model_mapping(asset_name):
-        for model in ASSET_MODELS:
-            if model.AssetMeta.asset_name == asset_name:
-                return model
-
-        return None
-
-    @staticmethod
     def build_dma_data_as_json(dma_codes, dma_names):
         dma_data = [
             {"code": dma_code, "name": dma_name}
@@ -56,58 +43,73 @@ class GisToNeo4J(GisToGraph):
     def check_node_exists(self, asset_name, gid):
         node_type: str = self._get_node_type(asset_name)
 
-        if node_type == "pipe_end":
+        if node_type == PIPE_END__NAME:
             node = PipeEnd.nodes.get_or_none(pipe_type=asset_name, gid=gid)
-            return node
-        elif node_type == "point_asset":
-            asset_model = self.asset_name_model_mapping(asset_name)
-            import pdb
+            return node, node_type, None
+        elif node_type == POINT_ASSET__NAME:
+            asset_model = PointAsset.asset_name_model_mapping(asset_name)
 
-            pdb.set_trace()
+            node = asset_model.nodes.get_or_none(gid=gid)
+            return node, node_type, asset_model
+        else:
+            InvalidNodeException(
+                f"Invalid node detected: {node_type}. Valid nodes are {PIPE_END__NAME} or {POINT_ASSET__NAME}"
+            )
 
-            node = asset_model.nodes.get_or_none(gid=gid).all(lazy=True)
-            return node
+    @staticmethod
+    def _connect_nodes(start_node, end_node, pipe_name, relation_data):
+        if pipe_name == TRUNK_MAIN__NAME:
+            start_node.trunk_main.connect(end_node, relation_data)
+        elif pipe_name == DISTRIBUTION_MAIN__NAME:
+            start_node.distrbution_main.connect(end_node, relation_data)
+        else:
+            InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
 
     def _set_connected_asset_relations(
-        self, pipe_data: dict, assets_data: list
+        self, pipe_data: dict, assets_data: list, pipe_end
     ) -> None:
+        start_node = pipe_end
+
         for asset in assets_data:
-            asset_name: str = asset["data"]["asset_name"]
-
             gid: int = asset["data"]["gid"]
+            asset_name: str = asset["data"]["asset_name"]
+            dma_data = self.build_dma_data_as_json(
+                asset["data"]["dma_codes"], asset["data"]["dma_names"]
+            )
 
-            node = self.check_node_exists(asset_name, gid)
-            import pdb
+            node, node_type, asset_model = self.check_node_exists(asset_name, gid)
 
-            pdb.set_trace()
-            if not node:
-                dma_data = self.build_dma_data_as_json(
-                    asset["dma_codes"], asset["dma_names"]
+            if not node and node_type == PIPE_END__NAME:
+                new_pipe_end = PipeEnd.create(
+                    {"gid": gid, "dmas": dma_data, "pipe_type": asset_name}
+                )[0]
+                self._connect_nodes(
+                    start_node,
+                    new_pipe_end,
+                    pipe_data["asset_name"],
+                    {"dmas": dma_data, "gid": gid, "weight": 1},
                 )
-                PipeEnd.create({"gid": gid, "dmas": dma_data, "pipe_type": pipe_type})
+            elif not node and node_type == POINT_ASSET__NAME:
+                new_point_asset = asset_model.create({"gid": gid, "dmas": dma_data})[0]
 
-                # self.G.add_node(
-                #     new_node_id,
-                #     position=asset["position"],
-                #     node_type=node_type,
-                #     coords=asset["intersection_point_geometry"].coords,
-                #     **asset["data"],
+                # edge_length: float = node_point_geometries[-1].distance(
+                #     asset["intersection_point_geometry"]
                 # )
 
-            edge_length: float = node_point_geometries[-1].distance(
-                asset["intersection_point_geometry"]
-            )
+                # TODO: add wieght to relation based on edge length
+                self._connect_nodes(
+                    start_node,
+                    new_point_asset,
+                    pipe_data["asset_name"],
+                    {"dmas": dma_data, "gid": gid, "weight": 1},
+                )
 
-            self.G.add_edge(
-                new_node_ids[-1],
-                new_node_id,
-                weight=edge_length,
-                id=pipe_data["id"],
-                gid=pipe_data["gid"],
-                normalised_position_on_pipe=asset["position"],
-            )
-            node_point_geometries.append(asset["intersection_point_geometry"])
-            new_node_ids.append(new_node_id)
+                start_node = new_point_asset
+
+            elif node_type not in [PIPE_END__NAME, POINT_ASSET__NAME]:
+                raise InvalidNodeException(
+                    f"Invalid node detected: {node_type}. Valid nodes are 'pipe_end' or 'point_asset'"
+                )
 
     def _set_pipe_connected_asset_relations(self) -> None:
         """Connect pipes with related pipe and point assets.
@@ -125,21 +127,19 @@ class GisToNeo4J(GisToGraph):
             pipe_type = pipe_data.get("asset_name")
 
             #
-            pipe_end_ids = PipeEnd.nodes.filter(pipe_type=pipe_type, gid=pipe_gid).all(
-                lazy=True
-            )
+            pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
 
-            if not pipe_end_ids:
+            if not pipe_end:
                 dma_data = self.build_dma_data_as_json(
                     pipe_data["dma_codes"], pipe_data["dma_names"]
                 )
                 coords = NeomodelPoint(pipe_data["geometry"].coords[0][0], crs="wgs-84")
 
-                PipeEnd.create(
+                pipe_end = PipeEnd.create(
                     {"gid": pipe_gid, "dmas": dma_data, "pipe_type": pipe_type}
-                )
+                )[0]
 
-            self._set_connected_asset_relations(pipe_data, assets_data)
+            self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
 
         list(
             map(
@@ -150,14 +150,4 @@ class GisToNeo4J(GisToGraph):
         )
 
     def _create_neo4j_graph(self) -> None:
-        # for asset_positions in self.all_asset_positions:
-        #     for asset_data in asset_positions:
-        #         if (
-        #             asset_data["data"]["id"]
-        #             in [21, 53, 60, 62, 81, 85, 87, 201, 213, 241, 252, 277, 538]
-        #             and asset_data["data"]["asset_name"] == "trunk_main"
-        #         ):
-        #             import pdb
-
-        #             pdb.set_trace()
         self._set_pipe_connected_asset_relations()

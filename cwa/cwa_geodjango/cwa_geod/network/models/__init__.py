@@ -9,3 +9,4 @@ from .operational_site import OperationalSite
 from .pressure_control_valve import PressureControlValve
 from .pressure_fitting import PressureFitting
 from .pipe_end import PipeEnd
+from .point_asset import PointAsset
