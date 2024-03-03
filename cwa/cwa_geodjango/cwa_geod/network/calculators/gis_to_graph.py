@@ -92,7 +92,7 @@ class GisToGraph(NetworkController):
         start: float = timer()
         # TODO: fix slice approach
         self.all_pipe_data, self.all_asset_positions = list(
-            zip(*map(self._map_relative_positions_calc, pipes_qs[:100]))
+            zip(*map(self._map_relative_positions_calc, pipes_qs[:1000]))
         )
         end: float = timer()
         print(end - start)

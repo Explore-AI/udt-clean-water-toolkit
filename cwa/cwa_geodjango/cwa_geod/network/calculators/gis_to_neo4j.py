@@ -44,6 +44,15 @@ class GisToNeo4J(GisToGraph):
 
         return None
 
+    @staticmethod
+    def build_dma_data_as_json(dma_codes, dma_names):
+        dma_data = [
+            {"code": dma_code, "name": dma_name}
+            for dma_code, dma_name in zip(dma_codes, dma_names)
+        ]
+
+        return json.dumps(dma_data)
+
     def check_node_exists(self, asset_name, gid):
         node_type: str = self._get_node_type(asset_name)
 
@@ -67,13 +76,16 @@ class GisToNeo4J(GisToGraph):
 
             gid: int = asset["data"]["gid"]
 
-            self.check_node_exists(asset_name, gid)
+            node = self.check_node_exists(asset_name, gid)
             import pdb
 
             pdb.set_trace()
-            PipeEnd.create({"gid": gid, "dmas": dma_json, "pipe_type": pipe_type})
-            if not node_ids:
-                pass
+            if not node:
+                dma_data = self.build_dma_data_as_json(
+                    asset["dma_codes"], asset["dma_names"]
+                )
+                PipeEnd.create({"gid": gid, "dmas": dma_data, "pipe_type": pipe_type})
+
                 # self.G.add_node(
                 #     new_node_id,
                 #     position=asset["position"],
@@ -118,18 +130,13 @@ class GisToNeo4J(GisToGraph):
             )
 
             if not pipe_end_ids:
-                dma_data = [
-                    {"code": dma_code, "name": dma_name}
-                    for dma_code, dma_name in zip(
-                        pipe_data["dma_codes"], pipe_data["dma_names"]
-                    )
-                ]
-
-                dma_json = json.dumps(dma_data)
+                dma_data = self.build_dma_data_as_json(
+                    pipe_data["dma_codes"], pipe_data["dma_names"]
+                )
                 coords = NeomodelPoint(pipe_data["geometry"].coords[0][0], crs="wgs-84")
 
                 PipeEnd.create(
-                    {"gid": pipe_gid, "dmas": dma_json, "pipe_type": pipe_type}
+                    {"gid": pipe_gid, "dmas": dma_data, "pipe_type": pipe_type}
                 )
 
             self._set_connected_asset_relations(pipe_data, assets_data)
@@ -143,4 +150,14 @@ class GisToNeo4J(GisToGraph):
         )
 
     def _create_neo4j_graph(self) -> None:
+        # for asset_positions in self.all_asset_positions:
+        #     for asset_data in asset_positions:
+        #         if (
+        #             asset_data["data"]["id"]
+        #             in [21, 53, 60, 62, 81, 85, 87, 201, 213, 241, 252, 277, 538]
+        #             and asset_data["data"]["asset_name"] == "trunk_main"
+        #         ):
+        #             import pdb
+
+        #             pdb.set_trace()
         self._set_pipe_connected_asset_relations()
