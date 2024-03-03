@@ -10,7 +10,7 @@ from cwa_geod.assets.models.trunk_main import TrunkMain
 from cwa_geod.assets.controllers import DistributionMainsController
 from cwa_geod.core.constants import (
     DEFAULT_SRID,
-    PIPE_ASSETS_MODEL_NAMES,
+    PIPE_ASSETS__NAMES,
     GEOS_LINESTRING_TYPES,
 )
 
@@ -115,7 +115,7 @@ class GisToGraph(NetworkController):
 
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
-        if asset_name in PIPE_ASSETS_MODEL_NAMES:
+        if asset_name in dict(PIPE_ASSETS__NAMES).keys():
             return "pipe_end"
 
         return "point_asset"

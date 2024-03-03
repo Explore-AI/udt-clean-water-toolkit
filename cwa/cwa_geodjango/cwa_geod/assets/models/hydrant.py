@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from cwa_geod.utilities.models import DMA
-from cwa_geod.core.constants import DEFAULT_SRID, HYDRANT_NAME
+from cwa_geod.core.constants import DEFAULT_SRID, HYDRANT__NAME
 
 
 class Hydrant(models.Model):
@@ -13,4 +13,4 @@ class Hydrant(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
     class AssetMeta:
-        asset_name = HYDRANT_NAME
+        asset_name = HYDRANT__NAME

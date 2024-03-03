@@ -6,11 +6,6 @@ from cwa_geod.core.constants import DEFAULT_SRID
 from ..models import *
 from ..models.point_node import PointNode
 
-PIPE_MODELS = [
-    TrunkMain,
-    DistributionMain,
-]
-
 ASSET_MODELS = [
     Logger,
     Hydrant,
@@ -42,20 +37,65 @@ class GisToNeo4J(GisToGraph):
         self._create_neo4j_graph()
 
     @staticmethod
-    def pipe_name_model_mapping(asset_name):
-        for model in PIPE_MODELS:
-            if model.AssetMeta.asset_name == asset_name:
-                return model
-
-        return None
-
-    @staticmethod
     def asset_name_model_mapping(asset_name):
         for model in ASSET_MODELS:
             if model.AssetMeta.asset_name == asset_name:
                 return model
 
         return None
+
+    def check_node_exists(self, asset_name, gid):
+        node_type: str = self._get_node_type(asset_name)
+
+        if node_type == "pipe_end":
+            node = PipeEnd.nodes.get_or_none(pipe_type=asset_name, gid=gid)
+            return node
+        elif node_type == "point_asset":
+            asset_model = self.asset_name_model_mapping(asset_name)
+            import pdb
+
+            pdb.set_trace()
+
+            node = asset_model.nodes.get_or_none(gid=gid).all(lazy=True)
+            return node
+
+    def _set_connected_asset_relations(
+        self, pipe_data: dict, assets_data: list
+    ) -> None:
+        for asset in assets_data:
+            asset_name: str = asset["data"]["asset_name"]
+
+            gid: int = asset["data"]["gid"]
+
+            self.check_node_exists(asset_name, gid)
+            import pdb
+
+            pdb.set_trace()
+            PipeEnd.create({"gid": gid, "dmas": dma_json, "pipe_type": pipe_type})
+            if not node_ids:
+                pass
+                # self.G.add_node(
+                #     new_node_id,
+                #     position=asset["position"],
+                #     node_type=node_type,
+                #     coords=asset["intersection_point_geometry"].coords,
+                #     **asset["data"],
+                # )
+
+            edge_length: float = node_point_geometries[-1].distance(
+                asset["intersection_point_geometry"]
+            )
+
+            self.G.add_edge(
+                new_node_ids[-1],
+                new_node_id,
+                weight=edge_length,
+                id=pipe_data["id"],
+                gid=pipe_data["gid"],
+                normalised_position_on_pipe=asset["position"],
+            )
+            node_point_geometries.append(asset["intersection_point_geometry"])
+            new_node_ids.append(new_node_id)
 
     def _set_pipe_connected_asset_relations(self) -> None:
         """Connect pipes with related pipe and point assets.
@@ -70,9 +110,14 @@ class GisToNeo4J(GisToGraph):
 
         def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
             pipe_gid = pipe_data.get("gid")
-            pipe_end_gid = PointNode.nodes.filter(gid=pipe_gid).all(lazy=True)
+            pipe_type = pipe_data.get("asset_name")
 
-            if not pipe_end_gid:
+            #
+            pipe_end_ids = PipeEnd.nodes.filter(pipe_type=pipe_type, gid=pipe_gid).all(
+                lazy=True
+            )
+
+            if not pipe_end_ids:
                 dma_data = [
                     {"code": dma_code, "name": dma_name}
                     for dma_code, dma_name in zip(
@@ -82,19 +127,10 @@ class GisToNeo4J(GisToGraph):
 
                 dma_json = json.dumps(dma_data)
                 coords = NeomodelPoint(pipe_data["geometry"].coords[0][0], crs="wgs-84")
-                import pdb
 
-                pdb.set_trace()
-                PipeEnd.create({"gid": pipe_gid, "dmas": dma_json, "coords": coords})
-                import pdb
-
-                pdb.set_trace()
-
-            # self.G.add_node(
-            #     node_id,
-            #     coords=pipe_data["geometry"].coords[0][0],
-            #     **pipe_data,
-            # )
+                PipeEnd.create(
+                    {"gid": pipe_gid, "dmas": dma_json, "pipe_type": pipe_type}
+                )
 
             self._set_connected_asset_relations(pipe_data, assets_data)
 

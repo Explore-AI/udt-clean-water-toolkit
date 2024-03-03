@@ -3,15 +3,15 @@
 
 DEFAULT_SRID = 27700
 
-TRUNK_MAIN_NAME = "trunk_main"
+TRUNK_MAIN__NAME = "trunk_main"
 
-DISTRIBUTION_MAIN_NAME = "distribution_main"
+DISTRIBUTION_MAIN__NAME = "distribution_main"
 
-CHAMBER_NAME = "chamber"
+CHAMBER__NAME = "chamber"
 
-HYDRANT_NAME = "hydrant"
+HYDRANT__NAME = "hydrant"
 
-LOGGER_NAME = "logger"
+LOGGER__NAME = "logger"
 
 NETWORK_METER_NAME = "network_meter"
 
@@ -23,7 +23,12 @@ PRESSURE_CONTROL_VALVE_NAME = "pressure_control_valve"
 
 PRESSURE_FITTING_NAME = "pressure_fitting"
 
-PIPE_ASSETS_MODEL_NAMES = [TRUNK_MAIN_NAME, DISTRIBUTION_MAIN_NAME]
+PIPE_ASSETS__NAMES = [
+    (TRUNK_MAIN__NAME, "Trunk Main"),
+    (DISTRIBUTION_MAIN__NAME, "Distribution Main"),
+]
+
+POINT_ASSETS__NAMES = [(), ()]
 
 GEOS_LINESTRING_TYPES = [1, 5]
 

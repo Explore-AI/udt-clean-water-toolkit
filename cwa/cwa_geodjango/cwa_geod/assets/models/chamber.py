@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from cwa_geod.utilities.models import DMA
-from cwa_geod.core.constants import DEFAULT_SRID, CHAMBER_NAME
+from cwa_geod.core.constants import DEFAULT_SRID, CHAMBER__NAME
 
 
 class Chamber(models.Model):
@@ -13,4 +13,4 @@ class Chamber(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
     class AssetMeta:
-        asset_name = CHAMBER_NAME
+        asset_name = CHAMBER__NAME

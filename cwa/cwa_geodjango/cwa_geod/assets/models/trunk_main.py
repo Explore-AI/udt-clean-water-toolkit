@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from cwa_geod.utilities.models import DMA
-from cwa_geod.core.constants import DEFAULT_SRID, TRUNK_MAIN_NAME
+from cwa_geod.core.constants import DEFAULT_SRID, TRUNK_MAIN__NAME
 
 
 class TrunkMain(models.Model):
@@ -13,4 +13,4 @@ class TrunkMain(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
     class AssetMeta:
-        asset_name = TRUNK_MAIN_NAME
+        asset_name = TRUNK_MAIN__NAME

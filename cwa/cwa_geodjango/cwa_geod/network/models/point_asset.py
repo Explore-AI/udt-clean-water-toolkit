@@ -1,3 +1,4 @@
+from neomodel import StringProperty
 from .point_node import PointNode
 
 
