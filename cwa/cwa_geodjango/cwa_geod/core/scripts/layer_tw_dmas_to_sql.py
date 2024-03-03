@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.gis.geos import GEOSGeometry
 from cwa_geod.utilities.models import DMA, Utility
 from cwa_geod.core.constants import DEFAULT_SRID
+from django.db.models import Q
 
 
 class Command(BaseCommand):
@@ -19,14 +20,16 @@ class Command(BaseCommand):
         dma_code_idx = 2
         geom_column_idx = 3
 
-        utility, _ = Utility.objects.get_or_create(name="THAMES WATER")
+        utility = Utility.objects.get_or_create(name="THAMES WATER")[0]
 
         # Create a dummy dma as not all assets fall within a dma
-        DMA.objects.create(
+        dummy_dma, created = DMA.objects.get_or_create(
             utility=utility,
-            name=r"undefined",
-            code=r"undefined",
-            geometry=GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID),
+            name="undefined",
+            code="undefined",
+            defaults={
+                'geometry': GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID)
+            }
         )
 
         new_dmas = []
@@ -36,6 +39,12 @@ class Command(BaseCommand):
 
             for row in csv_reader:
                 dma_geom = GEOSGeometry(row[geom_column_idx], srid=DEFAULT_SRID)
+                dma_name = row[dma_name_idx]
+                dma_code = row[dma_code_idx]
+                if dma_name == "undefined" and dma_code == "undefined":
+                    continue
+                if DMA.objects.filter(Q(name=dma_name) | Q(code=dma_code)).exists():
+                    continue
 
                 new_dma = DMA(
                     utility=utility,
@@ -46,9 +55,9 @@ class Command(BaseCommand):
 
                 new_dmas.append(new_dma)
                 if len(new_dmas) == 100000:
-                    Dma.objects.bulk_create(new_dmas)
+                    DMA.objects.bulk_create(new_dmas, ignore_conflicts=True)
                     new_dmas = []
 
         # save the last set of data as it will probably be less than 100000
         if new_dmas:
-            DMA.objects.bulk_create(new_dmas)
+            DMA.objects.bulk_create(new_dmas, ignore_conflicts=True)
