@@ -27,9 +27,6 @@ Large numbers of features will take a long time to save."""
             "gid": "GISID",
             "geometry": "POINT",
         }
-        import pdb
-
-        pdb.set_trace()
 
         lm = LayerMapping(
             NetworkOptValve, ds, layer_mapping, layer=layer_index, transform=False
