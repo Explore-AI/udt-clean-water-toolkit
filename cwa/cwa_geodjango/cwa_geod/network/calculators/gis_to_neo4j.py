@@ -1,5 +1,6 @@
 import json
 from django.db.models.query import QuerySet
+from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
 from cleanwater.exceptions import InvalidNodeException, InvalidPipeException
 from . import GisToGraph
@@ -77,11 +78,20 @@ class GisToNeo4J(GisToGraph):
                 asset["data"]["dma_codes"], asset["data"]["dma_names"]
             )
 
+            # point = asset["intersection_point_geometry"].transform("WGS84", clone=True)
+
+            # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
+
             node, node_type, asset_model = self.check_node_exists(asset_name, gid)
 
             if not node and node_type == PIPE_END__NAME:
                 new_pipe_end = PipeEnd.create(
-                    {"gid": gid, "dmas": dma_data, "pipe_type": asset_name}
+                    {
+                        "gid": gid,
+                        "dmas": dma_data,
+                        "pipe_type": asset_name,
+                        #                        "location": coords,
+                    }
                 )[0]
                 self._connect_nodes(
                     start_node,
@@ -90,7 +100,13 @@ class GisToNeo4J(GisToGraph):
                     {"dmas": dma_data, "gid": gid, "weight": 1},
                 )
             elif not node and node_type == POINT_ASSET__NAME:
-                new_point_asset = asset_model.create({"gid": gid, "dmas": dma_data})[0]
+                new_point_asset = asset_model.create(
+                    {
+                        "gid": gid,
+                        "dmas": dma_data,
+                        #                       "location": coords,
+                    }
+                )[0]
 
                 # edge_length: float = node_point_geometries[-1].distance(
                 #     asset["intersection_point_geometry"]
@@ -133,10 +149,20 @@ class GisToNeo4J(GisToGraph):
                 dma_data = self.build_dma_data_as_json(
                     pipe_data["dma_codes"], pipe_data["dma_names"]
                 )
-                coords = NeomodelPoint(pipe_data["geometry"].coords[0][0], crs="wgs-84")
+
+                # point = Point(pipe_data["geometry"][0][0], srid=DEFAULT_SRID).transform(
+                #     "WGS84", clone=True
+                # )
+
+                # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
 
                 pipe_end = PipeEnd.create(
-                    {"gid": pipe_gid, "dmas": dma_data, "pipe_type": pipe_type}
+                    {
+                        "gid": pipe_gid,
+                        "dmas": dma_data,
+                        "pipe_type": pipe_type,
+                        #                        "location": coords,
+                    }
                 )[0]
 
             self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
