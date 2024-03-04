@@ -13,3 +13,4 @@ services:
       - ../../cwa/cwa_geodjango:/opt/udt/cwa/cwa_geodjango/
       - ../../cwm:/opt/udt/cwm/
       - ../../data:/opt/udt/data/
+    restart: always
