@@ -13,4 +13,10 @@ services:
       - ../../cwa/cwa_geodjango:/opt/udt/cwa/cwa_geodjango/
       - ../../cwm:/opt/udt/cwm/
       - ../../data:/opt/udt/data/
+    environment:
+      - POSTGIS_DB_NAME__ENV_VAR=udt
+      - POSTGIS_DB_USER__ENV_VAR=udt
+      - POSTGIS_DEFAULT_DB_PASSWORD__ENV_VAR=123456yellow
+      - POSTGIS_DEFAULT_DB_HOST__ENV_VAR=udtpostgis
+      - POSTGIS_DEFAULT_PORT__ENV_VAR=5432
     restart: always
