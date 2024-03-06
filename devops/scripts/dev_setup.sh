@@ -9,7 +9,7 @@ echo "pip packages will be installed for the cwa_geodjango app."
 echo "pip packages will be installed for the cwm in dev mode."
 echo
 
-docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml up -d
+docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml up -d --build
 
 CWA_GEODORM_CONTAINER_ID=`docker ps | grep udtcwageodjangodev | grep cwa_geodjango_dev | awk '{ print $1 }'`
 
