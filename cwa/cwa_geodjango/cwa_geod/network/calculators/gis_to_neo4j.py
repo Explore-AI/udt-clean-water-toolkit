@@ -124,7 +124,7 @@ class GisToNeo4J(GisToGraph):
 
             elif node_type not in [PIPE_END__NAME, POINT_ASSET__NAME]:
                 raise InvalidNodeException(
-                    f"Invalid node detected: {node_type}. Valid nodes are 'pipe_end' or 'point_asset'"
+                    f"Invalid node detected: {node_type}. Valid nodes are {PIPE_END__NAME} or {POINT_ASSET__NAME}"
                 )
 
     def _set_pipe_connected_asset_relations(self) -> None:
