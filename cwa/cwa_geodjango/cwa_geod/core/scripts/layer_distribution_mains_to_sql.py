@@ -3,7 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import DistributionMain
 from cwa_geod.utilities.models import DMA
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 
 
@@ -29,7 +29,7 @@ Large numbers of features will take a long time to save."""
         lm = LayerMapping(
             DistributionMain, ds, layer_mapping, layer=layer_index, transform=False
         )
-        lm.save(strict=True, step=100000)
+
         lyr = ds[layer_index]
         for feat in lyr:
             gid = feat.get("GISID")
@@ -47,3 +47,12 @@ Large numbers of features will take a long time to save."""
 
         for distribution_main in DistributionMain.objects.only("id", "geometry"):
             wkt = distribution_main.geometry.wkt
+
+            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
+                "pk", flat=True
+            )
+
+            if not dma_ids:
+                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+
+            distribution_main.dmas.add(*list(dma_ids))
