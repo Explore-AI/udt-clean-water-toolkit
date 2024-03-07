@@ -1,7 +1,7 @@
 from neomodel import (
     StructuredNode,
     Relationship,
-    StringProperty,
+    IntegerProperty,
     JSONProperty,
 )
 from neomodel.contrib.spatial_properties import PointProperty
@@ -10,7 +10,7 @@ from .distribution_main import DistributionMain
 
 
 class PointNode(StructuredNode):
-    gid = StringProperty(unique_index=True, required=True)
+    gid = IntegerProperty(unique_index=True, required=True)
     dmas = JSONProperty(required=True)
     location = PointProperty(crs="wgs-84")
     trunk_main = Relationship("PointNode", "TRUNKMAIN", model=TrunkMain)
