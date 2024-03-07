@@ -12,7 +12,7 @@ fi
 
 DB_CONTAINER_ID=`docker ps | grep udtpostgis | grep postgis/postgis | awk '{ print $1 }'`
 
-CURRENT_DATETIME=`date "+%m-%d-%Y_%H-%M-%S"`
+CURRENT_DATETIME=`date "+%d-%m-%Y_%H-%M-%S"`
 BACKUP_FILE_NAME=${DB_BACKUPS_DIR}/udt_postgis_db_backup_${CURRENT_DATETIME}.sql
 
 #https://stackoverflow.com/questions/24718706/backup-restore-a-dockerized-postgresql-database
