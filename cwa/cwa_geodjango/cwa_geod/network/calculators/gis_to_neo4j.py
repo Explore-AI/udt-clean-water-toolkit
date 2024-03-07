@@ -66,6 +66,51 @@ class GisToNeo4J(GisToGraph):
         else:
             InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
 
+    def _create_and_connect_pipe_end_node(
+        self, pipe_name, gid, asset_name, dma_data, start_node
+    ):
+        new_pipe_end = PipeEnd.create(
+            {
+                "gid": gid,
+                "dmas": dma_data,
+                "pipe_type": asset_name,
+                #                        "location": coords,
+            }
+        )[0]
+
+        self._connect_nodes(
+            start_node,
+            new_pipe_end,
+            pipe_name,
+            {"dmas": dma_data, "gid": gid, "weight": 1},
+        )
+
+        return new_pipe_end
+
+    def _create_and_connect_point_asset_node(
+        self, pipe_name, gid, asset_model, dma_data, start_node
+    ):
+        new_point_asset = asset_model.create(
+            {
+                "gid": gid,
+                "dmas": dma_data,
+                #                       "location": coords,
+            }
+        )[0]
+
+        # edge_length: float = node_point_geometries[-1].distance(
+        #     asset["intersection_point_geometry"]
+        # )
+
+        # TODO: add wieght to relation based on edge length
+        self._connect_nodes(
+            start_node,
+            new_point_asset,
+            pipe_name,
+            {"dmas": dma_data, "gid": gid, "weight": 1},
+        )
+        return new_point_asset
+
     def _set_connected_asset_relations(
         self, pipe_data: dict, assets_data: list, pipe_end
     ) -> None:
@@ -78,6 +123,8 @@ class GisToNeo4J(GisToGraph):
                 asset["data"]["dma_codes"], asset["data"]["dma_names"]
             )
 
+            pipe_name = pipe_data["asset_name"]
+
             # point = asset["intersection_point_geometry"].transform("WGS84", clone=True)
 
             # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
@@ -85,42 +132,13 @@ class GisToNeo4J(GisToGraph):
             node, node_type, asset_model = self.check_node_exists(asset_name, gid)
 
             if not node and node_type == PIPE_END__NAME:
-                new_pipe_end = PipeEnd.create(
-                    {
-                        "gid": gid,
-                        "dmas": dma_data,
-                        "pipe_type": asset_name,
-                        #                        "location": coords,
-                    }
-                )[0]
-                self._connect_nodes(
-                    start_node,
-                    new_pipe_end,
-                    pipe_data["asset_name"],
-                    {"dmas": dma_data, "gid": gid, "weight": 1},
+                start_node = self._create_and_connect_pipe_end_node(
+                    pipe_name, gid, asset_name, dma_data, start_node
                 )
             elif not node and node_type == POINT_ASSET__NAME:
-                new_point_asset = asset_model.create(
-                    {
-                        "gid": gid,
-                        "dmas": dma_data,
-                        #                       "location": coords,
-                    }
-                )[0]
-
-                # edge_length: float = node_point_geometries[-1].distance(
-                #     asset["intersection_point_geometry"]
-                # )
-
-                # TODO: add wieght to relation based on edge length
-                self._connect_nodes(
-                    start_node,
-                    new_point_asset,
-                    pipe_data["asset_name"],
-                    {"dmas": dma_data, "gid": gid, "weight": 1},
+                start_node = self._create_and_connect_point_asset_node(
+                    pipe_name, gid, asset_model, dma_data, start_node
                 )
-
-                start_node = new_point_asset
 
             elif node_type not in [PIPE_END__NAME, POINT_ASSET__NAME]:
                 raise InvalidNodeException(
