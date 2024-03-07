@@ -126,6 +126,9 @@ class TrunkMainsController(GeoDjangoController):
             asset_name=Value(self.model.AssetMeta.asset_name),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
+            dma_ids=ArrayAgg("dmas"),
+            dma_codes=ArrayAgg("dmas__code"),
+            dma_names=ArrayAgg("dmas__name"),
             **asset_subqueries
         )
         return qs

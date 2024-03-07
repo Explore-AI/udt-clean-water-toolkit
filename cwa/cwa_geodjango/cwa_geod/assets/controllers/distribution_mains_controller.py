@@ -1,9 +1,10 @@
 from django.db.models import Value, JSONField, OuterRef
 from django.db.models.functions import JSONObject
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.expressions import ArraySubquery
 from django.db.models.query import QuerySet
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWKT
-from django.contrib.postgres.expressions import ArraySubquery
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import *
 from cwa_geod.core.constants import DEFAULT_SRID
@@ -46,14 +47,30 @@ class DistributionMainsController(GeoDjangoController):
         )
         return subquery
 
-    def _generate_asset_subqueries(self):
-        json_fields = {
+    @staticmethod
+    def set_json_fields():
+        """Overwrite this function to bypass
+        custom PostgreSQL functions
+
+        Params:
+              None
+
+        Returns:
+              json object for use in subquery
+        """
+
+        return {
             "id": "id",
             "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
-            "dmas": "dmas",
+            "dma_ids": ArrayAgg("dmas"),
+            "dma_codes": ArrayAgg("dmas__code"),
+            "dma_names": ArrayAgg("dmas__name"),
         }
+
+    def _generate_asset_subqueries(self):
+        json_fields = self.set_json_fields()
 
         # This section is deliberately left verbose for clarity
         subquery1 = self._generate_touches_subquery(
@@ -89,8 +106,8 @@ class DistributionMainsController(GeoDjangoController):
         )
 
         subqueries = {
-            "trunk_mains_data": ArraySubquery(subquery1),
-            "distribution_mains_data": ArraySubquery(subquery2),
+            "distribution_mains_data": ArraySubquery(subquery1),
+            "trunk_mains_data": ArraySubquery(subquery2),
             "logger_data": ArraySubquery(subquery3),
             "hydrant_data": ArraySubquery(subquery4),
             "pressure_fitting_data": ArraySubquery(subquery5),
@@ -109,6 +126,9 @@ class DistributionMainsController(GeoDjangoController):
             asset_name=Value(self.model.AssetMeta.asset_name),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
+            dma_ids=ArrayAgg("dmas"),
+            dma_codes=ArrayAgg("dmas__code"),
+            dma_names=ArrayAgg("dmas__name"),
             **asset_subqueries
         )
         return qs

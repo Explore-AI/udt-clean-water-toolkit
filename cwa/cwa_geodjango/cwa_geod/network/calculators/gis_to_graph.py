@@ -50,14 +50,15 @@ class GisToGraph(NetworkController):
 
     def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
         pipe_data: dict = {}
+
         pipe_data["id"] = qs_object.id
         pipe_data["gid"] = qs_object.gid
         pipe_data["asset_name"] = qs_object.asset_name
         pipe_data["length"] = qs_object.length
         pipe_data["wkt"] = qs_object.wkt
-        pipe_data["dma_ids"] = list(qs_object.dmas.values_list("id", flat=True))
-        pipe_data["dma_codes"] = list(qs_object.dmas.values_list("code", flat=True))
-        pipe_data["dma_names"] = list(qs_object.dmas.values_list("name", flat=True))
+        pipe_data["dma_ids"] = qs_object.dma_ids
+        pipe_data["dma_codes"] = qs_object.dma_codes
+        pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["geometry"] = qs_object.geometry
 
         return pipe_data
@@ -92,7 +93,7 @@ class GisToGraph(NetworkController):
         start: float = timer()
         # TODO: fix slice approach
         self.all_pipe_data, self.all_asset_positions = list(
-            zip(*map(self._map_relative_positions_calc, pipes_qs[:1000]))
+            zip(*map(self._map_relative_positions_calc, pipes_qs[:100]))
         )
         end: float = timer()
         print(end - start)
