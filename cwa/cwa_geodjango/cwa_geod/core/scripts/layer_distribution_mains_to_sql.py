@@ -27,16 +27,16 @@ class Command(BaseCommand):
             gisid = feature.get("GISID")
 
             new_distribution_mains.append(
-                DistributionMain(gid=gisid, geometry=geometry.wkt)
+                DistributionMain(gid=gisid, geometry=feature.geom.wkt)
             )
 
             if len(new_distribution_mains) == 100000:
                 DistributionMain.objects.bulk_create(new_distribution_mains)
                 new_distribution_mains = []
 
-            # save the last set of data as it will probably be less than 100000
-            if new_distribution_mains:
-                DistributionMain.objects.bulk_create(new_distribution_mains)
+        # save the last set of data as it will probably be less than 100000
+        if new_distribution_mains:
+            DistributionMain.objects.bulk_create(new_distribution_mains)
 
         for distribution_main in DistributionMain.objects.only("id", "geometry"):
             wkt = distribution_main.geometry.wkt
