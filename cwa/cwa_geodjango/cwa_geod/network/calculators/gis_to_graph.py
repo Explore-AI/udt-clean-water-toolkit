@@ -98,22 +98,6 @@ class GisToGraph(NetworkController):
         end: float = timer()
         print(end - start)
 
-        # start = timer()
-
-        # qs_list = [
-        #     pipes_qs[:1000],
-        #     pipes_qs[1000:2000],
-        #     pipes_qs[2000:3000],
-        #     pipes_qs[3000:4000],
-        # ]
-        # with mp.Pool(4) as pool:
-        #     self.all_pipe_data, self.all_asset_positions = list(
-        #         zip(*pool.map(self._map_relative_positions_calc, qs_list))
-        #     )
-
-        # end = timer()
-        # print(end - start)
-
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
         if asset_name in dict(PIPE_ASSETS__NAMES).keys():
