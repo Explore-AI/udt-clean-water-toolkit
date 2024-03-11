@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
                 new_dmas.append(new_dma)
                 if len(new_dmas) == 100000:
-                    Dma.objects.bulk_create(new_dmas)
+                    DMA.objects.bulk_create(new_dmas)
                     new_dmas = []
 
         # save the last set of data as it will probably be less than 100000
