@@ -9,6 +9,7 @@ services:
       dockerfile: Dockerfile_cwa_geodjango_dev
     links:
       - udtpostgis
+      - udtneo4j
     volumes:
       - ../../cwa/cwa_geodjango:/opt/udt/cwa/cwa_geodjango/
       - ../../cwm:/opt/udt/cwm/

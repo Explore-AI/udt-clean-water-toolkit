@@ -1,0 +1,14 @@
+# Create a docker compose file that will spin up a neo4j image/container
+
+version: "3"
+
+services:
+    udtneo4j:
+        container_name: udtneo4j
+        ports:
+            - 7474:7474
+            - 7687:7687
+        environment:
+            - ./env_files/.db_env
+        image: neo4j:latest
+        restart: always

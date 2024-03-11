@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Started udt postgis DB backup. Ensure you have a data/db_backups/ folder in the root directory of this project. If not we will make one."
+echo "Started udt Neo4j DB backup. Ensure you have a data/db_backups/ folder in the root directory of this project. If not we will make one."
 echo
 
 BASE_DIR=../../..
