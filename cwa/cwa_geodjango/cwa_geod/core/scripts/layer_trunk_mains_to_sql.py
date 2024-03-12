@@ -32,15 +32,24 @@ Large numbers of features will take a long time to save."""
             TrunkMain, ds, layer_mapping, layer=layer_index, transform=False
         )
         lm.save(strict=True)
-
+        
+        DMAThroughModel = TrunkMain.dmas.through
+        bulk_create_list = []
         for trunk_main in TrunkMain.objects.only("id", "geometry"):
+            
             wkt = trunk_main.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
                 "pk", flat=True
             )
-
+            
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
-
-            trunk_main.dmas.add(*list(dma_ids))
+            
+            for dma_id in dma_ids:
+                bulk_create_list.append(DMAThroughModel(trunkmain_id=trunk_main.pk, dma_id=dma_id))
+        
+        if bulk_create_list: 
+            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=99999)
+            # # perform a bulk insert
+            # trunk_main.dmas.add(*list(dma_ids))
