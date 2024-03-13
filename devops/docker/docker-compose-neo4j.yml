@@ -4,6 +4,7 @@ version: "3"
 volumes:
    neo4j-data:
    neo4j-backup:
+   neo4j-data-upgrade:
 
 services:
     udtneo4j:
@@ -16,17 +17,9 @@ services:
         image: neo4j:latest
         volumes:
             - neo4j-data:/data
+            # Use the data directory below as initial
             - neo4j-backup:/backups
+            #- neo4j-data-upgrade:/data
         restart: always
 
-    udtneo4j-backup:
-        container_name: udtneo4j-backup
-        environment:
-            - ./env_files/.db_env
-        image: neo4j/neo4j-admin
-        volumes:
-            - neo4j-data:/data
-            - neo4j-backup:/backups
-        entrypoint: "tail -f /dev/null"
-        platform: linux/amd64
-        restart: always
+
