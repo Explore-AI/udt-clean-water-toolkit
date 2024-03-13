@@ -11,8 +11,19 @@ if [ ! -d ${DB_BACKUPS_DIR} ]; then
 fi
 
 DB_CONTAINER_ID=`docker ps | grep udtneo4j | grep neo4j:latest | awk '{ print $1 }'`
+DB_BACKUP_CONTAINER_ID=`docker ps | grep udtneo4j-backup | grep neo4j/neo4j-admin | awk '{ print $1 }'`
 
 CURRENT_DATETIME=`date "+%d-%m-%Y_%H-%M-%S"`
-BACKUP_FILE_NAME=udt_neo4j_db_backup_${CURRENT_DATETIME}.sql
+BACKUP_FILE_NAME=udt_neo4j_db_backup_${CURRENT_DATETIME}.dump
 
-docker exec --name dump --entrypoint="/bin/bash" -it -v ${DB_BACKUPS_DIR}:/data ${DB_CONTAINER_ID} -c "neo4j-admin dump neo4j --to=/data/${BACKUP_FILE_NAME}"
+
+docker stop ${DB_CONTAINER_ID}
+
+docker exec -it ${DB_BACKUP_CONTAINER_ID} neo4j-admin database dump neo4j --to-path=/backups
+
+docker cp ${DB_BACKUP_CONTAINER_ID}:/backups/neo4j.dump ${DB_BACKUPS_DIR}
+
+mv ${DB_BACKUPS_DIR}/neo4j.dump ${DB_BACKUPS_DIR}/${BACKUP_FILE_NAME}
+
+docker start ${DB_CONTAINER_ID}
+
