@@ -3,6 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import Hydrant
 from cwa_geod.utilities.models import DMA
+from django.db import transaction
 
 
 class Command(BaseCommand):
@@ -33,6 +34,9 @@ Large numbers of features will take a long time to save."""
         )
         lm.save(strict=True)
 
+        DMAThroughModel = Hydrant.dmas.through
+        bulk_create_list = []
+
         for hydrant in Hydrant.objects.only("id", "geometry"):
             wkt = hydrant.geometry.wkt
 
@@ -43,4 +47,13 @@ Large numbers of features will take a long time to save."""
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
 
-            hydrant.dmas.add(*list(dma_ids))
+            bulk_create_list.extend(
+                [
+                    DMAThroughModel(hydrant_id=hydrant.pk, dma_id=dma_id)
+                    for dma_id in dma_ids
+                ]
+            )
+
+            # hydrant.dmas.add(*list(dma_ids))
+        with transaction.atomic():
+            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=250000)

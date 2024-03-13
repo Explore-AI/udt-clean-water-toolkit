@@ -3,6 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import Logger
 from cwa_geod.utilities.models import DMA
+from django.db import transaction
 
 
 class Command(BaseCommand):
@@ -31,6 +32,8 @@ Large numbers of features will take a long time to save."""
         lm = LayerMapping(Logger, ds, layer_mapping, layer=layer_index, transform=False)
         lm.save(strict=True)
 
+        DMAThroughModel = Logger.dmas.through
+        bulk_create_list = []
         for logger in Logger.objects.only("id", "geometry"):
             wkt = logger.geometry.wkt
 
@@ -41,4 +44,13 @@ Large numbers of features will take a long time to save."""
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
 
-            logger.dmas.add(*list(dma_ids))
+            bulk_create_list.extend(
+                [
+                    DMAThroughModel(logger_id=logger.pk, dma_id=dma_id)
+                    for dma_id in dma_ids
+                ]
+            )
+
+            # logger.dmas.add(*list(dma_ids))
+        with transaction.atomic():
+            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=10000)

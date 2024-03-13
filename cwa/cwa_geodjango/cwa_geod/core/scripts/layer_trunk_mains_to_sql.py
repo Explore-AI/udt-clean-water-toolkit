@@ -3,7 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import TrunkMain
 from cwa_geod.utilities.models import DMA
-
+from django.db import transaction
 
 class Command(BaseCommand):
     help = "Write Thames Water trunk mains layer data to sql"
@@ -49,7 +49,5 @@ Large numbers of features will take a long time to save."""
             for dma_id in dma_ids:
                 bulk_create_list.append(DMAThroughModel(trunkmain_id=trunk_main.pk, dma_id=dma_id))
         
-        if bulk_create_list: 
-            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=99999)
-            # # perform a bulk insert
-            # trunk_main.dmas.add(*list(dma_ids))
+        with transaction.atomic():
+            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=120000)

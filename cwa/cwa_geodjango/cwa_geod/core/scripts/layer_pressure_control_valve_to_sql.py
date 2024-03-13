@@ -3,7 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import PressureControlValve
 from cwa_geod.utilities.models import DMA
-
+from django.db import transaction
 
 class Command(BaseCommand):
     help = "Write Thames Water pressure control valve layer data to sql"
@@ -32,7 +32,9 @@ Large numbers of features will take a long time to save."""
             PressureControlValve, ds, layer_mapping, layer=layer_index, transform=False
         )
         lm.save(strict=True)
-
+        DMAThroughModel = PressureControlValve.dmas.through
+        bulk_create_list = []
+        
         for pressure_control_valve in PressureControlValve.objects.only(
             "id", "geometry"
         ):
@@ -44,5 +46,14 @@ Large numbers of features will take a long time to save."""
 
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
+            
+            bulk_create_list.extend(
+                [
+                    DMAThroughModel(pressurecontrolvalve_id=pressure_control_valve.pk, dma_id=dma_id)
+                    for dma_id in dma_ids
+                ]
+            )
 
-            pressure_control_valve.dmas.add(*list(dma_ids))
+            # pressure_control_valve.dmas.add(*list(dma_ids))
+        with transaction.atomic():
+            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=5000)
