@@ -12,7 +12,13 @@ fi
 
 DB_CONTAINER_ID=`docker ps | grep udtneo4j | grep neo4j:latest | awk '{ print $1 }'`
 
-CURRENT_DATETIME=`date "+%d-%m-%Y_%H-%M-%S"`
-BACKUP_FILE_NAME=udt_neo4j_db_backup_${CURRENT_DATETIME}.sql
 
-docker exec --name dump --entrypoint="/bin/bash" -it -v ${DB_BACKUPS_DIR}:/data ${DB_CONTAINER_ID} -c "neo4j-admin dump neo4j --to=/data/${BACKUP_FILE_NAME}"
+if [[ -z ${DB_CONTAINER_ID} ]];then
+  echo "${DB_CONTAINER_ID} is not running, please run it using the docker-compose-postgis.yml"
+else
+  docker stop ${DB_CONTAINER_ID}
+  docker run -it  --rm --env-file ../../docker/env_files/.db_env --volume=docker_neo4j-data:/data --volume=docker_neo4j-backup:/backups neo4j/neo4j-admin neo4j-admin database dump neo4j --to-path=/backups
+  docker start ${DB_CONTAINER_ID}
+  docker cp ${DB_CONTAINER_ID}:/backups/neo4j.dump ${DB_BACKUPS_DIR}
+
+fi
