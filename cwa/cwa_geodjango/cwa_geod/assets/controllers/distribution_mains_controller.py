@@ -8,6 +8,7 @@ from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWK
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import *
 from cwa_geod.core.constants import DEFAULT_SRID
+from .pipes_controller import PipesController
 
 
 class DistributionMainsController(GeoDjangoController):
