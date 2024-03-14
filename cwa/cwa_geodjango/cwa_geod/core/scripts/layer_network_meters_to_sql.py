@@ -3,7 +3,6 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import NetworkMeter
 from cwa_geod.utilities.models import DMA
-from django.db import transaction
 
 
 class Command(BaseCommand):
@@ -54,5 +53,4 @@ Large numbers of features will take a long time to save."""
             )
             # network_meter.dmas.add(*list(dma_ids))
 
-        with transaction.atomic():
-            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=100000)
+        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=100000)

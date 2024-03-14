@@ -3,7 +3,7 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import PressureFitting
 from cwa_geod.utilities.models import DMA
-from django.db import transaction
+
 
 class Command(BaseCommand):
     help = "Write Thames Water pressure fitting layer data to sql"
@@ -32,7 +32,7 @@ Large numbers of features will take a long time to save."""
             PressureFitting, ds, layer_mapping, layer=layer_index, transform=False
         )
         lm.save(strict=True)
-        DMAThroughModel = PressureFitting.dmas.through # create our intermediary model
+        DMAThroughModel = PressureFitting.dmas.through  # create our intermediary model
         bulk_create_list = []
         for pressure_fitting in PressureFitting.objects.only("id", "geometry"):
             wkt = pressure_fitting.geometry.wkt
@@ -43,15 +43,16 @@ Large numbers of features will take a long time to save."""
 
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
-            
+
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(pressurefitting_id=pressure_fitting.pk, dma_id=dma_id)
+                    DMAThroughModel(
+                        pressurefitting_id=pressure_fitting.pk, dma_id=dma_id
+                    )
                     for dma_id in dma_ids
                 ]
             )
 
             # pressure_fitting.dmas.add(*list(dma_ids))
-        
-        with transaction.atomic():
-            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=3000)
+
+        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=3000)

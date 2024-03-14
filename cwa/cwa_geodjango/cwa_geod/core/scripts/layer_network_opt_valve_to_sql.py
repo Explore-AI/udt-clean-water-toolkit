@@ -3,7 +3,6 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
 from cwa_geod.assets.models import NetworkOptValve
 from cwa_geod.utilities.models import DMA
-from django.db import transaction
 
 
 class Command(BaseCommand):
@@ -46,11 +45,12 @@ Large numbers of features will take a long time to save."""
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(networkoptvalve_id=network_opt_valve.pk, dma_id=dma_id)
+                    DMAThroughModel(
+                        networkoptvalve_id=network_opt_valve.pk, dma_id=dma_id
+                    )
                     for dma_id in dma_ids
                 ]
-            ) 
+            )
             # network_opt_valve.dmas.add(*list(dma_ids))
-        
-        with transaction.atomic():
-            DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=375000)
+
+        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=375000)
