@@ -17,11 +17,7 @@ docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -r requirements.txt -r d
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
 
-cd postgis/
-
-./postgis_db_init.sh
-
-cd .. 
+./postgis/postgis_db_init.sh
 
 #docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
 

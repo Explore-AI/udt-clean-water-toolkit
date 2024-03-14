@@ -6,8 +6,11 @@ echo "A udt postgis database will be created."
 echo "A udt superuser will be created."
 echo
 
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source "$DIR/../../docker/env_files/.db_env"
 
-source ../../docker/env_files/.db_env
+echo $NEO4J_USER
+echo $NEO4J_PASSWORD
 
 DB_CONTAINER_ID=`docker ps | grep udtpostgis | grep postgis/postgis | awk '{ print $1 }'`
 
