@@ -45,7 +45,6 @@ Large numbers of features will take a long time to save."""
 
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
-            # chamber.dmas.add(*list(dma_ids))
 
             bulk_create_list.extend(
                 [
