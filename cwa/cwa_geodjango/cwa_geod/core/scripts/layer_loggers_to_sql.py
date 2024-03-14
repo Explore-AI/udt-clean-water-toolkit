@@ -50,6 +50,4 @@ Large numbers of features will take a long time to save."""
                 ]
             )
 
-            # logger.dmas.add(*list(dma_ids))
-
         DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=10000)
