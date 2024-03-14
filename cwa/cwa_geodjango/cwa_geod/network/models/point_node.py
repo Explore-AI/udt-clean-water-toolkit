@@ -14,5 +14,5 @@ class PointNode(StructuredNode):
     gid = IntegerProperty(unique_index=True, required=True)
     dmas = JSONProperty(required=True)
     location = PointProperty(crs="wgs-84")
-    trunk_main = RelationshipTo("PointNode", "TRUNKMAIN", model=TrunkMain, cardinality=ZeroOrOne)
-    distribution_main = RelationshipTo("PointNode", "DISTRIBUTIONMAIN", model=DistributionMain, cardinality=ZeroOrOne)
+    trunk_main = RelationshipTo("PointNode", "TRUNKMAIN", model=TrunkMain)
+    distribution_main = RelationshipTo("PointNode", "DISTRIBUTIONMAIN", model=DistributionMain)
