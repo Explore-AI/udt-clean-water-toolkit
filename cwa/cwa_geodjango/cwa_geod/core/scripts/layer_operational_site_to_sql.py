@@ -33,6 +33,9 @@ Large numbers of features will take a long time to save."""
         )
         lm.save(strict=True)
 
+        DMAThroughModel = OperationalSite.dmas.through
+        bulk_create_list = []
+
         for operational_site in OperationalSite.objects.only("id", "geometry"):
             wkt = operational_site.geometry.wkt
 
@@ -43,4 +46,15 @@ Large numbers of features will take a long time to save."""
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
 
-            operational_site.dmas.add(*list(dma_ids))
+            bulk_create_list.extend(
+                [
+                    DMAThroughModel(
+                        operationalsite_id=operational_site.pk, dma_id=dma_id
+                    )
+                    for dma_id in dma_ids
+                ]
+            )
+
+            # operational_site.dmas.add(*list(dma_ids))
+
+        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=2000)

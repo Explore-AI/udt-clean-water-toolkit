@@ -33,7 +33,10 @@ Large numbers of features will take a long time to save."""
         )
         lm.save(strict=True)
 
+        DMAThroughModel = TrunkMain.dmas.through
+        bulk_create_list = []
         for trunk_main in TrunkMain.objects.only("id", "geometry"):
+
             wkt = trunk_main.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
@@ -43,4 +46,9 @@ Large numbers of features will take a long time to save."""
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
 
-            trunk_main.dmas.add(*list(dma_ids))
+            for dma_id in dma_ids:
+                bulk_create_list.append(
+                    DMAThroughModel(trunkmain_id=trunk_main.pk, dma_id=dma_id)
+                )
+
+        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=120000)

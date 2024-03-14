@@ -32,7 +32,8 @@ Large numbers of features will take a long time to save."""
             NetworkOptValve, ds, layer_mapping, layer=layer_index, transform=False
         )
         lm.save(strict=True)
-
+        DMAThroughModel = NetworkOptValve.dmas.through
+        bulk_create_list = []
         for network_opt_valve in NetworkOptValve.objects.only("id", "geometry"):
             wkt = network_opt_valve.geometry.wkt
 
@@ -42,5 +43,14 @@ Large numbers of features will take a long time to save."""
 
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined").pk]
+            bulk_create_list.extend(
+                [
+                    DMAThroughModel(
+                        networkoptvalve_id=network_opt_valve.pk, dma_id=dma_id
+                    )
+                    for dma_id in dma_ids
+                ]
+            )
+            # network_opt_valve.dmas.add(*list(dma_ids))
 
-            network_opt_valve.dmas.add(*list(dma_ids))
+        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=375000)
