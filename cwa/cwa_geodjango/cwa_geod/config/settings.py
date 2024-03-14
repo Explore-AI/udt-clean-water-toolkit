@@ -60,10 +60,10 @@ DATABASES = {
 # TO DO: cleanup how this is used
 GRAPH_DATABASES = {
     "default": {
-        "HOST": "http://localhost",
+        "HOST": os.getenv("NEO4J_HOST__ENV_VAR"),
         "PORT": "7687",
-        "USER": os.getenv("NEO4J_USER"),
-        "PASSWORD": os.getenv("NEO4J_PASSWORD"),
+        "USER": os.getenv("NEO4J_USER__ENV_VAR"),
+        "PASSWORD": os.getenv("NEO4J_PASSWORD__ENV_VAR"),
     }
 }
 
@@ -73,7 +73,7 @@ graph_db_user = default_graph_db.get("USER")
 graph_password = default_graph_db.get("PASSWORD")
 
 neo_config.DATABASE_URL = f"bolt://{graph_db_user}:{graph_password}@{graph_uri}"
-neo_config.DATABASE_URL = "bolt://neo4j:password@localhost:7687"
+#neo_config.DATABASE_URL = "bolt://neo4j:password@localhost:7687"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

@@ -1,14 +1,23 @@
 # Create a docker compose file that will spin up a neo4j image/container
 
 version: "3"
+volumes:
+   neo4j-data:
+   neo4j-backup:
+   neo4j-data-upgrade:
 
 services:
     udtneo4j:
         container_name: udtneo4j
         ports:
-            - 7474:7474
-            - 7687:7687
-        environment:
+            - "7474:7474"
+            - "7687:7687"
+        env_file:
             - ./env_files/.db_env
         image: neo4j:latest
+        volumes:
+            - neo4j-data:/data
+            # Use the data directory below as initial
+            - neo4j-backup:/backups
+            #- neo4j-data-upgrade:/data
         restart: always
