@@ -8,13 +8,17 @@ from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWKT
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import *
-from cwa_geod.core.constants import DEFAULT_SRID   
+from cwa_geod.core.constants import DEFAULT_SRID
 
-class MainsController(GeoDjangoController): 
+
+class MainsController(GeoDjangoController):
     """_summary_
-        Base Controller class for the Mains Controller classes
+    Base Controller class for the Mains Controller classes
     """
-    model = models.Model # model will need to be overridden for each child controller class
+
+    model = (
+        models.Model
+    )  # model will need to be overridden for each child controller class
     srid = DEFAULT_SRID
     # items_limit = 100000  # TODO: set default in config
     WITHIN_DISTANCE = 1
@@ -22,10 +26,10 @@ class MainsController(GeoDjangoController):
         "id",
         "gid",
     ]  # should not include the geometry column as per convention
-    
+
     # at runtime ensure that the model created by the mains controller is a TrunkMain or DistributionMain class
     # assert model in (TrunkMain, DistributionMain), "model attribute must be either a TrunkMain or DistributionMian"
-    
+
     def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
@@ -35,7 +39,7 @@ class MainsController(GeoDjangoController):
             )
         )
         return subquery
-    
+
     def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(
@@ -43,7 +47,7 @@ class MainsController(GeoDjangoController):
             )
         )
         return subquery
-    
+
     @staticmethod
     def set_json_fields():
         """Overwrite this function to bypass
@@ -65,10 +69,9 @@ class MainsController(GeoDjangoController):
             "dma_codes": ArrayAgg("dmas__code"),
             "dma_names": ArrayAgg("dmas__name"),
         }
-    
+
     def _generate_asset_subqueries(self):
         json_fields = self.set_json_fields()
-        
 
         # This section is deliberately left verbose for clarity
         subquery1 = self._generate_touches_subquery(
@@ -102,7 +105,6 @@ class MainsController(GeoDjangoController):
         subquery10 = self._generate_dwithin_subquery(
             NetworkOptValve.objects.all(), json_fields
         )
-        
 
         subqueries = {
             "distribution_mains_data": ArraySubquery(subquery1),
@@ -116,10 +118,10 @@ class MainsController(GeoDjangoController):
             "operational_site_data": ArraySubquery(subquery9),
         }
         return subqueries
-    
+
     def _generate_asset_subqueries2(self):
         # An attempt to improve the _generate_asset_subqueries method
-        # get the json fields 
+        # get the json fields
         json_fields = self.set_json_fields()
 
         # define the model objects
@@ -148,13 +150,22 @@ class MainsController(GeoDjangoController):
         #     "operational_site_data": OperationalSite.objects.all(),
         #     "network_opt_valve_data": NetworkOptValve.objects.all(),
         # }
-        
+
         subqueries = {}
         for asset_name, model_object in model_objects.items():
-            subqueries[asset_name] = ArraySubquery(self._generate_dwithin_subquery(model_object, json_fields))
-        
+            if "mains" in asset_name:
+                # mains models
+                subqueries[asset_name] = ArraySubquery(
+                    self._generate_touches_subquery(model_object, json_fields)
+                )
+            else:
+                # point asset models
+                subqueries[asset_name] = ArraySubquery(
+                    self._generate_dwithin_subquery(model_object, json_fields)
+                )
+
         return subqueries
-        
+
     def get_pipe_point_relation_queryset(self):
         asset_subqueries = self._generate_asset_subqueries()
 
@@ -169,7 +180,7 @@ class MainsController(GeoDjangoController):
             **asset_subqueries
         )
         return qs
-    
+
     def get_geometry_queryset(self, properties=None) -> QuerySet:
         properties = properties or self.default_properties
         properties = set(properties)
@@ -190,9 +201,8 @@ class MainsController(GeoDjangoController):
             .values_list("geojson", flat=True)
         )
         return qs
-    
-    
-    def mains_to_geojson(self, properties=None): 
+
+    def mains_to_geojson(self, properties=None):
         """Serialization of db data to GeoJSON.
 
         Faster (with bigger datasets) serialization into geoson.
@@ -205,7 +215,7 @@ class MainsController(GeoDjangoController):
 
         qs = self.get_geometry_queryset(properties)
         return self.queryset_to_geojson(qs)
-    
+
     def mains_to_geojson2(self, properties=None):
         """Faster (with bigger datasets) serialization into geoson.
 
@@ -217,7 +227,7 @@ class MainsController(GeoDjangoController):
 
         qs = self.get_geometry_queryset(properties)
         return self.queryset_to_geojson(qs)
-    
+
     def mains_to_geodataframe(self, properties=None):
         """Serialization of db data to GeoJSON.
 
@@ -231,5 +241,3 @@ class MainsController(GeoDjangoController):
 
         qs = self.get_geometry_queryset(properties)
         return self.queryset_to_geodataframe(qs)
-    
-    
