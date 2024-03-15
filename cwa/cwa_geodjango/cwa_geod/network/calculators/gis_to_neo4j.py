@@ -1,4 +1,6 @@
 import json
+import multiprocessing as mp
+from django.db import connections
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
@@ -13,6 +15,7 @@ from cwa_geod.core.constants import (
     POINT_ASSET__NAME,
 )
 from ..models import PointAsset, PipeEnd
+from timeit import default_timer as timer
 
 
 class GisToNeo4J(GisToGraph):
@@ -21,17 +24,70 @@ class GisToNeo4J(GisToGraph):
 
     def __init__(self, srid: int):
         self.srid: int = srid or DEFAULT_SRID
-        super().__init__(self.srid)
+        super().__init__(srid=self.srid)
 
     def create_network(self):
+        from timeit import default_timer as timer
+
+        start = timer()
+        self.initial_slice = 0
+        self.final_slice = 40000
+        pipes_qs = self.get_pipe_and_asset_data()
+
+        self.calc_pipe_point_relative_positions(pipes_qs)
+        end = timer()
+        print(end - start)
+        import pdb
+
+        pdb.set_trace()
+        self._create_neo4j_graph()
+
+    def _map_network_parallel(self, pipes_qs, initial_slice, final_slice):
+        new_connection = connections.create_connection("default")
+        self.initial_slice = initial_slice
+        self.final_slice = final_slice
+
+        self.calc_pipe_point_relative_positions(pipes_qs)
+        new_connection.close()
+
+        # self._create_neo4j_graph()
+
+    def create_network_parallel(self):
+        start = timer()
+
+        pipes_qs = self.get_pipe_and_asset_data()
+
+        slices = [
+            (pipes_qs, 0, 10000),
+            (pipes_qs, 10000, 20000),
+            (pipes_qs, 20000, 30000),
+            (pipes_qs, 30000, 40000),
+        ]
+
+        connections.close_all()
+        print("A")
+        procs = []
+        for slice_data in slices:
+            # print(name)
+            proc = mp.Process(target=self._map_network_parallel, args=(slice_data))
+            procs.append(proc)
+            proc.start()
+
+        for proc in procs:
+            proc.join()
+
+        end = timer()
+        print(end - start)
+        import pdb
+
+        pdb.set_trace()
+
+    def get_pipe_and_asset_data(self):
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
         distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
 
         pipes_qs: QuerySet = trunk_mains_qs.union(distribution_mains_qs, all=True)
-
-        self.calc_pipe_point_relative_positions(pipes_qs)
-
-        self._create_neo4j_graph()
+        return pipes_qs
 
     @staticmethod
     def build_dma_data_as_json(dma_codes, dma_names):

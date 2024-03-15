@@ -73,7 +73,7 @@ graph_db_user = default_graph_db.get("USER")
 graph_password = default_graph_db.get("PASSWORD")
 
 neo_config.DATABASE_URL = f"bolt://{graph_db_user}:{graph_password}@{graph_uri}"
-#neo_config.DATABASE_URL = "bolt://neo4j:password@localhost:7687"
+# neo_config.DATABASE_URL = "bolt://neo4j:password@localhost:7687"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -104,6 +104,28 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+# LOGGING = {
+#     "version": 1,
+#     "filters": {
+#         "require_debug_true": {
+#             "()": "django.utils.log.RequireDebugTrue",
+#         }
+#     },
+#     "handlers": {
+#         "console": {
+#             "level": "DEBUG",
+#             "filters": ["require_debug_true"],
+#             "class": "logging.StreamHandler",
+#         }
+#     },
+#     "loggers": {
+#         "django.db.backends": {
+#             "level": "DEBUG",
+#             "handlers": ["console"],
+#         }
+#     },
+# }
 
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEBUG = True

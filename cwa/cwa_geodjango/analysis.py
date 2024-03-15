@@ -23,6 +23,11 @@ def cleanwater_gis2neo4j() -> None:
     neo4j_graph = gis_to_neo4j.create_network()
 
 
+def cleanwater_gis2neo4j_p() -> None:
+    gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID)
+    neo4j_graph = gis_to_neo4j.create_network_parallel()
+
+
 # TODO: Deprecated. for test purposes only.
 def create_pipes_network() -> None:
     gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
@@ -44,8 +49,50 @@ def main():
     if args.method == "gis2neo4j":
         cleanwater_gis2neo4j()
 
+    if args.method == "gis2neo4jp":
+        cleanwater_gis2neo4j_p()
+
     if args.method == "createpipes":
         create_pipes_network()
 
 
 main()
+
+# import multiprocessing as mp
+# from cwa_geod.assets.models import *
+# from django.db import connections
+
+
+# def qs_check(qs, ii, fi):
+#     new_connection = connections.create_connection("default")
+
+#     list(qs[ii:fi])
+#     print(ii, fi)
+#     new_connection.close()
+
+
+# def run():
+#     qs = TrunkMain.objects.all()
+#     slices = [
+#         (qs, 0, 10000),
+#         (qs, 10000, 20000),
+#         (qs, 20000, 30000),
+#         (qs, 30000, 40000),
+#     ]
+
+#     connections.close_all()
+#     # with mp.Pool(4) as pool:
+#     #     pool.starmap(qs_check, xlist)
+
+#     procs = []
+#     for data in slices:
+#         # print(name)
+#         proc = mp.Process(target=qs_check, args=(data))
+#         procs.append(proc)
+#         proc.start()
+
+#     for proc in procs:
+#         proc.join()
+
+
+# run()

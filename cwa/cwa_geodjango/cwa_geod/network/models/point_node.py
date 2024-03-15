@@ -20,4 +20,4 @@ class PointNode(StructuredNode):
     )
 
 
-install_labels(PointNode)
+# install_labels(PointNode)

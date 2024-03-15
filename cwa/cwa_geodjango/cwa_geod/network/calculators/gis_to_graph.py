@@ -1,5 +1,4 @@
 import bisect
-import multiprocessing as mp
 from networkx import Graph
 from django.contrib.gis.geos import GEOSGeometry, MultiLineString
 from django.db.models.query import QuerySet
@@ -18,7 +17,7 @@ from cwa_geod.core.constants import (
 class GisToGraph(NetworkController):
     def __init__(self, srid=None):
         self.srid = srid or DEFAULT_SRID
-        super().__init__(self.srid)
+        super().__init__(srid=self.srid)
 
     def _get_connections_points_on_pipe(
         self, base_pipe_geom: MultiLineString, asset_data: list
@@ -88,15 +87,21 @@ class GisToGraph(NetworkController):
         return pipe_data, asset_positions
 
     def calc_pipe_point_relative_positions(self, pipes_qs: QuerySet) -> None:
-        from timeit import default_timer as timer
+        # from timeit import default_timer as timer
 
-        start: float = timer()
+        # start = timer()
         # TODO: fix slice approach
         self.all_pipe_data, self.all_asset_positions = list(
-            zip(*map(self._map_relative_positions_calc, pipes_qs[:40000]))
+            zip(
+                *map(
+                    self._map_relative_positions_calc,
+                    pipes_qs[self.initial_slice : self.final_slice],
+                )
+            )
         )
-        end: float = timer()
-        print(end - start)
+
+        # end = timer()
+        # print(end - start)
 
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
