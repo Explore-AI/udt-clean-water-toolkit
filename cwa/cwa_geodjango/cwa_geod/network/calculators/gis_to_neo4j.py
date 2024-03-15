@@ -22,8 +22,10 @@ class GisToNeo4J(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid: int):
+    def __init__(self, srid: int, offset: int, limit: int):
         self.srid: int = srid or DEFAULT_SRID
+        self.offset: int = 10000
+        self.limit = None
         super().__init__(srid=self.srid)
 
     def create_network(self):
@@ -31,16 +33,15 @@ class GisToNeo4J(GisToGraph):
 
         start = timer()
         self.initial_slice = 0
-        self.final_slice = 40000
+        self.final_slice = 4000
         pipes_qs = self.get_pipe_and_asset_data()
 
         self.calc_pipe_point_relative_positions(pipes_qs)
+
+        self._create_neo4j_graph()
+
         end = timer()
         print(end - start)
-        import pdb
-
-        pdb.set_trace()
-        self._create_neo4j_graph()
 
     def _map_network_parallel(self, pipes_qs, initial_slice, final_slice):
         new_connection = connections.create_connection("default")
@@ -50,22 +51,32 @@ class GisToNeo4J(GisToGraph):
         self.calc_pipe_point_relative_positions(pipes_qs)
         new_connection.close()
 
-        # self._create_neo4j_graph()
+        self._create_neo4j_graph()
+
+    def _generate_slices(self, pipes_qs):
+        slices = []
+
+        initial_slice = self.offset
+        final_slice = self.offset + self.limit
+        for x in y:
+            slices.append((pipes_qs[0:1000],))
+        slices = [
+            (pipes_qs[0:1000]),
+            (pipes_qs[0:1000]),
+            (pipes_qs[0:1000]),
+            (pipes_qs[0:1000]),
+        ]
+        return slices
 
     def create_network_parallel(self):
         start = timer()
 
         pipes_qs = self.get_pipe_and_asset_data()
 
-        slices = [
-            (pipes_qs, 0, 10000),
-            (pipes_qs, 10000, 20000),
-            (pipes_qs, 20000, 30000),
-            (pipes_qs, 30000, 40000),
-        ]
+        self._generate_slices(pipes_qs)
 
         connections.close_all()
-        print("A")
+
         procs = []
         for slice_data in slices:
             # print(name)
@@ -136,7 +147,7 @@ class GisToNeo4J(GisToGraph):
                 }
             )[0]
         except UniqueProperty:
-            pass
+            print("unique", gid)
 
         self._connect_nodes(
             start_node,
@@ -159,7 +170,7 @@ class GisToNeo4J(GisToGraph):
                 }
             )[0]
         except UniqueProperty:
-            pass
+            print("unique", gid)
 
         # edge_length: float = node_point_geometries[-1].distance(
         #     asset["intersection_point_geometry"]
@@ -247,7 +258,7 @@ class GisToNeo4J(GisToGraph):
                         }
                     )[0]
                 except UniqueProperty:
-                    pass
+                    print("unique", pipe_gid)
 
             self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
 
