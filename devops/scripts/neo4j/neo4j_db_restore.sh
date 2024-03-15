@@ -1,19 +1,29 @@
 #!/bin/bash
 
-echo "Started udt Neo4j DB backup. Ensure you have a data/db_backups/ folder in the root directory of this project. If not we will make one."
+echo "Started udt neo4j DB restore."
 echo
 
-BASE_DIR=../../..
-DB_BACKUPS_DIR=${BASE_DIR}/data/db_backups
+OPTSTRING=":f:"
 
-if [ ! -d ${DB_BACKUPS_DIR} ]; then
-    mkdir -p ${DB_BACKUPS_DIR}
-fi
+DB_CONTAINER_ID=`docker ps | grep udtneo4j | grep neo4j:latest | awk '{ print $1 }'`
 
 
-# Start the backup container
-docker run -it --rm --env-file ../../docker/env_files/.db_env --volume=docker_neo4j-data-upgrade:/data --volume=docker_neo4j-backup:/backups neo4j/neo4j-admin neo4j-admin database load neo4j --from-path=/backups
+while getopts ${OPTSTRING} opt; do
+    case ${opt} in
+        f)
+            if [[ -z ${DB_CONTAINER_ID} ]];then
+                echo "${DB_CONTAINER_ID} is not running, please run it using the docker-compose-postgis.yml"
+            else
+            docker cp ${OPTARG} ${DB_CONTAINER_ID}:/backups/neo4j.dump
+            docker stop ${DB_CONTAINER_ID}
+            # Start the backup container
+            docker run -it --rm --env-file ../../docker/env_files/.db_env --volume=docker_neo4j-data-upgrade:/data --volume=docker_neo4j-backup:/backups neo4j/neo4j-admin neo4j-admin database load neo4j --from-path=/backups/ --verbose --overwrite-destination=true
+            docker start ${DB_CONTAINER_ID}
+            docker exec -it ${DB_CONTAINER_ID} bash -c 'rm /backups/neo4j.dump'
+            fi
+    esac
+done
 
 
-echo "A new database dump has been initiated, please use the following logic"
-echo "Comment out the following - neo4j-backup:/backups and uncomment #- neo4j-data-upgrade:/data in docker-compose-postgis.yml and run it again"
+echo
+echo "udt neo4j DB restore complete."
