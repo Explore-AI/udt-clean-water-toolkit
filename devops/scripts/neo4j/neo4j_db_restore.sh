@@ -17,7 +17,7 @@ while getopts ${OPTSTRING} opt; do
             docker cp ${OPTARG} ${DB_CONTAINER_ID}:/backups/neo4j.dump
             docker stop ${DB_CONTAINER_ID}
             # Start the backup container
-            docker run -it --rm --env-file ../../docker/env_files/.db_env --volume=docker_neo4j-data-upgrade:/data --volume=docker_neo4j-backup:/backups neo4j/neo4j-admin neo4j-admin database load neo4j --from-path=/backups/ --verbose --overwrite-destination=true
+            docker run -it --rm --env-file ../../docker/env_files/.db_env --volume=docker_neo4j-data:/data --volume=docker_neo4j-backup:/backups neo4j/neo4j-admin neo4j-admin database load neo4j --from-path=/backups/ --verbose --overwrite-destination=true
             docker start ${DB_CONTAINER_ID}
             docker exec -it ${DB_CONTAINER_ID} bash -c 'rm /backups/neo4j.dump'
             fi
