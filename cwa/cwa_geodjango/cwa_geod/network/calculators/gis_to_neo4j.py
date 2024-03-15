@@ -2,6 +2,7 @@ import json
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
+from neomodel.exceptions import UniqueProperty
 from cleanwater.exceptions import InvalidNodeException, InvalidPipeException
 from . import GisToGraph
 from cwa_geod.core.constants import (
@@ -69,14 +70,17 @@ class GisToNeo4J(GisToGraph):
     def _create_and_connect_pipe_end_node(
         self, pipe_name, gid, asset_name, dma_data, start_node
     ):
-        new_pipe_end = PipeEnd.create(
-            {
-                "gid": gid,
-                "dmas": dma_data,
-                "pipe_type": asset_name,
-                #                        "location": coords,
-            }
-        )[0]
+        try:
+            new_pipe_end = PipeEnd.create(
+                {
+                    "gid": gid,
+                    "dmas": dma_data,
+                    "pipe_type": asset_name,
+                    #                        "location": coords,
+                }
+            )[0]
+        except UniqueProperty:
+            pass
 
         self._connect_nodes(
             start_node,
@@ -90,13 +94,16 @@ class GisToNeo4J(GisToGraph):
     def _create_and_connect_point_asset_node(
         self, pipe_name, gid, asset_model, dma_data, start_node
     ):
-        new_point_asset = asset_model.create(
-            {
-                "gid": gid,
-                "dmas": dma_data,
-                #                       "location": coords,
-            }
-        )[0]
+        try:
+            new_point_asset = asset_model.create(
+                {
+                    "gid": gid,
+                    "dmas": dma_data,
+                    #                       "location": coords,
+                }
+            )[0]
+        except UniqueProperty:
+            pass
 
         # edge_length: float = node_point_geometries[-1].distance(
         #     asset["intersection_point_geometry"]
@@ -174,14 +181,17 @@ class GisToNeo4J(GisToGraph):
 
                 # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
 
-                pipe_end = PipeEnd.create(
-                    {
-                        "gid": pipe_gid,
-                        "dmas": dma_data,
-                        "pipe_type": pipe_type,
-                        #                        "location": coords,
-                    }
-                )[0]
+                try:
+                    pipe_end = PipeEnd.create(
+                        {
+                            "gid": pipe_gid,
+                            "dmas": dma_data,
+                            "pipe_type": pipe_type,
+                            #                        "location": coords,
+                        }
+                    )[0]
+                except UniqueProperty:
+                    pass
 
             self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
 
