@@ -95,7 +95,7 @@ class GisToGraph(NetworkController):
             zip(
                 *map(
                     self._map_relative_positions_calc,
-                    pipes_qs[self.initial_slice : self.final_slice],
+                    pipes_qs,
                 )
             )
         )

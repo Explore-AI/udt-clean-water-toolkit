@@ -4,8 +4,11 @@ from django.db import connections
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
-from neomodel.exceptions import UniqueProperty
-from cleanwater.exceptions import InvalidNodeException, InvalidPipeException
+from neomodel.exceptions import UniqueProperty, ConstraintValidationFailed
+from cleanwater.exceptions import (
+    InvalidNodeException,
+    InvalidPipeException,
+)
 from . import GisToGraph
 from cwa_geod.core.constants import (
     DEFAULT_SRID,
@@ -22,31 +25,28 @@ class GisToNeo4J(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid: int, offset: int, limit: int):
-        self.srid: int = srid or DEFAULT_SRID
-        self.offset: int = 10000
-        self.limit = None
+    def __init__(self, srid: int = DEFAULT_SRID, offset: int = 0, limit: int = 40000):
+        self.srid: int = srid
+        self.offset: int = offset
+        self.limit = limit
+
         super().__init__(srid=self.srid)
 
     def create_network(self):
         from timeit import default_timer as timer
 
         start = timer()
-        self.initial_slice = 0
-        self.final_slice = 4000
         pipes_qs = self.get_pipe_and_asset_data()
 
-        self.calc_pipe_point_relative_positions(pipes_qs)
+        self.calc_pipe_point_relative_positions(pipes_qs[self.offset, self.limit])
 
         self._create_neo4j_graph()
 
         end = timer()
         print(end - start)
 
-    def _map_network_parallel(self, pipes_qs, initial_slice, final_slice):
+    def _map_network_parallel(self, pipes_qs):
         new_connection = connections.create_connection("default")
-        self.initial_slice = initial_slice
-        self.final_slice = final_slice
 
         self.calc_pipe_point_relative_positions(pipes_qs)
         new_connection.close()
@@ -58,14 +58,14 @@ class GisToNeo4J(GisToGraph):
 
         initial_slice = self.offset
         final_slice = self.offset + self.limit
-        for x in y:
-            slices.append((pipes_qs[0:1000],))
-        slices = [
-            (pipes_qs[0:1000]),
-            (pipes_qs[0:1000]),
-            (pipes_qs[0:1000]),
-            (pipes_qs[0:1000]),
-        ]
+        skip_slice = 1000
+
+        start_slice = initial_slice
+        for start_slice in range(initial_slice, final_slice, skip_slice):
+            end_slice = start_slice + skip_slice
+            print(start_slice, end_slice)
+            slices.append((pipes_qs[initial_slice:end_slice],))
+
         return slices
 
     def create_network_parallel(self):
@@ -73,14 +73,13 @@ class GisToNeo4J(GisToGraph):
 
         pipes_qs = self.get_pipe_and_asset_data()
 
-        self._generate_slices(pipes_qs)
+        slices = self._generate_slices(pipes_qs)
 
         connections.close_all()
 
         procs = []
-        for slice_data in slices:
-            # print(name)
-            proc = mp.Process(target=self._map_network_parallel, args=(slice_data))
+        for slice in slices:
+            proc = mp.Process(target=self._map_network_parallel, args=(slice))
             procs.append(proc)
             proc.start()
 
@@ -89,9 +88,6 @@ class GisToNeo4J(GisToGraph):
 
         end = timer()
         print(end - start)
-        import pdb
-
-        pdb.set_trace()
 
     def get_pipe_and_asset_data(self):
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
@@ -127,18 +123,21 @@ class GisToNeo4J(GisToGraph):
 
     @staticmethod
     def _connect_nodes(start_node, end_node, pipe_name, relation_data):
-        if pipe_name == TRUNK_MAIN__NAME:
-            start_node.trunk_main.connect(end_node, relation_data)
-        elif pipe_name == DISTRIBUTION_MAIN__NAME:
-            start_node.distrbution_main.connect(end_node, relation_data)
-        else:
-            InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
+        try:
+            if pipe_name == TRUNK_MAIN__NAME:
+                start_node.trunk_main.connect(end_node, relation_data)
+            elif pipe_name == DISTRIBUTION_MAIN__NAME:
+                start_node.distrbution_main.connect(end_node, relation_data)
+            else:
+                InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
+        except ConstraintValidationFailed:
+            pass
 
     def _create_and_connect_pipe_end_node(
         self, pipe_name, gid, asset_name, dma_data, start_node
     ):
         try:
-            new_pipe_end = PipeEnd.create(
+            pipe_end = PipeEnd.create(
                 {
                     "gid": gid,
                     "dmas": dma_data,
@@ -147,22 +146,22 @@ class GisToNeo4J(GisToGraph):
                 }
             )[0]
         except UniqueProperty:
-            print("unique", gid)
+            pipe_end = PipeEnd.nodes.get_or_none(pipe_type=asset_name, gid=gid)
 
         self._connect_nodes(
             start_node,
-            new_pipe_end,
+            pipe_end,
             pipe_name,
             {"dmas": dma_data, "gid": gid, "weight": 1},
         )
 
-        return new_pipe_end
+        return pipe_end
 
     def _create_and_connect_point_asset_node(
         self, pipe_name, gid, asset_model, dma_data, start_node
     ):
         try:
-            new_point_asset = asset_model.create(
+            point_asset = asset_model.create(
                 {
                     "gid": gid,
                     "dmas": dma_data,
@@ -170,20 +169,22 @@ class GisToNeo4J(GisToGraph):
                 }
             )[0]
         except UniqueProperty:
-            print("unique", gid)
+            point_asset = asset_model.nodes.get_or_none(gid=gid)
 
         # edge_length: float = node_point_geometries[-1].distance(
         #     asset["intersection_point_geometry"]
         # )
 
         # TODO: add wieght to relation based on edge length
+
         self._connect_nodes(
             start_node,
-            new_point_asset,
+            point_asset,
             pipe_name,
             {"dmas": dma_data, "gid": gid, "weight": 1},
         )
-        return new_point_asset
+
+        return point_asset
 
     def _set_connected_asset_relations(
         self, pipe_data: dict, assets_data: list, pipe_end
@@ -258,7 +259,9 @@ class GisToNeo4J(GisToGraph):
                         }
                     )[0]
                 except UniqueProperty:
-                    print("unique", pipe_gid)
+                    pipe_end = PipeEnd.nodes.get_or_none(
+                        pipe_type=pipe_type, gid=pipe_gid
+                    )
 
             self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
 
