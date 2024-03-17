@@ -19,12 +19,12 @@ def cleanwater_gis2nx() -> None:
 
 
 def cleanwater_gis2neo4j() -> None:
-    gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID)
+    gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
     neo4j_graph = gis_to_neo4j.create_network()
 
 
 def cleanwater_gis2neo4j_p() -> None:
-    gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID)
+    gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
     neo4j_graph = gis_to_neo4j.create_network_parallel()
 
 
@@ -35,64 +35,72 @@ def create_pipes_network() -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run Clean Water Toolkit functions")
+    methods_map = {"gis2neo4j": cleanwater_gis2neo4j}
+    import pdb
 
-    parser.add_argument(
-        "--method", help="Convert the gis network to a connected graph network."
-    )
-
-    args = parser.parse_args()
-
-    if args.method == "gis2nx":
-        cleanwater_gis2nx()
-
-    if args.method == "gis2neo4j":
-        cleanwater_gis2neo4j()
-
-    if args.method == "gis2neo4jp":
-        cleanwater_gis2neo4j_p()
-
-    if args.method == "createpipes":
-        create_pipes_network()
+    pdb.set_trace()
 
 
-main()
+# if args.method == "gis2nx":
+#     cleanwater_gis2nx()
 
-# import multiprocessing as mp
+
+# if args.method == "gis2neo4j":
+#     cleanwater_gis2neo4j()
+
+# if args.method == "gis2neo4jp":
+#     cleanwater_gis2neo4j_p()
+
+# if args.method == "createpipes":
+#     create_pipes_network()
+
+
+if __name__ == "__main__":
+    main()
+
+
+# from multiprocessing.pool import ThreadPool
+# from multiprocessing import Pool
 # from cwa_geod.assets.models import *
 # from django.db import connections
 
 
-# def qs_check(qs, ii, fi):
+# def qs_check(qs):
 #     new_connection = connections.create_connection("default")
-
-#     list(qs[ii:fi])
-#     print(ii, fi)
+#     x = list(qs)
 #     new_connection.close()
+#     return x
 
 
 # def run():
 #     qs = TrunkMain.objects.all()
 #     slices = [
-#         (qs, 0, 10000),
-#         (qs, 10000, 20000),
-#         (qs, 20000, 30000),
-#         (qs, 30000, 40000),
+#         qs[:100],
+#         qs[100:200],
+#         qs[200:300],
+#         qs[300:400],
 #     ]
-
+#     print("a")
 #     connections.close_all()
-#     # with mp.Pool(4) as pool:
-#     #     pool.starmap(qs_check, xlist)
+#     with ThreadPool(4) as pool:
+#         xlist = pool.map(qs_check, slices)
 
-#     procs = []
-#     for data in slices:
-#         # print(name)
-#         proc = mp.Process(target=qs_check, args=(data))
-#         procs.append(proc)
-#         proc.start()
+#     qslist = []
+#     for x in xlist:
+#         qslist += x
+#     import pdb
 
-#     for proc in procs:
-#         proc.join()
+#     pdb.set_trace()
+
+# procs = []
+# for data in slices:
+#     print(name)
+#     proc = mp.Process(target=qs_check, args=(data))
+#     procs.append(proc)
+#     proc.start()
+
+# for proc in procs:
+#     proc.join()
 
 
 # run()
