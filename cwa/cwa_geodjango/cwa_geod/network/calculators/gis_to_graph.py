@@ -1,6 +1,7 @@
 import bisect
+from multiprocessing import Pool
 from networkx import Graph
-from django.contrib.gis.geos import GEOSGeometry, MultiLineString
+from django.contrib.gis.geos import GEOSGeometry, MultiLineString, Point
 from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
@@ -36,12 +37,15 @@ class GisToGraph(NetworkController):
                 base_pipe_geom, geom, srid=self.srid
             )
 
+            point = geom.transform("WGS84", clone=True)
+
             bisect.insort(
                 normalised_positions,
                 {
                     "position": normalised_position_on_pipe,
                     "data": asset,
                     "intersection_point_geometry": geom,
+                    "point": point,
                 },
                 key=lambda x: x["position"],
             )
@@ -59,6 +63,9 @@ class GisToGraph(NetworkController):
         pipe_data["dma_codes"] = qs_object.dma_codes
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["geometry"] = qs_object.geometry
+        pipe_data["point"] = Point(
+            pipe_data["geometry"][0][0], srid=DEFAULT_SRID
+        ).transform("WGS84", clone=True)
 
         return pipe_data
 
@@ -86,11 +93,7 @@ class GisToGraph(NetworkController):
         )
         return pipe_data, asset_positions
 
-    def calc_pipe_point_relative_positions(self, pipes_qs: QuerySet) -> None:
-        # from timeit import default_timer as timer
-
-        # start = timer()
-        # TODO: fix slice approach
+    def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         self.all_pipe_data, self.all_asset_positions = list(
             zip(
                 *map(
@@ -100,8 +103,18 @@ class GisToGraph(NetworkController):
             )
         )
 
-        # end = timer()
-        # print(end - start)
+    def calc_pipe_point_relative_positions_parallel(
+        self, pipes_qs_values: list
+    ) -> None:
+        # TODO: fix process count
+        with Pool(processes=4) as p:
+            self.all_pipe_data, self.all_asset_positions = zip(
+                *p.imap_unordered(
+                    self._map_relative_positions_calc,
+                    pipes_qs_values,
+                    10,  # TODO: fix chunksite
+                )
+            )
 
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
