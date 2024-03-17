@@ -28,13 +28,8 @@ class GisToNeo4J(GisToGraph):
     def __init__(
         self,
         srid: int = DEFAULT_SRID,
-        offset: int = 0,
-        limit: int = 40000,
-        step: int = 10000,
+        step: int = 100,
     ):
-        self.srid: int = srid
-        self.offset: int = offset
-        self.limit = limit
         self.step = step
 
         super().__init__(srid=self.srid)
@@ -44,19 +39,27 @@ class GisToNeo4J(GisToGraph):
 
         start = timer()
         pipes_qs = self.get_pipe_and_asset_data()
-        x = list(pipes_qs[self.offset : self.limit])
+
+        number_of_pipes = self.get_pipe_data_count(pipes_qs)
+
+        import pdb
+
+        pdb.set_trace()
+
+        for qs in range(step, number_of_pipes, step):
+            x = list(pipes_qs)
         int = timer()
         print(int - start)
 
         self.calc_pipe_point_relative_positions(x)
 
-        end = timer()
-        print(end - start)
-        import pdb
-
-        pdb.set_trace()
+        int2 = timer()
+        print(int2 - start)
 
         self._create_neo4j_graph()
+
+        end = timer()
+        print(end - start)
 
     def _generate_slices(self, pipes_qs):
         slices = []

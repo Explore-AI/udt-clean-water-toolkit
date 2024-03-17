@@ -145,3 +145,18 @@ class GisToGraph(NetworkController):
     def get_srid(self):
         """Get the currently used global srid"""
         return self.srid
+
+    @staticmethod
+    def get_pipe_data_count(qs) -> QuerySet:
+        """Get the number of pipes in the provided queryset.
+        Will make a call to the db. Strictly speaking will
+        return the count of any queryset.
+
+        Params:
+              A queryset (preferably a union of all the pipe data)
+
+        Returns:
+              The queryset count
+        """
+
+        return qs.count()
