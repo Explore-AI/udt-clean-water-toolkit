@@ -27,9 +27,6 @@ class MainsController(GeoDjangoController):
         "gid",
     ]  # should not include the geometry column as per convention
 
-    # at runtime ensure that the model created by the mains controller is a TrunkMain or DistributionMain class
-    # assert model in (TrunkMain, DistributionMain), "model attribute must be either a TrunkMain or DistributionMian"
-
     def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
@@ -70,7 +67,12 @@ class MainsController(GeoDjangoController):
             "dma_names": ArrayAgg("dmas__name"),
         }
 
-    def _generate_asset_subqueries(self):
+    def _generate_asset_subqueries2(self):
+        """ 
+        The verbose method for generating the subqueries.
+        This method is left for documentation purposes 
+        
+        """
         json_fields = self.set_json_fields()
 
         # This section is deliberately left verbose for clarity
@@ -119,8 +121,12 @@ class MainsController(GeoDjangoController):
         }
         return subqueries
 
-    def _generate_asset_subqueries2(self):
-        # An attempt to improve the _generate_asset_subqueries method
+    def _generate_asset_subqueries(self):
+        """ 
+        A more concise method of generating the asset subqueries for the Pipes Controllers
+        Model objects and their functions are placed in a dictionary, and the subqueries 
+        are generated based on their data types.
+        """
         # get the json fields
         json_fields = self.set_json_fields()
 
