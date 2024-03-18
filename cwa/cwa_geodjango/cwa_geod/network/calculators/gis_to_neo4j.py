@@ -29,35 +29,24 @@ class GisToNeo4J(GisToGraph):
         super().__init__(config)
 
     def create_network(self):
-        from timeit import default_timer as timer
-
-        start = timer()
         pipes_qs = self.get_pipe_and_asset_data()
 
-        number_of_pipes = self.get_pipe_data_count(pipes_qs)
+        if not self.config.query_limit:
+            query_limit = self.get_pipe_count(pipes_qs)
+        else:
+            query_limit = self.config.query_limit
 
-        import pdb
+        if not self.config.query_offset:
+            query_offset = 0
 
-        pdb.set_trace()
-
-        for offset in range(
-            self.config.query_offset, number_of_pipes, self.config.query_step
-        ):
+        for offset in range(query_offset, query_limit, self.config.query_step):
             limit = offset + self.config.query_step
-            sliced_qs = list(pipes_qs[offset:limit])
 
-            int = timer()
-            print(int - start)
+            sliced_qs = list(pipes_qs[offset:limit])
 
             self.calc_pipe_point_relative_positions(sliced_qs)
 
-            int2 = timer()
-            print(int2 - start)
-
-            self._create_neo4j_graph()
-
-        end = timer()
-        print(end - start)
+            # self._create_neo4j_graph()
 
     def _generate_slices(self, pipes_qs):
         slices = []

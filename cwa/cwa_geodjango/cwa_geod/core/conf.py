@@ -21,9 +21,10 @@ class AppConf:
         self._validate_config(parser["app_config"])
 
     def _validate_config(self, parser_config):
-        self.validated_config = ConfigValidator(parser_config)
+        config = ConfigValidator(parser_config)
+        is_valid = config.is_valid()
 
-        if not self.validated_config.is_valid():
+        if not is_valid:
             raise ValidationError(
                 [
                     ValidationError(
@@ -34,26 +35,28 @@ class AppConf:
                 ]
             )
 
+        self.validated_config = config.cleaned_data
+
     @property
     def method(self):
-        return self.validated_config["method"].value()
+        return self.validated_config["method"]
 
     @property
     def srid(self):
-        return self.validated_config["srid"].value()
+        return self.validated_config["srid"]
 
     @property
     def parallel(self):
-        return self.validated_config["parallel"].value()
+        return self.validated_config["parallel"]
 
     @property
     def query_step(self):
-        return self.validated_config["step"].value()
+        return self.validated_config["query_step"]
 
     @property
     def query_limit(self):
-        return self.validated_config["query_limit"].value()
+        return self.validated_config["query_limit"]
 
     @property
     def query_offset(self):
-        return self.validated_config["query_offset"].value()
+        return self.validated_config["query_offset"]

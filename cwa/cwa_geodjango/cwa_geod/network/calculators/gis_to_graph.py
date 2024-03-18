@@ -36,7 +36,7 @@ class GisToGraph(NetworkController):
                 base_pipe_geom, geom, srid=self.srid
             )
 
-            point = geom.transform("WGS84", clone=True)
+            # point = geom.transform("WGS84", clone=True)
 
             bisect.insort(
                 normalised_positions,
@@ -44,7 +44,7 @@ class GisToGraph(NetworkController):
                     "position": normalised_position_on_pipe,
                     "data": asset,
                     "intersection_point_geometry": geom,
-                    "point": point,
+                    #       "point": point,
                 },
                 key=lambda x: x["position"],
             )
@@ -62,9 +62,9 @@ class GisToGraph(NetworkController):
         pipe_data["dma_codes"] = qs_object.dma_codes
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["geometry"] = qs_object.geometry
-        pipe_data["point"] = Point(
-            pipe_data["geometry"][0][0], srid=DEFAULT_SRID
-        ).transform("WGS84", clone=True)
+        # pipe_data["point"] = Point(
+        #     pipe_data["geometry"][0][0], srid=DEFAULT_SRID
+        # ).transform("WGS84", clone=True)
 
         return pipe_data
 
@@ -146,16 +146,16 @@ class GisToGraph(NetworkController):
         return self.srid
 
     @staticmethod
-    def get_pipe_data_count(qs) -> QuerySet:
+    def get_pipe_count(qs) -> QuerySet:
         """Get the number of pipes in the provided queryset.
         Will make a call to the db. Strictly speaking will
         return the count of any queryset.
 
         Params:
-              A queryset (preferably a union of all the pipe data)
+              qs (Queryset). A queryset (preferably a union of all the pipe data)
 
         Returns:
-              The queryset count
+              int: The queryset count:
         """
 
         return qs.count()
