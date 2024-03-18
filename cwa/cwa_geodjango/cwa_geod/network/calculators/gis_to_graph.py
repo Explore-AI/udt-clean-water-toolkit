@@ -16,9 +16,11 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraph(NetworkController):
-    def __init__(self, analysis):
-        self.srid = srid or DEFAULT_SRID
-        super().__init__(srid=self.srid)
+    def __init__(self, config):
+        import pdb
+
+        pdb.set_trace()
+        super().__init__(srid=config.srid)
 
     def _get_connections_points_on_pipe(
         self, base_pipe_geom: MultiLineString, asset_data: list

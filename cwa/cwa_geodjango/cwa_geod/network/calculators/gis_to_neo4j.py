@@ -25,8 +25,8 @@ class GisToNeo4J(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, analysis):
-        super().__init__(analysis)
+    def __init__(self, config):
+        super().__init__(config)
 
     def create_network(self):
         import pdb

@@ -1,6 +1,7 @@
 import configparser
 from itertools import chain
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 from .validators import ConfigValidator
 
 
@@ -21,14 +22,38 @@ class AppConf:
 
     def _validate_config(self, parser_config):
         self.validated_config = ConfigValidator(parser_config)
+
         if not self.validated_config.is_valid():
             raise ValidationError(
                 [
-                    ValidationError(_("Error 1"), code="error1"),
-                    ValidationError(_("Error 2"), code="error2"),
+                    ValidationError(
+                        _("Invalid or missing: '%(value)s' - %(error)s"),
+                        params={"value": value, "error": error[0]},
+                    )
+                    for value, error in self.validated_config.errors.items()
                 ]
             )
 
     @property
     def method(self):
-        return self.config["method"]
+        return self.validated_config["method"].value()
+
+    @property
+    def srid(self):
+        return self.validated_config["srid"].value()
+
+    @property
+    def parallel(self):
+        return self.validated_config["parallel"].value()
+
+    @property
+    def query_step(self):
+        return self.validated_config["step"].value()
+
+    @property
+    def query_limit(self):
+        return self.validated_config["query_limit"].value()
+
+    @property
+    def query_offset(self):
+        return self.validated_config["query_offset"].value()
