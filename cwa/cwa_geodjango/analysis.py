@@ -1,44 +1,10 @@
 import setup  # Required. Do not remove.
-import argparse
-from cwa_geod.core.constants import DEFAULT_SRID
-from cwa_geod.network.calculators import GisToNetworkX
-from cwa_geod.network.calculators import GisToNeo4J
-
-
-def cleanwater_gis2nx() -> None:
-    gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
-    nx_graph = gis_to_nx.create_network()
-    print("Created Graph:", nx_graph)
-
-    # pos = nx.get_node_attributes(nx_graph, "coords")
-    # # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
-    # nx.draw(
-    #     nx_graph, pos=pos, node_size=10, linewidths=1, font_size=15, with_labels=True
-    # )
-    # plt.show()
-
-
-def cleanwater_gis2neo4j() -> None:
-    gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
-    neo4j_graph = gis_to_neo4j.create_network()
-
-
-def cleanwater_gis2neo4j_p() -> None:
-    gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
-    neo4j_graph = gis_to_neo4j.create_network_parallel()
-
-
-# TODO: Deprecated. for test purposes only.
-def create_pipes_network() -> None:
-    gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
-    gis_to_nx.create_network2()
+from cwa_geod.core import AnalysisCore
 
 
 def main():
-    methods_map = {"gis2neo4j": cleanwater_gis2neo4j}
-    import pdb
-
-    pdb.set_trace()
+    analysis = AnalysisCore()
+    # analysis.run()
 
 
 # if args.method == "gis2nx":
@@ -53,7 +19,6 @@ def main():
 
 # if args.method == "createpipes":
 #     create_pipes_network()
-
 
 if __name__ == "__main__":
     main()

@@ -35,6 +35,9 @@ class GisToNeo4J(GisToGraph):
         super().__init__(srid=self.srid)
 
     def create_network(self):
+        import pdb
+
+        pdb.set_trace()
         from timeit import default_timer as timer
 
         start = timer()

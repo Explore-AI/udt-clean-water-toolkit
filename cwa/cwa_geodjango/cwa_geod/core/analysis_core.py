@@ -1,0 +1,59 @@
+import argparse
+from cwa_geod.config.conf import AppConf
+from cwa_geod.core.constants import DEFAULT_SRID
+from cwa_geod.network.calculators import GisToNetworkX, GisToNeo4J
+
+
+class AnalysisCore(AppConf):
+    def __init__(self):
+        args = self._set_args()
+        super().__init__(args.file)
+
+    def _set_args(self):
+        parser = argparse.ArgumentParser(
+            description="Run Clean Water Toolkit functions"
+        )
+
+        parser.add_argument(
+            "--method",
+            help="Convert the gis network to a connected graph network.",
+            action="append",
+        )
+
+        parser.add_argument("-f", "--file")
+
+        return parser.parse_args()
+
+    def run(self):
+        self._run_method()
+
+    def cleanwater_gis2nx(self) -> None:
+        gis_to_nx = GisToNetworkX(srid=DEFAULT_SRID)
+        nx_graph = gis_to_nx.create_network()
+        print("Created Graph:", nx_graph)
+
+        # pos = nx.get_node_attributes(nx_graph, "coords")
+        # # https://stackoverflow.com/questions/28372127/add-edge-weights-to-plot-output-in-networkx
+        # nx.draw(
+        #     nx_graph, pos=pos, node_size=10, linewidths=1, font_size=15, with_labels=True
+        # )
+        # plt.show()
+
+    def cleanwater_gis2neo4j(self) -> None:
+        gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
+        neo4j_graph = gis_to_neo4j.create_network()
+
+    def cleanwater_gis2neo4j_p(self) -> None:
+        gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
+        neo4j_graph = gis_to_neo4j.create_network_parallel()
+
+    def _set_run_methods(self):
+        return {
+            "gis2nx": self.cleanwater_gis2nx,
+            "gis2neo4j": self.cleanwater_gis2neo4j,
+        }
+
+    @property
+    def _run_method(self):
+        methods = self._set_run_methods()
+        return methods[self.method]
