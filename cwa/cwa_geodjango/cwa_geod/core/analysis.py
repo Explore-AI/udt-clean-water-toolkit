@@ -1,10 +1,10 @@
 import argparse
-from cwa_geod.config.conf import AppConf
+from cwa_geod.core.conf import AppConf
 from cwa_geod.core.constants import DEFAULT_SRID
 from cwa_geod.network.calculators import GisToNetworkX, GisToNeo4J
 
 
-class AnalysisCore(AppConf):
+class Analysis(AppConf):
     def __init__(self):
         args = self._set_args()
         super().__init__(args.file)
@@ -12,12 +12,6 @@ class AnalysisCore(AppConf):
     def _set_args(self):
         parser = argparse.ArgumentParser(
             description="Run Clean Water Toolkit functions"
-        )
-
-        parser.add_argument(
-            "--method",
-            help="Convert the gis network to a connected graph network.",
-            action="append",
         )
 
         parser.add_argument("-f", "--file")
@@ -40,7 +34,7 @@ class AnalysisCore(AppConf):
         # plt.show()
 
     def cleanwater_gis2neo4j(self) -> None:
-        gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
+        gis_to_neo4j = GisToNeo4J(self)
         neo4j_graph = gis_to_neo4j.create_network()
 
     def cleanwater_gis2neo4j_p(self) -> None:

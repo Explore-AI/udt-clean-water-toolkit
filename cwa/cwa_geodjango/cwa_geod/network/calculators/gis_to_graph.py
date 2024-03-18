@@ -16,7 +16,7 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraph(NetworkController):
-    def __init__(self, srid=None):
+    def __init__(self, analysis):
         self.srid = srid or DEFAULT_SRID
         super().__init__(srid=self.srid)
 
