@@ -11,7 +11,6 @@ from cleanwater.exceptions import (
 )
 from . import GisToGraph
 from cwa_geod.core.constants import (
-    DEFAULT_SRID,
     TRUNK_MAIN__NAME,
     DISTRIBUTION_MAIN__NAME,
     PIPE_END__NAME,
@@ -26,12 +25,10 @@ class GisToNeo4J(GisToGraph):
     network of assets"""
 
     def __init__(self, config):
+        self.config = config
         super().__init__(config)
 
     def create_network(self):
-        import pdb
-
-        pdb.set_trace()
         from timeit import default_timer as timer
 
         start = timer()
@@ -43,17 +40,21 @@ class GisToNeo4J(GisToGraph):
 
         pdb.set_trace()
 
-        for qs in range(step, number_of_pipes, step):
-            x = list(pipes_qs)
-        int = timer()
-        print(int - start)
+        for offset in range(
+            self.config.query_offset, number_of_pipes, self.config.query_step
+        ):
+            limit = offset + self.config.query_step
+            sliced_qs = list(pipes_qs[offset:limit])
 
-        self.calc_pipe_point_relative_positions(x)
+            int = timer()
+            print(int - start)
 
-        int2 = timer()
-        print(int2 - start)
+            self.calc_pipe_point_relative_positions(sliced_qs)
 
-        self._create_neo4j_graph()
+            int2 = timer()
+            print(int2 - start)
+
+            self._create_neo4j_graph()
 
         end = timer()
         print(end - start)
