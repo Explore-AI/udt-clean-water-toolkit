@@ -26,7 +26,7 @@ class GisToNeo4J(GisToGraph):
 
     def __init__(self, config):
         self.config = config
-        super().__init__()
+        super().__init__(config)
 
     def create_network(self):
         pipes_qs = self.get_pipe_and_asset_data()
