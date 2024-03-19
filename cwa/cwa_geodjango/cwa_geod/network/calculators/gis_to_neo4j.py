@@ -17,7 +17,6 @@ from cwa_geod.core.constants import (
     POINT_ASSET__NAME,
 )
 from ..models import PointAsset, PipeEnd
-from timeit import default_timer as timer
 
 
 class GisToNeo4J(GisToGraph):
@@ -49,43 +48,21 @@ class GisToNeo4J(GisToGraph):
             new_connection.close()
             return values
 
-        start = timer()
-        print("0")
         pipes_qs = self.get_pipe_and_asset_data()
 
         pipes_qs_slices = self._generate_slices(pipes_qs)
 
         connections.close_all()
-        print("a")
 
         with ThreadPool(self.config.thread_count) as p:
             qs_data = p.map(_map_pipe_assets_calcs_parallel, pipes_qs_slices)
-        print("b")
+
         qs_values_list = []
-        int = timer()
-        print(int - start)
         for qs in qs_data:
             qs_values_list += qs
-        print("c")
-        int2 = timer()
-        print(int2 - start)
 
         self.calc_pipe_point_relative_positions_parallel(qs_values_list)
 
-        # procs = []
-        # for slice in slices:
-        #     proc = Process(target=_map_pipe_assets_calcs_parallel, args=(slice))
-        #     procs.append(proc)
-        #     proc.start()
-
-        # for proc in procs:
-        #     proc.join()
-
-        end = timer()
-        print(end - start)
-        import pdb
-
-        pdb.set_trace()
         self._create_neo4j_graph_parallel()
 
     def _get_query_offset_limit(self, pipes_qs):

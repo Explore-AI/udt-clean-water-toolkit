@@ -111,12 +111,9 @@ class GisToGraph(NetworkController):
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs_values,
-                    10,  # TODO: fix chunksize
+                    10,
                 )
             )
-        import pdb
-
-        pdb.set_trace()
 
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
