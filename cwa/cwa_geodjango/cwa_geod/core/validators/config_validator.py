@@ -11,6 +11,7 @@ class ConfigValidator(forms.Form):
     parallel = forms.BooleanField(required=False)
     thread_count = forms.IntegerField(required=False)
     processor_count = forms.IntegerField(required=False)
+#    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
     def clean(self):
         cleaned_data = super().clean()

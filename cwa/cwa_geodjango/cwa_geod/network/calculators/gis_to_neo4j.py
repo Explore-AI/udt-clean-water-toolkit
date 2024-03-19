@@ -42,6 +42,10 @@ class GisToNeo4J(GisToGraph):
             # self._create_neo4j_graph()
 
     def create_network_parallel(self):
+        from timeit import default_timer as timer
+
+        start = timer()
+
         def _map_pipe_assets_calcs_parallel(pipes_qs):
             new_connection = connections.create_connection("default")
             values = list(pipes_qs)
@@ -64,6 +68,9 @@ class GisToNeo4J(GisToGraph):
         self.calc_pipe_point_relative_positions_parallel(qs_values_list)
 
         self._create_neo4j_graph_parallel()
+
+        end = timer()
+        print(end - start)
 
     def _get_query_offset_limit(self, pipes_qs):
         if not self.config.query_limit:
@@ -200,9 +207,7 @@ class GisToNeo4J(GisToGraph):
 
             pipe_name = pipe_data["asset_name"]
 
-            # point = asset["intersection_point_geometry"].transform("WGS84", clone=True)
-
-            # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
+            # coords = NeomodelPoint((asset["point"].x, asset["point"].y), crs="wgs-84")
 
             node, node_type, asset_model = self.check_node_exists(asset_name, gid)
 
@@ -232,11 +237,7 @@ class GisToNeo4J(GisToGraph):
                 pipe_data["dma_codes"], pipe_data["dma_names"]
             )
 
-            # point = Point(pipe_data["geometry"][0][0], srid=DEFAULT_SRID).transform(
-            #     "WGS84", clone=True
-            # )
-
-            # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
+            # coords = NeomodelPoint((pipe_data['point'].x, pipe_data['point'].y), crs="wgs-84")
 
             try:
                 pipe_end = PipeEnd.create(
@@ -284,8 +285,5 @@ class GisToNeo4J(GisToGraph):
 
         items = zip(self.all_pipe_data, self.all_asset_positions)
 
-        with ThreadPool(4) as p:
+        with ThreadPool(self.config.thread_count) as p:
             p.starmap(self._map_pipe_connected_asset_relations, items)
-
-        # with mp.pool.ThreadPool(5) as p:
-        #     p.map(self._create_neo4j_graph, range(50))
