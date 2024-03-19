@@ -18,8 +18,7 @@ from cwa_geod.core.constants import (
 class GisToGraph(NetworkController):
     def __init__(self, config):
         self.config = config
-        self.srid = config.srid
-        super().__init__(srid=27700)
+        super().__init__(srid=config.srid)
 
     def _get_connections_points_on_pipe(
         self, base_pipe_geom: MultiLineString, asset_data: list
@@ -27,7 +26,7 @@ class GisToGraph(NetworkController):
         normalised_positions: list = []
 
         for asset in asset_data:
-            geom: MultiLineString = GEOSGeometry(asset["wkt"], srid=self.srid)
+            geom: MultiLineString = GEOSGeometry(asset["wkt"], srid=self.config.srid)
 
             if geom.geom_typeid in GEOS_LINESTRING_TYPES:
                 geom = base_pipe_geom.intersection(
@@ -35,7 +34,7 @@ class GisToGraph(NetworkController):
                 )  # TODO: handle multiple intersections at single point
 
             normalised_position_on_pipe: float = normalised_point_position_on_line(
-                base_pipe_geom, geom, srid=self.srid
+                base_pipe_geom, geom, srid=self.config.srid
             )
 
             # point = geom.transform("WGS84", clone=True)
@@ -141,13 +140,9 @@ class GisToGraph(NetworkController):
         trunk_mains: QuerySet = tm.get_geometry_queryset()
         return self.create_pipes_network(trunk_mains)
 
-    def set_srid(self, srid: int):
-        """Set or change the global srid"""
-        self.srid = srid
-
     def get_srid(self):
         """Get the currently used global srid"""
-        return self.srid
+        return self.config.srid
 
     @staticmethod
     def get_pipe_count(qs) -> QuerySet:

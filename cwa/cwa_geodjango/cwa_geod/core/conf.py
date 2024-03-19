@@ -1,4 +1,5 @@
 import configparser
+from types import SimpleNamespace
 from itertools import chain
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
@@ -35,36 +36,4 @@ class AppConf:
                 ]
             )
 
-        self.validated_config = config.cleaned_data
-
-    @property
-    def method(self):
-        return self.validated_config["method"]
-
-    @property
-    def srid(self):
-        return self.validated_config["srid"]
-
-    @property
-    def query_step(self):
-        return self.validated_config["query_step"]
-
-    @property
-    def query_limit(self):
-        return self.validated_config["query_limit"]
-
-    @property
-    def query_offset(self):
-        return self.validated_config["query_offset"]
-
-    @property
-    def parallel(self):
-        return self.validated_config["parallel"]
-
-    @property
-    def thread_count(self):
-        return self.validated_config["thread_count"]
-
-    @property
-    def processor_count(self):
-        return self.validated_config["processor_count"]
+        self.validated_config = SimpleNamespace(**config.cleaned_data)

@@ -34,7 +34,7 @@ class Analysis(AppConf):
         # plt.show()
 
     def cleanwater_gis2neo4j(self) -> None:
-        gis_to_neo4j = GisToNeo4J(super())
+        gis_to_neo4j = GisToNeo4J(self.validated_config)
 
         if self.parallel:
             gis_to_neo4j.create_network_parallel()
@@ -50,4 +50,4 @@ class Analysis(AppConf):
     @property
     def _run_method(self):
         methods = self._get_run_methods()
-        return methods[self.method]
+        return methods[self.validated_config.method]
