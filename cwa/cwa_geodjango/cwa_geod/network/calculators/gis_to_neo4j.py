@@ -26,18 +26,12 @@ class GisToNeo4J(GisToGraph):
 
     def __init__(self, config):
         self.config = config
-        super().__init__(config)
+        super().__init__()
 
     def create_network(self):
         pipes_qs = self.get_pipe_and_asset_data()
 
-        if not self.config.query_limit:
-            query_limit = self.get_pipe_count(pipes_qs)
-        else:
-            query_limit = self.config.query_limit
-
-        if not self.config.query_offset:
-            query_offset = 0
+        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
 
         for offset in range(query_offset, query_limit, self.config.query_step):
             limit = offset + self.config.query_step
@@ -47,23 +41,6 @@ class GisToNeo4J(GisToGraph):
             self.calc_pipe_point_relative_positions(sliced_qs)
 
             # self._create_neo4j_graph()
-
-    def _generate_slices(self, pipes_qs):
-        slices = []
-
-        initial_slice = self.offset
-        final_slice = self.offset + self.limit
-        skip_slice = self.step
-
-        start_slice = initial_slice
-        for start_slice in range(initial_slice, final_slice, skip_slice):
-            end_slice = start_slice + skip_slice
-            print(start_slice, end_slice)
-            slices.append(
-                (pipes_qs[start_slice:end_slice]),
-            )
-
-        return slices
 
     def create_network_parallel(self):
         def _map_pipe_assets_calcs_parallel(pipes_qs):
@@ -80,7 +57,8 @@ class GisToNeo4J(GisToGraph):
 
         connections.close_all()
         print("a")
-        with ThreadPool(4) as p:
+
+        with ThreadPool(self.config.thread_count) as p:
             qs_data = p.map(_map_pipe_assets_calcs_parallel, pipes_qs_slices)
         print("b")
         qs_values_list = []
@@ -109,6 +87,30 @@ class GisToNeo4J(GisToGraph):
 
         pdb.set_trace()
         self._create_neo4j_graph_parallel()
+
+    def _get_query_offset_limit(self, pipes_qs):
+        if not self.config.query_limit:
+            query_limit = self.get_pipe_count(pipes_qs)
+        else:
+            query_limit = self.config.query_limit
+
+        if not self.config.query_offset:
+            query_offset = 0
+        else:
+            query_offset = self.query_offset
+
+        return query_offset, query_limit
+
+    def _generate_slices(self, pipes_qs):
+        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
+
+        qs_slices = []
+
+        for offset in range(query_offset, query_limit, self.config.query_step):
+            limit = offset + self.config.query_step
+            qs_slices.append(pipes_qs[offset:limit])
+
+        return qs_slices
 
     def get_pipe_and_asset_data(self):
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data()

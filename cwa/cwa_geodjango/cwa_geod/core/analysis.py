@@ -35,11 +35,11 @@ class Analysis(AppConf):
 
     def cleanwater_gis2neo4j(self) -> None:
         gis_to_neo4j = GisToNeo4J(super())
-        neo4j_graph = gis_to_neo4j.create_network()
 
-    def cleanwater_gis2neo4j_p(self) -> None:
-        gis_to_neo4j = GisToNeo4J(srid=DEFAULT_SRID, step=250)
-        neo4j_graph = gis_to_neo4j.create_network_parallel()
+        if self.parallel:
+            gis_to_neo4j.create_network_parallel()
+        else:
+            gis_to_neo4j.create_network()
 
     def _get_run_methods(self):
         return {

@@ -31,7 +31,7 @@ class AppConf:
                         _("Invalid or missing: '%(value)s' - %(error)s"),
                         params={"value": value, "error": error[0]},
                     )
-                    for value, error in self.validated_config.errors.items()
+                    for value, error in config.errors.items()
                 ]
             )
 
@@ -46,10 +46,6 @@ class AppConf:
         return self.validated_config["srid"]
 
     @property
-    def parallel(self):
-        return self.validated_config["parallel"]
-
-    @property
     def query_step(self):
         return self.validated_config["query_step"]
 
@@ -60,3 +56,15 @@ class AppConf:
     @property
     def query_offset(self):
         return self.validated_config["query_offset"]
+
+    @property
+    def parallel(self):
+        return self.validated_config["parallel"]
+
+    @property
+    def thread_count(self):
+        return self.validated_config["thread_count"]
+
+    @property
+    def processor_count(self):
+        return self.validated_config["processor_count"]

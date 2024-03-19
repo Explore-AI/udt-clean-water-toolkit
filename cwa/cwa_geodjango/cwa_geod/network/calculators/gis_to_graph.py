@@ -16,8 +16,9 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraph(NetworkController):
-    def __init__(self, config):
-        super().__init__(srid=config.srid)
+    def __init__(self):
+        # self.config = config
+        super().__init__(srid=27700)
 
     def _get_connections_points_on_pipe(
         self, base_pipe_geom: MultiLineString, asset_data: list
@@ -105,15 +106,17 @@ class GisToGraph(NetworkController):
     def calc_pipe_point_relative_positions_parallel(
         self, pipes_qs_values: list
     ) -> None:
-        # TODO: fix process count
-        with Pool(processes=4) as p:
+        with Pool(processes=self.config.processor_count) as p:
             self.all_pipe_data, self.all_asset_positions = zip(
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs_values,
-                    10,  # TODO: fix chunksite
+                    10,  # TODO: fix chunksize
                 )
             )
+        import pdb
+
+        pdb.set_trace()
 
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
