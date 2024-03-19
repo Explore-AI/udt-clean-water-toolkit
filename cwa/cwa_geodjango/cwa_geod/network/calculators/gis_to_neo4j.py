@@ -28,6 +28,10 @@ class GisToNeo4J(GisToGraph):
         super().__init__(config)
 
     def create_network(self):
+        from timeit import default_timer as timer
+
+        start = timer()
+
         pipes_qs = self.get_pipe_and_asset_data()
 
         query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
@@ -39,7 +43,10 @@ class GisToNeo4J(GisToGraph):
 
             self.calc_pipe_point_relative_positions(sliced_qs)
 
-            # self._create_neo4j_graph()
+            self._create_neo4j_graph()
+
+        end = timer()
+        print(end - start)
 
     def create_network_parallel(self):
         from timeit import default_timer as timer
