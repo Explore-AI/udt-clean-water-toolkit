@@ -12,3 +12,6 @@ services:
       - ./env_files/.db_env
     image: postgis/postgis
     restart: always
+    # Adjust params in db-init-config.sh before running this compose
+    volumes:
+      - ../scripts/postgis/db-init-config.sh:/docker-entrypoint-initdb.d/db-init-config.sh
