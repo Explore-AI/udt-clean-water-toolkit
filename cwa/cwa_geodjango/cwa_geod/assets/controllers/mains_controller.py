@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from django.db.models import Value, JSONField, OuterRef
 from django.db.models.functions import JSONObject
 from django.contrib.gis.db import models
@@ -10,16 +11,11 @@ from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import *
 
 
-class MainsController(GeoDjangoController):
-    """_summary_
-    Base Controller class for the Mains Controller classes
+class MainsController(ABC, GeoDjangoController):
+    """This is an abstract base class and should not be
+    instantiated explicitly
     """
 
-    model = (
-        models.Model
-    )  # model will need to be overridden for each child controller class
-
-    # items_limit = 100000  # TODO: set default in config
     WITHIN_DISTANCE = 0.5
     default_properties = [
         "id",
@@ -47,7 +43,7 @@ class MainsController(GeoDjangoController):
     @staticmethod
     def get_json_fields():
         """Overwrite this function to bypass
-        custom PostgreSQL functions
+        the custom PostgreSQL functions
 
         Params:
               None
@@ -66,22 +62,11 @@ class MainsController(GeoDjangoController):
             "dma_names": ArrayAgg("dmas__name"),
         }
 
-    def _generate_mains_subqueries(mains_model):
-        json_fields = self.get_json_fields()
-
-        subquery1 = self._generate_touches_subquery(
-            mains_model.objects.all(), json_fields
+    @abstractmethod
+    def _generate_mains_subqueries(self):
+        raise NotImplementedError(
+            "Function should be defined in the child class and not called explicitly. "
         )
-        subquery2 = self._generate_touches_subquery(
-            DistributionMain.objects.all(), json_fields
-        )
-
-        subqueries = {
-            "trunk_mains_data": ArraySubquery(subquery1),
-            "distribution_mains_data": ArraySubquery(subquery2),
-        }
-
-        return subqueries
 
     def _generate_asset_subqueries(self):
         json_fields = self.get_json_fields()
@@ -120,6 +105,7 @@ class MainsController(GeoDjangoController):
             "network_meter_data": ArraySubquery(subquery7),
             "chamber_data": ArraySubquery(subquery8),
             "operational_site_data": ArraySubquery(subquery9),
+            "network_opt_valve": ArraySubquery(subquery10),
         }
         return subqueries
 
@@ -135,6 +121,7 @@ class MainsController(GeoDjangoController):
             dma_ids=ArrayAgg("dmas"),
             dma_codes=ArrayAgg("dmas__code"),
             dma_names=ArrayAgg("dmas__name"),
+            **mains_intersection_subqueries,
             **asset_subqueries
         )
         return qs

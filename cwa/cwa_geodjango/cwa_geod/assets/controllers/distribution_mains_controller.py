@@ -1,32 +1,40 @@
-from cwa_geod.assets.models import *
-from cwa_geod.core.constants import DEFAULT_SRID
+from django.contrib.postgres.expressions import ArraySubquery
+from cwa_geod.assets.models import TrunkMain, DistributionMain
 from .mains_controller import MainsController
 
 
 class DistributionMainsController(MainsController):
-      """Convert distribution mains data to Queryset or GeoJSON.
+    """Convert distribution mains data to a Queryset or GeoJSON."""
 
-      Refs on how the GeoJSON is constructed.
-      AsGeoJson query combined with json to build object
-      https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
-      https://postgis.net/docs/ST_AsGeoJSON.html
-      https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
-      """
+    model = DistributionMain
+    default_properties = [
+        "id",
+        "gid",
+    ]  # should not include the geometry column as per convention
 
-      model = DistributionMain
-      srid = DEFAULT_SRID
-      # items_limit = 100000  # TODO: set default in config
-      WITHIN_DISTANCE = 0.5
-      default_properties = [
-            "id",
-            "gid",
-      ]  # should not include the geometry column as per convention
+    def _generate_mains_subqueries(self):
+        json_fields = self.get_json_fields()
 
-      def distribution_mains_to_geojson(self, properties=None):
-            return self.mains_to_geojson(properties)
+        subquery1 = self._generate_touches_subquery(
+            self.model.objects.all(), json_fields
+        )
 
-      def distribution_mains_to_geojson2(self, properties=None):
-            return self.mains_to_geojson2(properties)
+        subquery2 = self._generate_touches_subquery(
+            TrunkMain.objects.all(), json_fields
+        )
 
-      def distribution_mains_to_geodataframe(self, properties=None):
-            return self.mains_to_geodataframe(properties)
+        subqueries = {
+            "trunk_mains_data": ArraySubquery(subquery1),
+            "distribution_mains_data": ArraySubquery(subquery2),
+        }
+
+        return subqueries
+
+    def distribution_mains_to_geojson(self, properties=None):
+        return self.mains_to_geojson(properties)
+
+    def distribution_mains_to_geojson2(self, properties=None):
+        return self.mains_to_geojson2(properties)
+
+    def distribution_mains_to_geodataframe(self, properties=None):
+        return self.mains_to_geodataframe(properties)
