@@ -15,17 +15,17 @@ class DistributionMainsController(MainsController):
     def _generate_mains_subqueries(self):
         json_fields = self.get_json_fields()
 
-        subquery1 = self._generate_touches_subquery(
+        dist_main_intersection_subquery = self._generate_touches_subquery(
             self.model.objects.all(), json_fields
         )
 
-        subquery2 = self._generate_touches_subquery(
+        trunk_main_intersection_subquery = self._generate_touches_subquery(
             TrunkMain.objects.all(), json_fields
         )
 
         subqueries = {
-            "trunk_mains_data": ArraySubquery(subquery1),
-            "distribution_mains_data": ArraySubquery(subquery2),
+            "trunk_mains_data": ArraySubquery(dist_main_intersection_subquery),
+            "distribution_mains_data": ArraySubquery(trunk_main_intersection_subquery),
         }
 
         return subqueries
