@@ -68,20 +68,30 @@ class MainsController(GeoDjangoController):
         }
 
     def _generate_asset_subqueries2(self):
-        """ 
+        """
         The verbose method for generating the subqueries.
-        This method is left for documentation purposes 
-        
+        This method is left for documentation purposes
+
         """
         json_fields = self.set_json_fields()
 
         # This section is deliberately left verbose for clarity
-        subquery1 = self._generate_touches_subquery(
-            self.model.objects.all(), json_fields
-        )
-        subquery2 = self._generate_touches_subquery(
-            TrunkMain.objects.all(), json_fields
-        )
+        if isinstance(self.model, DistributionMain):
+            # Distribution Mains Controller
+            subquery1 = self._generate_touches_subquery(
+                self.model.objects.all(), json_fields
+            )
+            subquery2 = self._generate_touches_subquery(
+                TrunkMain.objects.all(), json_fields
+            )
+        else:
+            # Trunk Mains Controller
+            subquery1 = self._generate_touches_subquery(
+                DistributionMain.objects.all(), json_fields
+            )
+            subquery2 = self._generate_touches_subquery(
+                self.model.objects.all(), json_fields
+            )
 
         subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
 
@@ -122,6 +132,7 @@ class MainsController(GeoDjangoController):
         return subqueries
 
     def _generate_asset_subqueries(self):
+        """Generates the Asset Subqueries. This method is to be overridden by child classes"""
         """ 
         A more concise method of generating the asset subqueries for the Pipes Controllers
         Model objects and their functions are placed in a dictionary, and the subqueries 
@@ -131,10 +142,17 @@ class MainsController(GeoDjangoController):
         json_fields = self.set_json_fields()
 
         # define the model objects
-        # 1 includes all model objects except for NetworkOptValve Model
         model_objects = {
-            "distribution_mains_data": self.model.objects.all(),
-            "trunk_mains_data": TrunkMain.objects.all(),
+            "distribution_mains_data": (
+                self.model.objects.all()
+                if self.model.AssetMeta.asset_name=='distribution_main'
+                else DistributionMain.objects.all()
+            ),
+            "trunk_mains_data": (
+                self.model.objects.all()
+                if self.model.AssetMeta.asset_name=='trunk_main'
+                else TrunkMain.objects.all()
+            ),
             "logger_data": Logger.objects.all(),
             "hydrant_data": Hydrant.objects.all(),
             "pressure_fitting_data": PressureFitting.objects.all(),
@@ -142,20 +160,8 @@ class MainsController(GeoDjangoController):
             "network_meter_data": NetworkMeter.objects.all(),
             "chamber_data": Chamber.objects.all(),
             "operational_site_data": OperationalSite.objects.all(),
+            "network_opt_valve_data": NetworkOptValve.objects.all(),
         }
-        # 2 includes NetworkOptValve Model
-        # model_objects = {
-        #     "distribution_mains_data": self.model.objects.all(),
-        #     "trunk_mains_data": TrunkMain.objects.all(),
-        #     "logger_data": Logger.objects.all(),
-        #     "hydrant_data": Hydrant.objects.all(),
-        #     "pressure_fitting_data": PressureFitting.objects.all(),
-        #     "pressure_valve_data": PressureControlValve.objects.all(),
-        #     "network_meter_data": NetworkMeter.objects.all(),
-        #     "chamber_data": Chamber.objects.all(),
-        #     "operational_site_data": OperationalSite.objects.all(),
-        #     "network_opt_valve_data": NetworkOptValve.objects.all(),
-        # }
 
         subqueries = {}
         for asset_name, model_object in model_objects.items():
