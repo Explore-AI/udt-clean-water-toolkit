@@ -1,5 +1,4 @@
 from cwa_geod.assets.models import *
-from cwa_geod.core.constants import DEFAULT_SRID
 from .mains_controller import MainsController
 
 
@@ -14,13 +13,13 @@ class TrunkMainsController(MainsController):
     """
 
     model = TrunkMain
-    srid = DEFAULT_SRID
     # items_limit = 100000  # TODO: set default in config
-    WITHIN_DISTANCE = 0.5
     default_properties = [
         "id",
         "gid",
     ]  # should not include the geometry column as per convention
+
+    def _
 
     def trunk_mains_to_geojson(self, properties=None):
         return self.mains_to_geojson(properties)
@@ -30,13 +29,3 @@ class TrunkMainsController(MainsController):
 
     def trunk_mains_to_geodataframe(self, properties=None):
         return self.mains_to_geodataframe(properties)
-
-    # 1) slower serialization into geojson
-    # start = datetime.datetime.now()
-    # trunk_mains = TrunkMain.objects.all()
-    # trunk_mains_data = serialize(
-    #     "geojson", trunk_mains, geometry_field="geometry", srid=DEFAULT_SRID
-    # )
-    # finish = datetime.datetime.now()
-    # print(finish - start)
-    # trunk_mains_gdf = gpd.read_file(trunk_mains_data)

@@ -8,7 +8,6 @@ from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWKT
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import *
-from cwa_geod.core.constants import DEFAULT_SRID
 
 
 class MainsController(GeoDjangoController):
@@ -19,9 +18,9 @@ class MainsController(GeoDjangoController):
     model = (
         models.Model
     )  # model will need to be overridden for each child controller class
-    srid = DEFAULT_SRID
+
     # items_limit = 100000  # TODO: set default in config
-    WITHIN_DISTANCE = 1
+    WITHIN_DISTANCE = 0.5
     default_properties = [
         "id",
         "gid",
@@ -46,7 +45,7 @@ class MainsController(GeoDjangoController):
         return subquery
 
     @staticmethod
-    def set_json_fields():
+    def get_json_fields():
         """Overwrite this function to bypass
         custom PostgreSQL functions
 
@@ -67,32 +66,27 @@ class MainsController(GeoDjangoController):
             "dma_names": ArrayAgg("dmas__name"),
         }
 
-    def _generate_asset_subqueries2(self):
-        """
-        The verbose method for generating the subqueries.
-        This method is left for documentation purposes
+    def _generate_mains_subqueries(mains_model):
+        json_fields = self.get_json_fields()
 
-        """
-        json_fields = self.set_json_fields()
+        subquery1 = self._generate_touches_subquery(
+            mains_model.objects.all(), json_fields
+        )
+        subquery2 = self._generate_touches_subquery(
+            DistributionMain.objects.all(), json_fields
+        )
+
+        subqueries = {
+            "trunk_mains_data": ArraySubquery(subquery1),
+            "distribution_mains_data": ArraySubquery(subquery2),
+        }
+
+        return subqueries
+
+    def _generate_asset_subqueries(self):
+        json_fields = self.get_json_fields()
 
         # This section is deliberately left verbose for clarity
-        if isinstance(self.model, DistributionMain):
-            # Distribution Mains Controller
-            subquery1 = self._generate_touches_subquery(
-                self.model.objects.all(), json_fields
-            )
-            subquery2 = self._generate_touches_subquery(
-                TrunkMain.objects.all(), json_fields
-            )
-        else:
-            # Trunk Mains Controller
-            subquery1 = self._generate_touches_subquery(
-                DistributionMain.objects.all(), json_fields
-            )
-            subquery2 = self._generate_touches_subquery(
-                self.model.objects.all(), json_fields
-            )
-
         subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
 
         subquery4 = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
@@ -119,8 +113,6 @@ class MainsController(GeoDjangoController):
         )
 
         subqueries = {
-            "distribution_mains_data": ArraySubquery(subquery1),
-            "trunk_mains_data": ArraySubquery(subquery2),
             "logger_data": ArraySubquery(subquery3),
             "hydrant_data": ArraySubquery(subquery4),
             "pressure_fitting_data": ArraySubquery(subquery5),
@@ -131,54 +123,8 @@ class MainsController(GeoDjangoController):
         }
         return subqueries
 
-    def _generate_asset_subqueries(self):
-        """Generates the Asset Subqueries. This method is to be overridden by child classes"""
-        """ 
-        A more concise method of generating the asset subqueries for the Pipes Controllers
-        Model objects and their functions are placed in a dictionary, and the subqueries 
-        are generated based on their data types.
-        """
-        # get the json fields
-        json_fields = self.set_json_fields()
-
-        # define the model objects
-        model_objects = {
-            "distribution_mains_data": (
-                self.model.objects.all()
-                if self.model.AssetMeta.asset_name=='distribution_main'
-                else DistributionMain.objects.all()
-            ),
-            "trunk_mains_data": (
-                self.model.objects.all()
-                if self.model.AssetMeta.asset_name=='trunk_main'
-                else TrunkMain.objects.all()
-            ),
-            "logger_data": Logger.objects.all(),
-            "hydrant_data": Hydrant.objects.all(),
-            "pressure_fitting_data": PressureFitting.objects.all(),
-            "pressure_valve_data": PressureControlValve.objects.all(),
-            "network_meter_data": NetworkMeter.objects.all(),
-            "chamber_data": Chamber.objects.all(),
-            "operational_site_data": OperationalSite.objects.all(),
-            "network_opt_valve_data": NetworkOptValve.objects.all(),
-        }
-
-        subqueries = {}
-        for asset_name, model_object in model_objects.items():
-            if "mains" in asset_name:
-                # mains models
-                subqueries[asset_name] = ArraySubquery(
-                    self._generate_touches_subquery(model_object, json_fields)
-                )
-            else:
-                # point asset models
-                subqueries[asset_name] = ArraySubquery(
-                    self._generate_dwithin_subquery(model_object, json_fields)
-                )
-
-        return subqueries
-
     def get_pipe_point_relation_queryset(self):
+        mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
