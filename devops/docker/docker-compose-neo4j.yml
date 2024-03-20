@@ -17,7 +17,5 @@ services:
         image: neo4j:latest
         volumes:
             - neo4j-data:/data
-            # Use the data directory below as initial
             - neo4j-backup:/backups
-            #- neo4j-data-upgrade:/data
         restart: always

@@ -1,11 +1,16 @@
 import json
+from multiprocessing.pool import ThreadPool
+from django.db import connections
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
-from cleanwater.exceptions import InvalidNodeException, InvalidPipeException
+from neomodel.exceptions import UniqueProperty, ConstraintValidationFailed
+from cleanwater.exceptions import (
+    InvalidNodeException,
+    InvalidPipeException,
+)
 from . import GisToGraph
 from cwa_geod.core.constants import (
-    DEFAULT_SRID,
     TRUNK_MAIN__NAME,
     DISTRIBUTION_MAIN__NAME,
     PIPE_END__NAME,
@@ -18,19 +23,92 @@ class GisToNeo4J(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid: int):
-        self.srid: int = srid or DEFAULT_SRID
-        super().__init__(self.srid)
+    def __init__(self, config):
+        self.config = config
+        super().__init__(config)
 
     def create_network(self):
+        from timeit import default_timer as timer
+
+        start = timer()
+
+        pipes_qs = self.get_pipe_and_asset_data()
+
+        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
+
+        for offset in range(query_offset, query_limit, self.config.query_step):
+            limit = offset + self.config.query_step
+
+            sliced_qs = list(pipes_qs[offset:limit])
+
+            self.calc_pipe_point_relative_positions(sliced_qs)
+
+            self._create_neo4j_graph()
+
+        end = timer()
+        print(end - start)
+
+    def create_network_parallel(self):
+        from timeit import default_timer as timer
+
+        start = timer()
+
+        def _map_pipe_assets_calcs_parallel(pipes_qs):
+            new_connection = connections.create_connection("default")
+            values = list(pipes_qs)
+            new_connection.close()
+            return values
+
+        pipes_qs = self.get_pipe_and_asset_data()
+
+        pipes_qs_slices = self._generate_slices(pipes_qs)
+
+        connections.close_all()
+
+        with ThreadPool(self.config.thread_count) as p:
+            qs_data = p.map(_map_pipe_assets_calcs_parallel, pipes_qs_slices)
+
+        qs_values_list = []
+        for qs in qs_data:
+            qs_values_list += qs
+
+        self.calc_pipe_point_relative_positions_parallel(qs_values_list)
+
+        self._create_neo4j_graph_parallel()
+
+        end = timer()
+        print(end - start)
+
+    def _get_query_offset_limit(self, pipes_qs):
+        if not self.config.query_limit:
+            query_limit = self.get_pipe_count(pipes_qs)
+        else:
+            query_limit = self.config.query_limit
+
+        if not self.config.query_offset:
+            query_offset = 0
+        else:
+            query_offset = self.query_offset
+
+        return query_offset, query_limit
+
+    def _generate_slices(self, pipes_qs):
+        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
+
+        qs_slices = []
+
+        for offset in range(query_offset, query_limit, self.config.query_step):
+            limit = offset + self.config.query_step
+            qs_slices.append(pipes_qs[offset:limit])
+
+        return qs_slices
+
+    def get_pipe_and_asset_data(self):
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
         distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
 
         pipes_qs: QuerySet = trunk_mains_qs.union(distribution_mains_qs, all=True)
-
-        self.calc_pipe_point_relative_positions(pipes_qs)
-
-        self._create_neo4j_graph()
+        return pipes_qs
 
     @staticmethod
     def build_dma_data_as_json(dma_codes, dma_names):
@@ -59,57 +137,68 @@ class GisToNeo4J(GisToGraph):
 
     @staticmethod
     def _connect_nodes(start_node, end_node, pipe_name, relation_data):
-        if pipe_name == TRUNK_MAIN__NAME:
-            start_node.trunk_main.connect(end_node, relation_data)
-        elif pipe_name == DISTRIBUTION_MAIN__NAME:
-            start_node.distrbution_main.connect(end_node, relation_data)
-        else:
-            InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
+        try:
+            if pipe_name == TRUNK_MAIN__NAME:
+                start_node.trunk_main.connect(end_node, relation_data)
+            elif pipe_name == DISTRIBUTION_MAIN__NAME:
+                start_node.distrbution_main.connect(end_node, relation_data)
+            else:
+                InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
+        except ConstraintValidationFailed:
+            pass
 
     def _create_and_connect_pipe_end_node(
         self, pipe_name, gid, asset_name, dma_data, start_node
     ):
-        new_pipe_end = PipeEnd.create(
-            {
-                "gid": gid,
-                "dmas": dma_data,
-                "pipe_type": asset_name,
-                #                        "location": coords,
-            }
-        )[0]
+        try:
+            pipe_end = PipeEnd.create(
+                {
+                    "gid": gid,
+                    "dmas": dma_data,
+                    "pipe_type": asset_name,
+                    #                        "location": coords,
+                }
+            )[0]
+        except UniqueProperty:
+            pipe_end = PipeEnd.nodes.get_or_none(pipe_type=asset_name, gid=gid)
 
         self._connect_nodes(
             start_node,
-            new_pipe_end,
+            pipe_end,
             pipe_name,
             {"dmas": dma_data, "gid": gid, "weight": 1},
         )
 
-        return new_pipe_end
+        return pipe_end
 
     def _create_and_connect_point_asset_node(
         self, pipe_name, gid, asset_model, dma_data, start_node
     ):
-        new_point_asset = asset_model.create(
-            {
-                "gid": gid,
-                "dmas": dma_data,
-                #                       "location": coords,
-            }
-        )[0]
+        try:
+            point_asset = asset_model.create(
+                {
+                    "gid": gid,
+                    "dmas": dma_data,
+                    #                       "location": coords,
+                }
+            )[0]
+        except UniqueProperty:
+            point_asset = asset_model.nodes.get_or_none(gid=gid)
 
         # edge_length: float = node_point_geometries[-1].distance(
         #     asset["intersection_point_geometry"]
         # )
 
         # TODO: add wieght to relation based on edge length
+
         self._connect_nodes(
             start_node,
-            new_point_asset,
+            point_asset,
             pipe_name,
             {"dmas": dma_data, "gid": gid, "weight": 1},
         )
-        return new_point_asset
+
+        return point_asset
 
     def _set_connected_asset_relations(
         self, pipe_data: dict, assets_data: list, pipe_end
@@ -125,9 +214,7 @@ class GisToNeo4J(GisToGraph):
 
             pipe_name = pipe_data["asset_name"]
 
-            # point = asset["intersection_point_geometry"].transform("WGS84", clone=True)
-
-            # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
+            # coords = NeomodelPoint((asset["point"].x, asset["point"].y), crs="wgs-84")
 
             node, node_type, asset_model = self.check_node_exists(asset_name, gid)
 
@@ -145,35 +232,21 @@ class GisToNeo4J(GisToGraph):
                     f"Invalid node detected: {node_type}. Valid nodes are {PIPE_END__NAME} or {POINT_ASSET__NAME}"
                 )
 
-    def _set_pipe_connected_asset_relations(self) -> None:
-        """Connect pipes with related pipe and point assets.
-        Uses a map method to operate on the pipe and asset
-        data.
+    def _map_pipe_connected_asset_relations(self, pipe_data: dict, assets_data: list):
+        pipe_gid = pipe_data.get("gid")
+        pipe_type = pipe_data.get("asset_name")
 
-        Params:
-              None
-        Returns:
-              None
-        """
+        #
+        pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
 
-        def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
-            pipe_gid = pipe_data.get("gid")
-            pipe_type = pipe_data.get("asset_name")
+        if not pipe_end:
+            dma_data = self.build_dma_data_as_json(
+                pipe_data["dma_codes"], pipe_data["dma_names"]
+            )
 
-            #
-            pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
+            # coords = NeomodelPoint((pipe_data['point'].x, pipe_data['point'].y), crs="wgs-84")
 
-            if not pipe_end:
-                dma_data = self.build_dma_data_as_json(
-                    pipe_data["dma_codes"], pipe_data["dma_names"]
-                )
-
-                # point = Point(pipe_data["geometry"][0][0], srid=DEFAULT_SRID).transform(
-                #     "WGS84", clone=True
-                # )
-
-                # coords = NeomodelPoint((point.x, point.y), crs="wgs-84")
-
+            try:
                 pipe_end = PipeEnd.create(
                     {
                         "gid": pipe_gid,
@@ -182,16 +255,42 @@ class GisToNeo4J(GisToGraph):
                         #                        "location": coords,
                     }
                 )[0]
+            except UniqueProperty:
+                pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
 
-            self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
+        self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
+
+    def _create_neo4j_graph(self) -> None:
+        """Iterate over pipes and connect related pipe interactions
+        and point assets. Uses a map method to operate on the pipe
+        and asset data.
+
+        Params:
+              None
+        Returns:
+              None
+        """
 
         list(
             map(
-                _map_pipe_connected_asset_relations,
+                self._map_pipe_connected_asset_relations,
                 self.all_pipe_data,
                 self.all_asset_positions,
             )
         )
 
-    def _create_neo4j_graph(self) -> None:
-        self._set_pipe_connected_asset_relations()
+    def _create_neo4j_graph_parallel(self) -> None:
+        """Same as _create_neo4j_graph() except done in a multithreaded manner
+
+        https://github.com/neo4j-contrib/neomodel/blob/master/test/test_multiprocessing.py
+
+        Params:
+              None
+        Returns:
+              None
+        """
+
+        items = zip(self.all_pipe_data, self.all_asset_positions)
+
+        with ThreadPool(self.config.thread_count) as p:
+            p.starmap(self._map_pipe_connected_asset_relations, items)

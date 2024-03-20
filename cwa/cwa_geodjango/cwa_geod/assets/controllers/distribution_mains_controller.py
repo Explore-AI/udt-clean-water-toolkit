@@ -16,7 +16,7 @@ class DistributionMainsController(MainsController):
       model = DistributionMain
       srid = DEFAULT_SRID
       # items_limit = 100000  # TODO: set default in config
-      WITHIN_DISTANCE = 1
+      WITHIN_DISTANCE = 0.5
       default_properties = [
             "id",
             "gid",
