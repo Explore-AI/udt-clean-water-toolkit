@@ -24,7 +24,4 @@ class PointNode(StructuredNode):
         # setup constraints based on the network.models
         if len(PointNode.nodes.all()) == 0:
             remove_all_labels()
-            install_labels(
-                PointNode,
-                # quiet=True
-            )
+            install_labels(PointNode)  # quiet=True
