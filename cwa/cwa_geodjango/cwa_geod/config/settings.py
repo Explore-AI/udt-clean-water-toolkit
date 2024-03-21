@@ -15,6 +15,7 @@ from pathlib import Path
 
 from neomodel import config as neo_config
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -73,10 +74,7 @@ graph_db_user = default_graph_db.get("USER")
 graph_password = default_graph_db.get("PASSWORD")
 
 neo_config.DATABASE_URL = f"bolt://{graph_db_user}:{graph_password}@{graph_uri}"
-# neo_config.DATABASE_URL = "bolt://neo4j:password@localhost:7687"
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 

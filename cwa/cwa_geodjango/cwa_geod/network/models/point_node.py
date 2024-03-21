@@ -4,6 +4,7 @@ from neomodel import (
     IntegerProperty,
     JSONProperty,
     install_labels,
+    remove_all_labels,
 )
 from neomodel.contrib.spatial_properties import PointProperty
 from .trunk_main import TrunkMain
@@ -19,5 +20,11 @@ class PointNode(StructuredNode):
         "PointNode", "DISTRIBUTIONMAIN", model=DistributionMain
     )
 
-
-# install_labels(PointNode)
+    def initialise_node_label(self):
+        # setup constraints based on the network.models
+        if len(PointNode.nodes.all()) == 0:
+            remove_all_labels()
+            install_labels(
+                PointNode,
+                # quiet=True
+            )
