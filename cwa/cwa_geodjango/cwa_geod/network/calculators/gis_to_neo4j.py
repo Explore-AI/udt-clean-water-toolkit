@@ -17,7 +17,6 @@ from cwa_geod.core.constants import (
     POINT_ASSET__NAME,
 )
 from ..models import PointAsset, PipeEnd
-from ..models.point_node import PointNode
 
 
 class GisToNeo4J(GisToGraph):
@@ -26,7 +25,7 @@ class GisToNeo4J(GisToGraph):
 
     def __init__(self, config):
         self.config = config
-        PointNode().initialise_node_label()
+        PipeEnd.initialise_node_label()
         super().__init__(config)
 
     def create_network(self):
@@ -55,28 +54,19 @@ class GisToNeo4J(GisToGraph):
 
         start = timer()
 
-        def _map_pipe_assets_calcs_parallel(pipes_qs):
-            new_connection = connections.create_connection("default")
-            values = list(pipes_qs)
-            new_connection.close()
-            return values
-
         pipes_qs = self.get_pipe_and_asset_data()
 
-        pipes_qs_slices = self._generate_slices(pipes_qs)
+        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
 
-        connections.close_all()
+        for offset in range(query_offset, query_limit, self.config.query_step):
+            limit = offset + self.config.query_step
+            print(offset, limit)
 
-        with ThreadPool(self.config.thread_count) as p:
-            qs_data = p.map(_map_pipe_assets_calcs_parallel, pipes_qs_slices)
+            sliced_qs = list(pipes_qs[offset:limit])
 
-        qs_values_list = []
-        for qs in qs_data:
-            qs_values_list += qs
+            self.calc_pipe_point_relative_positions_parallel(sliced_qs)
 
-        self.calc_pipe_point_relative_positions_parallel(qs_values_list)
-
-        self._create_neo4j_graph_parallel()
+            self._create_neo4j_graph_parallel()
 
         end = timer()
         print(end - start)
@@ -90,7 +80,7 @@ class GisToNeo4J(GisToGraph):
         if not self.config.query_offset:
             query_offset = 0
         else:
-            query_offset = self.query_offset
+            query_offset = self.config.query_offset
 
         return query_offset, query_limit
 
@@ -143,7 +133,7 @@ class GisToNeo4J(GisToGraph):
             if pipe_name == TRUNK_MAIN__NAME:
                 start_node.trunk_main.connect(end_node, relation_data)
             elif pipe_name == DISTRIBUTION_MAIN__NAME:
-                start_node.distrbution_main.connect(end_node, relation_data)
+                start_node.distribution_main.connect(end_node, relation_data)
             else:
                 InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
         except ConstraintValidationFailed:
@@ -238,27 +228,25 @@ class GisToNeo4J(GisToGraph):
         pipe_gid = pipe_data.get("gid")
         pipe_type = pipe_data.get("asset_name")
 
-        #
-        pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
+        # pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
 
-        if not pipe_end:
-            dma_data = self.build_dma_data_as_json(
-                pipe_data["dma_codes"], pipe_data["dma_names"]
-            )
+        dma_data = self.build_dma_data_as_json(
+            pipe_data["dma_codes"], pipe_data["dma_names"]
+        )
 
-            # coords = NeomodelPoint((pipe_data['point'].x, pipe_data['point'].y), crs="wgs-84")
+        # coords = NeomodelPoint((pipe_data['point'].x, pipe_data['point'].y), crs="wgs-84")
 
-            try:
-                pipe_end = PipeEnd.create(
-                    {
-                        "gid": pipe_gid,
-                        "dmas": dma_data,
-                        "pipe_type": pipe_type,
-                        #                        "location": coords,
-                    }
-                )[0]
-            except UniqueProperty:
-                pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
+        try:
+            pipe_end = PipeEnd.create(
+                {
+                    "gid": pipe_gid,
+                    "dmas": dma_data,
+                    "pipe_type": pipe_type,
+                    #                        "location": coords,
+                }
+            )[0]
+        except UniqueProperty:
+            pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
 
         self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
 

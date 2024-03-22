@@ -111,7 +111,7 @@ class GisToGraph(NetworkController):
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs_values,
-                    10,
+                    25,
                 )
             )
 
