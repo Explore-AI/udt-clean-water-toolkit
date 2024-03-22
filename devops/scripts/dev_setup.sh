@@ -9,6 +9,7 @@ echo "pip packages will be installed for the cwa_geodjango app."
 echo "pip packages will be installed for the cwm in dev mode."
 echo
 
+docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-neo4j.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml -f ../docker/docker-compose-geoserver.yml up -d --build
 docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-neo4j.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml -f ../docker/docker-compose-cwa-geoalchemy-dev.yml up -d --build
 
 CWA_GEODORM_CONTAINER_ID=`docker ps | grep udtcwageodjangodev | grep cwa_geodjango_dev | awk '{ print $1 }'`
@@ -20,7 +21,7 @@ docker exec -it ${CWA_GEOALCHEMY_CONTAINER_ID} pip install -r requirements.txt
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
 
-./postgis/postgis_db_init.sh
+#./postgis/postgis_db_init.sh
 
 #docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
 
