@@ -250,6 +250,11 @@ class GisToNeo4J(GisToGraph):
 
         self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
 
+    def _reset_pipe_asset_data(self):
+        # reset all_pipe_data and all_asset_positions to manage memory
+        self.all_pipe_data = []
+        self.all_asset_positions = []
+
     def _create_neo4j_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
         and point assets. Uses a map method to operate on the pipe
@@ -269,6 +274,8 @@ class GisToNeo4J(GisToGraph):
             )
         )
 
+        self._reset_pipe_asset_data()
+
     def _create_neo4j_graph_parallel(self) -> None:
         """Same as _create_neo4j_graph() except done in a multithreaded manner
 
@@ -280,7 +287,10 @@ class GisToNeo4J(GisToGraph):
               None
         """
 
-        items = zip(self.all_pipe_data, self.all_asset_positions)
-
         with ThreadPool(self.config.thread_count) as p:
-            p.starmap(self._map_pipe_connected_asset_relations, items)
+            p.starmap(
+                self._map_pipe_connected_asset_relations,
+                zip(self.all_pipe_data, self.all_asset_positions),
+            )
+
+        self._reset_pipe_asset_data()
