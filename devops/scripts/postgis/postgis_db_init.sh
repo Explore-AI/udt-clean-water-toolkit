@@ -9,9 +9,6 @@ echo
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "$DIR/../../docker/env_files/.db_env"
 
-echo $NEO4J_USER
-echo $NEO4J_PASSWORD
-
 DB_CONTAINER_ID=`docker ps | grep udtpostgis | grep postgis/postgis | awk '{ print $1 }'`
 
 docker exec -it ${DB_CONTAINER_ID} psql --user postgres -c "create database udt"
