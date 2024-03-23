@@ -143,7 +143,7 @@ class GisToNeo4J(GisToGraph):
             pass
 
     def _create_and_connect_pipe_end_node(
-        self, pipe_name, gid, asset_name, dma_data, start_node
+        self, pipe_name, gid, asset_name, dma_data, start_node, coords
     ):
         try:
             pipe_end = PipeEnd.create(
@@ -151,7 +151,7 @@ class GisToNeo4J(GisToGraph):
                     "gid": gid,
                     "dmas": dma_data,
                     "pipe_type": asset_name,
-                    #                        "location": coords,
+                    "location": coords,
                 }
             )[0]
         except UniqueProperty:
@@ -167,14 +167,14 @@ class GisToNeo4J(GisToGraph):
         return pipe_end
 
     def _create_and_connect_point_asset_node(
-        self, pipe_name, gid, asset_model, dma_data, start_node
+        self, pipe_name, gid, asset_model, dma_data, start_node, coords
     ):
         try:
             point_asset = asset_model.create(
                 {
                     "gid": gid,
                     "dmas": dma_data,
-                    #                       "location": coords,
+                    "location": coords,
                 }
             )[0]
         except UniqueProperty:
@@ -209,17 +209,17 @@ class GisToNeo4J(GisToGraph):
 
             pipe_name = pipe_data["asset_name"]
 
-            # coords = NeomodelPoint((asset["point"].x, asset["point"].y), crs="wgs-84")
+            coords = NeomodelPoint((asset["point"].x, asset["point"].y), crs="wgs-84")
 
             node, node_type, asset_model = self.check_node_exists(asset_name, gid)
 
             if not node and node_type == PIPE_END__NAME:
                 start_node = self._create_and_connect_pipe_end_node(
-                    pipe_name, gid, asset_name, dma_data, start_node
+                    pipe_name, gid, asset_name, dma_data, start_node, coords
                 )
             elif not node and node_type == POINT_ASSET__NAME:
                 start_node = self._create_and_connect_point_asset_node(
-                    pipe_name, gid, asset_model, dma_data, start_node
+                    pipe_name, gid, asset_model, dma_data, start_node, coords
                 )
 
             elif node_type not in [PIPE_END__NAME, POINT_ASSET__NAME]:
@@ -237,7 +237,9 @@ class GisToNeo4J(GisToGraph):
             pipe_data["dma_codes"], pipe_data["dma_names"]
         )
 
-        # coords = NeomodelPoint((pipe_data['point'].x, pipe_data['point'].y), crs="wgs-84")
+        coords = NeomodelPoint(
+            (pipe_data["point"].x, pipe_data["point"].y), crs="wgs-84"
+        )
 
         try:
             pipe_end = PipeEnd.create(
@@ -245,7 +247,7 @@ class GisToNeo4J(GisToGraph):
                     "gid": pipe_gid,
                     "dmas": dma_data,
                     "pipe_type": pipe_type,
-                    #                        "location": coords,
+                    "location": coords,
                 }
             )[0]
         except UniqueProperty:
