@@ -16,7 +16,7 @@ from cwa_geod.core.constants import (
     PIPE_END__NAME,
     POINT_ASSET__NAME,
 )
-from ..models import PointAsset, PipeEnd
+from ..models import PointAsset, PipeEnd, initialise_node_labels
 
 
 class GisToNeo4J(GisToGraph):
@@ -25,7 +25,7 @@ class GisToNeo4J(GisToGraph):
 
     def __init__(self, config):
         self.config = config
-        PipeEnd.initialise_node_label()
+        initialise_node_labels()
         super().__init__(config)
 
     def create_network(self):
