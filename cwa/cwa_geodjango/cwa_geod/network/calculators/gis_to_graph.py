@@ -37,7 +37,7 @@ class GisToGraph(NetworkController):
                 base_pipe_geom, geom, srid=self.config.srid
             )
 
-            # point = geom.transform("WGS84", clone=True)
+            point = geom.transform("WGS84", clone=True)
 
             bisect.insort(
                 normalised_positions,
@@ -45,7 +45,7 @@ class GisToGraph(NetworkController):
                     "position": normalised_position_on_pipe,
                     "data": asset,
                     "intersection_point_geometry": geom,
-                    #       "point": point,
+                    "point": point,
                 },
                 key=lambda x: x["position"],
             )
@@ -63,16 +63,16 @@ class GisToGraph(NetworkController):
         pipe_data["dma_codes"] = qs_object.dma_codes
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["geometry"] = qs_object.geometry
-        # pipe_data["point"] = Point(
-        #     pipe_data["geometry"][0][0], srid=DEFAULT_SRID
-        # ).transform("WGS84", clone=True)
+        pipe_data["point"] = self.transform_geometry(
+            pipe_data["geometry"][0][0], self.config.srid, "WGS84"
+        )
 
         return pipe_data
 
     def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
         return (
             pipe_qs_object.trunk_mains_data
-            + pipe_qs_object.distribution_mains_data
+            + Pipe_qs_object.distribution_mains_data
             + pipe_qs_object.chamber_data
             + pipe_qs_object.operational_site_data
             + pipe_qs_object.network_meter_data
@@ -111,7 +111,7 @@ class GisToGraph(NetworkController):
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs_values,
-                    25,
+                    self.config.chunk_size,
                 )
             )
 
@@ -155,3 +155,8 @@ class GisToGraph(NetworkController):
         """
 
         return qs.count()
+
+    @staticmethod
+    def transform_point(geometry, srid: int, ct):
+        # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geos/
+        return Point(geometry, srid=srid).transform("WGS84", clone=True)

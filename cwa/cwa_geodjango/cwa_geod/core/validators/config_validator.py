@@ -5,13 +5,14 @@ from django.core.exceptions import ValidationError
 class ConfigValidator(forms.Form):
     method = forms.CharField(max_length=20, required=True)
     srid = forms.IntegerField(required=True)
-    query_step = forms.IntegerField(required=True)
+    batch_size = forms.IntegerField(required=True)
+    chunk_size = forms.IntegerField(required=False)
     query_limit = forms.IntegerField(required=False)
     query_offset = forms.IntegerField(required=False)
     parallel = forms.BooleanField(required=False)
     thread_count = forms.IntegerField(required=False)
     processor_count = forms.IntegerField(required=False)
-#    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
+    #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
     def clean(self):
         cleaned_data = super().clean()

@@ -30,6 +30,7 @@ class GisToNeo4J(GisToGraph):
 
     def create_network(self):
         from timeit import default_timer as timer
+        import time
 
         start = timer()
 
@@ -37,14 +38,16 @@ class GisToNeo4J(GisToGraph):
 
         query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
 
-        for offset in range(query_offset, query_limit, self.config.query_step):
-            limit = offset + self.config.query_step
+        for offset in range(query_offset, query_limit, self.config.batch_size):
+            limit = offset + self.config.batch_size
 
             sliced_qs = list(pipes_qs[offset:limit])
 
             self.calc_pipe_point_relative_positions(sliced_qs)
 
             self._create_neo4j_graph()
+
+            time.sleep(30)
 
         end = timer()
         print(end - start)
@@ -58,8 +61,8 @@ class GisToNeo4J(GisToGraph):
 
         query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
 
-        for offset in range(query_offset, query_limit, self.config.query_step):
-            limit = offset + self.config.query_step
+        for offset in range(query_offset, query_limit, self.config.batch_size):
+            limit = offset + self.config.batch_size
             print(offset, limit)
 
             sliced_qs = list(pipes_qs[offset:limit])
@@ -89,8 +92,8 @@ class GisToNeo4J(GisToGraph):
 
         qs_slices = []
 
-        for offset in range(query_offset, query_limit, self.config.query_step):
-            limit = offset + self.config.query_step
+        for offset in range(query_offset, query_limit, self.config.batch_size):
+            limit = offset + self.config.batch_size
             qs_slices.append(pipes_qs[offset:limit])
 
         return qs_slices
