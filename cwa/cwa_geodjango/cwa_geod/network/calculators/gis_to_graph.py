@@ -63,7 +63,7 @@ class GisToGraph(NetworkController):
         pipe_data["dma_codes"] = qs_object.dma_codes
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["geometry"] = qs_object.geometry
-        pipe_data["point"] = self.transform_geometry(
+        pipe_data["point"] = self.transform_point(
             pipe_data["geometry"][0][0], self.config.srid, "WGS84"
         )
 
@@ -72,7 +72,7 @@ class GisToGraph(NetworkController):
     def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
         return (
             pipe_qs_object.trunk_mains_data
-            + Pipe_qs_object.distribution_mains_data
+            + pipe_qs_object.distribution_mains_data
             + pipe_qs_object.chamber_data
             + pipe_qs_object.operational_site_data
             + pipe_qs_object.network_meter_data
