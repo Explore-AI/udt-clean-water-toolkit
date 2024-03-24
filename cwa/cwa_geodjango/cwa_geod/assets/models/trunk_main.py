@@ -4,7 +4,7 @@ from cwa_geod.core.constants import DEFAULT_SRID, TRUNK_MAIN__NAME
 
 
 class TrunkMain(models.Model):
-    gid = models.IntegerField(null=False, blank=False, unique=True)
+    gid = models.IntegerField(null=False, blank=False, unique=True, index=True)
     geometry = models.MultiLineStringField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )

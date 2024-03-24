@@ -4,7 +4,9 @@ from cwa_geod.core.constants import DEFAULT_SRID
 
 
 class DMA(models.Model):
-    code = models.CharField(max_length=10, null=False, blank=False, unique=True)
+    code = models.CharField(
+        max_length=10, null=False, blank=False, unique=True, index=True
+    )
     name = models.CharField(max_length=255, null=False, blank=False)
     utility = models.ForeignKey(
         Utility, on_delete=models.RESTRICT, related_name="utility_dmas"
