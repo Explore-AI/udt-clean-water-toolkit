@@ -60,6 +60,7 @@ class MainsController(ABC, GeoDjangoController):
             "dma_ids": ArrayAgg("dmas"),
             "dma_codes": ArrayAgg("dmas__code"),
             "dma_names": ArrayAgg("dmas__name"),
+            "utilities": ArrayAgg("dmas__utility__name"),
         }
 
     @abstractmethod
@@ -114,13 +115,14 @@ class MainsController(ABC, GeoDjangoController):
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.prefetch_related("dmas").annotate(
+        qs = self.model.objects.prefetch_related("dmas", "dmas__utility").annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),
             length=Length("geometry"),
             wkt=AsWKT("geometry"),
             dma_ids=ArrayAgg("dmas"),
             dma_codes=ArrayAgg("dmas__code"),
             dma_names=ArrayAgg("dmas__name"),
+            utility_names=ArrayAgg("dmas__name__utility"),
             **mains_intersection_subqueries,
             **asset_subqueries
         )
