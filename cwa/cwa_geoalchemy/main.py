@@ -21,6 +21,12 @@ def main():
     results = session.execute(utility_query)
     util_results = results.all()
     
+    for result in util_results:
+        print(result[0].name)
+        print(result[0].id)
+        print(result[0].modified_at)
+        print(result[0].created_at)
+    
     
     
 if __name__ == "__main__":
