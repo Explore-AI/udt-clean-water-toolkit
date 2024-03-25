@@ -1,1 +1,0 @@
-# TODO: Implement the Chambers repository for crud operations of the Chambers model
