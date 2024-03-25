@@ -1,4 +1,4 @@
-from ..db import Base
+from ..postgis_db import Base
 from .utility import Utility
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, JSON
 from sqlalchemy.orm import relationship
