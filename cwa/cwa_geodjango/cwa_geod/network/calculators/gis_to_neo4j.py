@@ -114,18 +114,20 @@ class GisToNeo4J(GisToGraph):
 
         return json.dumps(dma_data)
 
-    def check_node_exists(self, asset_name, gid):
+    def check_node_exists(self, asset_name, gid, utility_name):
         node_type: str = self._get_node_type(asset_name)
 
         if node_type == PIPE_END__NAME:
-            node = PipeEnd.nodes.get_or_none(pipe_type=asset_name, gid=gid)
+            node = PipeEnd.nodes.get_or_none(
+                pipe_type=asset_name, gid=gid, utility=utility_name
+            )
 
             return node, node_type, None
 
         elif node_type == POINT_ASSET__NAME:
             asset_model = PointAsset.asset_name_model_mapping(asset_name)
 
-            node = asset_model.nodes.get_or_none(gid=gid)
+            node = asset_model.nodes.get_or_none(gid=gid, utility=utility_name)
             return node, node_type, asset_model
         else:
             InvalidNodeException(
@@ -154,17 +156,19 @@ class GisToNeo4J(GisToGraph):
                     "dmas": dma_data,
                     "pipe_type": asset_name,
                     "location": coords,
-                    "utility_name": utility_name,
+                    "utility": utility_name,
                 }
             )[0]
         except UniqueProperty:
-            pipe_end = PipeEnd.nodes.get_or_none(pipe_type=asset_name, gid=gid)
+            pipe_end = PipeEnd.nodes.get_or_none(
+                pipe_type=asset_name, gid=gid, utility=utility_name
+            )
 
         self._connect_nodes(
             start_node,
             pipe_end,
             pipe_name,
-            {"dmas": dma_data, "gid": gid, "weight": 1},
+            {"dmas": dma_data, "gid": gid, "utility": utility_name},
         )
 
         return pipe_end
@@ -178,22 +182,17 @@ class GisToNeo4J(GisToGraph):
                     "gid": gid,
                     "dmas": dma_data,
                     "location": coords,
+                    "utility": utility_name,
                 }
             )[0]
         except UniqueProperty:
-            point_asset = asset_model.nodes.get_or_none(gid=gid)
-
-        # edge_length: float = node_point_geometries[-1].distance(
-        #     asset["intersection_point_geometry"]
-        # )
-
-        # TODO: add wieght to relation based on edge length
+            point_asset = asset_model.nodes.get_or_none(gid=gid, utility=utility_name)
 
         self._connect_nodes(
             start_node,
             point_asset,
             pipe_name,
-            {"dmas": dma_data, "gid": gid, "weight": 1},
+            {"dmas": dma_data, "gid": gid, "utility": utility_name},
         )
 
         return point_asset
@@ -215,7 +214,9 @@ class GisToNeo4J(GisToGraph):
 
             coords = NeomodelPoint((asset["point"].x, asset["point"].y), crs="wgs-84")
 
-            node, node_type, asset_model = self.check_node_exists(asset_name, gid)
+            node, node_type, asset_model = self.check_node_exists(
+                asset_name, gid, utility_name
+            )
 
             if not node and node_type == PIPE_END__NAME:
                 start_node = self._create_and_connect_pipe_end_node(
@@ -265,11 +266,13 @@ class GisToNeo4J(GisToGraph):
                     "dmas": dma_data,
                     "pipe_type": pipe_type,
                     "location": coords,
-                    "utility_name": utility_name,
+                    "utility": utility_name,
                 }
             )[0]
         except UniqueProperty:
-            pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
+            pipe_end = PipeEnd.nodes.get_or_none(
+                pipe_type=pipe_type, gid=pipe_gid, utility=utility_name
+            )
 
         self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
 

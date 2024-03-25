@@ -166,7 +166,8 @@ class GisToGraph(NetworkController):
     @staticmethod
     def _get_utility(qs_object):
         utilities = list(set(qs_object.utility_names))
-        if len(utilities) > 0:
+
+        if len(utilities) > 1:
             raise Exception(
                 f"{qs_object} is located in multiple utilities. It should only be wtihing one"
             )
