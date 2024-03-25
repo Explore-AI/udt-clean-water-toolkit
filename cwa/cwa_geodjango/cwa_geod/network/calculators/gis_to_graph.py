@@ -63,7 +63,7 @@ class GisToGraph(NetworkController):
         pipe_data["dma_ids"] = qs_object.dma_ids
         pipe_data["dma_codes"] = qs_object.dma_codes
         pipe_data["dma_names"] = qs_object.dma_names
-        pipe_data["utility_names"] = self._get_utility(qs_object)
+        pipe_data["utility_name"] = self._get_utility(qs_object)
         pipe_data["geometry"] = qs_object.geometry
         pipe_data["point"] = self.transform_point(
             pipe_data["geometry"][0][0], self.config.srid, "WGS84"
