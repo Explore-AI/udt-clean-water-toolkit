@@ -13,6 +13,7 @@ from cwa_geod.core.constants import (
     POINT_ASSET__NAME,
     PIPE_ASSETS__NAMES,
     GEOS_LINESTRING_TYPES,
+    GEOS_POINT_TYPES,
 )
 
 
@@ -21,35 +22,73 @@ class GisToGraph(NetworkController):
         self.config = config
         super().__init__(srid=config.srid)
 
+    def _create_pipe_single_intersection_data(
+        self, asset, normalised_positions, base_pipe_geom, intersection_geom
+    ):
+        normalised_position_on_pipe: float = normalised_point_position_on_line(
+            base_pipe_geom, intersection_geom, srid=self.config.srid
+        )
+
+        intersection_point = intersection_geom.transform("WGS84", clone=True)
+
+        bisect.insort(
+            normalised_positions,
+            {
+                "position": normalised_position_on_pipe,
+                "data": asset,
+                "intersection_point_geometry": intersection_geom,
+                "point": intersection_point,
+            },
+            key=lambda x: x["position"],
+        )
+
+        return normalised_positions
+
+    def _create_pipe_multiple_intersection_data(
+        self, asset, normalised_positions, base_pipe_geom, intersection_geom
+    ):
+        # handle multiple intersections
+        for coords in intersection_geom.coords:
+            normalised_positions = self._create_pipe_single_intersection_data(
+                asset,
+                normalised_positions,
+                base_pipe_geom,
+                Point(coords, srid=self.srid),
+            )
+
+        return normalised_positions
+
     def _get_connections_points_on_pipe(
         self, base_pipe_geom: MultiLineString, asset_data: list
     ) -> list:
         normalised_positions: list = []
 
         for asset in asset_data:
-            geom: MultiLineString = GEOSGeometry(asset["wkt"], srid=self.config.srid)
+            # Geom of the intersecting pipe or asset
+            pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid=self.config.srid)
 
-            if geom.geom_typeid in GEOS_LINESTRING_TYPES:
-                geom = base_pipe_geom.intersection(
-                    geom
-                )  # TODO: handle multiple intersections at single point
+            # if pipe_or_asset_geom is a line then get the intersection point of the two lines
+            if pipe_or_asset_geom.geom_typeid in GEOS_LINESTRING_TYPES:
+                # __intersection__ may return a single or multipoint object
 
-            normalised_position_on_pipe: float = normalised_point_position_on_line(
-                base_pipe_geom, geom, srid=self.config.srid
-            )
+                intersection_geom = base_pipe_geom.intersection(pipe_or_asset_geom)
 
-            point = geom.transform("WGS84", clone=True)
+            elif pipe_or_asset_geom.geom_typeid in GEOS_POINT_TYPES:
+                intersection_geom = pipe_or_asset_geom
+            else:
+                raise Exception(
+                    f"Invalid GEOS line string type. Allowed types are {(',').join(str(x) for x in GEOS_LINESTRING_TYPES+GEOS_POINT_TYPES)}"
+                )
 
-            bisect.insort(
-                normalised_positions,
-                {
-                    "position": normalised_position_on_pipe,
-                    "data": asset,
-                    "intersection_point_geometry": geom,
-                    "point": point,
-                },
-                key=lambda x: x["position"],
-            )
+            if intersection_geom.geom_type == "Point":
+                normalised_positions = self._create_pipe_single_intersection_data(
+                    asset, normalised_positions, base_pipe_geom, intersection_geom
+                )
+            elif intersection_geom.geom_type == "MultiPoint":
+                normalised_positions = self._create_pipe_multiple_intersection_data(
+                    asset, normalised_positions, base_pipe_geom, intersection_geom
+                )
+
         return normalised_positions
 
     def _get_pipe_data(self, qs_object: TrunkMain) -> dict:

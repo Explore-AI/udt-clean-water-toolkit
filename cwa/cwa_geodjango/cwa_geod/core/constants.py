@@ -36,6 +36,8 @@ POINT_ASSETS__NAMES = [(), ()]
 
 GEOS_LINESTRING_TYPES = [1, 5]
 
+GEOS_POINT_TYPES = [0]
+
 UTILITIES = [
     ("thames_water", "Thames Water"),
     ("severn_trent_water", "Severn Trent Water"),
