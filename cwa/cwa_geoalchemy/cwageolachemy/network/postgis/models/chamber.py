@@ -1,6 +1,6 @@
-from ..postgis_db import Base
-from ..utilities.dma import DMA
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Table, DateTime
+from ....core.db.postgis_db import Base
+from ....utilities.models.dma import DMA
+from sqlalchemy import Column, Integer, ForeignKey, Table, DateTime
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 
