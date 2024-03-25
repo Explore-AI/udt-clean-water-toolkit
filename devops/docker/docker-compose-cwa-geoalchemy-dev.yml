@@ -1,0 +1,17 @@
+version: "3"
+
+services: 
+  cwageoalchemydev: 
+    container_name: udtcwageoalchemydev
+    image: cwa_geoalchemy_dev
+    build: 
+      context: ./
+      dockerfile: Dockerfile_cwa_geoalchemy_dev
+    links:
+      - udtpostgis
+      - udtneo4j
+    volumes:
+      - ../../cwa/cwa_geoalchemy:/opt/udt/cwa/cwa_geoalchemy
+      - ../../cwm:/opt/udt/cwm
+      - ../../data/:/opt/udt/data
+    restart: always

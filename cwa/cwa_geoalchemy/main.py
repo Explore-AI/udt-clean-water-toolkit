@@ -1,5 +1,5 @@
 from domain.config.config_manager import Settings as AppSettings
-from cwa.cwa_geoalchemy.domain.models.db import get_db
+from domain.models.postgis_db import get_db
 from sqlalchemy.orm import Session
 
 
@@ -10,4 +10,5 @@ def main():
     settings = AppSettings()
     
 if __name__ == "__main__":
+    print("Our CWA Geoalchemy application!!")
     main()
