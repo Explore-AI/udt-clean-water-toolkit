@@ -122,7 +122,7 @@ class MainsController(ABC, GeoDjangoController):
             dma_ids=ArrayAgg("dmas"),
             dma_codes=ArrayAgg("dmas__code"),
             dma_names=ArrayAgg("dmas__name"),
-            utility_names=ArrayAgg("dmas__name__utility"),
+            utility_names=ArrayAgg("dmas__utility__name"),
             **mains_intersection_subqueries,
             **asset_subqueries
         )

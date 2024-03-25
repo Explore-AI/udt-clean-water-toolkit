@@ -9,7 +9,8 @@ from cwa_geod.assets.controllers import TrunkMainsController
 from cwa_geod.assets.models.trunk_main import TrunkMain
 from cwa_geod.assets.controllers import DistributionMainsController
 from cwa_geod.core.constants import (
-    DEFAULT_SRID,
+    PIPE_END__NAME,
+    POINT_ASSET__NAME,
     PIPE_ASSETS__NAMES,
     GEOS_LINESTRING_TYPES,
 )
@@ -62,6 +63,7 @@ class GisToGraph(NetworkController):
         pipe_data["dma_ids"] = qs_object.dma_ids
         pipe_data["dma_codes"] = qs_object.dma_codes
         pipe_data["dma_names"] = qs_object.dma_names
+        pipe_data["utility_names"] = self._get_utility(qs_object)
         pipe_data["geometry"] = qs_object.geometry
         pipe_data["point"] = self.transform_point(
             pipe_data["geometry"][0][0], self.config.srid, "WGS84"
@@ -118,9 +120,9 @@ class GisToGraph(NetworkController):
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
         if asset_name in dict(PIPE_ASSETS__NAMES).keys():
-            return "pipe_end"
+            return PIPE_END__NAME
 
-        return "point_asset"
+        return POINT_ASSET__NAME
 
     def get_trunk_mains_data(self) -> QuerySet:
         tm: TrunkMainsController = TrunkMainsController()
@@ -160,3 +162,12 @@ class GisToGraph(NetworkController):
     def transform_point(geometry, srid: int, ct):
         # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geos/
         return Point(geometry, srid=srid).transform("WGS84", clone=True)
+
+    @staticmethod
+    def _get_utility(qs_object):
+        utilities = list(set(qs_object.utility_names))
+        if len(utilities) > 0:
+            raise Exception(
+                f"{qs_object} is located in multiple utilities. It should only be wtihing one"
+            )
+        return utilities[0]
