@@ -1,13 +1,13 @@
 from django.contrib.gis.geos import Point
 
 
-def normalised_point_position_on_line(line_geom, point_geom, srid=None):
+def normalised_point_position_on_line(
+    line_geom, start_of_line_point, point_geom, srid=None
+):
     """Get the normalised position of a Point on a Line relative to the
     Line start Point. The Line start Point is the first set of coordinates
     in the tuple returned by geometry.coords where geometry is a
     LineString or MultiLineString"""
-
-    start_of_line_point = Point(line_geom.coords[0][0], srid=srid)
 
     # https://zach.se/geodesic-distance-between-points-in-geodjango/
     # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geos/

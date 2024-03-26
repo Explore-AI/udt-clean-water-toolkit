@@ -12,6 +12,7 @@ from django.contrib.gis.db.models.functions import (
     Length,
     AsWKT,
     Transform,
+    Intersection,
 )
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import *
@@ -43,12 +44,12 @@ class MainsController(ABC, GeoDjangoController):
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(
                 **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
-            )
+            ),
         )
         return subquery
 
     @staticmethod
-    def get_asset_json_fields():
+    def get_asset_json_fields(geometry_field="geometry"):
         """Overwrite this function to bypass
         the custom PostgreSQL functions
 
@@ -62,9 +63,9 @@ class MainsController(ABC, GeoDjangoController):
         return {
             "id": "id",
             "gid": "gid",
-            "geometry": "geometry",
-            "wkt": AsWKT("geometry"),
-            "geom_4326": Transform("geometry", 4326),
+            "geometry": geometry_field,
+            "wkt": AsWKT(geometry_field),
+            "geom_latlong": Transform(geometry_field, 4326),
             "dma_ids": ArrayAgg("dmas"),
             "dma_codes": ArrayAgg("dmas__code"),
             "dma_names": ArrayAgg("dmas__name"),
@@ -88,8 +89,10 @@ class MainsController(ABC, GeoDjangoController):
             "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
-            "start_geom_4326": Transform(LineStartPoint("geometry"), 4326),
-            "end_geom_4326": Transform(LineEndPoint("geometry"), 4326),
+            "start_point_geom": LineStartPoint("geometry", 4326),
+            #            "end_geom_latlong": Transform(LineEndPoint("geometry"), 4326),
+            "start_geom_latlong": Transform(LineStartPoint("geometry"), 4326),
+            "end_geom_latlong": Transform(LineEndPoint("geometry"), 4326),
             "dma_ids": ArrayAgg("dmas"),
             "dma_codes": ArrayAgg("dmas__code"),
             "dma_names": ArrayAgg("dmas__name"),
@@ -155,6 +158,8 @@ class MainsController(ABC, GeoDjangoController):
             dma_ids=ArrayAgg("dmas"),
             dma_codes=ArrayAgg("dmas__code"),
             dma_names=ArrayAgg("dmas__name"),
+            start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
+            end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
             utility_names=ArrayAgg("dmas__utility__name"),
             **mains_intersection_subqueries,
             **asset_subqueries

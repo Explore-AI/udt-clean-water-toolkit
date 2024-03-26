@@ -1,7 +1,7 @@
 import bisect
 from multiprocessing import Pool
 from networkx import Graph
-from django.contrib.gis.geos import GEOSGeometry, MultiLineString, Point
+from django.contrib.gis.geos import GEOSGeometry, LineString, Point
 from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
 from cleanwater.core.utils import normalised_point_position_on_line
@@ -23,21 +23,32 @@ class GisToGraph(NetworkController):
         super().__init__(srid=config.srid)
 
     def _create_pipe_single_intersection_data(
-        self, asset, normalised_positions, base_pipe_geom, intersection_geom
+        self,
+        asset,
+        normalised_positions,
+        base_pipe_geom,
+        start_point_geom,
+        intersection_geom,
     ):
-        normalised_position_on_pipe: float = normalised_point_position_on_line(
-            base_pipe_geom, intersection_geom, srid=self.config.srid
-        )
         import pdb
 
         pdb.set_trace()
+        normalised_position_on_pipe: float = normalised_point_position_on_line(
+            base_pipe_geom,
+            start_point_geom,
+            intersection_geom,
+            srid=self.config.srid,
+        )
+
+        intersection_geom_4326 = intersection_geom.transform("WGS84", clone=True)
+
         bisect.insort(
             normalised_positions,
             {
                 "position": normalised_position_on_pipe,
                 "data": asset,
                 "intersection_point_geometry": intersection_geom,
-                "intersection_point_geom_4326": geom_4326,
+                "intersection_point_geom_4326": intersection_geom_4326,
             },
             key=lambda x: x["position"],
         )
@@ -45,13 +56,19 @@ class GisToGraph(NetworkController):
         return normalised_positions
 
     def _create_pipe_multiple_intersection_data(
-        self, asset, normalised_positions, base_pipe_geom, intersection_geom
+        self,
+        asset,
+        normalised_positions,
+        base_pipe_geom,
+        start_point_geom,
+        intersection_geom,
     ):
         # handle multiple intersections
         for coords in intersection_geom.coords:
             normalised_positions = self._create_pipe_single_intersection_data(
                 asset,
                 normalised_positions,
+                start_point_geom,
                 base_pipe_geom,
                 Point(coords, srid=self.srid),
             )
@@ -59,7 +76,7 @@ class GisToGraph(NetworkController):
         return normalised_positions
 
     def _get_connections_points_on_pipe(
-        self, base_pipe_geom: MultiLineString, asset_data: list
+        self, base_pipe_geom: LineString, start_point_geom, asset_data: list
     ) -> list:
         normalised_positions: list = []
 
@@ -82,20 +99,26 @@ class GisToGraph(NetworkController):
 
             if intersection_geom.geom_type == "Point":
                 normalised_positions = self._create_pipe_single_intersection_data(
-                    asset, normalised_positions, base_pipe_geom, intersection_geom
+                    asset,
+                    normalised_positions,
+                    base_pipe_geom,
+                    start_point_geom,
+                    intersection_geom,
                 )
             elif intersection_geom.geom_type == "MultiPoint":
                 normalised_positions = self._create_pipe_multiple_intersection_data(
-                    asset, normalised_positions, base_pipe_geom, intersection_geom
+                    asset,
+                    normalised_positions,
+                    base_pipe_geom,
+                    start_point_geom,
+                    intersection_geom,
                 )
 
         return normalised_positions
 
     def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
         pipe_data: dict = {}
-        import pdb
 
-        pdb.set_trace()
         pipe_data["id"] = qs_object.id
         pipe_data["gid"] = qs_object.gid
         pipe_data["asset_name"] = qs_object.asset_name
@@ -106,8 +129,8 @@ class GisToGraph(NetworkController):
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["utility_name"] = self._get_utility(qs_object)
         pipe_data["geometry"] = qs_object.geometry
-        pipe_data["start_point"] = qs_object.start_geom_4326
-        pipe_data["end_point"] = qs_object.end_geom_4326
+        pipe_data["start_geom_4326"] = qs_object.start_geom_latlong
+        pipe_data["end_geom_4326"] = qs_object.end_geom_latlong
 
         return pipe_data
 
@@ -131,7 +154,7 @@ class GisToGraph(NetworkController):
         asset_data: list = self._combine_all_asset_data(pipe_qs_object)
 
         asset_positions: list = self._get_connections_points_on_pipe(
-            pipe_qs_object.geometry, asset_data
+            pipe_qs_object.geometry, pipe_qs_object.start_point_geom, asset_data
         )
         return pipe_data, asset_positions
 

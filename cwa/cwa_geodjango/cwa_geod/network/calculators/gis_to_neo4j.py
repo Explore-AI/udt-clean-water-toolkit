@@ -73,8 +73,10 @@ class GisToNeo4J(GisToGraph):
         print(end - start)
 
     def _get_query_offset_limit(self, pipes_qs):
-        if not self.config.query_limit:
-            query_limit = self.get_pipe_count(pipes_qs)
+        pipe_count = self.get_pipe_count(pipes_qs)
+
+        if not self.config.query_limit or self.config.query_limit == pipe_count:
+            query_limit = pipe_count
         else:
             query_limit = self.config.query_limit
 
@@ -210,7 +212,13 @@ class GisToNeo4J(GisToGraph):
             pipe_name = pipe_data["asset_name"]
             utility_name = pipe_data["utility_name"]
 
-            coords = NeomodelPoint((asset["point"].x, asset["point"].y), crs="wgs-84")
+            coords = NeomodelPoint(
+                (
+                    asset["intersection_point_geom_4326"].x,
+                    asset["intersection_point_geom_4326"].y,
+                ),
+                crs="wgs-84",
+            )
 
             node, node_type, asset_model = self.check_node_exists(
                 asset_name, gid, utility_name
