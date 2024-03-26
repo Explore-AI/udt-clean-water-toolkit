@@ -1,6 +1,6 @@
 from ....core.db.gis_db import Base
 from ...assets_utilities.models.dma import DMA
-from .base_gis_asset import BaseMultiStringAsset
+from .base_gis_asset import BaseMainsAsset
 from sqlalchemy import Column, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped
 from typing import List
@@ -14,6 +14,6 @@ distributionmain_dmas = Table(
 )
 
 
-class DistributionMain(BaseMultiStringAsset):
+class DistributionMain(BaseMainsAsset):
     __tablename__ = "assets_distributionmain"
     dmas: Mapped[List[DMA]] = relationship(secondary=distributionmain_dmas)

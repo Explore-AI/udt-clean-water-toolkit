@@ -24,8 +24,8 @@ class BasePointAsset(BaseAsset):
     )
 
 
-class BaseMultiStringAsset(BaseAsset):
+class BaseMainsAsset(BaseAsset):
     __abstract__ = True
     geometry: Mapped[Geometry] = mapped_column(
-        Geometry(geometry_type="MULTILINESTRING", srid=DEFAULT_SRID)
+        Geometry(geometry_type="LINESTRING", srid=DEFAULT_SRID)
     )
