@@ -6,9 +6,16 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.expressions import ArraySubquery
 from django.db.models.query import QuerySet
 from django.contrib.gis.measure import D
-from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWKT
+from django.contrib.gis.db.models.functions import (
+    AsGeoJSON,
+    Cast,
+    Length,
+    AsWKT,
+    Transform,
+)
 from cleanwater.controllers import GeoDjangoController
 from cwa_geod.assets.models import *
+from cwa_geod.core.db.models.functions.line_points import LineStartPoint, LineEndPoint
 
 
 class MainsController(ABC, GeoDjangoController):
@@ -41,7 +48,7 @@ class MainsController(ABC, GeoDjangoController):
         return subquery
 
     @staticmethod
-    def get_json_fields():
+    def get_asset_json_fields():
         """Overwrite this function to bypass
         the custom PostgreSQL functions
 
@@ -57,6 +64,32 @@ class MainsController(ABC, GeoDjangoController):
             "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
+            "geom_4326": Transform("geometry", 4326),
+            "dma_ids": ArrayAgg("dmas"),
+            "dma_codes": ArrayAgg("dmas__code"),
+            "dma_names": ArrayAgg("dmas__name"),
+            "utilities": ArrayAgg("dmas__utility__name"),
+        }
+
+    @staticmethod
+    def get_pipe_json_fields():
+        """Overwrite this function to bypass
+        the custom PostgreSQL functions
+
+        Params:
+              None
+
+        Returns:
+              json object for use in subquery
+        """
+
+        return {
+            "id": "id",
+            "gid": "gid",
+            "geometry": "geometry",
+            "wkt": AsWKT("geometry"),
+            "start_geom_4326": Transform(LineStartPoint("geometry"), 4326),
+            "end_geom_4326": Transform(LineEndPoint("geometry"), 4326),
             "dma_ids": ArrayAgg("dmas"),
             "dma_codes": ArrayAgg("dmas__code"),
             "dma_names": ArrayAgg("dmas__name"),
@@ -70,7 +103,7 @@ class MainsController(ABC, GeoDjangoController):
         )
 
     def _generate_asset_subqueries(self):
-        json_fields = self.get_json_fields()
+        json_fields = self.get_asset_json_fields()
 
         # This section is deliberately left verbose for clarity
         subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
@@ -126,6 +159,7 @@ class MainsController(ABC, GeoDjangoController):
             **mains_intersection_subqueries,
             **asset_subqueries
         )
+
         return qs
 
     def get_geometry_queryset(self, properties=None) -> QuerySet:

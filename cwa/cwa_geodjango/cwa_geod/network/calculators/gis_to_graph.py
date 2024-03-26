@@ -28,16 +28,16 @@ class GisToGraph(NetworkController):
         normalised_position_on_pipe: float = normalised_point_position_on_line(
             base_pipe_geom, intersection_geom, srid=self.config.srid
         )
+        import pdb
 
-        intersection_point = intersection_geom.transform("WGS84", clone=True)
-
+        pdb.set_trace()
         bisect.insort(
             normalised_positions,
             {
                 "position": normalised_position_on_pipe,
                 "data": asset,
                 "intersection_point_geometry": intersection_geom,
-                "point": intersection_point,
+                "intersection_point_geom_4326": geom_4326,
             },
             key=lambda x: x["position"],
         )
@@ -93,7 +93,9 @@ class GisToGraph(NetworkController):
 
     def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
         pipe_data: dict = {}
+        import pdb
 
+        pdb.set_trace()
         pipe_data["id"] = qs_object.id
         pipe_data["gid"] = qs_object.gid
         pipe_data["asset_name"] = qs_object.asset_name
@@ -104,9 +106,8 @@ class GisToGraph(NetworkController):
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["utility_name"] = self._get_utility(qs_object)
         pipe_data["geometry"] = qs_object.geometry
-        pipe_data["point"] = self.transform_point(
-            pipe_data["geometry"][0][0], self.config.srid, "WGS84"
-        )
+        pipe_data["start_point"] = qs_object.start_geom_4326
+        pipe_data["end_point"] = qs_object.end_geom_4326
 
         return pipe_data
 
@@ -196,11 +197,6 @@ class GisToGraph(NetworkController):
         """
 
         return qs.count()
-
-    @staticmethod
-    def transform_point(geometry, srid: int, ct):
-        # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geos/
-        return Point(geometry, srid=srid).transform("WGS84", clone=True)
 
     @staticmethod
     def _get_utility(qs_object):

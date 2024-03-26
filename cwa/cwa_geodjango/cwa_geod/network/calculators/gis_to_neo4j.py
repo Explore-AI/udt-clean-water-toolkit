@@ -47,8 +47,6 @@ class GisToNeo4J(GisToGraph):
 
             self._create_neo4j_graph()
 
-            time.sleep(30)
-
         end = timer()
         print(end - start)
 
@@ -244,37 +242,66 @@ class GisToNeo4J(GisToGraph):
                     f"Invalid node detected: {node_type}. Valid nodes are {PIPE_END__NAME} or {POINT_ASSET__NAME}"
                 )
 
-    def _map_pipe_connected_asset_relations(self, pipe_data: dict, assets_data: list):
+    def _set_pipe_start_node(self, pipe_data, dma_data):
         pipe_gid = pipe_data.get("gid")
         pipe_type = pipe_data.get("asset_name")
         utility_name = pipe_data.get("utility_name")
+        start_geom_4326 = pipe_data.get("start_geom_4326")
 
+        start_neo_point = NeomodelPoint(
+            start_geom_4326.x, start_geom_4326.y, crs="wgs-84"
+        )
+
+        try:
+            pipe_start_node = PipeEnd.create(
+                {
+                    "gid": pipe_gid,
+                    "dmas": dma_data,
+                    "pipe_type": pipe_type,
+                    "location": start_neo_point,
+                    "utility": utility_name,
+                }
+            )[0]
+        except UniqueProperty:
+            pipe_start_node = PipeEnd.nodes.get_or_none(
+                pipe_type=pipe_type, gid=pipe_gid, utility=utility_name
+            )
+
+        return pipe_start_node
+
+    def _set_pipe_end_node(self, pipe_data, dma_data):
+        pipe_gid = pipe_data.get("gid")
+        pipe_type = pipe_data.get("asset_name")
+        utility_name = pipe_data.get("utility_name")
+        end_geom_4326 = pipe_data.get("end_geom_4326")
+
+        end_neo_point = NeomodelPoint(end_geom_4326.x, end_geom_4326.y, crs="wgs-84")
+
+        try:
+            PipeEnd.create(
+                {
+                    "gid": pipe_gid,
+                    "dmas": dma_data,
+                    "pipe_type": pipe_type,
+                    "location": end_neo_point,
+                    "utility": utility_name,
+                }
+            )
+        except UniqueProperty:
+            pass
+
+    def _map_pipe_connected_asset_relations(self, pipe_data: dict, assets_data: list):
         # pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
 
         dma_data = self.build_dma_data_as_json(
             pipe_data["dma_codes"], pipe_data["dma_names"]
         )
 
-        coords = NeomodelPoint(
-            (pipe_data["point"].x, pipe_data["point"].y), crs="wgs-84"
-        )
+        pipe_start_node = self._set_pipe_start_node(pipe_data, dma_data)
 
-        try:
-            pipe_end = PipeEnd.create(
-                {
-                    "gid": pipe_gid,
-                    "dmas": dma_data,
-                    "pipe_type": pipe_type,
-                    "location": coords,
-                    "utility": utility_name,
-                }
-            )[0]
-        except UniqueProperty:
-            pipe_end = PipeEnd.nodes.get_or_none(
-                pipe_type=pipe_type, gid=pipe_gid, utility=utility_name
-            )
+        self._set_connected_asset_relations(pipe_data, assets_data, pipe_start_node)
 
-        self._set_connected_asset_relations(pipe_data, assets_data, pipe_end)
+        self._set_pipe_end_node(pipe_data, dma_data)
 
     def _reset_pipe_asset_data(self):
         # reset all_pipe_data and all_asset_positions to manage memory
