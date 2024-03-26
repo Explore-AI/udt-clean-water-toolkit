@@ -1,4 +1,4 @@
-from ....core.db.postgis_db import Base
+from ....core.db.gis_db import Base
 from ....core.constants import DEFAULT_SRID
 from sqlalchemy import Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column

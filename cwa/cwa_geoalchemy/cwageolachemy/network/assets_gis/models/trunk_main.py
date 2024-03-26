@@ -1,8 +1,8 @@
 from typing import List
 from sqlalchemy import Column, ForeignKey, Integer, Table
 from sqlalchemy.orm import Mapped, relationship
-from ....core.db.postgis_db import Base
-from ....utilities.models.dma import DMA
+from ....core.db.gis_db import Base
+from ...assets_utilities.models.dma import DMA
 from .base_gis_asset import BaseMultiStringAsset
 
 trunkmain_dmas = Table(
