@@ -13,7 +13,7 @@ class DistributionMainsController(MainsController):
     ]  # should not include the geometry column as per convention
 
     def _generate_mains_subqueries(self):
-        json_fields = self.get_json_fields()
+        json_fields = self.get_pipe_json_fields()
 
         dist_main_intersection_subquery = self._generate_touches_subquery(
             self.model.objects.all(), json_fields
