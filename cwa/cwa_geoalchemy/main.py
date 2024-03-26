@@ -1,9 +1,9 @@
 from cwageolachemy.config.config_manager import Settings as AppSettings
-from cwageolachemy.core.db.postgis_db import get_db, session_local
+from cwa.cwa_geoalchemy.cwageolachemy.core.db.gis_db import get_db, session_local
 from sqlalchemy.orm import Session
-from cwageolachemy.utilities.models.dma import DMA
-from cwageolachemy.utilities.models.utility import Utility
-from cwageolachemy.network.postgis.models import * 
+from cwageolachemy.network.assets_utilities.models.dma import DMA
+from cwageolachemy.network.assets_utilities.models.utility import Utility
+from cwageolachemy.network.assets_gis.models import * 
 from sqlalchemy import select
 
 

@@ -1,1 +1,0 @@
-# postgis models for dma and utilities exists here

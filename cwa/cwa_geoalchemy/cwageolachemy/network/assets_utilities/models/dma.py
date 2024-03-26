@@ -1,4 +1,4 @@
-from ...core.db.postgis_db import Base
+from ....core.db.gis_db import Base
 from sqlalchemy import String, DateTime, JSON, Integer
 from geoalchemy2 import Geometry
 from sqlalchemy.orm import Mapped, mapped_column

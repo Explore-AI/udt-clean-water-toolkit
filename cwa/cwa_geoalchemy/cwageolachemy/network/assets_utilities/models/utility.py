@@ -1,4 +1,4 @@
-from ...core.db.postgis_db import Base
+from ....core.db.gis_db import Base
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime 
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
