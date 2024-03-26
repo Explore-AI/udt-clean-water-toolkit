@@ -30,7 +30,6 @@ class GisToNeo4J(GisToGraph):
 
     def create_network(self):
         from timeit import default_timer as timer
-        import time
 
         start = timer()
 
@@ -41,6 +40,7 @@ class GisToNeo4J(GisToGraph):
         for offset in range(query_offset, query_limit, self.config.batch_size):
             limit = offset + self.config.batch_size
 
+            print(offset, limit)
             sliced_qs = list(pipes_qs[offset:limit])
 
             self.calc_pipe_point_relative_positions(sliced_qs)
@@ -257,7 +257,7 @@ class GisToNeo4J(GisToGraph):
         start_geom_4326 = pipe_data.get("start_geom_4326")
 
         start_neo_point = NeomodelPoint(
-            start_geom_4326.x, start_geom_4326.y, crs="wgs-84"
+            (start_geom_4326.x, start_geom_4326.y), crs="wgs-84"
         )
 
         try:
@@ -283,7 +283,7 @@ class GisToNeo4J(GisToGraph):
         utility_name = pipe_data.get("utility_name")
         end_geom_4326 = pipe_data.get("end_geom_4326")
 
-        end_neo_point = NeomodelPoint(end_geom_4326.x, end_geom_4326.y, crs="wgs-84")
+        end_neo_point = NeomodelPoint((end_geom_4326.x, end_geom_4326.y), crs="wgs-84")
 
         try:
             PipeEnd.create(

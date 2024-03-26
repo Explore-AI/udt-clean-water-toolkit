@@ -30,9 +30,6 @@ class GisToGraph(NetworkController):
         start_point_geom,
         intersection_geom,
     ):
-        import pdb
-
-        pdb.set_trace()
         normalised_position_on_pipe: float = normalised_point_position_on_line(
             base_pipe_geom,
             start_point_geom,
