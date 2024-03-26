@@ -155,7 +155,7 @@ class GisToNeo4J(GisToGraph):
                     "gid": gid,
                     "dmas": dma_data,
                     "pipe_type": asset_name,
-                    "location": coords,
+                    #            "location": coords,
                     "utility": utility_name,
                 }
             )[0]
@@ -181,7 +181,7 @@ class GisToNeo4J(GisToGraph):
                 {
                     "gid": gid,
                     "dmas": dma_data,
-                    "location": coords,
+                    # "location": coords,
                     "utility": utility_name,
                 }
             )[0]
@@ -212,13 +212,14 @@ class GisToNeo4J(GisToGraph):
             pipe_name = pipe_data["asset_name"]
             utility_name = pipe_data["utility_name"]
 
-            coords = NeomodelPoint(
-                (
-                    asset["intersection_point_geom_4326"].x,
-                    asset["intersection_point_geom_4326"].y,
-                ),
-                crs="wgs-84",
-            )
+            # coords = NeomodelPoint(
+            #     (
+            #         asset["intersection_point_geom_latlong"].x,
+            #         asset["intersection_point_geom_latlong"].y,
+            #     ),
+            #     crs="wgs-84",
+            # )
+            coords = None
 
             node, node_type, asset_model = self.check_node_exists(
                 asset_name, gid, utility_name
@@ -254,11 +255,11 @@ class GisToNeo4J(GisToGraph):
         pipe_gid = pipe_data.get("gid")
         pipe_type = pipe_data.get("asset_name")
         utility_name = pipe_data.get("utility_name")
-        start_geom_4326 = pipe_data.get("start_geom_4326")
+        start_geom_4326 = pipe_data.get("start_geom_latlong")
 
-        start_neo_point = NeomodelPoint(
-            (start_geom_4326.x, start_geom_4326.y), crs="wgs-84"
-        )
+        # start_neo_point = NeomodelPoint(
+        #     (start_geom_4326.x, start_geom_4326.y), crs="wgs-84"
+        # )
 
         try:
             pipe_start_node = PipeEnd.create(
@@ -266,7 +267,7 @@ class GisToNeo4J(GisToGraph):
                     "gid": pipe_gid,
                     "dmas": dma_data,
                     "pipe_type": pipe_type,
-                    "location": start_neo_point,
+                    # "location": start_neo_point,
                     "utility": utility_name,
                 }
             )[0]
@@ -281,9 +282,11 @@ class GisToNeo4J(GisToGraph):
         pipe_gid = pipe_data.get("gid")
         pipe_type = pipe_data.get("asset_name")
         utility_name = pipe_data.get("utility_name")
-        end_geom_4326 = pipe_data.get("end_geom_4326")
+        end_geom_latlong = pipe_data.get("end_geom_latlong")
 
-        end_neo_point = NeomodelPoint((end_geom_4326.x, end_geom_4326.y), crs="wgs-84")
+        # end_neo_point = NeomodelPoint(
+        #     (end_geom_latlong.x, end_geom_latlong.y), crs="wgs-84"
+        # )
 
         try:
             PipeEnd.create(
@@ -291,7 +294,7 @@ class GisToNeo4J(GisToGraph):
                     "gid": pipe_gid,
                     "dmas": dma_data,
                     "pipe_type": pipe_type,
-                    "location": end_neo_point,
+                    #            "location": end_neo_point,
                     "utility": utility_name,
                 }
             )

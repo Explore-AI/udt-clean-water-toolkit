@@ -37,7 +37,7 @@ class GisToGraph(NetworkController):
             srid=self.config.srid,
         )
 
-        intersection_geom_4326 = intersection_geom.transform("WGS84", clone=True)
+        # intersection_geom_latlong = intersection_geom.transform("WGS84", clone=True)
 
         bisect.insort(
             normalised_positions,
@@ -45,7 +45,7 @@ class GisToGraph(NetworkController):
                 "position": normalised_position_on_pipe,
                 "data": asset,
                 "intersection_point_geometry": intersection_geom,
-                "intersection_point_geom_4326": intersection_geom_4326,
+                # "intersection_point_geom_latlong": intersection_geom_latlong,
             },
             key=lambda x: x["position"],
         )
@@ -126,8 +126,8 @@ class GisToGraph(NetworkController):
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["utility_name"] = self._get_utility(qs_object)
         pipe_data["geometry"] = qs_object.geometry
-        pipe_data["start_geom_4326"] = qs_object.start_geom_latlong
-        pipe_data["end_geom_4326"] = qs_object.end_geom_latlong
+        # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
+        # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
 
         return pipe_data
 
@@ -149,6 +149,12 @@ class GisToGraph(NetworkController):
     ) -> tuple[dict, list]:
         pipe_data: dict = self._get_pipe_data(pipe_qs_object)
         asset_data: list = self._combine_all_asset_data(pipe_qs_object)
+
+        print(pipe_qs_object.geometry.length, "a")
+        if pipe_qs_object.geometry.length == 0.0:
+            import pdb
+
+            pdb.set_trace()
 
         asset_positions: list = self._get_connections_points_on_pipe(
             pipe_qs_object.geometry, pipe_qs_object.start_point_geom, asset_data
