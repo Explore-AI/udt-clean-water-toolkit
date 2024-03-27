@@ -17,7 +17,7 @@ from cwa_geod.core.constants import (
 )
 
 
-class GisToGraph(NetworkController):
+class GisToGraphCalculator(NetworkController):
     def __init__(self, config):
         self.config = config
         super().__init__(srid=config.srid)
@@ -65,8 +65,8 @@ class GisToGraph(NetworkController):
             normalised_positions = self._create_pipe_single_intersection_data(
                 asset,
                 normalised_positions,
-                start_point_geom,
                 base_pipe_geom,
+                start_point_geom,
                 Point(coords, srid=self.srid),
             )
 
@@ -149,12 +149,6 @@ class GisToGraph(NetworkController):
     ) -> tuple[dict, list]:
         pipe_data: dict = self._get_pipe_data(pipe_qs_object)
         asset_data: list = self._combine_all_asset_data(pipe_qs_object)
-
-        print(pipe_qs_object.geometry.length, "a")
-        if pipe_qs_object.geometry.length == 0.0:
-            import pdb
-
-            pdb.set_trace()
 
         asset_positions: list = self._get_connections_points_on_pipe(
             pipe_qs_object.geometry, pipe_qs_object.start_point_geom, asset_data

@@ -1,11 +1,11 @@
 from django.contrib.gis.geos import Point
 from django.db.models.query import QuerySet
 from networkx import Graph
-from . import GisToGraph
+from . import GisToGraphCalculator
 from cwa_geod.core.constants import DEFAULT_SRID
 
 
-class GisToNetworkX(GisToGraph):
+class GisToNetworkXCalculator(GisToGraphCalculator):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 

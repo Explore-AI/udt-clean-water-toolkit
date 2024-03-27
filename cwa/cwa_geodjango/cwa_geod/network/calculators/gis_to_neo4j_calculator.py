@@ -9,7 +9,7 @@ from cleanwater.exceptions import (
     InvalidNodeException,
     InvalidPipeException,
 )
-from . import GisToGraph
+from . import GisToGraphCalculator
 from cwa_geod.core.constants import (
     TRUNK_MAIN__NAME,
     DISTRIBUTION_MAIN__NAME,
@@ -19,7 +19,7 @@ from cwa_geod.core.constants import (
 from ..models import PointAsset, PipeEnd, initialise_node_labels
 
 
-class GisToNeo4J(GisToGraph):
+class GisToNeo4jCalculator(GisToGraphCalculator):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
