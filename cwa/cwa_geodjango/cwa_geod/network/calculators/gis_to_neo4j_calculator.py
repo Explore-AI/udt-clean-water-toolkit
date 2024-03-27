@@ -1,6 +1,5 @@
 import json
 from multiprocessing.pool import ThreadPool
-from django.db import connections
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
@@ -16,7 +15,7 @@ from cwa_geod.core.constants import (
     PIPE_END__NAME,
     POINT_ASSET__NAME,
 )
-from ..models import PointAsset, PipeEnd, initialise_node_labels
+from ..models import PointAsset, PipeEnd
 
 
 class GisToNeo4jCalculator(GisToGraphCalculator):
@@ -25,7 +24,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
     def __init__(self, config):
         self.config = config
-        initialise_node_labels()
         super().__init__(config)
 
     def create_network(self):
