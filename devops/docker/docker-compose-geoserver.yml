@@ -10,6 +10,7 @@ services:
       container_name: udtgeoserver
       volumes:
         - geoserver-data:/opt/geoserver/data_dir
+        - ../../devops/scripts/geoserver:/geoserver
       ports:
         - "8080:8080"
       restart: on-failure
