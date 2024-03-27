@@ -233,6 +233,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                     start_node,
                     coords,
                 )
+
             elif not node and node_type == POINT_ASSET__NAME:
                 start_node = self._create_and_connect_point_asset_node(
                     pipe_name,
@@ -244,10 +245,15 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                     coords,
                 )
 
+            elif node:
+                start_node = node
+
             elif node_type not in [PIPE_END__NAME, POINT_ASSET__NAME]:
                 raise InvalidNodeException(
                     f"Invalid node detected: {node_type}. Valid nodes are {PIPE_END__NAME} or {POINT_ASSET__NAME}"
                 )
+
+        return start_node
 
     def _set_pipe_start_node(self, pipe_data, dma_data):
         pipe_gid = pipe_data.get("gid")
@@ -276,7 +282,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
         return pipe_start_node
 
-    def _set_pipe_end_node(self, pipe_data, dma_data):
+    def _set_pipe_end_node(self, pipe_data, dma_data, pipe_second_last_node):
         pipe_gid = pipe_data.get("gid")
         pipe_type = pipe_data.get("asset_name")
         utility_name = pipe_data.get("utility_name")
@@ -287,7 +293,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         # )
 
         try:
-            PipeEnd.create(
+            pipe_last_node = PipeEnd.create(
                 {
                     "gid": pipe_gid,
                     "dmas": dma_data,
@@ -295,9 +301,18 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                     #            "location": end_neo_point,
                     "utility": utility_name,
                 }
-            )
+            )[0]
         except UniqueProperty:
-            pass
+            pipe_last_node = PipeEnd.nodes.get_or_none(
+                pipe_type=pipe_type, gid=pipe_gid, utility=utility_name
+            )
+
+        self._connect_nodes(
+            pipe_second_last_node,
+            pipe_last_node,
+            pipe_type,
+            {"dmas": dma_data, "gid": pipe_gid, "utility": utility_name},
+        )
 
     def _map_pipe_connected_asset_relations(self, pipe_data: dict, assets_data: list):
         # pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
@@ -308,9 +323,11 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
         pipe_start_node = self._set_pipe_start_node(pipe_data, dma_data)
 
-        self._set_connected_asset_relations(pipe_data, assets_data, pipe_start_node)
+        pipe_second_last_node = self._set_connected_asset_relations(
+            pipe_data, assets_data, pipe_start_node
+        )
 
-        self._set_pipe_end_node(pipe_data, dma_data)
+        self._set_pipe_end_node(pipe_data, dma_data, pipe_second_last_node)
 
     def _reset_pipe_asset_data(self):
         # reset all_pipe_data and all_asset_positions to manage memory
