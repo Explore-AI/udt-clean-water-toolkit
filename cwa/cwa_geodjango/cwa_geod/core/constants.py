@@ -32,8 +32,6 @@ PIPE_ASSETS__NAMES = [
     (DISTRIBUTION_MAIN__NAME, "Distribution Main"),
 ]
 
-POINT_ASSETS__NAMES = [(), ()]
-
 GEOS_LINESTRING_TYPES = [1, 5]
 
 GEOS_POINT_TYPES = [0]

@@ -159,7 +159,7 @@ class MainsController(ABC, GeoDjangoController):
             dma_codes=ArrayAgg("dmas__code"),
             dma_names=ArrayAgg("dmas__name"),
             start_point_geom=LineStartPoint("geometry"),
-            #            end_geom=LineEndPoint("geometry"),
+            end_point_geom=LineEndPoint("geometry"),
             # start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
             # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
             utility_names=ArrayAgg("dmas__utility__name"),

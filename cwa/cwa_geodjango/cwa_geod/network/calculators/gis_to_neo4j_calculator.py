@@ -280,6 +280,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         dma_data = self.build_dma_data_as_json(
             pipe_data["dma_codes"], pipe_data["dma_names"]
         )
+        import pdb
+
+        pdb.set_trace()
 
         pipe_start_node, pipe_segment_id = self._set_pipe_start_node(
             pipe_data, dma_data

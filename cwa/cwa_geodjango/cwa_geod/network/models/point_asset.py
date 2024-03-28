@@ -1,8 +1,10 @@
-from neomodel import StringProperty
+from neomodel import IntegerProperty
 from .point_node import PointNode
 
 
 class PointAsset(PointNode):
+    gid = IntegerProperty(unique_index=True, unique=True, required=True)
+
     class AssetMeta:
         asset_name = "point_asset"
 
