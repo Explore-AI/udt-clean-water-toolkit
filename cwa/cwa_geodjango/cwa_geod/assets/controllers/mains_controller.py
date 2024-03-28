@@ -90,7 +90,7 @@ class MainsController(ABC, GeoDjangoController):
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "start_point_geom": LineStartPoint("geometry"),
-            #            "end_geom": LineEndPoint("geometry"),
+            "end_point_geom": LineEndPoint("geometry"),
             # "start_geom_latlong": Transform(LineStartPoint("geometry"), 4326),
             # "end_geom_latlong": Transform(LineEndPoint("geometry"), 4326),
             "dma_ids": ArrayAgg("dmas"),
