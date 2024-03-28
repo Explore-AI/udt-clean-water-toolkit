@@ -157,12 +157,13 @@ class GisToGraphCalculator(NetworkController):
 
         # Get the intersection points of all intersecting pipes (pipe junctions)
         # and the intersection points of all point assets. Then order them
-        # relative to the start point of the line
-        asset_positions: list = self._get_connections_points_on_pipe(
+        # relative to the start point of the line. The junction_and_asset_positions
+        # returned matched the actual physical order that occurs geospatially
+        junction_and_asset_positions: list = self._get_connections_points_on_pipe(
             pipe_qs_object.geometry, pipe_qs_object.start_point_geom, asset_data
         )
 
-        return pipe_data, asset_positions
+        return pipe_data, junction_and_asset_positions
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         self.all_pipe_data, self.all_asset_positions = list(
