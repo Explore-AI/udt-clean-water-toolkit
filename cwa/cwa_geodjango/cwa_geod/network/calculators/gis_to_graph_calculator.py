@@ -147,12 +147,21 @@ class GisToGraphCalculator(NetworkController):
     def _map_relative_positions_calc(
         self, pipe_qs_object: TrunkMain
     ) -> tuple[dict, list]:
+
+        # Convert the base pipe data from a queryset object to a dictionary
         pipe_data: dict = self._get_pipe_data(pipe_qs_object)
+
+        # Convert all the data from intersecting pipes and point assets into
+        # a list of dictionaries
         asset_data: list = self._combine_all_asset_data(pipe_qs_object)
 
+        # Get the intersection points of all intersecting pipes (pipe junctions)
+        # and the intersection points of all point assets. Then order them
+        # relative to the start point of the line
         asset_positions: list = self._get_connections_points_on_pipe(
             pipe_qs_object.geometry, pipe_qs_object.start_point_geom, asset_data
         )
+
         return pipe_data, asset_positions
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
