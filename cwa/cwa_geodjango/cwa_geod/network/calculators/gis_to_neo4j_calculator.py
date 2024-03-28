@@ -118,7 +118,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         if node_type == PIPE_END__NAME:
             node = PipeEnd.nodes.get_or_none(
                 pipe_type=asset_name,
-                pipe_segment_id=pipe_segment_id,
+                pipe_segment_id=f"{gid}-{pipe_segment_id}",
                 gid=gid,
                 utility=utility_name,
             )
@@ -164,7 +164,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             pipe_end = PipeEnd.create(
                 {
                     "gid": gid,
-                    "pipe_segment_id": new_pipe_segment_id,
+                    "pipe_segment_id": f"{gid}-{new_pipe_segment_id}",
                     "dmas": dma_data,
                     "pipe_type": asset_name,
                     #            "location": coords,
@@ -175,7 +175,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         except UniqueProperty:
             pipe_end = PipeEnd.nodes.get_or_none(
                 pipe_type=asset_name,
-                pipe_segment_id=pipe_segment_id,
+                pipe_segment_id=f"{gid}-{pipe_segment_id}",
                 gid=gid,
                 utility=utility_name,
             )
@@ -290,7 +290,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                     "gid": pipe_gid,
                     "dmas": dma_data,
                     "pipe_type": pipe_type,
-                    "pipe_segment_id": pipe_segment_id,
+                    "pipe_segment_id": f"{pipe_gid}-{pipe_segment_id}",
                     # "location": start_neo_point,
                     "utility": utility_name,
                 }
@@ -298,7 +298,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         except UniqueProperty:
             pipe_start_node = PipeEnd.nodes.get_or_none(
                 pipe_type=pipe_type,
-                pipe_segment_id=pipe_segment_id,
+                pipe_segment_id=f"{pipe_gid}-{pipe_segment_id}",
                 gid=pipe_gid,
                 utility=utility_name,
             )
@@ -324,7 +324,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                     "gid": pipe_gid,
                     "dmas": dma_data,
                     "pipe_type": pipe_type,
-                    "pipe_segment_id": pipe_segment_id,
+                    "pipe_segment_id": f"{pipe_gid}-{pipe_segment_id}",
                     #            "location": end_neo_point,
                     "utility": utility_name,
                 }
@@ -332,7 +332,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         except UniqueProperty:
             pipe_last_node = PipeEnd.nodes.get_or_none(
                 pipe_type=pipe_type,
-                pipe_segment_id=pipe_segment_id,
+                pipe_segment_id=f"{pipe_gid}-{pipe_segment_id}",
                 gid=pipe_gid,
                 utility=utility_name,
             )
