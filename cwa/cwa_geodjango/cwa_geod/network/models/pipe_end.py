@@ -4,7 +4,6 @@ from cwa_geod.core.constants import PIPE_ASSETS__NAMES
 
 
 class PipeEnd(PointNode):
-    gid = IntegerProperty(index=True, required=True)
     pipe_type = StringProperty(required=True, index=True, choices=PIPE_ASSETS__NAMES)
     pipe_segment_id = IntegerProperty(required=True, index=True)
 

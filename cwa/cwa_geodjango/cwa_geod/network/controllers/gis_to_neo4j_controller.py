@@ -23,7 +23,7 @@ class GisToNeo4jController(GisToNeo4jCalculator):
         for offset in range(query_offset, query_limit, self.config.batch_size):
             limit = offset + self.config.batch_size
 
-            print(offset, limit)
+            print(offset, limit, "a")
             sliced_qs = list(pipes_qs[offset:limit])
 
             self.calc_pipe_point_relative_positions(sliced_qs)
@@ -54,3 +54,19 @@ class GisToNeo4jController(GisToNeo4jCalculator):
 
         end = timer()
         print(end - start)
+
+
+    def _get_query_offset_limit(self, pipes_qs):
+        pipe_count = self.get_pipe_count(pipes_qs)
+
+        if not self.config.query_limit or self.config.query_limit == pipe_count:
+            query_limit = pipe_count
+        else:
+            query_limit = self.config.query_limit
+
+        if not self.config.query_offset:
+            query_offset = 0
+        else:
+            query_offset = self.config.query_offset
+
+        return query_offset, query_limit
