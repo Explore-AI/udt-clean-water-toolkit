@@ -1,5 +1,6 @@
 import bisect
 from multiprocessing import Pool
+from collections import OrderedDict
 from networkx import Graph
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point
 from django.db.models.query import QuerySet
@@ -116,7 +117,7 @@ class GisToGraphCalculator(NetworkController):
     def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
         pipe_data: dict = {}
 
-        pipe_data["id"] = qs_object.id
+        pipe_data["id"] = qs_object.pk
         pipe_data["gid"] = qs_object.gid
         pipe_data["asset_name"] = qs_object.asset_name
         pipe_data["length"] = qs_object.length
@@ -126,6 +127,8 @@ class GisToGraphCalculator(NetworkController):
         pipe_data["dma_names"] = qs_object.dma_names
         pipe_data["utility_name"] = self._get_utility(qs_object)
         pipe_data["geometry"] = qs_object.geometry
+        pipe_data["start_point_geom"] = qs_object.start_point_geom
+        pipe_data["end_point_geom"] = qs_object.end_point_geom
         # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
         # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
 
@@ -144,16 +147,44 @@ class GisToGraphCalculator(NetworkController):
             + pipe_qs_object.pressure_valve_data
         )
 
+    def _set_node_properties(self, pipe_data, junction_and_assets):
+        all_nodes_ordered = OrderedDict()
+
+        all_nodes_ordered[0.0] = {**pipe_data}
+
+        for i, ja in enumerate(junction_and_assets):
+            if ja["data"]["asset_name"] in dict(PIPE_ASSETS__NAMES).keys():
+                junction_and_assets[i]["junction_gids"] = sorted(
+                    [pipe_data["gid"], ja["data"]["gid"]]
+                )
+        import pdb
+
+        pdb.set_trace()
+        return junction_and_assets
+
     def _map_relative_positions_calc(
         self, pipe_qs_object: TrunkMain
     ) -> tuple[dict, list]:
+        # Convert the base pipe data from a queryset object to a dictionary
         pipe_data: dict = self._get_pipe_data(pipe_qs_object)
-        asset_data: list = self._combine_all_asset_data(pipe_qs_object)
 
-        asset_positions: list = self._get_connections_points_on_pipe(
-            pipe_qs_object.geometry, pipe_qs_object.start_point_geom, asset_data
+        # Convert all the data from intersecting pipes and point assets into
+        # a list of dictionaries
+        junction_and_assets: list = self._combine_all_asset_data(pipe_qs_object)
+
+        # Get the intersection points of all intersecting pipes (pipe junctions)
+        # and the intersection points of all point assets. Then order them
+        # relative to the start point of the line. The junction_and_asset_positions
+        # returned matched the actual physical order that occurs geospatially
+        junction_and_assets: list = self._get_connections_points_on_pipe(
+            pipe_qs_object.geometry,
+            pipe_qs_object.start_point_geom,
+            junction_and_assets,
         )
-        return pipe_data, asset_positions
+
+        self._set_node_properties(pipe_data, junction_and_assets)
+
+        return pipe_data, junction_and_assets
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         self.all_pipe_data, self.all_asset_positions = list(

@@ -26,76 +26,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self.config = config
         super().__init__(config)
 
-    def create_network(self):
-        from timeit import default_timer as timer
-
-        start = timer()
-
-        pipes_qs = self.get_pipe_and_asset_data()
-
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-
-            print(offset, limit)
-            sliced_qs = list(pipes_qs[offset:limit])
-
-            self.calc_pipe_point_relative_positions(sliced_qs)
-
-            self._create_neo4j_graph()
-
-        end = timer()
-        print(end - start)
-
-    def create_network_parallel(self):
-        from timeit import default_timer as timer
-
-        start = timer()
-
-        pipes_qs = self.get_pipe_and_asset_data()
-
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-            print(offset, limit)
-
-            sliced_qs = list(pipes_qs[offset:limit])
-
-            self.calc_pipe_point_relative_positions_parallel(sliced_qs)
-
-            self._create_neo4j_graph_parallel()
-
-        end = timer()
-        print(end - start)
-
-    def _get_query_offset_limit(self, pipes_qs):
-        pipe_count = self.get_pipe_count(pipes_qs)
-
-        if not self.config.query_limit or self.config.query_limit == pipe_count:
-            query_limit = pipe_count
-        else:
-            query_limit = self.config.query_limit
-
-        if not self.config.query_offset:
-            query_offset = 0
-        else:
-            query_offset = self.config.query_offset
-
-        return query_offset, query_limit
-
-    def _generate_slices(self, pipes_qs):
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        qs_slices = []
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-            qs_slices.append(pipes_qs[offset:limit])
-
-        return qs_slices
-
     def get_pipe_and_asset_data(self):
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
         distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
@@ -350,6 +280,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         dma_data = self.build_dma_data_as_json(
             pipe_data["dma_codes"], pipe_data["dma_names"]
         )
+        import pdb
+
+        pdb.set_trace()
 
         pipe_start_node, pipe_segment_id = self._set_pipe_start_node(
             pipe_data, dma_data

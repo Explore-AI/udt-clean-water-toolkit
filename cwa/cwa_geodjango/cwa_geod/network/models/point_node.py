@@ -12,7 +12,6 @@ from cwa_geod.core.constants import UTILITIES
 
 
 class PointNode(StructuredNode):
-    gid = IntegerProperty(unique_index=True, unique=True, required=True)
     dmas = JSONProperty(required=True)
     location = PointProperty(crs="wgs-84")
     utility = StringProperty(required=True, index=True, choices=UTILITIES)

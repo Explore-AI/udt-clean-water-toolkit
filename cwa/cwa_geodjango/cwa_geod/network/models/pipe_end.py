@@ -1,11 +1,12 @@
-from neomodel import StringProperty
+from neomodel import StringProperty, IntegerProperty
 from .point_node import PointNode
 from cwa_geod.core.constants import PIPE_ASSETS__NAMES
 
 
 class PipeEnd(PointNode):
+    gid = IntegerProperty(unique_index=True, unique=True, required=True)
+    pipe_end_id = StringProperty(unique_index=True, unique=True, required=True)
     pipe_type = StringProperty(required=True, index=True, choices=PIPE_ASSETS__NAMES)
-    pipe_segment_id = StringProperty(required=True, index=True)
 
     class AssetMeta:
         asset_name = "pipe_end"
