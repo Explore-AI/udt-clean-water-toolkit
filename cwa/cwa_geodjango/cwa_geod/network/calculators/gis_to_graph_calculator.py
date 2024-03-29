@@ -176,6 +176,19 @@ class GisToGraphCalculator(NetworkController):
         #                 x.append(junc["data"]["gid"])
         #                 all_nodes_ordered[i]["junction_gids"] = sorted(list(set(x)))
 
+        def _filter_for_common_junction(ja):
+            if ja["data"]["asset_name"] in dict(PIPE_ASSETS__NAMES).keys():
+                distance_from_pipe_start_1 = round(
+                    ja["distance_from_pipe_start"], 1
+                )  # TODO: could move the round earlier
+                distance_from_pipe_start_2 = round(ja["distance_from_pipe_start"], 1)
+                print("yellow")
+                if distance_from_pipe_start_1 == distance_from_pipe_start_2:
+                    pass
+                    import pdb
+
+                    pdb.set_trace()
+
         i = 0
         nodes_ordered = OrderedDict()
         while True:
@@ -187,15 +200,17 @@ class GisToGraphCalculator(NetworkController):
             # if intersection is a pipe add pipe gids of intersection
             if data["asset_name"] in dict(PIPE_ASSETS__NAMES).keys():
                 nodes_ordered[i] = {
-                    "junction_gids": sorted([pipe_data["gid"], data["gid"]])
+                    "junction_gids": sorted([pipe_data["gid"], data["gid"]]),
+                    **data,
                 }
+                print("eee")
+                x = filter(
+                    lambda x: _filter_for_common_junction(x), junctions_and_assets
+                )
+                print(list(x))
 
             else:
                 nodes_ordered[i] = junctions_and_assets[i]
-
-            import pdb
-
-            pdb.set_trace()
 
             i += 1
         import pdb
