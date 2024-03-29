@@ -151,20 +151,24 @@ class MainsController(ABC, GeoDjangoController):
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.prefetch_related("dmas", "dmas__utility").annotate(
-            asset_name=Value(self.model.AssetMeta.asset_name),
-            length=Length("geometry"),
-            wkt=AsWKT("geometry"),
-            dma_ids=ArrayAgg("dmas"),
-            dma_codes=ArrayAgg("dmas__code"),
-            dma_names=ArrayAgg("dmas__name"),
-            start_point_geom=LineStartPoint("geometry"),
-            end_point_geom=LineEndPoint("geometry"),
-            # start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
-            # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
-            utility_names=ArrayAgg("dmas__utility__name"),
-            **mains_intersection_subqueries,
-            **asset_subqueries
+        qs = (
+            self.model.objects.prefetch_related("dmas", "dmas__utility")
+            .filter(gid=2213263)
+            .annotate(
+                asset_name=Value(self.model.AssetMeta.asset_name),
+                length=Length("geometry"),
+                wkt=AsWKT("geometry"),
+                dma_ids=ArrayAgg("dmas"),
+                dma_codes=ArrayAgg("dmas__code"),
+                dma_names=ArrayAgg("dmas__name"),
+                start_point_geom=LineStartPoint("geometry"),
+                end_point_geom=LineEndPoint("geometry"),
+                # start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
+                # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
+                utility_names=ArrayAgg("dmas__utility__name"),
+                **mains_intersection_subqueries,
+                **asset_subqueries
+            )
         )
 
         return qs

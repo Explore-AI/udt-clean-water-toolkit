@@ -1,12 +1,13 @@
 from neomodel import IntegerProperty
 from .point_node import PointNode
+from cwa_geod.core.constants import POINT_ASSET__NAME
 
 
 class PointAsset(PointNode):
     gid = IntegerProperty(unique_index=True, unique=True, required=True)
 
     class AssetMeta:
-        asset_name = "point_asset"
+        asset_name = POINT_ASSET__NAME
 
     @staticmethod
     def get_all_asset_models():

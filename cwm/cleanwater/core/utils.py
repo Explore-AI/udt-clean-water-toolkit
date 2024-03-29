@@ -20,8 +20,11 @@ def normalised_point_position_on_line(
 
     # https://zach.se/geodesic-distance-between-points-in-geodjango/
     # https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geos/
+
+    distance_from_line_start = start_of_line_point.distance(point_geom)
+
     normalised_position_on_line = 1 - (
-        (line_geom.length - start_of_line_point.distance(point_geom)) / line_geom.length
+        (line_geom.length - distance_from_line_start) / line_geom.length
     )
 
-    return normalised_position_on_line
+    return normalised_position_on_line, distance_from_line_start
