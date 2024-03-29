@@ -149,10 +149,10 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         start_node = pipe_start_node
 
         for asset in assets_data:
-            gid: int = asset["data"]["gid"]
-            asset_name: str = asset["data"]["asset_name"]
+            gid: int = asset["gid"]
+            asset_name: str = asset["asset_name"]
             dma_data = self.build_dma_data_as_json(
-                asset["data"]["dma_codes"], asset["data"]["dma_names"]
+                asset["dma_codes"], asset["dma_names"]
             )
 
             pipe_name = pipe_data["asset_name"]
