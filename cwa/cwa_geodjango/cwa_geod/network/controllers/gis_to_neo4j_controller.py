@@ -1,15 +1,17 @@
+from cleanwater.controllers.network_controller import NetworkController
 from ..calculators import GisToNeo4jCalculator
 from ..models import initialise_node_labels
 
 
-class GisToNeo4jController(GisToNeo4jCalculator):
+class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
     def __init__(self, config):
         self.config = config
         initialise_node_labels()
-        super().__init__(config)
+        NetworkController.__init__(self, self.config.srid)
+        GisToNeo4jCalculator.__init__(self, self.config)
 
     def create_network(self):
         from timeit import default_timer as timer
@@ -54,7 +56,6 @@ class GisToNeo4jController(GisToNeo4jCalculator):
 
         end = timer()
         print(end - start)
-
 
     def _get_query_offset_limit(self, pipes_qs):
         pipe_count = self.get_pipe_count(pipes_qs)
