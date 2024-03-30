@@ -187,26 +187,43 @@ class MainsController(ABC, GeoDjangoDataManager):
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = (
-            self.model.objects.filter(gid=2213263)
-            .prefetch_related("dmas", "dmas__utility")
-            .annotate(
-                asset_name=Value(self.model.AssetMeta.asset_name),
-                length=Length("geometry"),
-                wkt=AsWKT("geometry"),
-                dma_ids=ArrayAgg("dmas"),
-                dma_codes=ArrayAgg("dmas__code"),
-                dma_names=ArrayAgg("dmas__name"),
-                start_point_geom=LineStartPoint("geometry"),
-                end_point_geom=LineEndPoint("geometry"),
-                # start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
-                # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
-                utility_names=ArrayAgg("dmas__utility__name"),
-            )
-            .annotate(
-                **mains_intersection_subqueries,
-                **asset_subqueries,
-            )
+        qs = self.model.objects.filter(gid=2213263).prefetch_related(
+            "dmas", "dmas__utility"
+        )
+
+        qs = qs.annotate(
+            asset_name=Value(self.model.AssetMeta.asset_name),
+            pipe_length=Length("geometry"),
+            wkt=AsWKT("geometry"),
+            dma_ids=ArrayAgg("dmas"),
+            dma_codes=ArrayAgg("dmas__code"),
+            dma_names=ArrayAgg("dmas__name"),
+            start_point_geom=LineStartPoint("geometry"),
+            end_point_geom=LineEndPoint("geometry"),
+            # start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
+            # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
+            utility_names=ArrayAgg("dmas__utility__name"),
+        )
+
+        qs = qs.annotate(**mains_intersection_subqueries, **asset_subqueries)
+
+        qs = qs.values(
+            "id",
+            "gid",
+            "dma_ids",
+            "dma_codes",
+            "dma_names",
+            "asset_name",
+            "pipe_length",
+            "geometry",
+            "wkt",
+            "utility_names",
+            "start_point_geom",
+            "end_point_geom",
+            "trunkmain_junctions",
+            "distmain_junctions",
+            "line_start_intersection_gids",  # from mains_intersection_subqueries
+            "line_end_intersection_gids",  # from mains_intersection_subqueries
         )
 
         return qs

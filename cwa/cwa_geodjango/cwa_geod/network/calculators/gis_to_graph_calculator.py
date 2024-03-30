@@ -66,37 +66,30 @@ class GisToGraphCalculator:
 
         return pipe_data, junctions_and_assets_normalised
 
-    def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
-        pipe_data: dict = {}
+    def _get_pipe_data(self, pipe_data: dict) -> dict:
 
-        pipe_data["id"] = qs_object.pk
-        pipe_data["gid"] = qs_object.gid
-        pipe_data["asset_name"] = qs_object.asset_name
-        pipe_data["length"] = qs_object.length
-        pipe_data["wkt"] = qs_object.wkt
-        pipe_data["dma_ids"] = qs_object.dma_ids
-        pipe_data["dma_codes"] = qs_object.dma_codes
-        pipe_data["dma_names"] = qs_object.dma_names
-        pipe_data["utility_name"] = self._get_utility(qs_object)
-        pipe_data["geometry"] = qs_object.geometry
-        pipe_data["start_point_geom"] = qs_object.start_point_geom
-        pipe_data["end_point_geom"] = qs_object.end_point_geom
+        pipe_data["utility_name"] = self._get_utility(pipe_data)
         pipe_data["line_start_intersection_gids"] = list(
-            set(qs_object.line_start_intersection_gids)
+            set(pipe_data.get("line_start_intersection_gids"))
         )
         pipe_data["line_end_intersection_gids"] = list(
-            set(qs_object.line_end_intersection_gids)
+            set(pipe_data.get("line_end_intersection_gids"))
         )
-
         # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
         # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
+
+        # TODO: maybe convert pipe data to simplenamespace
+        # SimpleNamespace
+
+        del pipe_data["trunkmain_junctions"]
+        del pipe_data["distmain_junctions"]
 
         return pipe_data
 
     def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
         return (
-            pipe_qs_object.tm_intersections
-            + pipe_qs_object.dm_intersections
+            pipe_qs_object.trunkmain_junctions
+            + pipe_qs_object.distmain_junctions
             + pipe_qs_object.chamber_data
             + pipe_qs_object.operational_site_data
             + pipe_qs_object.network_meter_data
@@ -289,7 +282,7 @@ class GisToGraphCalculator:
 
     @staticmethod
     def _get_utility(qs_object):
-        utilities = list(set(qs_object.utility_names))
+        utilities = list(set(qs_object["utility_names"]))
 
         if len(utilities) > 1:
             raise Exception(
