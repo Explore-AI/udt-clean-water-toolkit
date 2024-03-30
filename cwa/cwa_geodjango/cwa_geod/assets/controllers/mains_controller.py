@@ -229,25 +229,24 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         qs = qs.annotate(**mains_intersection_subqueries, **asset_subqueries)
 
-        qs = qs.values(
-            "id",
-            "gid",
-            "dma_ids",
-            "dma_codes",
-            "dma_names",
-            "asset_name",
-            "pipe_length",
-            "geometry",
-            "wkt",
-            "utility_names",
-            "start_point_geom",
-            "end_point_geom",
-            "trunkmain_junctions",
-            "distmain_junctions",
-            "line_start_intersection_gids",  # from mains_intersection_subqueries
-            "line_end_intersection_gids",  # from mains_intersection_subqueries
-            *asset_subqueries.keys()
-        )
+        # qs = qs.values(
+        #     "id",
+        #     "gid",
+        #     "dma_ids",
+        #     "dma_codes",
+        #     "dma_names",
+        #     "asset_name",
+        #     "pipe_length",
+        #     "geometry",
+        #     "wkt",
+        #     "utility_names",
+        #     "start_point_geom",
+        #     "end_point_geom",
+        #     "line_start_intersection_gids",  # from mains_intersection_subqueries
+        #     "line_end_intersection_gids",  # from mains_intersection_subqueries
+        #     *mains_intersection_subqueries.keys(),
+        #     *asset_subqueries.keys()
+        # )
 
         return qs
 
