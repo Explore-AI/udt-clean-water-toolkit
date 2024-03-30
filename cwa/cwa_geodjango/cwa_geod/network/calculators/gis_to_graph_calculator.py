@@ -121,7 +121,7 @@ class GisToGraphCalculator:
                 "Invalid geometry types for intersection. Allowed types are point and multipoint"
             )
 
-    def _set_node_properties(self, pipe_data, junctions_and_assets_normalised):
+    def _set_node_properties(self, pipe_data, junctions_and_assets_intersections):
         # all_nodes_ordered = OrderedDict()
 
         # for i, ja in enumerate(junctions_and_assets):
@@ -159,14 +159,16 @@ class GisToGraphCalculator:
         i = 0
         nodes_ordered = OrderedDict()
         pipes_only = [
-            x for x in junctions_and_assets if x["asset_name"] in PIPE_ASSETS__NAMES
+            x
+            for x in junctions_and_assets_intersections
+            if x["asset_name"] in PIPE_ASSETS__NAMES
         ]
 
         while True:
-            if i == len(junctions_and_assets):
+            if i == len(junctions_and_assets_intersections):
                 break
 
-            asset_data = junctions_and_assets[i]
+            asset_data = junctions_and_assets_intersections[i]
 
             # if intersection is a pipe add pipe gids of intersection
             if asset_data["asset_name"] in PIPE_ASSETS__NAMES:
@@ -183,11 +185,11 @@ class GisToGraphCalculator:
                 )
 
             else:
-                nodes_ordered[i] = junctions_and_assets[i]
+                nodes_ordered[i] = junctions_and_assets_intersections[i]
 
             i += 1
 
-        return junctions_and_assets
+        return nodes_ordered
 
     def _get_connections_points_on_pipe(
         self, base_pipe_geom: LineString, start_point_geom, asset_data: list
