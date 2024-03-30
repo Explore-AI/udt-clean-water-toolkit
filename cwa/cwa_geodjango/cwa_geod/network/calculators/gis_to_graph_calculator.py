@@ -22,6 +22,40 @@ class GisToGraphCalculator:
     def __init__(self, config):
         self.config = config
 
+    def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
+        pipe_data: dict = {}
+
+        pipe_data["id"] = qs_object.pk
+        pipe_data["gid"] = qs_object.gid
+        pipe_data["asset_name"] = qs_object.asset_name
+        pipe_data["length"] = qs_object.length
+        pipe_data["wkt"] = qs_object.wkt
+        pipe_data["dma_ids"] = qs_object.dma_ids
+        pipe_data["dma_codes"] = qs_object.dma_codes
+        pipe_data["dma_names"] = qs_object.dma_names
+        pipe_data["utility_name"] = self._get_utility(qs_object)
+        pipe_data["geometry"] = qs_object.geometry
+        pipe_data["start_point_geom"] = qs_object.start_point_geom
+        pipe_data["end_point_geom"] = qs_object.end_point_geom
+        # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
+        # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
+
+        return pipe_data
+
+    def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
+        return (
+            pipe_qs_object.trunk_mains_data
+            + pipe_qs_object.distribution_mains_data
+            + pipe_qs_object.chamber_data
+            + pipe_qs_object.operational_site_data
+            + pipe_qs_object.network_meter_data
+            + pipe_qs_object.logger_data
+            + pipe_qs_object.hydrant_data
+            + pipe_qs_object.pressure_fitting_data
+            + pipe_qs_object.pressure_valve_data
+            + pipe_qs_object.network_opt_valve
+        )
+
     def _get_intersecting_geometry(self, base_pipe_geom, asset):
         # Geom of the intersecting pipe or asset
         pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid=self.config.srid)
@@ -87,51 +121,7 @@ class GisToGraphCalculator:
                 "Invalid geometry types for intersection. Allowed types are point and multipoint"
             )
 
-    def _get_connections_points_on_pipe(
-        self, base_pipe_geom: LineString, start_point_geom, asset_data: list
-    ) -> list:
-        mapfunc = partial(
-            self._map_get_normalised_positions, base_pipe_geom, start_point_geom
-        )
-        normalised_intersections = list(zip(*map(mapfunc, asset_data)))[0]
-
-        return normalised_intersections
-
-    def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
-        pipe_data: dict = {}
-
-        pipe_data["id"] = qs_object.pk
-        pipe_data["gid"] = qs_object.gid
-        pipe_data["asset_name"] = qs_object.asset_name
-        pipe_data["length"] = qs_object.length
-        pipe_data["wkt"] = qs_object.wkt
-        pipe_data["dma_ids"] = qs_object.dma_ids
-        pipe_data["dma_codes"] = qs_object.dma_codes
-        pipe_data["dma_names"] = qs_object.dma_names
-        pipe_data["utility_name"] = self._get_utility(qs_object)
-        pipe_data["geometry"] = qs_object.geometry
-        pipe_data["start_point_geom"] = qs_object.start_point_geom
-        pipe_data["end_point_geom"] = qs_object.end_point_geom
-        # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
-        # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
-
-        return pipe_data
-
-    def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
-        return (
-            pipe_qs_object.trunk_mains_data
-            + pipe_qs_object.distribution_mains_data
-            + pipe_qs_object.chamber_data
-            + pipe_qs_object.operational_site_data
-            + pipe_qs_object.network_meter_data
-            + pipe_qs_object.logger_data
-            + pipe_qs_object.hydrant_data
-            + pipe_qs_object.pressure_fitting_data
-            + pipe_qs_object.pressure_valve_data
-            + pipe_qs_object.network_opt_valve
-        )
-
-    def _set_node_properties(self, pipe_data, junctions_and_assets):
+    def _set_node_properties(self, pipe_data, junctions_and_assets_normalised):
         # all_nodes_ordered = OrderedDict()
 
         # for i, ja in enumerate(junctions_and_assets):
@@ -199,6 +189,16 @@ class GisToGraphCalculator:
 
         return junctions_and_assets
 
+    def _get_connections_points_on_pipe(
+        self, base_pipe_geom: LineString, start_point_geom, asset_data: list
+    ) -> tuple:
+        mapfunc = partial(
+            self._map_get_normalised_positions, base_pipe_geom, start_point_geom
+        )
+        junctions_and_assets_normalised = list(zip(*map(mapfunc, asset_data)))[0]
+
+        return junctions_and_assets_normalised
+
     def _map_relative_positions_calc(
         self, pipe_qs_object: TrunkMain
     ) -> tuple[dict, list]:
@@ -213,13 +213,13 @@ class GisToGraphCalculator:
         # and the intersection points of all point assets. Then order them
         # relative to the start point of the line. The junction_and_asset_positions
         # returned matched the actual physical order that occurs geospatially
-        junctions_and_assets: list = self._get_connections_points_on_pipe(
+        junctions_and_assets_normalised: tuple = self._get_connections_points_on_pipe(
             pipe_qs_object.geometry,
             pipe_qs_object.start_point_geom,
             junction_and_assets,
         )
 
-        self._set_node_properties(pipe_data, junctions_and_assets)
+        self._set_node_properties(pipe_data, junctions_and_assets_normalised)
 
         return pipe_data, junctions_and_assets
 
