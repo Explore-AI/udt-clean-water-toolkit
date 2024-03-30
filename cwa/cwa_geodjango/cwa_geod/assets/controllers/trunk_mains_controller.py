@@ -30,6 +30,9 @@ class TrunkMainsController(MainsController):
             DistributionMain.objects.all(), json_fields
         )
 
+        # subquery = TrunkMain.objects.filter(geometry__touches=OuterRef("start_point_geom")).values("gid")
+        # qs = tm.annotate(start_point_geom=LineStartPoint("geometry")).annotate(start_point_touches=ArraySubquery(subquery))
+
         subqueries = {
             "trunk_mains_data": ArraySubquery(subquery1),
             "distribution_mains_data": ArraySubquery(subquery2),

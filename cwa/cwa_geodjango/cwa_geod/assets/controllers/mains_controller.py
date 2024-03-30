@@ -149,6 +149,9 @@ class MainsController(ABC, GeoDjangoController):
     def get_pipe_point_relation_queryset(self):
         mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
+        import pdb
+
+        pdb.set_trace()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = (
@@ -166,9 +169,8 @@ class MainsController(ABC, GeoDjangoController):
                 # start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
                 # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
                 utility_names=ArrayAgg("dmas__utility__name"),
-                **mains_intersection_subqueries,
-                **asset_subqueries
             )
+            .annotate(**mains_intersection_subqueries, **asset_subqueries)
         )
 
         return qs
