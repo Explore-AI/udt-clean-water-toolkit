@@ -192,7 +192,7 @@ class GisToGraphCalculator:
 
         return junctions_and_assets_intersections
 
-    def _set_node_properties(self, pipe_data, junctions_and_assets_intersections):
+    def _set_node_properties(self, base_pipe_data, junctions_and_assets_intersections):
         def _filter_for_common_junction(asset_data, pipe):
             distance_from_pipe_start_1 = round(
                 asset_data["distance_from_pipe_start"], 1
@@ -207,12 +207,47 @@ class GisToGraphCalculator:
         i = 0
         nodes_ordered = OrderedDict()
         pipes_only = [
-            x
-            for x in junctions_and_assets_intersections
-            if x["asset_name"] in PIPE_ASSETS__NAMES
+            ja
+            for ja in junctions_and_assets_intersections
+            if ja["asset_name"] in PIPE_ASSETS__NAMES
         ]
-        print(junctions_and_assets_intersections)
-        print(pipes_only)
+
+        all_intersecting_pipes = [pipe["gid"] for pipe in pipes_only]
+
+        pipes_intersecting_at_base_pipe_start_point = [
+            gid
+            for gid in base_pipe_data["line_start_intersection_gids"]
+            if gid != base_pipe_data["gid"]
+        ]
+
+        pipes_intersecting_at_base_pipe_end_point = [
+            gid
+            for gid in base_pipe_data["line_end_intersection_gids"]
+            if gid != base_pipe_data["gid"]
+        ]
+
+        non_termini_intersecting_pipes = list(
+            set(all_intersecting_pipes).difference(
+                pipes_intersecting_at_base_pipe_start_point
+                + pipes_intersecting_at_base_pipe_end_point
+            )
+        )
+
+        i = 0
+        for pipe in pipes_only:
+            nodes_ordered[i] = {}
+            if pipe["gid"] in pipes_intersecting_at_base_pipe_start_point:
+                node_gids = sorted([base_pipe_data["gid"], pipe["gid"]])
+                nodes_ordered[i]["node_gids"] = node_gids
+
+            elif pipe["gid"] in pipes_intersecting_at_base_pipe_end_point:
+                node_gids = sorted([base_pipe_data["gid"], pipe["gid"]])
+                nodes_ordered[i]["node_gids"] = node_gids
+
+            elif pipe["gid"] in non_termini_intersecting_pipes:
+                node_gids = sorted([base_pipe_data["gid"], pipe["gid"]])
+                nodes_ordered[i]["node_gids"] = node_gids
+
         import pdb
 
         pdb.set_trace()
@@ -226,7 +261,7 @@ class GisToGraphCalculator:
 
             # if intersection is a pipe add pipe gids of intersection
             if junction_or_asset["asset_name"] in PIPE_ASSETS__NAMES:
-                node_gids = sorted([pipe_data["gid"], junction_or_asset["gid"]])
+                node_gids = sorted([base_pipe_data["gid"], junction_or_asset["gid"]])
 
                 nodes_ordered[i] = {
                     "junction_gids": node_gids,
