@@ -74,8 +74,12 @@ class GisToGraphCalculator:
                 f"Invalid GEOS line string type. Allowed types are {(',').join(str(x) for x in GEOS_LINESTRING_TYPES+GEOS_POINT_TYPES)}"
             )
 
-    def _map_get_normalised_positions(self, base_pipe_geom, start_point_geom, asset):
-        intersection_geom = self._get_intersecting_geometry(base_pipe_geom, asset)
+    def _map_get_normalised_positions(
+        self, base_pipe_geom, start_point_geom, junction_or_asset: dict
+    ) -> list:
+        intersection_geom = self._get_intersecting_geometry(
+            base_pipe_geom, junction_or_asset
+        )
 
         if intersection_geom.geom_type == "Point":
             intersection_params = normalised_point_position_on_line(
@@ -86,14 +90,12 @@ class GisToGraphCalculator:
             )
             data = [
                 {
-                    **asset,
+                    **junction_or_asset,
                     "intersection_point_geometry": intersection_geom,
                     "position": intersection_params[0],
                     "distance_from_pipe_start": intersection_params[1],
                 }
             ]
-
-            return data
 
         elif intersection_geom.geom_type == "MultiPoint":
             data = []
@@ -107,44 +109,36 @@ class GisToGraphCalculator:
 
                 data.append(
                     {
-                        **asset,
+                        **junction_or_asset,
                         "intersection_point_geometry": intersection_geom,
                         "position": intersection_params[0],
                         "distance_from_pipe_start": intersection_params[1],
                     }
                 )
 
-                return data
-
         else:
             raise Exception(
                 "Invalid geometry types for intersection. Allowed types are point and multipoint"
             )
 
+        return data
+
+    def _get_connections_points_on_pipe(
+        self, base_pipe_geom: LineString, start_point_geom, junction_and_assets: list
+    ) -> list:
+        junctions_and_assets_intersections = []
+
+        # Not inefficient to use for loop with append here as the number of intersecting
+        # junctions_and_assets for any given base pipe is not large
+        for ja in junction_and_assets:
+            intersections = self._map_get_normalised_positions(
+                base_pipe_geom, start_point_geom, ja
+            )
+            junctions_and_assets_intersections += intersections
+
+        return junctions_and_assets_intersections
+
     def _set_node_properties(self, pipe_data, junctions_and_assets_intersections):
-        # all_nodes_ordered = OrderedDict()
-
-        # for i, ja in enumerate(junctions_and_assets):
-        #     if ja["data"]["asset_name"] in dict(PIPE_ASSETS__NAMES).keys():
-        #         print(i, "qqq")
-        #         all_nodes_ordered[i] = {
-        #             "junction_gids": sorted([pipe_data["gid"], ja["data"]["gid"]])
-        #         }
-
-        #         for j, junc in enumerate(junctions_and_assets):
-        #             print(j, "rrrr")
-        #             distance_from_pipe_start_1 = round(
-        #                 ja["distance_from_pipe_start"], 1
-        #             )  # TODO: could move the round earlier
-        #             distance_from_pipe_start_2 = round(
-        #                 junc["distance_from_pipe_start"], 1
-        #             )
-
-        #             if distance_from_pipe_start_1 == distance_from_pipe_start_2:
-        #                 x = all_nodes_ordered[i]["junction_gids"]
-        #                 x.append(junc["data"]["gid"])
-        #                 all_nodes_ordered[i]["junction_gids"] = sorted(list(set(x)))
-
         def _filter_for_common_junction(asset_data, pipe):
             distance_from_pipe_start_1 = round(
                 asset_data["distance_from_pipe_start"], 1
@@ -191,15 +185,19 @@ class GisToGraphCalculator:
 
         return nodes_ordered
 
-    def _get_connections_points_on_pipe(
-        self, base_pipe_geom: LineString, start_point_geom, asset_data: list
-    ) -> tuple:
-        mapfunc = partial(
-            self._map_get_normalised_positions, base_pipe_geom, start_point_geom
-        )
-        junctions_and_assets_normalised = list(zip(*map(mapfunc, asset_data)))[0]
+        #     bisect.insort(
+        #         normalised_positions,
+        #         {
+        #             **asset,
+        #             "position": normalised_position_on_pipe,
+        #             "intersection_point_geometry": intersection_geom,
+        #             "distance_from_pipe_start": distance_from_pipe_start
+        #             # "intersection_point_geom_latlong": intersection_geom_latlong,
+        #         },
+        #         key=lambda x: x["position"],
+        #     )
 
-        return junctions_and_assets_normalised
+        return junctions_and_assets_intersections
 
     def _map_relative_positions_calc(
         self, pipe_qs_object: TrunkMain
