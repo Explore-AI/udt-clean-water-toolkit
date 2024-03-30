@@ -16,9 +16,9 @@ class TrunkMainsController(MainsController):
         dm_qs = DistributionMain.objects.all()
         json_fields = self.get_pipe_json_fields()
 
-        subquery_tm_junctions = self.generate_touches_line_subquery(tm_qs, json_fields)
+        subquery_tm_junctions = self.generate_touches_subquery(tm_qs, json_fields)
 
-        subquery_dm_junctions = self.generate_touches_line_subquery(dm_qs, json_fields)
+        subquery_dm_junctions = self.generate_touches_subquery(dm_qs, json_fields)
 
         termini_subqueries = self.generate_termini_subqueries([tm_qs, dm_qs])
 

@@ -34,6 +34,19 @@ class MainsController(ABC, GeoDjangoDataManager):
         self.model = model
 
     def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
+        """
+        Generates a subquery where the inner query is filtered if its geometery object
+        is within the geometry of the outer query.
+
+        Params:
+              qs (Queryset, required)
+              json_fields (dict, required) - A dictionary of model fields to return
+              geometry+field (str, optional, default="geometry") - The field name of the outer geometry object
+
+        Returns:
+              subquery (Queryset)
+
+        """
 
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
@@ -42,28 +55,37 @@ class MainsController(ABC, GeoDjangoDataManager):
                 **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
             )
         )
+
         return subquery
 
     @staticmethod
-    def generate_touches_line_subquery(qs, json_fields, geometry_field="geometry"):
+    def generate_touches_subquery(qs, json_fields, geometry_field="geometry"):
+        """
+        Generates a subquery where the inner query is filtered if its geometery object
+        touches the geometry of the outer query.
+
+        Params:
+               qs (Queryset, required)
+               json_fields (dict, required) - A dictionary of model fields to return
+               geometry+field (str, optional, default="geometry") - The field name of the outer geometry object
+
+        Returns:
+              subquery (Queryset)
+
+        """
 
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(
                 **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
             ),
         )
-        return subquery
-
-    def _generate_touches_line_end_subquery(self, qs, point_field, field="gid"):
-
-        subquery = qs.filter(geometry__touches=OuterRef(point_field)).values(field)
 
         return subquery
 
     def generate_termini_subqueries(self, querysets):
-
         start_point_subqueries = []
         end_point_subqueries = []
+
         for qs in querysets:
             subquery1 = qs.filter(geometry__touches=OuterRef("start_point_geom"))
             subquery2 = qs.filter(geometry__touches=OuterRef("end_point_geom"))
@@ -86,11 +108,11 @@ class MainsController(ABC, GeoDjangoDataManager):
 
     @staticmethod
     def get_asset_json_fields(geometry_field="geometry"):
-        """Overwrite this function to bypass
-        the custom PostgreSQL functions
+        """Overwrite the fields retrieved by the subqueries or
+        the SQL functions used to retrieve them.
 
         Params:
-              None
+              geometry_field (str, optional, defaut="geometry")
 
         Returns:
               json object for use in subquery
@@ -110,8 +132,8 @@ class MainsController(ABC, GeoDjangoDataManager):
 
     @staticmethod
     def get_pipe_json_fields():
-        """Overwrite this function to bypass
-        the custom PostgreSQL functions
+        """Overwrite the fields retrieved by the subqueries or
+        the SQL functions used to retrieve them.
 
         Params:
               None
@@ -224,6 +246,7 @@ class MainsController(ABC, GeoDjangoDataManager):
             "distmain_junctions",
             "line_start_intersection_gids",  # from mains_intersection_subqueries
             "line_end_intersection_gids",  # from mains_intersection_subqueries
+            *asset_subqueries.keys()
         )
 
         return qs

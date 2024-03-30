@@ -11,15 +11,14 @@ class DistributionMainsController(MainsController):
     def __init__(self):
         super().__init__(self.model)
 
-
     def _generate_mains_subqueries(self):
         tm_qs = TrunkMain.objects.all()
         dm_qs = self.model.objects.all()
         json_fields = self.get_pipe_json_fields()
 
-        subquery_tm_junctions = self.generate_touches_line_subquery(tm_qs, json_fields)
+        subquery_tm_junctions = self.generate_touches_subquery(tm_qs, json_fields)
 
-        subquery_dm_junctions = self.generate_touches_line_subquery(dm_qs, json_fields)
+        subquery_dm_junctions = self.generate_touches_subquery(dm_qs, json_fields)
 
         termini_subqueries = self.generate_termini_subqueries([tm_qs, dm_qs])
 
