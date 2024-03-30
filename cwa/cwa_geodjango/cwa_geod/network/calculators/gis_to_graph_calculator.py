@@ -1,14 +1,9 @@
-from bisect import insort
-from functools import partial
 from multiprocessing import Pool
 from collections import OrderedDict
-from networkx import Graph
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point
 from django.db.models.query import QuerySet
 from cleanwater.core.utils import normalised_point_position_on_line
-from cwa_geod.assets.controllers import TrunkMainsController
 from cwa_geod.assets.models.trunk_main import TrunkMain
-from cwa_geod.assets.controllers import DistributionMainsController
 from cwa_geod.core.constants import (
     PIPE_END__NAME,
     POINT_ASSET__NAME,
@@ -74,6 +69,9 @@ class GisToGraphCalculator:
     def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
         pipe_data: dict = {}
 
+        import pdb
+
+        pdb.set_trace()
         pipe_data["id"] = qs_object.pk
         pipe_data["gid"] = qs_object.gid
         pipe_data["asset_name"] = qs_object.asset_name
@@ -86,6 +84,13 @@ class GisToGraphCalculator:
         pipe_data["geometry"] = qs_object.geometry
         pipe_data["start_point_geom"] = qs_object.start_point_geom
         pipe_data["end_point_geom"] = qs_object.end_point_geom
+        pipe_data["line_start_intersection_gids"] = list(
+            set(qs_object.line_start_intersection_gids)
+        )
+        pipe_data["line_end_intersection_gids"] = list(
+            set(qs_object.line_end_intersection_gids)
+        )
+
         # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
         # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
 
@@ -265,14 +270,6 @@ class GisToGraphCalculator:
             return PIPE_END__NAME
 
         return POINT_ASSET__NAME
-
-    def get_trunk_mains_data(self) -> QuerySet:
-        tm: TrunkMainsController = TrunkMainsController()
-        return tm.get_pipe_point_relation_queryset()
-
-    def get_distribution_mains_data(self) -> QuerySet:
-        dm: DistributionMainsController = DistributionMainsController()
-        return dm.get_pipe_point_relation_queryset()
 
     def get_srid(self):
         """Get the currently used global srid"""

@@ -4,38 +4,33 @@ from .mains_controller import MainsController
 
 
 class TrunkMainsController(MainsController):
-    """Convert trunk_mains data to Queryset or GeoJSON.
-
-    Refs on how the GeoJSON is constructed.
-    AsGeoJson query combined with json to build object
-    https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
-    https://postgis.net/docs/ST_AsGeoJSON.html
-    https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
-    """
+    """Convert trunk_mains data to Queryset or GeoJSON."""
 
     model = TrunkMain
-    # items_limit = 100000  # TODO: set default in config
-    default_properties = [
-        "id",
-        "gid",
-    ]  # should not include the geometry column as per convention
+
+    def __init__(self):
+        super().__init__(self.model)
 
     def _generate_mains_subqueries(self):
+        tm_qs = self.model.objects.all()
+        dm_qs = DistributionMain.objects.all()
         json_fields = self.get_pipe_json_fields()
 
-        subquery1 = self._generate_touches_subquery(
-            self.model.objects.all(), json_fields
-        )
-        subquery2 = self._generate_touches_subquery(
-            DistributionMain.objects.all(), json_fields
+        subquery_tm_intersections = self.generate_touches_line_subquery(
+            tm_qs, json_fields
         )
 
-        # subquery = TrunkMain.objects.filter(geometry__touches=OuterRef("start_point_geom")).values("gid")
-        # qs = tm.annotate(start_point_geom=LineStartPoint("geometry")).annotate(start_point_touches=ArraySubquery(subquery))
+        subquery_dm_intersections = self.generate_touches_line_subquery(
+            dm_qs, json_fields
+        )
+
+        termini_subqueries = self.generate_termini_subqueries([tm_qs, dm_qs])
 
         subqueries = {
-            "trunk_mains_data": ArraySubquery(subquery1),
-            "distribution_mains_data": ArraySubquery(subquery2),
+            "tm_intersections": ArraySubquery(subquery_tm_intersections),
+            "dm_intersections": ArraySubquery(subquery_dm_intersections),
+            "line_start_intersection_gids": ArraySubquery(termini_subqueries[0]),
+            "line_end_intersections_gids": ArraySubquery(termini_subqueries[1]),
         }
 
         return subqueries

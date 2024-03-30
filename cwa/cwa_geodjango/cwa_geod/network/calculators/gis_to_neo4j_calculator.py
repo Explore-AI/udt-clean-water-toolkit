@@ -26,13 +26,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self.config = config
         super().__init__(config)
 
-    def get_pipe_and_asset_data(self):
-        trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
-        distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
-
-        pipes_qs: QuerySet = trunk_mains_qs.union(distribution_mains_qs, all=True)
-        return pipes_qs
-
     @staticmethod
     def build_dma_data_as_json(dma_codes, dma_names):
         dma_data = [

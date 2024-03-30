@@ -14,14 +14,14 @@ from django.contrib.gis.db.models.functions import (
     Transform,
     Intersection,
 )
-from cleanwater.controllers import GeoDjangoController
+from cleanwater.data_managers import GeoDjangoDataManager
 from cwa_geod.assets.models import *
-from cwa_geod.core.db.models.functions.line_points import LineStartPoint, LineEndPoint
+from cwa_geod.core.db.models.functions import LineStartPoint, LineEndPoint
 
 
-class MainsController(ABC, GeoDjangoController):
+class MainsController(ABC, GeoDjangoDataManager):
     """This is an abstract base class and should not be
-    instantiated explicitly
+    instantiated explicitly.
     """
 
     WITHIN_DISTANCE = 0.5
@@ -30,7 +30,11 @@ class MainsController(ABC, GeoDjangoController):
         "gid",
     ]  # should not include the geometry column as per convention
 
+    def __init__(self, model):
+        self.model = model
+
     def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
+
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
         ).values(
@@ -40,13 +44,45 @@ class MainsController(ABC, GeoDjangoController):
         )
         return subquery
 
-    def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
+    @staticmethod
+    def generate_touches_line_subquery(qs, json_fields, geometry_field="geometry"):
+
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(
                 **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
             ),
         )
         return subquery
+
+    def _generate_touches_line_end_subquery(self, qs, point_field, field="gid"):
+
+        subquery = qs.filter(geometry__touches=OuterRef(point_field)).values(field)
+
+        return subquery
+
+    def generate_termini_subqueries(self, querysets):
+
+        start_point_subqueries = []
+        end_point_subqueries = []
+        for qs in querysets:
+            subquery1 = qs.filter(geometry__touches=OuterRef("start_point_geom"))
+            subquery2 = qs.filter(geometry__touches=OuterRef("end_point_geom"))
+            start_point_subqueries.append(subquery1)
+            end_point_subqueries.append(subquery2)
+
+        subquery_line_start = (
+            start_point_subqueries[0]
+            .union(*start_point_subqueries[0:], all=True)
+            .values("gid")
+        )
+
+        subquery_line_end = (
+            end_point_subqueries[0]
+            .union(*end_point_subqueries[0:], all=True)
+            .values("gid")
+        )
+
+        return subquery_line_start, subquery_line_end
 
     @staticmethod
     def get_asset_json_fields(geometry_field="geometry"):
@@ -149,9 +185,6 @@ class MainsController(ABC, GeoDjangoController):
     def get_pipe_point_relation_queryset(self):
         mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
-        import pdb
-
-        pdb.set_trace()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = (
@@ -170,11 +203,19 @@ class MainsController(ABC, GeoDjangoController):
                 # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
                 utility_names=ArrayAgg("dmas__utility__name"),
             )
-            .annotate(**mains_intersection_subqueries, **asset_subqueries)
+            .annotate(
+                **mains_intersection_subqueries,
+                **asset_subqueries,
+            )
         )
 
         return qs
 
+    # Refs on how the GeoJSON is constructed.
+    # AsGeoJson query combined with json to build object
+    # https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
+    # https://postgis.net/docs/ST_AsGeoJSON.html
+    # https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
     def get_geometry_queryset(self, properties=None) -> QuerySet:
         properties = properties or self.default_properties
         properties = set(properties)

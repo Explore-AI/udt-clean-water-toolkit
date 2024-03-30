@@ -1,6 +1,11 @@
+from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
 from ..calculators import GisToNeo4jCalculator
 from ..models import initialise_node_labels
+from cwa_geod.assets.controllers import (
+    TrunkMainsController,
+    DistributionMainsController,
+)
 
 
 class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
@@ -18,7 +23,7 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
 
         start = timer()
 
-        pipes_qs = self.get_pipe_and_asset_data()
+        pipes_qs = self._get_pipe_and_asset_data()
 
         query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
 
@@ -71,3 +76,19 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
             query_offset = self.config.query_offset
 
         return query_offset, query_limit
+
+    # This fn is a candidate to be abstracted out into the NetworkController
+    def _get_pipe_and_asset_data(self) -> QuerySet:
+        trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
+        distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
+
+        pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
+        return pipes_qs
+
+    def get_trunk_mains_data(self) -> QuerySet:
+        tm: TrunkMainsController = TrunkMainsController()
+        return tm.get_pipe_point_relation_queryset()
+
+    def get_distribution_mains_data(self) -> QuerySet:
+        dm: DistributionMainsController = DistributionMainsController()
+        return dm.get_pipe_point_relation_queryset()
