@@ -69,9 +69,6 @@ class GisToGraphCalculator:
     def _get_pipe_data(self, qs_object: TrunkMain) -> dict:
         pipe_data: dict = {}
 
-        import pdb
-
-        pdb.set_trace()
         pipe_data["id"] = qs_object.pk
         pipe_data["gid"] = qs_object.gid
         pipe_data["asset_name"] = qs_object.asset_name
@@ -98,8 +95,8 @@ class GisToGraphCalculator:
 
     def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
         return (
-            pipe_qs_object.trunk_mains_data
-            + pipe_qs_object.distribution_mains_data
+            pipe_qs_object.tm_intersections
+            + pipe_qs_object.dm_intersections
             + pipe_qs_object.chamber_data
             + pipe_qs_object.operational_site_data
             + pipe_qs_object.network_meter_data
