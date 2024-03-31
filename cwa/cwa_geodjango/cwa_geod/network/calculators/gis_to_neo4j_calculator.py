@@ -259,7 +259,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             {"dmas": dma_data, "gid": pipe_gid, "utility": utility_name},
         )
 
-    def _create_nodes(self, all_node_properties):
+    def _create_nodes(self, base_pipe, all_node_properties):
 
         created_nodes = []
         for node_properties in all_node_properties:
@@ -321,14 +321,22 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
             created_nodes.append(new_node)
 
-        # for node in created_nodes:
+        start_node = created_nodes[0]
 
-        #     self._connect_nodes(
-        #         start_node,
-        #         pipe_end,
-        #         pipe_name,
-        #         {"dmas": dma_data, "gid": gid, "utility": utility_name},
-        #     )
+        for node in created_nodes[1:]:
+            print(start_node, "q")
+            print(node, "r")
+            self._connect_nodes(
+                start_node,
+                node,
+                base_pipe["asset_name"],
+                {
+                    "dmas": base_pipe["dmas"],
+                    "gid": base_pipe["gid"],
+                    "utility": base_pipe["utility_name"],
+                },
+            )
+            start_node = node
 
         import pdb
 
@@ -343,7 +351,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         #     pipe_data["dma_codes"], pipe_data["dma_names"]
         # )
 
-        self._create_nodes(all_node_properties)
+        self._create_nodes(base_pipe, all_node_properties)
 
         # pipe_start_node, pipe_segment_id = self._set_pipe_start_node(
         #     pipe_data, dma_data

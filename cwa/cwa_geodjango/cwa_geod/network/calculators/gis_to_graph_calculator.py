@@ -87,6 +87,9 @@ class GisToGraphCalculator:
         base_pipe["dma_ids"] = qs_object.dma_ids
         base_pipe["dma_codes"] = qs_object.dma_codes
         base_pipe["dma_names"] = qs_object.dma_names
+        base_pipe["dmas"] = self.build_dma_data_as_json(
+            base_pipe["dma_codes"], base_pipe["dma_names"]
+        )
         base_pipe["utility_name"] = self._get_utility(qs_object)
         base_pipe["geometry"] = qs_object.geometry
         base_pipe["start_point_geom"] = qs_object.start_point_geom
@@ -238,7 +241,7 @@ class GisToGraphCalculator:
 
         return non_termini_intersecting_pipes
 
-    def _set_terminal_nodes(self, base_pipe, dmas):
+    def _set_terminal_nodes(self, base_pipe):
 
         start_node_distance_cm = 0
         # round to int to make distance comparisons more robust
@@ -265,7 +268,7 @@ class GisToGraphCalculator:
                 "gids": start_node_gids,
                 "node_type": start_node_type,
                 "distance_from_pipe_start_cm": start_node_distance_cm,
-                "dmas": dmas,
+                "dmas": base_pipe["dma_codes"],
                 "node_id": self._encode_node_id(
                     base_pipe["start_point_geom"],
                     start_node_gids,
@@ -276,7 +279,7 @@ class GisToGraphCalculator:
                 "gids": end_node_gids,
                 "node_type": end_node_type,
                 "distance_from_pipe_start_cm": end_node_distance_cm,
-                "dmas": dmas,
+                "dmas": base_pipe["dma_codes"],
                 "node_id": self._encode_node_id(
                     base_pipe["end_point_geom"],
                     end_node_gids,
@@ -295,11 +298,7 @@ class GisToGraphCalculator:
             base_pipe, junctions_with_positions
         )
 
-        dmas = self.build_dma_data_as_json(
-            base_pipe["dma_codes"], base_pipe["dma_names"]
-        )
-
-        nodes_ordered = self._set_terminal_nodes(base_pipe, dmas)
+        nodes_ordered = self._set_terminal_nodes(base_pipe)
 
         distances = [x["distance_from_pipe_start_cm"] for x in nodes_ordered]
 
@@ -325,7 +324,7 @@ class GisToGraphCalculator:
                         "gids": gids,
                         "node_type": PIPE_JUNCTION__NAME,
                         "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
-                        "dmas": dmas,
+                        "dmas": base_pipe["dmas"],
                         "node_id": self._encode_node_id(
                             base_pipe["start_point_geom"],
                             gids,
@@ -354,7 +353,7 @@ class GisToGraphCalculator:
                 {
                     "distance_from_pipe_start_cm": asset["distance_from_pipe_start_cm"],
                     "node_type": POINT_ASSET__NAME,
-                    "dmas": dmas,
+                    "dmas": base_pipe["dma_codes"],
                     "node_id": self._encode_node_id(
                         base_pipe["start_point_geom"],
                         [base_pipe["gid"], asset["gid"]],
