@@ -310,13 +310,14 @@ class GisToGraphCalculator:
             distance_from_pipe_start_cm = pipe["distance_from_pipe_start_cm"]
 
             if distance_from_pipe_start_cm not in distances:
-                gids = [pipe_gid, base_pipe["gid"]]
+                gids = sorted([pipe_gid, base_pipe["gid"]])
 
                 position_index = bisect.bisect_right(
                     nodes_ordered,
                     distance_from_pipe_start_cm,
                     key=lambda x: x["distance_from_pipe_start_cm"],
                 )
+
                 nodes_ordered.insert(
                     # TODO: node_id may not be unique if different types of pipes have the same gid. FIX by defining a pipe_code
                     position_index,
@@ -326,7 +327,7 @@ class GisToGraphCalculator:
                         "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
                         "dmas": base_pipe["dmas"],
                         "node_id": self._encode_node_id(
-                            base_pipe["start_point_geom"],
+                            pipe["intersection_point_geometry"],
                             gids,
                         ),
                         **base_pipe,
@@ -355,8 +356,8 @@ class GisToGraphCalculator:
                     "node_type": POINT_ASSET__NAME,
                     "dmas": base_pipe["dma_codes"],
                     "node_id": self._encode_node_id(
-                        base_pipe["start_point_geom"],
-                        [base_pipe["gid"], asset["gid"]],
+                        asset["intersection_point_geometry"],
+                        sorted([base_pipe["gid"], asset["gid"]]),
                     ),
                     # "utility": _get_utility(qs_object)
                     **asset,
