@@ -243,10 +243,15 @@ class GisToGraphCalculator:
         start_node_distance_cm = 0
         end_node_distance_cm = round(base_pipe_data["pipe_length"].cm)
 
+        dmas = self.build_dma_data_as_json(
+            base_pipe_data["dma_codes"], base_pipe_data["dma_names"]
+        )
+
         nodes_unordered = [
             {
                 "gids": pipes_intersecting_at_base_pipe_start_point,
                 "distance_from_pipe_start_cm": start_node_distance_cm,
+                "dmas": dmas,
                 # "dmas": self.build_dma_data_as_json(dma_codes, dma_names),
                 # "utility": utility_name
             },
@@ -255,6 +260,7 @@ class GisToGraphCalculator:
                 "distance_from_pipe_start_cm": round(
                     base_pipe_data["pipe_length"].cm
                 ),  # need to be an int for sqid compatible hashing
+                "dmas": dmas,
             },
         ]
 
@@ -268,9 +274,11 @@ class GisToGraphCalculator:
                     yellow[distance_from_start_cm]["gids"] = sorted(
                         [base_pipe_data["gid"], pipe_gid]
                     )
+                    yellow[distance_from_start_cm]["dmas"] = dmas
                     yellow[distance_from_start_cm][
                         "distance_from_pipe_start_cm"
                     ] = distance_from_start_cm
+
                 else:
                     yellow[distance_from_start_cm]["gids"].append(pipe_gid)
                     yellow[distance_from_start_cm]["gids"] = sorted(
@@ -282,28 +290,30 @@ class GisToGraphCalculator:
             point_assets_unordered.append(
                 {
                     "gid": asset_gid,
+                    "dmas": dmas,
                     "distance_from_pipe_start_cm": distance_from_start_cm,
+                    "node_id": sqids.encode([base_pipe_data["gid"], asset_gid]),
                 }
             )
 
-        #                     "node_id": sqids.encode(
-        #     [
-        #         end_node_distance_cm,
-        #         *pipes_intersecting_at_base_pipe_end_point,
-        #     ]
-        # ),
+        all_pipes = nodes_unordered + list(yellow.values())
 
-        nodes_unordered = (
-            nodes_unordered + list(yellow.values()) + point_assets_unordered
-        )
-        import pdb
+        for pipe in all_pipes:
+            pipe["node_id"] = sqids.encode(
+                [
+                    pipe["distance_from_pipe_start_cm"],
+                    *pipe["gids"],
+                ]
+            )
 
-        pdb.set_trace()
+        nodes_unordered = all_pipes + point_assets_unordered
 
+        nodes_ordered = nodes_unordered
         sorted(
-            nodes_unordered,
+            nodes_ordered,
             key=lambda x: x["distance_from_pipe_start_cm"],
         )
+
         import pdb
 
         pdb.set_trace()
