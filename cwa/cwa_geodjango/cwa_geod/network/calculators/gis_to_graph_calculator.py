@@ -223,23 +223,6 @@ class GisToGraphCalculator:
             )
         )
 
-        pipes_only.append((999999, 50))
-        pipes_only.append((77777, 73))
-        pipes_only.append((88888888, 73))
-        pipes_only.append((333333, 50))
-        non_termini_intersecting_pipes.append(88888888)
-        non_termini_intersecting_pipes.append(333333)
-        non_termini_intersecting_pipes.append(999999)
-
-        pipes_only.append((111111, 73))
-        non_termini_intersecting_pipes.append(77777)
-        non_termini_intersecting_pipes.append(111111)
-
-        pipes_only.append((222222, 80))
-        non_termini_intersecting_pipes.append(222222)
-
-        pipes_only.append((222222, 35))
-
         start_node_distance_cm = 0
         end_node_distance_cm = round(base_pipe_data["pipe_length"].cm)
 
