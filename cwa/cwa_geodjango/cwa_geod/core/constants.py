@@ -25,6 +25,8 @@ PRESSURE_FITTING_NAME = "pressure_fitting"
 
 PIPE_END__NAME = "pipe_end"
 
+PIPE_JUNCTION__NAME = "pipe_junction"
+
 POINT_ASSET__NAME = "point_asset"
 
 PIPE_ASSETS__CHOICES = [

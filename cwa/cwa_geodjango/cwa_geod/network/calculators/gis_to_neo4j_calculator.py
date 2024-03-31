@@ -27,9 +27,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         super().__init__(config)
 
     def check_node_exists(self, asset_name, gid, utility_name, pipe_segment_id):
-        node_type: str = self._get_node_type(asset_name)
+        # node_type: str = self._get_node_type(asset_name)
 
-        if node_type == PIPE_END__NAME:
+        if node_type == "":  # PIPE_END__NAME:
             node = PipeEnd.nodes.get_or_none(
                 pipe_type=asset_name,
                 pipe_segment_id=f"{gid}-{pipe_segment_id}",

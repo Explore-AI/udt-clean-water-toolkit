@@ -7,7 +7,7 @@ class PointAsset(PointNode):
     gid = IntegerProperty(unique_index=True, unique=True, required=True)
 
     class AssetMeta:
-        asset_name = POINT_ASSET__NAME
+        node_type = POINT_ASSET__NAME
 
     @staticmethod
     def get_all_asset_models():

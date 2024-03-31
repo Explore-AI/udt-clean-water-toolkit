@@ -77,6 +77,8 @@ class GisToGraphCalculator:
             base_pipe, junctions_with_positions, point_assets_with_positions
         )
 
+        self._set_relationship_properties()
+
         return base_pipe, junctions_and_assets_normalised
 
     def _get_base_pipe_data(self, qs_object) -> dict:
@@ -342,12 +344,8 @@ class GisToGraphCalculator:
 
         return nodes_ordered
 
-    @staticmethod
-    def _get_node_type(asset_name: str) -> str:
-        if asset_name in PIPE_ASSETS__NAMES:
-            return PIPE_END__NAME
-
-        return POINT_ASSET__NAME
+    def _set_relationship_properties(self):
+        pass
 
     def get_srid(self):
         """Get the currently used global srid"""
