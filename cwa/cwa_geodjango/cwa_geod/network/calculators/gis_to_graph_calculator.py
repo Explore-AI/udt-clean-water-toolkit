@@ -49,7 +49,7 @@ class GisToGraphCalculator:
         self, pipe_qs_object: TrunkMain
     ) -> tuple[dict, list]:
         # Convert the base pipe data from a queryset object to a dictionary
-        base_pipe: dict = self._get_pipe_data(pipe_qs_object)
+        base_pipe: dict = self._get_base_pipe_data(pipe_qs_object)
 
         # Convert all the data from intersecting pipes into
         # a list of dictionaries
@@ -78,35 +78,38 @@ class GisToGraphCalculator:
 
         return base_pipe, junctions_and_assets_normalised
 
-    def _get_pipe_data(self, qs_object) -> dict:
+    def _get_base_pipe_data(self, qs_object) -> dict:
 
-        pipe_data: dict = {}
+        base_pipe: dict = {}
 
-        pipe_data["id"] = qs_object.pk
-        pipe_data["gid"] = qs_object.gid
-        pipe_data["asset_name"] = qs_object.asset_name
-        pipe_data["pipe_length"] = qs_object.pipe_length
-        pipe_data["wkt"] = qs_object.wkt
-        pipe_data["dma_ids"] = qs_object.dma_ids
-        pipe_data["dma_codes"] = qs_object.dma_codes
-        pipe_data["dma_names"] = qs_object.dma_names
-        pipe_data["utility_name"] = self._get_utility(qs_object)
-        pipe_data["geometry"] = qs_object.geometry
-        pipe_data["start_point_geom"] = qs_object.start_point_geom
-        pipe_data["end_point_geom"] = qs_object.end_point_geom
-        pipe_data["line_start_intersection_gids"] = (
-            qs_object.line_start_intersection_gids.remove(qs_object.gid)
+        base_pipe["id"] = qs_object.pk
+        base_pipe["gid"] = qs_object.gid
+        base_pipe["asset_name"] = qs_object.asset_name
+        base_pipe["pipe_length"] = qs_object.pipe_length
+        base_pipe["wkt"] = qs_object.wkt
+        base_pipe["dma_ids"] = qs_object.dma_ids
+        base_pipe["dma_codes"] = qs_object.dma_codes
+        base_pipe["dma_names"] = qs_object.dma_names
+        base_pipe["utility_name"] = self._get_utility(qs_object)
+        base_pipe["geometry"] = qs_object.geometry
+        base_pipe["start_point_geom"] = qs_object.start_point_geom
+        base_pipe["end_point_geom"] = qs_object.end_point_geom
+
+        base_pipe["line_start_intersection_gids"] = (
+            qs_object.line_start_intersection_gids
         )
-        pipe_data["line_end_intersection_gids"] = (
-            qs_object.line_end_intersection_gids.remove(qs_object.gid)
-        )
-        # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
-        # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
+        base_pipe["line_start_intersection_gids"].remove(qs_object.gid)
 
-        # TODO: maybe convert pipe data to simplenamespace
+        base_pipe["line_end_intersection_gids"] = qs_object.line_end_intersection_gids
+        base_pipe["line_end_intersection_gids"].remove(qs_object.gid)
+
+        # base_pipe["start_geom_latlong"] = qs_object.start_geom_latlong
+        # base_pipe["end_geom_latlong"] = qs_object.end_geom_latlong
+
+        # TODO: maybe convert base_pipe to simplenamespace
         # SimpleNamespace
 
-        return pipe_data
+        return base_pipe
 
     def _combine_all_pipe_junnctions(self, pipe_qs_object: TrunkMain) -> list:
         return pipe_qs_object.trunkmain_junctions + pipe_qs_object.distmain_junctions
@@ -224,27 +227,25 @@ class GisToGraphCalculator:
         return pipes_only, point_assets_only
 
     @staticmethod
-    def _get_pipe_intersecting_gids(base_pipe_data, pipes_only):
-        all_intersecting_pipes = [pipe[0] for pipe in pipes_only]
+    def _get_pipe_intersecting_gids(base_pipe_data, junctions_with_positions):
+        import pdb
 
-        pipes_intersecting_at_base_pipe_start_point = [
-            gid
-            for gid in base_pipe_data["line_start_intersection_gids"]
-            if gid != base_pipe_data["gid"]
-        ]
+        pdb.set_trace()
 
-        pipes_intersecting_at_base_pipe_end_point = [
-            gid
-            for gid in base_pipe_data["line_end_intersection_gids"]
-            if gid != base_pipe_data["gid"]
-        ]
-
-        non_termini_intersecting_pipes = list(
-            set(all_intersecting_pipes).difference(
-                pipes_intersecting_at_base_pipe_start_point
-                + pipes_intersecting_at_base_pipe_end_point
-            )
+        termini_intersecting_pipe_gids = (
+            base_pipe_data["line_start_intersection_gids"]
+            + base_pipe_data["line_end_intersection_gids"]
         )
+
+        non_termini_intersecting_pipes = []
+
+        all_intersecting_pipes = [
+            pipe
+            for pipe in junctions_with_positions
+            if pipe["gid"] not in termini_intersecting_pipe_gids
+        ]
+
+        non_termini_intersecting_pipes = list(set(all_intersecting_pipes).difference())
 
         non_termini_intersecting_pipes.append(88888888)
         non_termini_intersecting_pipes.append(333333)
@@ -260,26 +261,25 @@ class GisToGraphCalculator:
         )
 
     def _set_node_properties(
-        self, base_pipe_data, junctions_with_positions, point_assets_with_positions
+        self, base_pipe, junctions_with_positions, point_assets_with_positions
     ):
 
-        import pdb
-
-        pdb.set_trace()
-        pipes_only, point_assets_only = self._seperate_pipes_and_assets(
-            junctions_and_assets_intersections
-        )
+        pipes_only = []
+        point_assets_only = []
+        # pipes_only, point_assets_only = self._seperate_pipes_and_assets(
+        #     junctions_and_assets_intersections
+        # )
 
         intersecting_pipes = self._get_pipe_intersecting_gids(
-            base_pipe_data, pipes_only
+            base_pipe, junctions_with_positions
         )
 
         # need to be an int for sqid compatible hashing
         start_node_distance_cm = 0
-        end_node_distance_cm = round(base_pipe_data["pipe_length"].cm)
+        end_node_distance_cm = round(base_pipe["pipe_length"].cm)
 
         dmas = self.build_dma_data_as_json(
-            base_pipe_data["dma_codes"], base_pipe_data["dma_names"]
+            base_pipe["dma_codes"], base_pipe["dma_names"]
         )
         import pdb
 
@@ -287,9 +287,7 @@ class GisToGraphCalculator:
 
         nodes_ordered = [
             {
-                "gids": base_pipe_data["line_end_intersection_gids"].remove(
-                    base_pipe_data["gid"]
-                ),
+                # "gids": base_pipe["line_start_intersection_gids"],
                 "distance_from_pipe_start_cm": start_node_distance_cm,
                 "dmas": dmas,
                 "node_id": sqids.encode(
@@ -298,11 +296,12 @@ class GisToGraphCalculator:
                         *intersecting_pipes[0],
                     ]
                 ),
+                **base_pipe,
                 # "dmas": self.build_dma_data_as_json(dma_codes, dma_names),
                 # "utility": utility_name
             },
             {
-                "gids": intersecting_pipes[1],
+                "gids": base_pipe["line_end_intersection_gids"],
                 "distance_from_pipe_start_cm": end_node_distance_cm,
                 "dmas": dmas,
                 "'node_id": sqids.encode(
@@ -313,6 +312,9 @@ class GisToGraphCalculator:
                 ),
             },
         ]
+        import pdb
+
+        pdb.set_trace()
 
         distances = [x["distance_from_pipe_start_cm"] for x in nodes_ordered]
         for pipe_gid, distance_from_start_cm in pipes_only:
