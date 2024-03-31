@@ -59,20 +59,21 @@ class GisToGraphCalculator:
         point_assets: list = self._combine_all_point_assets(pipe_qs_object)
 
         # Get the intersection points of all intersecting pipes (pipe junctions)
-        # and the intersection points of all point assets. Then order them
-        # relative to the start point of the line. The junction_and_asset_positions
-        # returned matched the actual physical order that occurs geospatially
         junctions_with_positions = self._get_connections_points_on_pipe(
             base_pipe,
             pipe_junctions,
         )
 
+        # Get the intersection points of all point assets
         point_assets_with_positions = self._get_connections_points_on_pipe(
             base_pipe,
             point_assets,
         )
 
-        self._set_node_properties(
+        # Set node properties and order them relative to the start point
+        # of the line. The junction and asset nodes returned matches the
+        # actual physical order that occurs geospatially
+        nodes_ordered = self._set_node_properties(
             base_pipe, junctions_with_positions, point_assets_with_positions
         )
 
@@ -220,33 +221,28 @@ class GisToGraphCalculator:
             if pipe["gid"] not in termini_intersecting_pipe_gids
         ]
 
-        # for pipe in junctions_with_positions:
-        #     if pipe["gid"] not in termini_intersecting_pipe_gids:
-        #         non_termini_intersecting_pipes.append(pipe)
-
-        non_termini_intersecting_pipes.append(
-            {"gid": 88888888, "distance_from_pipe_start_cm": 73}
-        )
-        non_termini_intersecting_pipes.append(
-            {"gid": 333333, "distance_from_pipe_start_cm": 50}
-        )
-        non_termini_intersecting_pipes.append(
-            {"gid": 999999, "distance_from_pipe_start_cm": 50}
-        )
-        non_termini_intersecting_pipes.append(
-            {"gid": 77777, "distance_from_pipe_start_cm": 73}
-        )
-        non_termini_intersecting_pipes.append(
-            {"gid": 111111, "distance_from_pipe_start_cm": 73}
-        )
-        non_termini_intersecting_pipes.append(
-            {"gid": 222222, "distance_from_pipe_start_cm": 35}
-        )
+        # non_termini_intersecting_pipes.append(
+        #     {"gid": 88888888, "distance_from_pipe_start_cm": 73}
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {"gid": 333333, "distance_from_pipe_start_cm": 50}
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {"gid": 999999, "distance_from_pipe_start_cm": 50}
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {"gid": 77777, "distance_from_pipe_start_cm": 73}
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {"gid": 111111, "distance_from_pipe_start_cm": 73}
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {"gid": 222222, "distance_from_pipe_start_cm": 35}
+        # )
 
         return non_termini_intersecting_pipes
 
-    @staticmethod
-    def _set_terminal_nodes(base_pipe, dmas):
+    def _set_terminal_nodes(self, base_pipe, dmas):
 
         # need to be an int for sqid compatible hashing
         start_node_distance_cm = 0
@@ -257,27 +253,19 @@ class GisToGraphCalculator:
                 "gids": base_pipe["line_start_intersection_gids"],
                 "distance_from_pipe_start_cm": start_node_distance_cm,
                 "dmas": dmas,
-                "node_id": sqids.encode(
-                    [
-                        start_node_distance_cm,
-                        base_pipe["gid"],
-                        *base_pipe["line_start_intersection_gids"],
-                    ]
+                "node_id": self._encode_node_id(
+                    base_pipe["start_point_geom"],
+                    [base_pipe["gid"], *base_pipe["line_start_intersection_gids"]],
                 ),
                 **base_pipe,
-                # "dmas": self.build_dma_data_as_json(dma_codes, dma_names),
-                # "utility": utility_name
             },
             {
                 "gids": base_pipe["line_end_intersection_gids"],
                 "distance_from_pipe_start_cm": end_node_distance_cm,
                 "dmas": dmas,
-                "node_id": sqids.encode(
-                    [
-                        start_node_distance_cm,
-                        base_pipe["gid"],
-                        *base_pipe["line_end_intersection_gids"],
-                    ]
+                "node_id": self._encode_node_id(
+                    base_pipe["end_point_geom"],
+                    [base_pipe["gid"], *base_pipe["line_end_intersection_gids"]],
                 ),
                 **base_pipe,
             },
@@ -307,22 +295,35 @@ class GisToGraphCalculator:
             # distance_from_start_cm must be an
             # int for sqid compatible hashing
             distance_from_pipe_start_cm = pipe["distance_from_pipe_start_cm"]
+
             if distance_from_pipe_start_cm not in distances:
                 data = {
                     "gids": [pipe_gid],
                     "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
                     "dmas": dmas,
+                    "node_id": self._encode_node_id(
+                        base_pipe["start_point_geom"],
+                        [base_pipe["gid"], pipe_gid],
+                    ),
                     **base_pipe,
                 }
-                bisect.insort(
+                position_index = bisect.bisect_right(
                     nodes_ordered,
-                    data,
+                    distance_from_pipe_start_cm,
                     key=lambda x: x["distance_from_pipe_start_cm"],
                 )
+                nodes_ordered.insert(position_index, data)
+
                 distances.append(distance_from_pipe_start_cm)
             else:
-                data["gids"].append(pipe_gid)
-                data["gids"] = sorted(data["gids"])
+                nodes_ordered[position_index]["gids"].append(pipe_gid)
+                nodes_ordered[position_index]["gids"] = sorted(data["gids"])
+
+                # TODO: This is inefficient. Should hash only once all gids are known.
+                nodes_ordered[position_index]["node_id"] = self._encode_node_id(
+                    base_pipe["start_point_geom"],
+                    [base_pipe["gid"], pipe_gid],
+                )
 
         for asset in point_assets_with_positions:
             bisect.insort(
@@ -330,14 +331,16 @@ class GisToGraphCalculator:
                 {
                     "distance_from_pipe_start_cm": asset["distance_from_pipe_start_cm"],
                     "dmas": dmas,
+                    "node_id": self._encode_node_id(
+                        base_pipe["start_point_geom"],
+                        [base_pipe["gid"], asset["gid"]],
+                    ),
                     **asset,
                 },
                 key=lambda x: x["distance_from_pipe_start_cm"],
             )
 
-        import pdb
-
-        pdb.set_trace()
+        return nodes_ordered
 
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
@@ -383,3 +386,23 @@ class GisToGraphCalculator:
         ]
 
         return json.dumps(dma_data)
+
+    @staticmethod
+    def _encode_node_id(point, gids):
+        """
+        Round and cast Point geometry coordinates to str to remove '.'
+        then return back to int to make make coords sqid compatible.
+
+        Note these are not coordinates but int representations of the
+        coordinates to ensure a unique node_id.
+        """
+
+        coord1_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
+        coord2_repr = int(str(round(point.coords[1], 3)).replace(".", ""))
+        return sqids.encode(
+            [
+                coord1_repr,
+                coord2_repr,
+                *gids,
+            ]
+        )
