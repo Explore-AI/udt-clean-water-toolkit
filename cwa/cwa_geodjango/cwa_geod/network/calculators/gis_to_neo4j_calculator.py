@@ -26,15 +26,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self.config = config
         super().__init__(config)
 
-    @staticmethod
-    def build_dma_data_as_json(dma_codes, dma_names):
-        dma_data = [
-            {"code": dma_code, "name": dma_name}
-            for dma_code, dma_name in zip(dma_codes, dma_names)
-        ]
-
-        return json.dumps(dma_data)
-
     def check_node_exists(self, asset_name, gid, utility_name, pipe_segment_id):
         node_type: str = self._get_node_type(asset_name)
 

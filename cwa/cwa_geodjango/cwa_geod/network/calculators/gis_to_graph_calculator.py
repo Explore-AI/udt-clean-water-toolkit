@@ -1,7 +1,9 @@
+import json
 from multiprocessing import Pool
 from collections import OrderedDict
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point
 from django.db.models.query import QuerySet
+from cwa_geod.config.settings import sqids
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.models.trunk_main import TrunkMain
 from cwa_geod.core.constants import (
@@ -192,12 +194,13 @@ class GisToGraphCalculator:
 
     def _set_node_properties(self, base_pipe_data, junctions_and_assets_intersections):
 
-        nodes_ordered = OrderedDict()
-        pipes_only = [
-            (ja["gid"], ja["distance_from_pipe_start"])
-            for ja in junctions_and_assets_intersections
-            if ja["asset_name"] in PIPE_ASSETS__NAMES
-        ]
+        pipes_only = []
+        point_assets_only = []
+        for ja in junctions_and_assets_intersections:
+            if ja["asset_name"] in PIPE_ASSETS__NAMES:
+                pipes_only.append((ja["gid"], ja["distance_from_pipe_start"]))
+            else:
+                point_assets_only.append((ja["gid"], ja["distance_from_pipe_start"]))
 
         all_intersecting_pipes = [pipe[0] for pipe in pipes_only]
 
@@ -220,19 +223,6 @@ class GisToGraphCalculator:
             )
         )
 
-        nodes_unordered = [
-            {
-                "gids": pipes_intersecting_at_base_pipe_start_point,
-                "distance_from_pipe_start_cm": 0,
-            },
-            {
-                "gids": pipes_intersecting_at_base_pipe_end_point,
-                "distance_from_pipe_start_cm": round(
-                    base_pipe_data["pipe_length"].cm
-                ),  # need to be an int for sqid compatible hashing
-            },
-        ]
-
         pipes_only.append((999999, 50))
         pipes_only.append((77777, 73))
         pipes_only.append((88888888, 73))
@@ -245,34 +235,78 @@ class GisToGraphCalculator:
         non_termini_intersecting_pipes.append(77777)
         non_termini_intersecting_pipes.append(111111)
 
+        pipes_only.append((222222, 80))
+        non_termini_intersecting_pipes.append(222222)
+
+        pipes_only.append((222222, 35))
+
+        start_node_distance_cm = 0
+        end_node_distance_cm = round(base_pipe_data["pipe_length"].cm)
+
+        nodes_unordered = [
+            {
+                "gids": pipes_intersecting_at_base_pipe_start_point,
+                "distance_from_pipe_start_cm": start_node_distance_cm,
+                # "dmas": self.build_dma_data_as_json(dma_codes, dma_names),
+                # "utility": utility_name
+            },
+            {
+                "gids": pipes_intersecting_at_base_pipe_end_point,
+                "distance_from_pipe_start_cm": round(
+                    base_pipe_data["pipe_length"].cm
+                ),  # need to be an int for sqid compatible hashing
+            },
+        ]
+
         yellow = {}
         for pipe_gid, distance_from_start_cm in pipes_only:
+            # distance_from_start_cm must be an int for sqid
+            # compatible hashing
             if pipe_gid in non_termini_intersecting_pipes:
                 if distance_from_start_cm not in yellow.keys():
-                    yellow[distance_from_start_cm] = sorted(
+                    yellow[distance_from_start_cm] = {}
+                    yellow[distance_from_start_cm]["gids"] = sorted(
                         [base_pipe_data["gid"], pipe_gid]
                     )
+                    yellow[distance_from_start_cm][
+                        "distance_from_pipe_start_cm"
+                    ] = distance_from_start_cm
                 else:
-                    yellow[distance_from_start_cm].append(pipe_gid)
-                    yellow[distance_from_start_cm] = sorted(
-                        yellow[distance_from_start_cm]
+                    yellow[distance_from_start_cm]["gids"].append(pipe_gid)
+                    yellow[distance_from_start_cm]["gids"] = sorted(
+                        yellow[distance_from_start_cm]["gids"]
                     )
 
+        point_assets_unordered = []
+        for asset_gid, distance_from_start_cm in point_assets_only:
+            point_assets_unordered.append(
+                {
+                    "gid": asset_gid,
+                    "distance_from_pipe_start_cm": distance_from_start_cm,
+                }
+            )
+
+        #                     "node_id": sqids.encode(
+        #     [
+        #         end_node_distance_cm,
+        #         *pipes_intersecting_at_base_pipe_end_point,
+        #     ]
+        # ),
+
+        nodes_unordered = (
+            nodes_unordered + list(yellow.values()) + point_assets_unordered
+        )
         import pdb
 
         pdb.set_trace()
 
-        #     bisect.insort(
-        #         normalised_positions,
-        #         {
-        #             **asset,
-        #             "position": normalised_position_on_pipe,
-        #             "intersection_point_geometry": intersection_geom,
-        #             "distance_from_pipe_start": distance_from_pipe_start
-        #             # "intersection_point_geom_latlong": intersection_geom_latlong,
-        #         },
-        #         key=lambda x: x["position"],
-        #     )
+        sorted(
+            nodes_unordered,
+            key=lambda x: x["distance_from_pipe_start_cm"],
+        )
+        import pdb
+
+        pdb.set_trace()
 
     @staticmethod
     def _get_node_type(asset_name: str) -> str:
@@ -309,3 +343,12 @@ class GisToGraphCalculator:
                 f"{qs_object} is located in multiple utilities. It should only be wtihing one"
             )
         return utilities[0]
+
+    @staticmethod
+    def build_dma_data_as_json(dma_codes, dma_names):
+        dma_data = [
+            {"code": dma_code, "name": dma_name}
+            for dma_code, dma_name in zip(dma_codes, dma_names)
+        ]
+
+        return json.dumps(dma_data)
