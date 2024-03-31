@@ -137,17 +137,16 @@ class GisToGraphCalculator:
 
         if intersection_geom.geom_type == "Point":
             intersection_params = normalised_point_position_on_line(
-                base_pipe_geom,
-                start_point_geom,
-                intersection_geom,
-                srid=self.config.srid,
+                base_pipe_geom, start_point_geom, intersection_geom
             )
             data = [
                 {
                     **junction_or_asset,
                     "intersection_point_geometry": intersection_geom,
                     "position": intersection_params[0],
-                    "distance_from_pipe_start": intersection_params[1],
+                    # distance returned is based on srid and should be in meters.
+                    # Convert to cm and round.
+                    "distance_from_pipe_start": round(intersection_params[1] * 100),
                 }
             ]
 
@@ -158,7 +157,6 @@ class GisToGraphCalculator:
                     base_pipe_geom,
                     start_point_geom,
                     Point(coords, srid=self.config.srid),
-                    srid=self.config.srid,
                 )
 
                 data.append(
@@ -193,26 +191,15 @@ class GisToGraphCalculator:
         return junctions_and_assets_intersections
 
     def _set_node_properties(self, base_pipe_data, junctions_and_assets_intersections):
-        def _filter_for_common_junction(asset_data, pipe):
-            distance_from_pipe_start_1 = round(
-                asset_data["distance_from_pipe_start"], 1
-            )  # TODO: could move the round earlier
-            distance_from_pipe_start_2 = round(pipe["distance_from_pipe_start"], 1)
 
-            if distance_from_pipe_start_1 == distance_from_pipe_start_2:
-                return False
-
-            return True
-
-        i = 0
         nodes_ordered = OrderedDict()
         pipes_only = [
-            ja
+            (ja["gid"], ja["distance_from_pipe_start"])
             for ja in junctions_and_assets_intersections
             if ja["asset_name"] in PIPE_ASSETS__NAMES
         ]
 
-        all_intersecting_pipes = [pipe["gid"] for pipe in pipes_only]
+        all_intersecting_pipes = [pipe[0] for pipe in pipes_only]
 
         pipes_intersecting_at_base_pipe_start_point = [
             gid
@@ -233,59 +220,47 @@ class GisToGraphCalculator:
             )
         )
 
-        i = 0
-        for pipe in pipes_only:
-            nodes_ordered[i] = {}
-            if pipe["gid"] in pipes_intersecting_at_base_pipe_start_point:
-                node_gids = sorted([base_pipe_data["gid"], pipe["gid"]])
-                nodes_ordered[i]["node_gids"] = node_gids
+        nodes_unordered = [
+            {
+                "gids": pipes_intersecting_at_base_pipe_start_point,
+                "distance_from_pipe_start_cm": 0,
+            },
+            {
+                "gids": pipes_intersecting_at_base_pipe_end_point,
+                "distance_from_pipe_start_cm": round(
+                    base_pipe_data["pipe_length"].cm
+                ),  # need to be an int for sqid compatible hashing
+            },
+        ]
 
-            elif pipe["gid"] in pipes_intersecting_at_base_pipe_end_point:
-                node_gids = sorted([base_pipe_data["gid"], pipe["gid"]])
-                nodes_ordered[i]["node_gids"] = node_gids
+        pipes_only.append((999999, 50))
+        pipes_only.append((77777, 73))
+        pipes_only.append((88888888, 73))
+        pipes_only.append((333333, 50))
+        non_termini_intersecting_pipes.append(88888888)
+        non_termini_intersecting_pipes.append(333333)
+        non_termini_intersecting_pipes.append(999999)
 
-            elif pipe["gid"] in non_termini_intersecting_pipes:
-                node_gids = sorted([base_pipe_data["gid"], pipe["gid"]])
-                nodes_ordered[i]["node_gids"] = node_gids
+        pipes_only.append((111111, 73))
+        non_termini_intersecting_pipes.append(77777)
+        non_termini_intersecting_pipes.append(111111)
+
+        yellow = {}
+        for pipe_gid, distance_from_start_cm in pipes_only:
+            if pipe_gid in non_termini_intersecting_pipes:
+                if distance_from_start_cm not in yellow.keys():
+                    yellow[distance_from_start_cm] = sorted(
+                        [base_pipe_data["gid"], pipe_gid]
+                    )
+                else:
+                    yellow[distance_from_start_cm].append(pipe_gid)
+                    yellow[distance_from_start_cm] = sorted(
+                        yellow[distance_from_start_cm]
+                    )
 
         import pdb
 
         pdb.set_trace()
-
-        x = pipes_only
-        while True:
-            if i == len(junctions_and_assets_intersections):
-                break
-
-            junction_or_asset = junctions_and_assets_intersections[i]
-
-            # if intersection is a pipe add pipe gids of intersection
-            if junction_or_asset["asset_name"] in PIPE_ASSETS__NAMES:
-                node_gids = sorted([base_pipe_data["gid"], junction_or_asset["gid"]])
-
-                nodes_ordered[i] = {
-                    "junction_gids": node_gids,
-                    **junction_or_asset,
-                }
-
-                x = list(
-                    filter(
-                        lambda pipe: _filter_for_common_junction(
-                            junction_or_asset, pipe
-                        ),
-                        x,
-                    )
-                )
-                import pdb
-
-                pdb.set_trace()
-
-            else:
-                nodes_ordered[i] = junctions_and_assets_intersections[i]
-
-            i += 1
-
-        return nodes_ordered
 
         #     bisect.insort(
         #         normalised_positions,

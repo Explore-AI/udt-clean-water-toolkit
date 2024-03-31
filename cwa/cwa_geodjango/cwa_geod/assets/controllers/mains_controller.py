@@ -213,6 +213,13 @@ class MainsController(ABC, GeoDjangoDataManager):
             "dmas", "dmas__utility"
         )
 
+        # 2164180
+        # 216381
+        # 10360450
+        # qs = self.model.objects.filter(gid=894565).prefetch_related(
+        #     "dmas", "dmas__utility"
+        # )
+
         qs = qs.annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),
             pipe_length=Length("geometry"),
