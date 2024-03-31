@@ -205,10 +205,13 @@ class MainsController(ABC, GeoDjangoDataManager):
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.filter(gid=2213263).prefetch_related(
+
+        qs = self.model.objects.filter(dmas__code="ZFINSB26").prefetch_related(
             "dmas", "dmas__utility"
         )
+        # dm 836364 not conected properly
 
+        # .filter(gid=2213263)
         # 2164180
         # 216381
         # 10360450

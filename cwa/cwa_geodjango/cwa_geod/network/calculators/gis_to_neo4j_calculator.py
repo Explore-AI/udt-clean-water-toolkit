@@ -272,12 +272,12 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 continue
 
             node_type = node_properties.get("node_type")
-            node_gids = node_properties.get("gids")
             node_dmas = node_properties.get("dmas")
             node_utility = node_properties.get("utility_name")
             node_asset_name = node_properties.get("asset_name")
 
             if node_type == PIPE_JUNCTION__NAME:
+                node_gids = node_properties.get("gids")
                 try:
                     new_node = PipeJunction.create(
                         {
@@ -291,12 +291,15 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                     new_node = PipeJunction.nodes.get_or_none(node_id=node_id)
 
             elif node_type == PIPE_END__NAME:
+
+                node_gid = node_properties.get("gid")
                 try:
                     new_node = PipeEnd.create(
                         {
                             "node_id": node_id,
-                            "gids": node_gids,
+                            "gid": node_gid,
                             "dmas": node_dmas,
+                            # "pipe_type"
                             # "utility": node_utility,
                         }
                     )[0]
@@ -321,11 +324,14 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
             created_nodes.append(new_node)
 
+        # if None in created_nodes:
+        #     import pdb
+
+        #     pdb.set_trace()
+
         start_node = created_nodes[0]
 
         for node in created_nodes[1:]:
-            print(start_node, "q")
-            print(node, "r")
             self._connect_nodes(
                 start_node,
                 node,
@@ -337,10 +343,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 },
             )
             start_node = node
-
-        import pdb
-
-        pdb.set_trace()
 
     def _map_pipe_connected_asset_relations(
         self, base_pipe: dict, all_node_properties: list

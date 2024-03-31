@@ -250,8 +250,8 @@ class GisToGraphCalculator:
         line_start_intersection_gids = base_pipe["line_start_intersection_gids"]
         line_end_intersection_gids = base_pipe["line_end_intersection_gids"]
 
-        start_node_gids = [base_pipe["gid"], *line_start_intersection_gids]
-        end_node_gids = [base_pipe["gid"], *line_end_intersection_gids]
+        start_node_gids = sorted([base_pipe["gid"], *line_start_intersection_gids])
+        end_node_gids = sorted([base_pipe["gid"], *line_end_intersection_gids])
 
         if not line_start_intersection_gids:
             start_node_type = PIPE_END__NAME
