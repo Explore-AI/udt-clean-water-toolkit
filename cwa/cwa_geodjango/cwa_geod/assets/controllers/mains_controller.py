@@ -93,15 +93,11 @@ class MainsController(ABC, GeoDjangoDataManager):
             end_point_subqueries.append(subquery2)
 
         subquery_line_start = (
-            start_point_subqueries[0]
-            .union(*start_point_subqueries[0:], all=True)
-            .values("gid")
+            start_point_subqueries[0].union(*start_point_subqueries[0:]).values("gid")
         )
 
         subquery_line_end = (
-            end_point_subqueries[0]
-            .union(*end_point_subqueries[0:], all=True)
-            .values("gid")
+            end_point_subqueries[0].union(*end_point_subqueries[0:]).values("gid")
         )
 
         return subquery_line_start, subquery_line_end

@@ -1,4 +1,5 @@
 import json
+import bisect
 from multiprocessing import Pool
 from collections import OrderedDict
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point
@@ -48,25 +49,34 @@ class GisToGraphCalculator:
         self, pipe_qs_object: TrunkMain
     ) -> tuple[dict, list]:
         # Convert the base pipe data from a queryset object to a dictionary
-        base_pipe_data: dict = self._get_pipe_data(pipe_qs_object)
+        base_pipe: dict = self._get_pipe_data(pipe_qs_object)
 
-        # Convert all the data from intersecting pipes and point assets into
+        # Convert all the data from intersecting pipes into
         # a list of dictionaries
-        junctions_and_assets: list = self._combine_all_asset_data(pipe_qs_object)
+        pipe_junctions: list = self._combine_all_pipe_junnctions(pipe_qs_object)
+
+        # Convert all the data from point assets into a list of dictionaries
+        point_assets: list = self._combine_all_point_assets(pipe_qs_object)
 
         # Get the intersection points of all intersecting pipes (pipe junctions)
         # and the intersection points of all point assets. Then order them
         # relative to the start point of the line. The junction_and_asset_positions
         # returned matched the actual physical order that occurs geospatially
-        junctions_and_assets_with_positions = self._get_connections_points_on_pipe(
-            pipe_qs_object.geometry,
-            pipe_qs_object.start_point_geom,
-            junctions_and_assets,
+        junctions_with_positions = self._get_connections_points_on_pipe(
+            base_pipe,
+            pipe_junctions,
         )
 
-        self._set_node_properties(base_pipe_data, junctions_and_assets_with_positions)
+        point_assets_with_positions = self._get_connections_points_on_pipe(
+            base_pipe,
+            point_assets,
+        )
 
-        return base_pipe_data, junctions_and_assets_normalised
+        self._set_node_properties(
+            base_pipe, junctions_with_positions, point_assets_with_positions
+        )
+
+        return base_pipe, junctions_and_assets_normalised
 
     def _get_pipe_data(self, qs_object) -> dict:
 
@@ -84,11 +94,11 @@ class GisToGraphCalculator:
         pipe_data["geometry"] = qs_object.geometry
         pipe_data["start_point_geom"] = qs_object.start_point_geom
         pipe_data["end_point_geom"] = qs_object.end_point_geom
-        pipe_data["line_start_intersection_gids"] = list(
-            set(qs_object.line_start_intersection_gids)
+        pipe_data["line_start_intersection_gids"] = (
+            qs_object.line_start_intersection_gids.remove(qs_object.gid)
         )
-        pipe_data["line_end_intersection_gids"] = list(
-            set(qs_object.line_end_intersection_gids)
+        pipe_data["line_end_intersection_gids"] = (
+            qs_object.line_end_intersection_gids.remove(qs_object.gid)
         )
         # pipe_data["start_geom_latlong"] = qs_object.start_geom_latlong
         # pipe_data["end_geom_latlong"] = qs_object.end_geom_latlong
@@ -98,11 +108,12 @@ class GisToGraphCalculator:
 
         return pipe_data
 
-    def _combine_all_asset_data(self, pipe_qs_object: TrunkMain) -> list:
+    def _combine_all_pipe_junnctions(self, pipe_qs_object: TrunkMain) -> list:
+        return pipe_qs_object.trunkmain_junctions + pipe_qs_object.distmain_junctions
+
+    def _combine_all_point_assets(self, pipe_qs_object: TrunkMain) -> list:
         return (
-            pipe_qs_object.trunkmain_junctions
-            + pipe_qs_object.distmain_junctions
-            + pipe_qs_object.chamber_data
+            pipe_qs_object.chamber_data
             + pipe_qs_object.operational_site_data
             + pipe_qs_object.network_meter_data
             + pipe_qs_object.logger_data
@@ -178,22 +189,22 @@ class GisToGraphCalculator:
         return data
 
     def _get_connections_points_on_pipe(
-        self, base_pipe_geom: LineString, start_point_geom, junction_and_assets: list
+        self, base_pipe: dict, intersected_objects: list
     ) -> list:
-        junctions_and_assets_intersections = []
 
-        # Not inefficient to use for loop with append here as the number of intersecting
-        # junctions_and_assets for any given base pipe is not large
-        for ja in junction_and_assets:
-            intersections = self._map_get_normalised_positions(
-                base_pipe_geom, start_point_geom, ja
+        object_intersections = []
+        # Not inefficient to use for loop with append here as the number
+        # of intersecting junctions_and_assets for any given base pipe is not large
+        for ja in intersected_objects:
+            intersection = self._map_get_normalised_positions(
+                base_pipe["geometry"], base_pipe["start_point_geom"], ja
             )
-            junctions_and_assets_intersections += intersections
+            object_intersections += intersection
 
-        return junctions_and_assets_intersections
+        return object_intersections
 
-    def _set_node_properties(self, base_pipe_data, junctions_and_assets_intersections):
-
+    @staticmethod
+    def _seperate_pipes_and_assets(junctions_and_assets_intersections):
         pipes_only = []
         point_assets_only = []
         for ja in junctions_and_assets_intersections:
@@ -202,6 +213,18 @@ class GisToGraphCalculator:
             else:
                 point_assets_only.append((ja["gid"], ja["distance_from_pipe_start"]))
 
+        pipes_only.append((999999, 50))
+        pipes_only.append((77777, 73))
+        pipes_only.append((88888888, 73))
+        pipes_only.append((333333, 50))
+        pipes_only.append((111111, 73))
+        pipes_only.append((222222, 80))
+        pipes_only.append((222222, 35))
+
+        return pipes_only, point_assets_only
+
+    @staticmethod
+    def _get_pipe_intersecting_gids(base_pipe_data, pipes_only):
         all_intersecting_pipes = [pipe[0] for pipe in pipes_only]
 
         pipes_intersecting_at_base_pipe_start_point = [
@@ -223,79 +246,109 @@ class GisToGraphCalculator:
             )
         )
 
+        non_termini_intersecting_pipes.append(88888888)
+        non_termini_intersecting_pipes.append(333333)
+        non_termini_intersecting_pipes.append(999999)
+        non_termini_intersecting_pipes.append(77777)
+        non_termini_intersecting_pipes.append(111111)
+        non_termini_intersecting_pipes.append(222222)
+
+        return (
+            pipes_intersecting_at_base_pipe_start_point,
+            pipes_intersecting_at_base_pipe_end_point,
+            non_termini_intersecting_pipes,
+        )
+
+    def _set_node_properties(
+        self, base_pipe_data, junctions_with_positions, point_assets_with_positions
+    ):
+
+        import pdb
+
+        pdb.set_trace()
+        pipes_only, point_assets_only = self._seperate_pipes_and_assets(
+            junctions_and_assets_intersections
+        )
+
+        intersecting_pipes = self._get_pipe_intersecting_gids(
+            base_pipe_data, pipes_only
+        )
+
+        # need to be an int for sqid compatible hashing
         start_node_distance_cm = 0
         end_node_distance_cm = round(base_pipe_data["pipe_length"].cm)
 
         dmas = self.build_dma_data_as_json(
             base_pipe_data["dma_codes"], base_pipe_data["dma_names"]
         )
+        import pdb
 
-        nodes_unordered = [
+        pdb.set_trace()
+
+        nodes_ordered = [
             {
-                "gids": pipes_intersecting_at_base_pipe_start_point,
+                "gids": base_pipe_data["line_end_intersection_gids"].remove(
+                    base_pipe_data["gid"]
+                ),
                 "distance_from_pipe_start_cm": start_node_distance_cm,
                 "dmas": dmas,
+                "node_id": sqids.encode(
+                    [
+                        start_node_distance_cm,
+                        *intersecting_pipes[0],
+                    ]
+                ),
                 # "dmas": self.build_dma_data_as_json(dma_codes, dma_names),
                 # "utility": utility_name
             },
             {
-                "gids": pipes_intersecting_at_base_pipe_end_point,
-                "distance_from_pipe_start_cm": round(
-                    base_pipe_data["pipe_length"].cm
-                ),  # need to be an int for sqid compatible hashing
+                "gids": intersecting_pipes[1],
+                "distance_from_pipe_start_cm": end_node_distance_cm,
                 "dmas": dmas,
+                "'node_id": sqids.encode(
+                    [
+                        start_node_distance_cm,
+                        *intersecting_pipes[1],
+                    ]
+                ),
             },
         ]
 
-        yellow = {}
+        distances = [x["distance_from_pipe_start_cm"] for x in nodes_ordered]
         for pipe_gid, distance_from_start_cm in pipes_only:
             # distance_from_start_cm must be an int for sqid
             # compatible hashing
-            if pipe_gid in non_termini_intersecting_pipes:
-                if distance_from_start_cm not in yellow.keys():
-                    yellow[distance_from_start_cm] = {}
-                    yellow[distance_from_start_cm]["gids"] = sorted(
-                        [base_pipe_data["gid"], pipe_gid]
+            if pipe_gid in intersecting_pipes[2]:
+                if distance_from_start_cm not in distances:
+                    bisect.insort(
+                        nodes_ordered,
+                        {
+                            "gids": intersecting_pipes[0],
+                            "distance_from_pipe_start_cm": distance_from_start_cm,
+                            "dmas": dmas,
+                        },
+                        key=lambda x: x["distance_from_pipe_start_cm"],
                     )
-                    yellow[distance_from_start_cm]["dmas"] = dmas
-                    yellow[distance_from_start_cm][
-                        "distance_from_pipe_start_cm"
-                    ] = distance_from_start_cm
-
+                    distances.append(distance_from_start_cm)
                 else:
-                    yellow[distance_from_start_cm]["gids"].append(pipe_gid)
-                    yellow[distance_from_start_cm]["gids"] = sorted(
-                        yellow[distance_from_start_cm]["gids"]
+                    import pdb
+
+                    pdb.set_trace()
+                    nodes_ordered[distance_from_start_cm]["gids"].append(pipe_gid)
+                    nodes_ordered[distance_from_start_cm]["gids"] = sorted(
+                        nodes_ordered[distance_from_start_cm]["gids"]
                     )
 
-        point_assets_unordered = []
         for asset_gid, distance_from_start_cm in point_assets_only:
-            point_assets_unordered.append(
+            bisect.insort(
+                nodes_ordered,
                 {
                     "gid": asset_gid,
-                    "dmas": dmas,
                     "distance_from_pipe_start_cm": distance_from_start_cm,
-                    "node_id": sqids.encode([base_pipe_data["gid"], asset_gid]),
-                }
+                    "dmas": dmas,
+                },
+                key=lambda x: x["distance_from_pipe_start_cm"],
             )
-
-        all_pipes = nodes_unordered + list(yellow.values())
-
-        for pipe in all_pipes:
-            pipe["node_id"] = sqids.encode(
-                [
-                    pipe["distance_from_pipe_start_cm"],
-                    *pipe["gids"],
-                ]
-            )
-
-        nodes_unordered = all_pipes + point_assets_unordered
-
-        nodes_ordered = nodes_unordered
-        sorted(
-            nodes_ordered,
-            key=lambda x: x["distance_from_pipe_start_cm"],
-        )
 
         import pdb
 
