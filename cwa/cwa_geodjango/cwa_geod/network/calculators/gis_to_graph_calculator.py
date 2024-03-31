@@ -29,14 +29,12 @@ class GisToGraphCalculator:
             )
         )
 
-    def calc_pipe_point_relative_positions_parallel(
-        self, pipes_qs_values: list
-    ) -> None:
+    def calc_pipe_point_relative_positions_parallel(self, pipes_qs: list) -> None:
         with Pool(processes=self.config.processor_count) as p:
-            self.all_pipe_data, self.all_asset_positions = zip(
+            self.all_base_pipes, self.all_nodes_ordered = zip(
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
-                    pipes_qs_values,
+                    pipes_qs,
                     self.config.chunk_size,
                 )
             )
@@ -321,6 +319,7 @@ class GisToGraphCalculator:
                     key=lambda x: x["distance_from_pipe_start_cm"],
                 )
                 nodes_ordered.insert(
+                    # TODO: node_id may not be unique if different types of pipes have the same gid. FIX by defining a pipe_code
                     position_index,
                     {
                         "gids": gids,
@@ -349,6 +348,7 @@ class GisToGraphCalculator:
                 )
 
         for asset in point_assets_with_positions:
+            # TODO: node_id may not be unique between assets. FIX by defining an asset_code
             bisect.insort(
                 nodes_ordered,
                 {
@@ -359,6 +359,7 @@ class GisToGraphCalculator:
                         base_pipe["start_point_geom"],
                         [base_pipe["gid"], asset["gid"]],
                     ),
+                    # "utility": _get_utility(qs_object)
                     **asset,
                 },
                 key=lambda x: x["distance_from_pipe_start_cm"],

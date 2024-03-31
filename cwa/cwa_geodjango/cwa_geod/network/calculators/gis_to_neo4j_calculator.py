@@ -10,12 +10,13 @@ from cleanwater.exceptions import (
 )
 from . import GisToGraphCalculator
 from cwa_geod.core.constants import (
+    PIPE_JUNCTION__NAME,
     TRUNK_MAIN__NAME,
     DISTRIBUTION_MAIN__NAME,
     PIPE_END__NAME,
     POINT_ASSET__NAME,
 )
-from ..models import PointAsset, PipeEnd
+from ..models import PointAsset, PipeEnd, PointNode, PipeJunction
 
 
 class GisToNeo4jCalculator(GisToGraphCalculator):
@@ -258,32 +259,108 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             {"dmas": dma_data, "gid": pipe_gid, "utility": utility_name},
         )
 
-    def _map_pipe_connected_asset_relations(self, pipe_data: dict, assets_data: list):
-        # pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
+    def _create_nodes(self, all_node_properties):
 
-        dma_data = self.build_dma_data_as_json(
-            pipe_data["dma_codes"], pipe_data["dma_names"]
-        )
+        created_nodes = []
+        for node_properties in all_node_properties:
+
+            node_id = node_properties.get("node_id")
+
+            point_node = PointNode.nodes.get_or_none(node_id=node_id)
+            if point_node:
+                created_nodes.append(point_node)
+                continue
+
+            node_type = node_properties.get("node_type")
+            node_gids = node_properties.get("gids")
+            node_dmas = node_properties.get("dmas")
+            node_utility = node_properties.get("utility_name")
+            node_asset_name = node_properties.get("asset_name")
+
+            if node_type == PIPE_JUNCTION__NAME:
+                try:
+                    new_node = PipeJunction.create(
+                        {
+                            "node_id": node_id,
+                            "gids": node_gids,
+                            "dmas": node_dmas,
+                            # "utility": node_utility,
+                        }
+                    )[0]
+                except UniqueProperty:
+                    new_node = PipeJunction.nodes.get_or_none(node_id=node_id)
+
+            elif node_type == PIPE_END__NAME:
+                try:
+                    new_node = PipeEnd.create(
+                        {
+                            "node_id": node_id,
+                            "gids": node_gids,
+                            "dmas": node_dmas,
+                            # "utility": node_utility,
+                        }
+                    )[0]
+                except UniqueProperty:
+                    new_node = PipeEnd.nodes.get_or_none(node_id=node_id)
+
+            elif node_type == POINT_ASSET__NAME:
+                node_gid = node_properties.get("gid")
+                asset_model = PointAsset.asset_name_model_mapping(node_asset_name)
+
+                try:
+                    new_node = asset_model.create(
+                        {
+                            "node_id": node_id,
+                            "gid": node_gid,
+                            "dmas": node_dmas,
+                            # "utility": node_utility,
+                        }
+                    )[0]
+                except UniqueProperty:
+                    new_node = asset_model.nodes.get_or_none(node_id=node_id)
+
+            created_nodes.append(new_node)
+
+        # for node in created_nodes:
+
+        #     self._connect_nodes(
+        #         start_node,
+        #         pipe_end,
+        #         pipe_name,
+        #         {"dmas": dma_data, "gid": gid, "utility": utility_name},
+        #     )
+
         import pdb
 
         pdb.set_trace()
 
-        pipe_start_node, pipe_segment_id = self._set_pipe_start_node(
-            pipe_data, dma_data
-        )
+    def _map_pipe_connected_asset_relations(
+        self, base_pipe: dict, all_node_properties: list
+    ):
+        # pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
 
-        pipe_second_last_node, pipe_segment_id = self._set_connected_asset_relations(
-            pipe_data, assets_data, pipe_start_node, pipe_segment_id
-        )
+        # dma_data = self.build_dma_data_as_json(
+        #     pipe_data["dma_codes"], pipe_data["dma_names"]
+        # )
 
-        self._set_pipe_end_node(
-            pipe_data, dma_data, pipe_second_last_node, pipe_segment_id
-        )
+        self._create_nodes(all_node_properties)
+
+        # pipe_start_node, pipe_segment_id = self._set_pipe_start_node(
+        #     pipe_data, dma_data
+        # )
+
+        # pipe_second_last_node, pipe_segment_id = self._set_connected_asset_relations(
+        #     pipe_data, assets_data, pipe_start_node, pipe_segment_id
+        # )
+
+        # self._set_pipe_end_node(
+        #     pipe_data, dma_data, pipe_second_last_node, pipe_segment_id
+        # )
 
     def _reset_pipe_asset_data(self):
         # reset all_pipe_data and all_asset_positions to manage memory
-        self.all_pipe_data = []
-        self.all_asset_positions = []
+        self.all_base_pipes = []
+        self.all_nodes_ordered = []
 
     def _create_neo4j_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
@@ -299,8 +376,8 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         list(
             map(
                 self._map_pipe_connected_asset_relations,
-                self.all_pipe_data,
-                self.all_asset_positions,
+                self.all_base_pipes,
+                self.all_nodes_ordered,
             )
         )
 
@@ -320,7 +397,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         with ThreadPool(self.config.thread_count) as p:
             p.starmap(
                 self._map_pipe_connected_asset_relations,
-                zip(self.all_pipe_data, self.all_asset_positions),
+                zip(self.all_base_pipes, self.all_nodes_ordered),
             )
 
         self._reset_pipe_asset_data()

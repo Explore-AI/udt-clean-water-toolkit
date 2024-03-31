@@ -12,6 +12,8 @@ from .pressure_fitting import PressureFitting
 from .pipe_end import PipeEnd
 from .point_asset import PointAsset
 from .pipe_relation import PipeRelation
+from .point_node import PointNode
+from .pipe_junction import PipeJunction
 
 
 def initialise_node_labels():
