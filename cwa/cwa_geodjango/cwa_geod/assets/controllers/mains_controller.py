@@ -33,7 +33,9 @@ class MainsController(ABC, GeoDjangoDataManager):
     def __init__(self, model):
         self.model = model
 
-    def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
+    def _generate_dwithin_subquery(
+        self, qs, json_fields, geometry_field="geometry", inner_subqueries={}
+    ):
         """
         Generates a subquery where the inner query is filtered if its geometery object
         is within the geometry of the outer query.
@@ -41,7 +43,7 @@ class MainsController(ABC, GeoDjangoDataManager):
         Params:
               qs (Queryset, required)
               json_fields (dict, required) - A dictionary of model fields to return
-              geometry+field (str, optional, default="geometry") - The field name of the outer geometry object
+              geometry_field (str, optional, default="geometry") - The field name of the outer geometry object
 
         Returns:
               subquery (Queryset)
@@ -52,11 +54,20 @@ class MainsController(ABC, GeoDjangoDataManager):
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
         ).values(
             json=JSONObject(
-                **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
+                **json_fields,
+                **inner_subqueries,
+                asset_name=Value(qs.model.AssetMeta.asset_name)
             )
         )
 
         return subquery
+
+    def _generate_dwithin_inner_subquery(self, qs, field, geometry_field="geometry"):
+        inner_subquery = qs.filter(
+            geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
+        ).values_list(field, flat=True)
+
+        return ArraySubquery(inner_subquery)
 
     @staticmethod
     def generate_touches_subquery(qs, json_fields, geometry_field="geometry"):
@@ -67,7 +78,7 @@ class MainsController(ABC, GeoDjangoDataManager):
         Params:
                qs (Queryset, required)
                json_fields (dict, required) - A dictionary of model fields to return
-               geometry+field (str, optional, default="geometry") - The field name of the outer geometry object
+               geometry_field (str, optional, default="geometry") - The field name of the outer geometry object
 
         Returns:
               subquery (Queryset)

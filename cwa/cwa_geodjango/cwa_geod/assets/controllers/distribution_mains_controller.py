@@ -31,6 +31,31 @@ class DistributionMainsController(MainsController):
 
         return subqueries
 
+    def _generate_dwithin_subquery(
+        self, qs, json_fields, geometry_field="geometry", inner_subqueries={}
+    ):
+
+        tm_qs = TrunkMain.objects.all()
+        dm_qs = self.model.objects.all()
+
+        tm_inner_subquery = self._generate_dwithin_inner_subquery(
+            tm_qs, "gid", geometry_field=geometry_field
+        )
+        dm_inner_subquery = self._generate_dwithin_inner_subquery(
+            dm_qs, "gid", geometry_field=geometry_field
+        )
+
+        inner_subqueries = {"tm_touches_gids": tm_inner_subquery, "dm_touches_gids": dm_inner_subquery}
+
+        subquery = super()._generate_dwithin_subquery(
+            qs,
+            json_fields,
+            geometry_field="geometry",
+            inner_subqueries=inner_subqueries,
+        )
+
+        return subquery
+
     def distribution_mains_to_geojson(self, properties=None):
         return self.mains_to_geojson(properties)
 
