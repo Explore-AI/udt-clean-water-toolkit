@@ -49,21 +49,55 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         node_id = node_properties.get("node_id")
         gids = node_properties.get("gids")
         dmas = node_properties.get("dmas")
-        pipe_type = node_properties.get("asset_name")
+        # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
         utility = base_pipe.get("utility_name")
 
         try:
             # TODO: would neomodel get_or_create work better here?
-            new_node = PipeJunction.create(
+            return PipeJunction.create(
                 {"node_id": node_id, "dmas": dmas, "gids": gids, "utility": utility}
             )[0]
         except UniqueProperty:
-            new_node = PipeJunction.nodes.get_or_none(node_id=node_id)
+            return PipeJunction.nodes.get_or_none(node_id=node_id)
+
+    @staticmethod
+    def _get_or_create_pipe_end_node(base_pipe, node_properties):
+
+        node_id = node_properties.get("node_id")
+        gid = node_properties.get("gid")
+        dmas = node_properties.get("dmas")
+        # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
+        utility = base_pipe.get("utility_name")
+
+        try:
+            # TODO: would neomodel get_or_create work better here?
+            return PipeEnd.create(
+                {"node_id": node_id, "dmas": dmas, "gid": gid, "utility": utility}
+            )[0]
+        except UniqueProperty:
+            return PipeEnd.nodes.get_or_none(node_id=node_id)
+
+    @staticmethod
+    def _get_or_create_point_asset_node(base_pipe, node_properties):
+
+        asset_name = node_properties.get("asset_name")
+        asset_model = PointAsset.asset_name_model_mapping(asset_name)
+
+        node_id = node_properties.get("node_id")
+        gid = node_properties.get("gid")
+        dmas = node_properties.get("dmas")
+        utility = base_pipe.get("utility_name")
+
+        try:
+            # TODO: would neomodel get_or_create work better here?
+            return asset_model.create(
+                {"node_id": node_id, "dmas": dmas, "gid": gid, "utility": utility}
+            )[0]
+        except UniqueProperty:
+            return asset_model.nodes.get_or_none(node_id=node_id)
 
     def _create_nodes(self, base_pipe, all_node_properties):
-        import pdb
 
-        pdb.set_trace()
         created_nodes = []
         for node_properties in all_node_properties:
 
@@ -76,54 +110,22 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 continue
 
             node_type = node_properties.get("node_type")
-            node_dmas = node_properties.get("dmas")
-            node_utility = base_pipe.get("utility_name")
-            node_asset_name = node_properties.get("asset_name")
 
             if node_type == PIPE_JUNCTION__NAME:
-                self._get_or_create_pipe_junctions_node(node_id)
+                node = self._get_or_create_pipe_junctions_node(
+                    base_pipe, node_properties
+                )
+                created_nodes.append(node)
 
             elif node_type == PIPE_END__NAME:
-
-                node_gid = node_properties.get("gid")
-                try:
-                    new_node = PipeEnd.create(
-                        {
-                            "node_id": node_id,
-                            "gid": node_gid,
-                            "dmas": node_dmas,
-                            # "pipe_type"
-                            # "utility": node_utility,
-                        }
-                    )[0]
-                except UniqueProperty:
-                    new_node = PipeEnd.nodes.get_or_none(node_id=node_id)
+                node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
+                created_nodes.append(node)
 
             elif node_type == POINT_ASSET__NAME:
-                node_gid = node_properties.get("gid")
-                asset_model = PointAsset.asset_name_model_mapping(node_asset_name)
-
-                try:
-                    new_node = asset_model.create(
-                        {
-                            "node_id": node_id,
-                            "gid": node_gid,
-                            "dmas": node_dmas,
-                            # "utility": node_utility,
-                        }
-                    )[0]
-                except UniqueProperty:
-                    new_node = asset_model.nodes.get_or_none(node_id=node_id)
-
-            created_nodes.append(new_node)
-
-        # if None in created_nodes:
-        #     import pdb
-
-        #     pdb.set_trace()
+                node = self._get_or_create_point_asset_node(base_pipe, node_properties)
+                created_nodes.append(node)
 
         start_node = created_nodes[0]
-
         for node in created_nodes[1:]:
             self._connect_nodes(
                 start_node,

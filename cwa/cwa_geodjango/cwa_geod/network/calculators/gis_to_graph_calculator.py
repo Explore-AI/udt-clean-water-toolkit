@@ -359,31 +359,12 @@ class GisToGraphCalculator:
                         asset["intersection_point_geometry"],
                         sorted([base_pipe["gid"], asset["gid"]]),
                     ),
-                    # "utility": _get_utility(qs_object)
                     **asset,
                 },
                 key=lambda x: x["distance_from_pipe_start_cm"],
             )
 
         return nodes_ordered
-
-    # def _set_relationship_properties(self, base_pipe, nodes_ordered):
-    #     print("A")
-    #     import pdb
-
-    #     pdb.set_trace()
-
-    #     i = 0
-    #     pipe_relations = []
-    #     while True:
-    #         if i == len(nodes_ordered) - 1:
-    #             break
-    #         import pdb
-
-    #         pdb.set_trace()
-    #         relation = {"gid": base_pipe["gid"]}
-    #         pipe_relations.append(relation)
-    #         i += 1
 
     def get_srid(self):
         """Get the currently used global srid"""
