@@ -1,16 +1,9 @@
-import json
 from multiprocessing.pool import ThreadPool
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
-from neomodel import db
 from neomodel.contrib.spatial_properties import NeomodelPoint
-from neomodel.exceptions import (
-    UniqueProperty,
-    ConstraintValidationFailed,
-    AttemptedCardinalityViolation,
-)
+from neomodel.exceptions import UniqueProperty
 from cleanwater.exceptions import (
-    InvalidNodeException,
     InvalidPipeException,
 )
 from . import GisToGraphCalculator
@@ -40,19 +33,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         super().__init__(config)
 
     def _connect_nodes(self, start_node, end_node):
-
-        # relation_id = ("").join([start_node.node_id, end_node.node_id])
-
-        # results = db.cypher_query(
-        #     f"""MATCH (node)-[rel]-(neighbor)
-        # WHERE rel.relation_id='{relation_id}'
-        # RETURN node, rel, neighbor limit 1"""
-        # )[0]
-
-        # try:
-        #     if results[0][1]["relation_id"] == relation_id:
-        #         return
-        # except IndexError:
 
         if not start_node.trunk_main.relationship(
             end_node
