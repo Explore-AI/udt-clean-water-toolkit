@@ -265,9 +265,6 @@ class GisToGraphCalculator:
         else:
             end_node_type = PIPE_JUNCTION__NAME
 
-        sorted_geoms = sorted(
-            [base_pipe["start_point_geom"], base_pipe["end_point_geom"]]
-        )
         nodes_ordered = [
             {
                 "gids": start_node_gids,
@@ -276,7 +273,7 @@ class GisToGraphCalculator:
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["start_point_geom"],
                 "node_id": self._encode_node_id(
-                    sorted_geoms[0],
+                    base_pipe["start_point_geom"],
                     start_node_gids,
                 ),
                 **base_pipe,
@@ -288,7 +285,7 @@ class GisToGraphCalculator:
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["end_point_geom"],
                 "node_id": self._encode_node_id(
-                    sorted_geoms[1],
+                    base_pipe["end_point_geom"],
                     end_node_gids,
                 ),
                 **base_pipe,
@@ -472,7 +469,7 @@ class GisToGraphCalculator:
         """
 
         coord1_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
-        coord2_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
+        coord2_repr = int(str(round(point.coords[1], 3)).replace(".", ""))
         return sqids.encode(
             [
                 coord1_repr,
