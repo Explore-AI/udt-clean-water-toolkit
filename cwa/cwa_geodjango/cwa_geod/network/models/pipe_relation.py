@@ -2,7 +2,7 @@ from neomodel import StructuredRel, IntegerProperty, JSONProperty, StringPropert
 
 
 class PipeRelation(StructuredRel):
-    relation_id = StringProperty(unique=True, index=True, required=True)
+    # relation_id = StringProperty(unique=True, index=True, required=True)
     gid = IntegerProperty(index=True, required=True)
     utility = StringProperty(index=True, required=True)
     # length = IntegerProperty(required=True)

@@ -41,20 +41,25 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
     def _connect_nodes(self, start_node, end_node):
 
-        relation_id = ("").join([start_node.node_id, end_node.node_id])
+        # relation_id = ("").join([start_node.node_id, end_node.node_id])
 
-        results = db.cypher_query(
-            f"""MATCH (node)-[rel]-(neighbor)
-        WHERE rel.relation_id='{relation_id}'
-        RETURN node, rel, neighbor limit 1"""
-        )[0]
+        # results = db.cypher_query(
+        #     f"""MATCH (node)-[rel]-(neighbor)
+        # WHERE rel.relation_id='{relation_id}'
+        # RETURN node, rel, neighbor limit 1"""
+        # )[0]
 
-        try:
-            if results[0][1]["relation_id"] == relation_id:
-                return
-        except IndexError:
+        # try:
+        #     if results[0][1]["relation_id"] == relation_id:
+        #         return
+        # except IndexError:
+
+        if not start_node.trunk_main.relationship(
+            end_node
+        ) and not start_node.distribution_main.relationship(end_node):
+
             relation_data = {
-                "relation_id": relation_id,
+                # "relation_id": relation_id,
                 "dmas": self.base_pipe["dmas"],
                 "gid": self.base_pipe["gid"],
                 "utility": self.base_pipe["utility_name"],
