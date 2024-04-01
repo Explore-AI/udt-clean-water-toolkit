@@ -55,13 +55,22 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         node_id = node_properties.get("node_id")
         gids = node_properties.get("gids")
         dmas = node_properties.get("dmas")
+        geom = node_properties.get("intersection_point_geometry")
         # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
         utility = self.base_pipe.get("utility_name")
 
         try:
             # TODO: would neomodel get_or_create work better here?
             return PipeJunction.create(
-                {"node_id": node_id, "dmas": dmas, "gids": gids, "utility": utility}
+                {
+                    "node_id": node_id,
+                    "dmas": dmas,
+                    "gids": gids,
+                    "utility": utility,
+                    # TODO: why does geom.x return a numpy array
+                    "x_coord": geom.coords[0],
+                    "y_coord": geom.coords[1],
+                }
             )[0]
         except UniqueProperty:
             return PipeJunction.nodes.get_or_none(node_id=node_id)
@@ -71,13 +80,22 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         node_id = node_properties.get("node_id")
         gid = node_properties.get("gid")
         dmas = node_properties.get("dmas")
+        geom = node_properties.get("intersection_point_geometry")
         # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
         utility = self.base_pipe.get("utility_name")
 
         try:
             # TODO: would neomodel get_or_create work better here?
             return PipeEnd.create(
-                {"node_id": node_id, "dmas": dmas, "gid": gid, "utility": utility}
+                {
+                    "node_id": node_id,
+                    "dmas": dmas,
+                    "gid": gid,
+                    "utility": utility,
+                    # TODO: why does geom.x return a numpy array
+                    "x_coord": geom.coords[0],
+                    "y_coord": geom.coords[1],
+                }
             )[0]
         except UniqueProperty:
             return PipeEnd.nodes.get_or_none(node_id=node_id)
@@ -90,12 +108,21 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         node_id = node_properties.get("node_id")
         gid = node_properties.get("gid")
         dmas = node_properties.get("dmas")
+        geom = node_properties.get("intersection_point_geometry")
         utility = self.base_pipe.get("utility_name")
 
         try:
             # TODO: would neomodel get_or_create work better here?
             return asset_model.create(
-                {"node_id": node_id, "dmas": dmas, "gid": gid, "utility": utility}
+                {
+                    "node_id": node_id,
+                    "dmas": dmas,
+                    "gid": gid,
+                    "utility": utility,
+                    # TODO: why does geom.x return a numpy array
+                    "x_coord": geom.coords[0],
+                    "y_coord": geom.coords[1],
+                }
             )[0]
         except UniqueProperty:
             return asset_model.nodes.get_or_none(node_id=node_id)

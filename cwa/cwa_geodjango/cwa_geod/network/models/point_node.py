@@ -1,7 +1,7 @@
 from neomodel import (
     StructuredNode,
     RelationshipTo,
-    IntegerProperty,
+    FloatProperty,
     StringProperty,
     JSONProperty,
 )
@@ -14,6 +14,8 @@ from cwa_geod.core.constants import UTILITIES
 class PointNode(StructuredNode):
     dmas = JSONProperty(required=True)
     # location = PointProperty(crs="wgs-84", require=True)
+    x_coord = FloatProperty(required=True)
+    y_coord = FloatProperty(required=True)
     node_id = StringProperty(unique_index=True, required=True)
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
     trunk_main = RelationshipTo("PointNode", "trunk_main", model=TrunkMain)

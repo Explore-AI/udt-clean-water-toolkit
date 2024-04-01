@@ -18,6 +18,8 @@ from cwa_geod.core.constants import (
 class GisToGraphCalculator:
     def __init__(self, config):
         self.config = config
+        self.all_base_pipes = []
+        self.all_nodes_ordered = []
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         self.all_base_pipes, self.all_nodes_ordered = list(
@@ -207,7 +209,7 @@ class GisToGraphCalculator:
         return object_intersections
 
     @staticmethod
-    def _get_pipe_intersecting_gids(base_pipe_data, junctions_with_positions):
+    def _get_non_termini_intersecting_pipes(base_pipe_data, junctions_with_positions):
 
         termini_intersecting_pipe_gids = (
             base_pipe_data["line_start_intersection_gids"]
@@ -269,6 +271,7 @@ class GisToGraphCalculator:
                 "node_type": start_node_type,
                 "distance_from_pipe_start_cm": start_node_distance_cm,
                 "dmas": base_pipe["dma_codes"],
+                "intersection_point_geometry": base_pipe["start_point_geom"],
                 "node_id": self._encode_node_id(
                     base_pipe["start_point_geom"],
                     start_node_gids,
@@ -280,6 +283,7 @@ class GisToGraphCalculator:
                 "node_type": end_node_type,
                 "distance_from_pipe_start_cm": end_node_distance_cm,
                 "dmas": base_pipe["dma_codes"],
+                "intersection_point_geometry": base_pipe["end_point_geom"],
                 "node_id": self._encode_node_id(
                     base_pipe["end_point_geom"],
                     end_node_gids,
@@ -294,7 +298,7 @@ class GisToGraphCalculator:
         self, base_pipe, junctions_with_positions, point_assets_with_positions
     ):
 
-        non_termini_intersecting_pipes = self._get_pipe_intersecting_gids(
+        non_termini_intersecting_pipes = self._get_non_termini_intersecting_pipes(
             base_pipe, junctions_with_positions
         )
 
@@ -326,6 +330,9 @@ class GisToGraphCalculator:
                         "node_type": PIPE_JUNCTION__NAME,
                         "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
                         "dmas": base_pipe["dmas"],
+                        "intersection_point_geometry": pipe[
+                            "intersection_point_geometry"
+                        ],
                         "node_id": self._encode_node_id(
                             pipe["intersection_point_geometry"],
                             gids,
@@ -415,7 +422,7 @@ class GisToGraphCalculator:
         """
 
         coord1_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
-        coord2_repr = int(str(round(point.coords[1], 3)).replace(".", ""))
+        coord2_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
         return sqids.encode(
             [
                 coord1_repr,
