@@ -27,3 +27,5 @@ def initialise_node_labels():
         remove_all_labels()
         install_labels(PipeEnd)  # quiet=True
         install_labels(PipeRelation)
+        install_labels(PipeJunction)
+        install_labels(PointAsset)

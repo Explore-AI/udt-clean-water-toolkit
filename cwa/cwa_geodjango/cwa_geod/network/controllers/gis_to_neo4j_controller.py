@@ -45,7 +45,7 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
 
         start = timer()
 
-        pipes_qs = self.get_pipe_and_asset_data()
+        pipes_qs = self._get_pipe_and_asset_data()
 
         query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
 
