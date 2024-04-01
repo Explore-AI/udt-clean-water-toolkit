@@ -190,10 +190,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             # need to sort to ensure cardinality is maintained
             sorted_nodes = sorted([current_node, next_node], key=lambda x: x.node_id)
 
-            start_node = sorted_nodes[0]
-            end_node = sorted_nodes[1]
-
-            self._connect_nodes(start_node, end_node)
+            self._connect_nodes(sorted_nodes[0], sorted_nodes[1])
             current_node = next_node
 
     def _map_pipe_connected_asset_relations(
