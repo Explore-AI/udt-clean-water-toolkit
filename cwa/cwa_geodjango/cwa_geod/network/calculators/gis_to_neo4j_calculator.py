@@ -25,6 +25,13 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
     def __init__(self, config):
         self.config = config
+
+        self.all_base_pipes = []
+        self.all_nodes_ordered = []
+
+        self.base_pipe = []
+        self.all_node_properties = []
+
         super().__init__(config)
 
     @staticmethod
@@ -43,14 +50,13 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         #     (end_geom_latlong.x, end_geom_latlong.y), crs="wgs-84"
         # )
 
-    @staticmethod
-    def _get_or_create_pipe_junctions_node(base_pipe, node_properties):
+    def _get_or_create_pipe_junctions_node(self, node_properties):
 
         node_id = node_properties.get("node_id")
         gids = node_properties.get("gids")
         dmas = node_properties.get("dmas")
         # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
-        utility = base_pipe.get("utility_name")
+        utility = self.base_pipe.get("utility_name")
 
         try:
             # TODO: would neomodel get_or_create work better here?
@@ -60,14 +66,13 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         except UniqueProperty:
             return PipeJunction.nodes.get_or_none(node_id=node_id)
 
-    @staticmethod
-    def _get_or_create_pipe_end_node(base_pipe, node_properties):
+    def _get_or_create_pipe_end_node(self, node_properties):
 
         node_id = node_properties.get("node_id")
         gid = node_properties.get("gid")
         dmas = node_properties.get("dmas")
         # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
-        utility = base_pipe.get("utility_name")
+        utility = self.base_pipe.get("utility_name")
 
         try:
             # TODO: would neomodel get_or_create work better here?
@@ -77,8 +82,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         except UniqueProperty:
             return PipeEnd.nodes.get_or_none(node_id=node_id)
 
-    @staticmethod
-    def _get_or_create_point_asset_node(base_pipe, node_properties):
+    def _get_or_create_point_asset_node(self, node_properties):
 
         asset_name = node_properties.get("asset_name")
         asset_model = PointAsset.asset_name_model_mapping(asset_name)
@@ -86,7 +90,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         node_id = node_properties.get("node_id")
         gid = node_properties.get("gid")
         dmas = node_properties.get("dmas")
-        utility = base_pipe.get("utility_name")
+        utility = self.base_pipe.get("utility_name")
 
         try:
             # TODO: would neomodel get_or_create work better here?
@@ -96,10 +100,10 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         except UniqueProperty:
             return asset_model.nodes.get_or_none(node_id=node_id)
 
-    def _create_nodes(self, base_pipe, all_node_properties):
+    def _create_nodes(self):
 
         all_nodes = []
-        for node_properties in all_node_properties:
+        for node_properties in self.all_node_properties:
 
             node_id = node_properties.get("node_id")
 
@@ -112,33 +116,31 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             node_type = node_properties.get("node_type")
 
             if node_type == PIPE_JUNCTION__NAME:
-                node = self._get_or_create_pipe_junctions_node(
-                    base_pipe, node_properties
-                )
+                node = self._get_or_create_pipe_junctions_node(node_properties)
                 all_nodes.append(node)
 
             elif node_type == PIPE_END__NAME:
-                node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
+                node = self._get_or_create_pipe_end_node(node_properties)
                 all_nodes.append(node)
 
             elif node_type == POINT_ASSET__NAME:
-                node = self._get_or_create_point_asset_node(base_pipe, node_properties)
+                node = self._get_or_create_point_asset_node(node_properties)
                 all_nodes.append(node)
 
         return all_nodes
 
-    def _create_relations(self, base_pipe, all_nodes):
+    def _create_relations(self, all_nodes):
         start_node = all_nodes[0]
 
         for node in all_nodes[1:]:
             self._connect_nodes(
                 start_node,
                 node,
-                base_pipe["asset_name"],
+                self.base_pipe["asset_name"],
                 {
-                    "dmas": base_pipe["dmas"],
-                    "gid": base_pipe["gid"],
-                    "utility": base_pipe["utility_name"],
+                    "dmas": self.base_pipe["dmas"],
+                    "gid": self.base_pipe["gid"],
+                    "utility": self.base_pipe["utility_name"],
                 },
             )
             start_node = node
@@ -147,8 +149,11 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self, base_pipe: dict, all_node_properties: list
     ):
 
-        all_nodes = self._create_nodes(base_pipe, all_node_properties)
-        self._create_relations(base_pipe, all_nodes)
+        self.base_pipe = base_pipe
+        self.all_node_properties = all_node_properties
+
+        all_nodes = self._create_nodes()
+        self._create_relations(all_nodes)
 
     def _reset_pipe_asset_data(self):
         # reset all_pipe_data and all_asset_positions to manage memory
