@@ -372,6 +372,26 @@ class GisToGraphCalculator:
 
         return nodes_ordered
 
+    # @staticmethod
+    # def _calc_pipe_segment_length(nodes_ordered):
+    #     """
+    #     Calc length of pipe segment by calculating pipe length between nodes
+    #     """
+
+    #     start_node = nodes_ordered[0]
+
+    #     # pipe length is stored on every node so it's safe to get from first node only
+    #     pipe_length = start_node["pipe_length"]
+
+    #     start_node["pipe_length_from_previous_node"] = 0
+
+    #     for node in nodes_ordered[1:]:
+    #         start_node = node
+
+    #     import pdb
+
+    #     pdb.set_trace()
+
     def _set_node_properties(
         self, base_pipe, junctions_with_positions, point_assets_with_positions
     ):
@@ -389,6 +409,8 @@ class GisToGraphCalculator:
         nodes_ordered = self._set_point_asset_properties(
             base_pipe, nodes_ordered, point_assets_with_positions
         )
+
+        # self._calc_pipe_length_between_nodes(nodes_ordered)
 
         return nodes_ordered
 
