@@ -3,7 +3,11 @@ from multiprocessing.pool import ThreadPool
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
-from neomodel.exceptions import UniqueProperty, ConstraintValidationFailed
+from neomodel.exceptions import (
+    UniqueProperty,
+    ConstraintValidationFailed,
+    AttemptedCardinalityViolation,
+)
 from cleanwater.exceptions import (
     InvalidNodeException,
     InvalidPipeException,
@@ -45,6 +49,8 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
         except ConstraintValidationFailed:
             pass
+        except:
+            AttemptedCardinalityViolation
 
         # end_neo_point = NeomodelPoint(
         #     (end_geom_latlong.x, end_geom_latlong.y), crs="wgs-84"

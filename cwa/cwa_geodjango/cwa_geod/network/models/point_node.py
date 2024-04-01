@@ -4,6 +4,7 @@ from neomodel import (
     FloatProperty,
     StringProperty,
     JSONProperty,
+    ZeroOrOne,
 )
 from neomodel.contrib.spatial_properties import PointProperty
 from .trunk_main import TrunkMain
@@ -18,7 +19,9 @@ class PointNode(StructuredNode):
     y_coord = FloatProperty(required=True)
     node_id = StringProperty(unique_index=True, unique=True, required=True)
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
-    trunk_main = RelationshipTo("PointNode", "trunk_main", model=TrunkMain)
+    trunk_main = RelationshipTo(
+        "PointNode", "trunk_main", model=TrunkMain, cardinality=ZeroOrOne
+    )
     distribution_main = RelationshipTo(
-        "PointNode", "distribution_main", model=DistributionMain
+        "PointNode", "distribution_main", model=DistributionMain, cardinality=ZeroOrOne
     )
