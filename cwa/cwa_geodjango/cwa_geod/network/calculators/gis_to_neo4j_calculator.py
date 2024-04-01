@@ -2,6 +2,7 @@ import json
 from multiprocessing.pool import ThreadPool
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
+from neomodel import db
 from neomodel.contrib.spatial_properties import NeomodelPoint
 from neomodel.exceptions import (
     UniqueProperty,
@@ -33,24 +34,39 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self.all_base_pipes = []
         self.all_nodes_ordered = []
 
-        self.base_pipe = []
+        self.base_pipe = {}
         self.all_node_properties = []
 
         super().__init__(config)
 
-    @staticmethod
-    def _connect_nodes(start_node, end_node, pipe_name, relation_data):
+    def _connect_nodes(self, start_node, end_node):
+
+        relation_id = ("").join([start_node.node_id, end_node.node_id])
+
+        results = db.cypher_query(
+            f"""MATCH (node)-[rel]-(neighbor)
+        WHERE rel.relation_id='{relation_id}'
+        RETURN node, rel, neighbor limit 1"""
+        )[0]
+
         try:
+            if results[0][1]["relation_id"] == relation_id:
+                return
+        except IndexError:
+            relation_data = {
+                "relation_id": relation_id,
+                "dmas": self.base_pipe["dmas"],
+                "gid": self.base_pipe["gid"],
+                "utility": self.base_pipe["utility_name"],
+            }
+            pipe_name = self.base_pipe["asset_name"]
+
             if pipe_name == TRUNK_MAIN__NAME:
                 start_node.trunk_main.connect(end_node, relation_data)
             elif pipe_name == DISTRIBUTION_MAIN__NAME:
                 start_node.distribution_main.connect(end_node, relation_data)
             else:
                 InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
-        except ConstraintValidationFailed:
-            pass
-        except:
-            AttemptedCardinalityViolation
 
         # end_neo_point = NeomodelPoint(
         #     (end_geom_latlong.x, end_geom_latlong.y), crs="wgs-84"
@@ -160,23 +176,25 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 node = self._get_or_create_point_asset_node(node_properties)
                 all_nodes.append(node)
 
+        # if self.base_pipe["gid"] == 838147:
+        #     import pdb
+
+        #     pdb.set_trace()
+
         return all_nodes
 
     def _create_relations(self, all_nodes):
-        start_node = all_nodes[0]
+        current_node = all_nodes[0]
 
-        for node in all_nodes[1:]:
-            self._connect_nodes(
-                start_node,
-                node,
-                self.base_pipe["asset_name"],
-                {
-                    "dmas": self.base_pipe["dmas"],
-                    "gid": self.base_pipe["gid"],
-                    "utility": self.base_pipe["utility_name"],
-                },
-            )
-            start_node = node
+        for next_node in all_nodes[1:]:
+            # need to sort to ensure cardinality is maintained
+            sorted_nodes = sorted([current_node, next_node], key=lambda x: x.node_id)
+
+            start_node = sorted_nodes[0]
+            end_node = sorted_nodes[1]
+
+            self._connect_nodes(start_node, end_node)
+            current_node = next_node
 
     def _map_pipe_connected_asset_relations(
         self, base_pipe: dict, all_node_properties: list

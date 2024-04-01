@@ -265,6 +265,9 @@ class GisToGraphCalculator:
         else:
             end_node_type = PIPE_JUNCTION__NAME
 
+        sorted_geoms = sorted(
+            [base_pipe["start_point_geom"], base_pipe["end_point_geom"]]
+        )
         nodes_ordered = [
             {
                 "gids": start_node_gids,
@@ -273,7 +276,7 @@ class GisToGraphCalculator:
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["start_point_geom"],
                 "node_id": self._encode_node_id(
-                    base_pipe["start_point_geom"],
+                    sorted_geoms[0],
                     start_node_gids,
                 ),
                 **base_pipe,
@@ -285,7 +288,7 @@ class GisToGraphCalculator:
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["end_point_geom"],
                 "node_id": self._encode_node_id(
-                    base_pipe["end_point_geom"],
+                    sorted_geoms[1],
                     end_node_gids,
                 ),
                 **base_pipe,
@@ -344,8 +347,8 @@ class GisToGraphCalculator:
 
                 # TODO: This is inefficient. Should hash only once all gids are known.
                 nodes_ordered[position_index]["node_id"] = self._encode_node_id(
-                    base_pipe["start_point_geom"],
-                    [base_pipe["gid"], pipe_gid],
+                    pipe["intersection_point_geometry"],
+                    sorted([base_pipe["gid"], *nodes_ordered[position_index]["gids"]]),
                 )
 
         return nodes_ordered
