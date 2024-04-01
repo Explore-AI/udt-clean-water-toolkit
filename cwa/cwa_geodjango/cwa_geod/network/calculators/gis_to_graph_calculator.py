@@ -363,7 +363,13 @@ class GisToGraphCalculator:
                     "dmas": base_pipe["dma_codes"],
                     "node_id": self._encode_node_id(
                         asset["intersection_point_geometry"],
-                        sorted([base_pipe["gid"], asset["gid"]]),
+                        sorted(
+                            [
+                                asset["gid"],
+                                *asset["tm_touches_gids"],
+                                *asset["dm_touches_gids"],
+                            ]
+                        ),
                     ),
                     **asset,
                 },
