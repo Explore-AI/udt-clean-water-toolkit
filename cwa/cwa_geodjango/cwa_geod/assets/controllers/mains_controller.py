@@ -209,15 +209,6 @@ class MainsController(ABC, GeoDjangoDataManager):
         qs = self.model.objects.filter(dmas__code="ZFINSB26").prefetch_related(
             "dmas", "dmas__utility"
         )
-        # dm 836364 not conected properly
-
-        # .filter(gid=2213263)
-        # 2164180
-        # 216381
-        # 10360450
-        # qs = self.model.objects.filter(gid=894565).prefetch_related(
-        #     "dmas", "dmas__utility"
-        # )
 
         qs = qs.annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),
@@ -234,25 +225,6 @@ class MainsController(ABC, GeoDjangoDataManager):
         )
 
         qs = qs.annotate(**mains_intersection_subqueries, **asset_subqueries)
-
-        # qs = qs.values(
-        #     "id",
-        #     "gid",
-        #     "dma_ids",
-        #     "dma_codes",
-        #     "dma_names",
-        #     "asset_name",
-        #     "pipe_length",
-        #     "geometry",
-        #     "wkt",
-        #     "utility_names",
-        #     "start_point_geom",
-        #     "end_point_geom",
-        #     "line_start_intersection_gids",  # from mains_intersection_subqueries
-        #     "line_end_intersection_gids",  # from mains_intersection_subqueries
-        #     *mains_intersection_subqueries.keys(),
-        #     *asset_subqueries.keys()
-        # )
 
         return qs
 

@@ -294,15 +294,9 @@ class GisToGraphCalculator:
 
         return nodes_ordered
 
-    def _set_node_properties(
-        self, base_pipe, junctions_with_positions, point_assets_with_positions
+    def _set_non_terminal_nodes(
+        self, base_pipe, nodes_ordered, non_termini_intersecting_pipes
     ):
-
-        non_termini_intersecting_pipes = self._get_non_termini_intersecting_pipes(
-            base_pipe, junctions_with_positions
-        )
-
-        nodes_ordered = self._set_terminal_nodes(base_pipe)
 
         distances = [x["distance_from_pipe_start_cm"] for x in nodes_ordered]
 
@@ -354,6 +348,11 @@ class GisToGraphCalculator:
                     [base_pipe["gid"], pipe_gid],
                 )
 
+        return nodes_ordered
+
+    def _set_point_asset_properties(
+        self, base_pipe, nodes_ordered, point_assets_with_positions
+    ):
         for asset in point_assets_with_positions:
             # TODO: node_id may not be unique between assets. FIX by defining an asset_code
             bisect.insort(
@@ -370,6 +369,26 @@ class GisToGraphCalculator:
                 },
                 key=lambda x: x["distance_from_pipe_start_cm"],
             )
+
+        return nodes_ordered
+
+    def _set_node_properties(
+        self, base_pipe, junctions_with_positions, point_assets_with_positions
+    ):
+
+        non_termini_intersecting_pipes = self._get_non_termini_intersecting_pipes(
+            base_pipe, junctions_with_positions
+        )
+
+        nodes_ordered = self._set_terminal_nodes(base_pipe)
+
+        nodes_ordered = self._set_non_terminal_nodes(
+            base_pipe, nodes_ordered, non_termini_intersecting_pipes
+        )
+
+        nodes_ordered = self._set_point_asset_properties(
+            base_pipe, nodes_ordered, point_assets_with_positions
+        )
 
         return nodes_ordered
 
