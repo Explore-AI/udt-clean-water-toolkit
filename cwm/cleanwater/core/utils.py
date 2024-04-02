@@ -9,13 +9,12 @@ def normalised_point_position_on_line(line_string_coords, end_point_coords):
     https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geos/
 
     Params:
-           line_geom (LineString geometry, required)
-           start_of_line_point (Point geometry, required)
-           point_geom (Point geometry, required)
+           line_string_coords (LineString coordinates, required)
+           end_point_coords (point corodinates, required)
 
     Returns:
-           normalised_position_on_line (float)
            distance_from_line_start (float)
+           normalised_position_on_line (float)
     """
 
     line_geom: LineString = LineString(line_string_coords)
