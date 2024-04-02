@@ -78,7 +78,6 @@ class GisToGraphCalculator:
         return base_pipe, nodes_ordered
 
     def _get_base_pipe_data(self, qs_object) -> dict:
-
         base_pipe: dict = {}
 
         base_pipe["id"] = qs_object.pk
@@ -97,9 +96,9 @@ class GisToGraphCalculator:
         base_pipe["start_point_geom"] = qs_object.start_point_geom
         base_pipe["end_point_geom"] = qs_object.end_point_geom
 
-        base_pipe["line_start_intersection_gids"] = (
-            qs_object.line_start_intersection_gids
-        )
+        base_pipe[
+            "line_start_intersection_gids"
+        ] = qs_object.line_start_intersection_gids
         base_pipe["line_start_intersection_gids"].remove(qs_object.gid)
 
         base_pipe["line_end_intersection_gids"] = qs_object.line_end_intersection_gids
@@ -196,7 +195,6 @@ class GisToGraphCalculator:
     def _get_connections_points_on_pipe(
         self, base_pipe: dict, intersected_objects: list
     ) -> list:
-
         object_intersections = []
         # Not inefficient to use for loop with append here as the number
         # of intersecting junctions_and_assets for any given base pipe is not large
@@ -210,7 +208,6 @@ class GisToGraphCalculator:
 
     @staticmethod
     def _get_non_termini_intersecting_pipes(base_pipe_data, junctions_with_positions):
-
         termini_intersecting_pipe_gids = (
             base_pipe_data["line_start_intersection_gids"]
             + base_pipe_data["line_end_intersection_gids"]
@@ -244,7 +241,6 @@ class GisToGraphCalculator:
         return non_termini_intersecting_pipes
 
     def _set_terminal_nodes(self, base_pipe):
-
         start_node_distance_cm = 0
         # round to int to make distance comparisons more robust
         end_node_distance_cm = round(base_pipe["pipe_length"].cm)
@@ -297,11 +293,9 @@ class GisToGraphCalculator:
     def _set_non_terminal_nodes(
         self, base_pipe, nodes_ordered, non_termini_intersecting_pipes
     ):
-
         distances = [x["distance_from_pipe_start_cm"] for x in nodes_ordered]
 
         for pipe in non_termini_intersecting_pipes:
-
             pipe_gid = pipe["gid"]
             # distance_from_start_cm must be an
             # int for sqid compatible hashing
@@ -378,30 +372,9 @@ class GisToGraphCalculator:
 
         return nodes_ordered
 
-    # @staticmethod
-    # def _calc_pipe_segment_length(nodes_ordered):
-    #     """
-    #     Calc length of pipe segment by calculating pipe length between nodes
-    #     """
-
-    #     start_node = nodes_ordered[0]
-
-    #     # pipe length is stored on every node so it's safe to get from first node only
-    #     pipe_length = start_node["pipe_length"]
-
-    #     start_node["pipe_length_from_previous_node"] = 0
-
-    #     for node in nodes_ordered[1:]:
-    #         start_node = node
-
-    #     import pdb
-
-    #     pdb.set_trace()
-
     def _set_node_properties(
         self, base_pipe, junctions_with_positions, point_assets_with_positions
     ):
-
         non_termini_intersecting_pipes = self._get_non_termini_intersecting_pipes(
             base_pipe, junctions_with_positions
         )
