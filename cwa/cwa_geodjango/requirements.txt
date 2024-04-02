@@ -6,3 +6,4 @@ neo4j==5.15.0
 neomodel==5.2.1
 networkx==3.2.1
 sqids==0.4.1
+shapely==2.0.3

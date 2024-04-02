@@ -1,7 +1,7 @@
-from django.contrib.gis.geos import Point
+from shapely import LineString, Point, line_locate_point, ops
 
 
-def normalised_point_position_on_line(line_geom, start_of_line_point, point_geom):
+def normalised_point_position_on_line(line_string_coords, end_point_coords):
     """Get the normalised position of a Point geometry on a LineString geometry relative to the
     LineString start Point.
 
@@ -18,14 +18,18 @@ def normalised_point_position_on_line(line_geom, start_of_line_point, point_geom
            distance_from_line_start (float)
     """
 
-    distance_from_line_start = start_of_line_point.distance(point_geom)
+    line_geom: LineString = LineString(line_string_coords)
 
-    # TODO: fix exception message
-    if type(distance_from_line_start) not in (int, float):
-        raise Exception("The calculated distance must be an int or float.")
+    end_point_geom: Point = Point(end_point_coords)
+
+    distance_from_line_start = line_locate_point(line_geom, end_point_geom)
+
+    line_part = ops.substring(
+        line_geom, start_dist=0, end_dist=distance_from_line_start
+    )
 
     normalised_position_on_line = 1 - (
         (line_geom.length - distance_from_line_start) / line_geom.length
     )
 
-    return normalised_position_on_line, distance_from_line_start
+    return line_part.length, normalised_position_on_line

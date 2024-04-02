@@ -154,16 +154,16 @@ class GisToGraphCalculator:
 
         if intersection_geom.geom_type == "Point":
             intersection_params = normalised_point_position_on_line(
-                base_pipe_geom, start_point_geom, intersection_geom
+                base_pipe_geom, intersection_geom.coords
             )
             data = [
                 {
                     **junction_or_asset,
                     "intersection_point_geometry": intersection_geom,
-                    "position": intersection_params[0],
+                    "position": intersection_params[1],
                     # distance returned is based on srid and should be in meters.
                     # Convert to cm and round.
-                    "distance_from_pipe_start_cm": round(intersection_params[1] * 100),
+                    "distance_from_pipe_start_cm": round(intersection_params[0] * 100),
                 }
             ]
 
