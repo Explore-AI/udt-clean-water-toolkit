@@ -25,14 +25,17 @@ PRESSURE_FITTING_NAME = "pressure_fitting"
 
 PIPE_END__NAME = "pipe_end"
 
+PIPE_JUNCTION__NAME = "pipe_junction"
+
 POINT_ASSET__NAME = "point_asset"
 
-PIPE_ASSETS__NAMES = [
+PIPE_ASSETS__CHOICES = [
     (TRUNK_MAIN__NAME, "Trunk Main"),
     (DISTRIBUTION_MAIN__NAME, "Distribution Main"),
 ]
 
-POINT_ASSETS__NAMES = [(), ()]
+PIPE_ASSETS__NAMES = [TRUNK_MAIN__NAME, DISTRIBUTION_MAIN__NAME]
+
 
 GEOS_LINESTRING_TYPES = [1, 5]
 

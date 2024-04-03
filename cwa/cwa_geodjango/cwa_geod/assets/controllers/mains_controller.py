@@ -14,14 +14,14 @@ from django.contrib.gis.db.models.functions import (
     Transform,
     Intersection,
 )
-from cleanwater.controllers import GeoDjangoController
+from cleanwater.data_managers import GeoDjangoDataManager
 from cwa_geod.assets.models import *
-from cwa_geod.core.db.models.functions.line_points import LineStartPoint, LineEndPoint
+from cwa_geod.core.db.models.functions import LineStartPoint, LineEndPoint
 
 
-class MainsController(ABC, GeoDjangoController):
+class MainsController(ABC, GeoDjangoDataManager):
     """This is an abstract base class and should not be
-    instantiated explicitly
+    instantiated explicitly.
     """
 
     WITHIN_DISTANCE = 0.5
@@ -30,31 +30,96 @@ class MainsController(ABC, GeoDjangoController):
         "gid",
     ]  # should not include the geometry column as per convention
 
-    def _generate_dwithin_subquery(self, qs, json_fields, geometry_field="geometry"):
+    def __init__(self, model):
+        self.model = model
+
+    def _generate_dwithin_subquery(
+        self, qs, json_fields, geometry_field="geometry", inner_subqueries={}
+    ):
+        """
+        Generates a subquery where the inner query is filtered if its geometery object
+        is within the geometry of the outer query.
+
+        Params:
+              qs (Queryset, required)
+              json_fields (dict, required) - A dictionary of model fields to return
+              geometry_field (str, optional, default="geometry") - The field name of the outer geometry object
+
+        Returns:
+              subquery (Queryset)
+
+        """
+
         subquery = qs.filter(
             geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
         ).values(
             json=JSONObject(
-                **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
+                **json_fields,
+                **inner_subqueries,
+                asset_name=Value(qs.model.AssetMeta.asset_name)
             )
         )
+
         return subquery
 
-    def _generate_touches_subquery(self, qs, json_fields, geometry_field="geometry"):
+    def _generate_dwithin_inner_subquery(self, qs, field, geometry_field="geometry"):
+        inner_subquery = qs.filter(
+            geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
+        ).values_list(field, flat=True)
+
+        return ArraySubquery(inner_subquery)
+
+    @staticmethod
+    def generate_touches_subquery(qs, json_fields, geometry_field="geometry"):
+        """
+        Generates a subquery where the inner query is filtered if its geometery object
+        touches the geometry of the outer query.
+
+        Params:
+               qs (Queryset, required)
+               json_fields (dict, required) - A dictionary of model fields to return
+               geometry_field (str, optional, default="geometry") - The field name of the outer geometry object
+
+        Returns:
+              subquery (Queryset)
+
+        """
+
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(
                 **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
             ),
         )
+
         return subquery
+
+    def generate_termini_subqueries(self, querysets):
+        start_point_subqueries = []
+        end_point_subqueries = []
+
+        for qs in querysets:
+            subquery1 = qs.filter(geometry__touches=OuterRef("start_point_geom"))
+            subquery2 = qs.filter(geometry__touches=OuterRef("end_point_geom"))
+            start_point_subqueries.append(subquery1)
+            end_point_subqueries.append(subquery2)
+
+        subquery_line_start = (
+            start_point_subqueries[0].union(*start_point_subqueries[0:]).values("gid")
+        )
+
+        subquery_line_end = (
+            end_point_subqueries[0].union(*end_point_subqueries[0:]).values("gid")
+        )
+
+        return subquery_line_start, subquery_line_end
 
     @staticmethod
     def get_asset_json_fields(geometry_field="geometry"):
-        """Overwrite this function to bypass
-        the custom PostgreSQL functions
+        """Overwrite the fields retrieved by the subqueries or
+        the SQL functions used to retrieve them.
 
         Params:
-              None
+              geometry_field (str, optional, defaut="geometry")
 
         Returns:
               json object for use in subquery
@@ -74,8 +139,8 @@ class MainsController(ABC, GeoDjangoController):
 
     @staticmethod
     def get_pipe_json_fields():
-        """Overwrite this function to bypass
-        the custom PostgreSQL functions
+        """Overwrite the fields retrieved by the subqueries or
+        the SQL functions used to retrieve them.
 
         Params:
               None
@@ -90,7 +155,7 @@ class MainsController(ABC, GeoDjangoController):
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "start_point_geom": LineStartPoint("geometry"),
-            #            "end_geom": LineEndPoint("geometry"),
+            "end_point_geom": LineEndPoint("geometry"),
             # "start_geom_latlong": Transform(LineStartPoint("geometry"), 4326),
             # "end_geom_latlong": Transform(LineEndPoint("geometry"), 4326),
             "dma_ids": ArrayAgg("dmas"),
@@ -151,24 +216,33 @@ class MainsController(ABC, GeoDjangoController):
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.prefetch_related("dmas", "dmas__utility").annotate(
+        qs = self.model.objects.filter(
+            dmas__code__in=["ZWAL4801", "ZCHESS12", "ZCHIPO01"]
+        ).prefetch_related("dmas", "dmas__utility")
+
+        qs = qs.annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),
-            length=Length("geometry"),
+            pipe_length=Length("geometry"),
             wkt=AsWKT("geometry"),
             dma_ids=ArrayAgg("dmas"),
             dma_codes=ArrayAgg("dmas__code"),
             dma_names=ArrayAgg("dmas__name"),
             start_point_geom=LineStartPoint("geometry"),
-            #            end_geom=LineEndPoint("geometry"),
+            end_point_geom=LineEndPoint("geometry"),
             # start_geom_latlong=Transform(LineStartPoint("geometry"), 4326),
             # end_geom_latlong=Transform(LineEndPoint("geometry"), 4326),
             utility_names=ArrayAgg("dmas__utility__name"),
-            **mains_intersection_subqueries,
-            **asset_subqueries
         )
+
+        qs = qs.annotate(**mains_intersection_subqueries, **asset_subqueries)
 
         return qs
 
+    # Refs on how the GeoJSON is constructed.
+    # AsGeoJson query combined with json to build object
+    # https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
+    # https://postgis.net/docs/ST_AsGeoJSON.html
+    # https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
     def get_geometry_queryset(self, properties=None) -> QuerySet:
         properties = properties or self.default_properties
         properties = set(properties)

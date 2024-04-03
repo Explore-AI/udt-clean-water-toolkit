@@ -4,38 +4,60 @@ from .mains_controller import MainsController
 
 
 class TrunkMainsController(MainsController):
-    """Convert trunk_mains data to Queryset or GeoJSON.
-
-    Refs on how the GeoJSON is constructed.
-    AsGeoJson query combined with json to build object
-    https://docs.djangoproject.com/en/5.0/ref/contrib/postgres/expressions/
-    https://postgis.net/docs/ST_AsGeoJSON.html
-    https://dakdeniz.medium.com/increase-django-geojson-serialization-performance-7cd8cb66e366
-    """
+    """Convert trunk_mains data to Queryset or GeoJSON."""
 
     model = TrunkMain
-    # items_limit = 100000  # TODO: set default in config
-    default_properties = [
-        "id",
-        "gid",
-    ]  # should not include the geometry column as per convention
+
+    def __init__(self):
+        super().__init__(self.model)
 
     def _generate_mains_subqueries(self):
+        tm_qs = self.model.objects.all()
+        dm_qs = DistributionMain.objects.all()
         json_fields = self.get_pipe_json_fields()
 
-        subquery1 = self._generate_touches_subquery(
-            self.model.objects.all(), json_fields
-        )
-        subquery2 = self._generate_touches_subquery(
-            DistributionMain.objects.all(), json_fields
-        )
+        subquery_tm_junctions = self.generate_touches_subquery(tm_qs, json_fields)
+
+        subquery_dm_junctions = self.generate_touches_subquery(dm_qs, json_fields)
+
+        termini_subqueries = self.generate_termini_subqueries([tm_qs, dm_qs])
 
         subqueries = {
-            "trunk_mains_data": ArraySubquery(subquery1),
-            "distribution_mains_data": ArraySubquery(subquery2),
+            "trunkmain_junctions": ArraySubquery(subquery_tm_junctions),
+            "distmain_junctions": ArraySubquery(subquery_dm_junctions),
+            "line_start_intersection_gids": ArraySubquery(termini_subqueries[0]),
+            "line_end_intersection_gids": ArraySubquery(termini_subqueries[1]),
         }
 
         return subqueries
+
+    def _generate_dwithin_subquery(
+        self, qs, json_fields, geometry_field="geometry", inner_subqueries={}
+    ):
+
+        tm_qs = self.model.objects.all()
+        dm_qs = DistributionMain.objects.all()
+
+        tm_inner_subquery = self._generate_dwithin_inner_subquery(
+            tm_qs, "gid", geometry_field=geometry_field
+        )
+        dm_inner_subquery = self._generate_dwithin_inner_subquery(
+            dm_qs, "gid", geometry_field=geometry_field
+        )
+
+        inner_subqueries = {
+            "tm_touches_gids": tm_inner_subquery,
+            "dm_touches_gids": dm_inner_subquery,
+        }
+
+        subquery = super()._generate_dwithin_subquery(
+            qs,
+            json_fields,
+            geometry_field="geometry",
+            inner_subqueries=inner_subqueries,
+        )
+
+        return subquery
 
     def trunk_mains_to_geojson(self, properties=None):
         return self.mains_to_geojson(properties)

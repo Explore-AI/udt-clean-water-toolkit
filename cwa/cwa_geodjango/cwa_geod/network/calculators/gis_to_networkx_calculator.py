@@ -106,3 +106,11 @@ class GisToNetworkXCalculator(GisToGraphCalculator):
         self._set_pipe_connected_asset_relations()
         # use when setting up multiprocessing
         # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
+
+        # TODO: remove from here as it contains specific nx methods
+
+    def create_trunk_mains_graph(self) -> Graph:
+        tm: TrunkMainsController = TrunkMainsController()
+
+        trunk_mains: QuerySet = tm.get_geometry_queryset()
+        return self.create_pipes_network(trunk_mains)

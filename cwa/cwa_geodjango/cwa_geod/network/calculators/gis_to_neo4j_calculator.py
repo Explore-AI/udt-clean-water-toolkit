@@ -1,21 +1,20 @@
-import json
 from multiprocessing.pool import ThreadPool
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
-from neomodel.exceptions import UniqueProperty, ConstraintValidationFailed
+from neomodel.exceptions import UniqueProperty
 from cleanwater.exceptions import (
-    InvalidNodeException,
     InvalidPipeException,
 )
 from . import GisToGraphCalculator
 from cwa_geod.core.constants import (
+    PIPE_JUNCTION__NAME,
     TRUNK_MAIN__NAME,
     DISTRIBUTION_MAIN__NAME,
     PIPE_END__NAME,
     POINT_ASSET__NAME,
 )
-from ..models import PointAsset, PipeEnd
+from ..models import PointAsset, PipeEnd, PointNode, PipeJunction
 
 
 class GisToNeo4jCalculator(GisToGraphCalculator):
@@ -24,315 +23,175 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
     def __init__(self, config):
         self.config = config
+
+        self.all_base_pipes = []
+        self.all_nodes_ordered = []
+
+        self.base_pipe = {}
+        self.all_node_properties = []
+
         super().__init__(config)
 
-    def create_network(self):
-        from timeit import default_timer as timer
+    def _connect_nodes(self, start_node, end_node):
 
-        start = timer()
+        if not start_node.trunk_main.relationship(
+            end_node
+        ) and not start_node.distribution_main.relationship(end_node):
 
-        pipes_qs = self.get_pipe_and_asset_data()
+            relation_data = {
+                # "relation_id": relation_id,
+                "dmas": self.base_pipe["dmas"],
+                "gid": self.base_pipe["gid"],
+                "utility": self.base_pipe["utility_name"],
+            }
+            pipe_name = self.base_pipe["asset_name"]
 
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-
-            print(offset, limit)
-            sliced_qs = list(pipes_qs[offset:limit])
-
-            self.calc_pipe_point_relative_positions(sliced_qs)
-
-            self._create_neo4j_graph()
-
-        end = timer()
-        print(end - start)
-
-    def create_network_parallel(self):
-        from timeit import default_timer as timer
-
-        start = timer()
-
-        pipes_qs = self.get_pipe_and_asset_data()
-
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-            print(offset, limit)
-
-            sliced_qs = list(pipes_qs[offset:limit])
-
-            self.calc_pipe_point_relative_positions_parallel(sliced_qs)
-
-            self._create_neo4j_graph_parallel()
-
-        end = timer()
-        print(end - start)
-
-    def _get_query_offset_limit(self, pipes_qs):
-        pipe_count = self.get_pipe_count(pipes_qs)
-
-        if not self.config.query_limit or self.config.query_limit == pipe_count:
-            query_limit = pipe_count
-        else:
-            query_limit = self.config.query_limit
-
-        if not self.config.query_offset:
-            query_offset = 0
-        else:
-            query_offset = self.config.query_offset
-
-        return query_offset, query_limit
-
-    def _generate_slices(self, pipes_qs):
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        qs_slices = []
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-            qs_slices.append(pipes_qs[offset:limit])
-
-        return qs_slices
-
-    def get_pipe_and_asset_data(self):
-        trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
-        distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
-
-        pipes_qs: QuerySet = trunk_mains_qs.union(distribution_mains_qs, all=True)
-        return pipes_qs
-
-    @staticmethod
-    def build_dma_data_as_json(dma_codes, dma_names):
-        dma_data = [
-            {"code": dma_code, "name": dma_name}
-            for dma_code, dma_name in zip(dma_codes, dma_names)
-        ]
-
-        return json.dumps(dma_data)
-
-    def check_node_exists(self, asset_name, gid, utility_name):
-        node_type: str = self._get_node_type(asset_name)
-
-        if node_type == PIPE_END__NAME:
-            node = PipeEnd.nodes.get_or_none(
-                pipe_type=asset_name, gid=gid, utility=utility_name
-            )
-
-            return node, node_type, None
-
-        elif node_type == POINT_ASSET__NAME:
-            asset_model = PointAsset.asset_name_model_mapping(asset_name)
-
-            node = asset_model.nodes.get_or_none(gid=gid, utility=utility_name)
-            return node, node_type, asset_model
-        else:
-            InvalidNodeException(
-                f"Invalid node detected: {node_type}. Valid nodes are {PIPE_END__NAME} or {POINT_ASSET__NAME}"
-            )
-
-    @staticmethod
-    def _connect_nodes(start_node, end_node, pipe_name, relation_data):
-        try:
             if pipe_name == TRUNK_MAIN__NAME:
                 start_node.trunk_main.connect(end_node, relation_data)
             elif pipe_name == DISTRIBUTION_MAIN__NAME:
                 start_node.distribution_main.connect(end_node, relation_data)
             else:
                 InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
-        except ConstraintValidationFailed:
-            pass
-
-    def _create_and_connect_pipe_end_node(
-        self, pipe_name, utility_name, gid, asset_name, dma_data, start_node, coords
-    ):
-        try:
-            pipe_end = PipeEnd.create(
-                {
-                    "gid": gid,
-                    "dmas": dma_data,
-                    "pipe_type": asset_name,
-                    #            "location": coords,
-                    "utility": utility_name,
-                }
-            )[0]
-        except UniqueProperty:
-            pipe_end = PipeEnd.nodes.get_or_none(
-                pipe_type=asset_name, gid=gid, utility=utility_name
-            )
-
-        self._connect_nodes(
-            start_node,
-            pipe_end,
-            pipe_name,
-            {"dmas": dma_data, "gid": gid, "utility": utility_name},
-        )
-
-        return pipe_end
-
-    def _create_and_connect_point_asset_node(
-        self, pipe_name, utility_name, gid, asset_model, dma_data, start_node, coords
-    ):
-        try:
-            point_asset = asset_model.create(
-                {
-                    "gid": gid,
-                    "dmas": dma_data,
-                    # "location": coords,
-                    "utility": utility_name,
-                }
-            )[0]
-        except UniqueProperty:
-            point_asset = asset_model.nodes.get_or_none(gid=gid, utility=utility_name)
-
-        self._connect_nodes(
-            start_node,
-            point_asset,
-            pipe_name,
-            {"dmas": dma_data, "gid": gid, "utility": utility_name},
-        )
-
-        return point_asset
-
-    def _set_connected_asset_relations(
-        self, pipe_data: dict, assets_data: list, pipe_end
-    ) -> None:
-        start_node = pipe_end
-
-        for asset in assets_data:
-            gid: int = asset["data"]["gid"]
-            asset_name: str = asset["data"]["asset_name"]
-            dma_data = self.build_dma_data_as_json(
-                asset["data"]["dma_codes"], asset["data"]["dma_names"]
-            )
-
-            pipe_name = pipe_data["asset_name"]
-            utility_name = pipe_data["utility_name"]
-
-            # coords = NeomodelPoint(
-            #     (
-            #         asset["intersection_point_geom_latlong"].x,
-            #         asset["intersection_point_geom_latlong"].y,
-            #     ),
-            #     crs="wgs-84",
-            # )
-            coords = None
-
-            node, node_type, asset_model = self.check_node_exists(
-                asset_name, gid, utility_name
-            )
-
-            if not node and node_type == PIPE_END__NAME:
-                start_node = self._create_and_connect_pipe_end_node(
-                    pipe_name,
-                    utility_name,
-                    gid,
-                    asset_name,
-                    dma_data,
-                    start_node,
-                    coords,
-                )
-
-            elif not node and node_type == POINT_ASSET__NAME:
-                start_node = self._create_and_connect_point_asset_node(
-                    pipe_name,
-                    utility_name,
-                    gid,
-                    asset_model,
-                    dma_data,
-                    start_node,
-                    coords,
-                )
-
-            elif node:
-                start_node = node
-
-            elif node_type not in [PIPE_END__NAME, POINT_ASSET__NAME]:
-                raise InvalidNodeException(
-                    f"Invalid node detected: {node_type}. Valid nodes are {PIPE_END__NAME} or {POINT_ASSET__NAME}"
-                )
-
-        return start_node
-
-    def _set_pipe_start_node(self, pipe_data, dma_data):
-        pipe_gid = pipe_data.get("gid")
-        pipe_type = pipe_data.get("asset_name")
-        utility_name = pipe_data.get("utility_name")
-        start_geom_4326 = pipe_data.get("start_geom_latlong")
-
-        # start_neo_point = NeomodelPoint(
-        #     (start_geom_4326.x, start_geom_4326.y), crs="wgs-84"
-        # )
-
-        try:
-            pipe_start_node = PipeEnd.create(
-                {
-                    "gid": pipe_gid,
-                    "dmas": dma_data,
-                    "pipe_type": pipe_type,
-                    # "location": start_neo_point,
-                    "utility": utility_name,
-                }
-            )[0]
-        except UniqueProperty:
-            pipe_start_node = PipeEnd.nodes.get_or_none(
-                pipe_type=pipe_type, gid=pipe_gid, utility=utility_name
-            )
-
-        return pipe_start_node
-
-    def _set_pipe_end_node(self, pipe_data, dma_data, pipe_second_last_node):
-        pipe_gid = pipe_data.get("gid")
-        pipe_type = pipe_data.get("asset_name")
-        utility_name = pipe_data.get("utility_name")
-        end_geom_latlong = pipe_data.get("end_geom_latlong")
 
         # end_neo_point = NeomodelPoint(
         #     (end_geom_latlong.x, end_geom_latlong.y), crs="wgs-84"
         # )
 
+    def _get_or_create_pipe_junctions_node(self, node_properties):
+
+        node_id = node_properties.get("node_id")
+        gids = node_properties.get("gids")
+        dmas = node_properties.get("dmas")
+        geom = node_properties.get("intersection_point_geometry")
+        # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
+        utility = self.base_pipe.get("utility_name")
+
         try:
-            pipe_last_node = PipeEnd.create(
+            # TODO: would neomodel get_or_create work better here?
+            return PipeJunction.create(
                 {
-                    "gid": pipe_gid,
-                    "dmas": dma_data,
-                    "pipe_type": pipe_type,
-                    #            "location": end_neo_point,
-                    "utility": utility_name,
+                    "node_id": node_id,
+                    "dmas": dmas,
+                    "gids": gids,
+                    "utility": utility,
+                    # TODO: why does geom.x return a numpy array
+                    "x_coord": geom.coords[0],
+                    "y_coord": geom.coords[1],
                 }
             )[0]
         except UniqueProperty:
-            pipe_last_node = PipeEnd.nodes.get_or_none(
-                pipe_type=pipe_type, gid=pipe_gid, utility=utility_name
-            )
+            return PipeJunction.nodes.get_or_none(node_id=node_id)
 
-        self._connect_nodes(
-            pipe_second_last_node,
-            pipe_last_node,
-            pipe_type,
-            {"dmas": dma_data, "gid": pipe_gid, "utility": utility_name},
-        )
+    def _get_or_create_pipe_end_node(self, node_properties):
 
-    def _map_pipe_connected_asset_relations(self, pipe_data: dict, assets_data: list):
-        # pipe_end = PipeEnd.nodes.get_or_none(pipe_type=pipe_type, gid=pipe_gid)
+        node_id = node_properties.get("node_id")
+        gid = node_properties.get("gid")
+        dmas = node_properties.get("dmas")
+        geom = node_properties.get("intersection_point_geometry")
+        # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
+        utility = self.base_pipe.get("utility_name")
 
-        dma_data = self.build_dma_data_as_json(
-            pipe_data["dma_codes"], pipe_data["dma_names"]
-        )
+        try:
+            # TODO: would neomodel get_or_create work better here?
+            return PipeEnd.create(
+                {
+                    "node_id": node_id,
+                    "dmas": dmas,
+                    "gid": gid,
+                    "utility": utility,
+                    # TODO: why does geom.x return a numpy array
+                    "x_coord": geom.coords[0],
+                    "y_coord": geom.coords[1],
+                }
+            )[0]
+        except UniqueProperty:
+            return PipeEnd.nodes.get_or_none(node_id=node_id)
 
-        pipe_start_node = self._set_pipe_start_node(pipe_data, dma_data)
+    def _get_or_create_point_asset_node(self, node_properties):
 
-        pipe_second_last_node = self._set_connected_asset_relations(
-            pipe_data, assets_data, pipe_start_node
-        )
+        asset_name = node_properties.get("asset_name")
+        asset_model = PointAsset.asset_name_model_mapping(asset_name)
 
-        self._set_pipe_end_node(pipe_data, dma_data, pipe_second_last_node)
+        node_id = node_properties.get("node_id")
+        gid = node_properties.get("gid")
+        dmas = node_properties.get("dmas")
+        geom = node_properties.get("intersection_point_geometry")
+        utility = self.base_pipe.get("utility_name")
+
+        try:
+            # TODO: would neomodel get_or_create work better here?
+            return asset_model.create(
+                {
+                    "node_id": node_id,
+                    "dmas": dmas,
+                    "gid": gid,
+                    "utility": utility,
+                    # TODO: why does geom.x return a numpy array
+                    "x_coord": geom.coords[0],
+                    "y_coord": geom.coords[1],
+                }
+            )[0]
+        except UniqueProperty:
+            return asset_model.nodes.get_or_none(node_id=node_id)
+
+    def _create_nodes(self):
+
+        all_nodes = []
+        for node_properties in self.all_node_properties:
+
+            node_id = node_properties.get("node_id")
+
+            point_node = PointNode.nodes.get_or_none(node_id=node_id)
+
+            if point_node:
+                all_nodes.append(point_node)
+                continue
+
+            node_type = node_properties.get("node_type")
+
+            if node_type == PIPE_JUNCTION__NAME:
+                node = self._get_or_create_pipe_junctions_node(node_properties)
+                all_nodes.append(node)
+
+            elif node_type == PIPE_END__NAME:
+                node = self._get_or_create_pipe_end_node(node_properties)
+                all_nodes.append(node)
+
+            elif node_type == POINT_ASSET__NAME:
+                node = self._get_or_create_point_asset_node(node_properties)
+                all_nodes.append(node)
+
+        # if self.base_pipe["gid"] == 838147:
+        #     import pdb
+
+        #     pdb.set_trace()
+
+        return all_nodes
+
+    def _create_relations(self, all_nodes):
+        current_node = all_nodes[0]
+
+        for next_node in all_nodes[1:]:
+            # need to sort to ensure cardinality is maintained
+            sorted_nodes = sorted([current_node, next_node], key=lambda x: x.node_id)
+
+            self._connect_nodes(sorted_nodes[0], sorted_nodes[1])
+            current_node = next_node
+
+    def _map_pipe_connected_asset_relations(
+        self, base_pipe: dict, all_node_properties: list
+    ):
+
+        self.base_pipe = base_pipe
+        self.all_node_properties = all_node_properties
+
+        all_nodes = self._create_nodes()
+        self._create_relations(all_nodes)
 
     def _reset_pipe_asset_data(self):
         # reset all_pipe_data and all_asset_positions to manage memory
-        self.all_pipe_data = []
-        self.all_asset_positions = []
+        self.all_base_pipes = []
+        self.all_nodes_ordered = []
 
     def _create_neo4j_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
@@ -348,8 +207,8 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         list(
             map(
                 self._map_pipe_connected_asset_relations,
-                self.all_pipe_data,
-                self.all_asset_positions,
+                self.all_base_pipes,
+                self.all_nodes_ordered,
             )
         )
 
@@ -369,7 +228,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         with ThreadPool(self.config.thread_count) as p:
             p.starmap(
                 self._map_pipe_connected_asset_relations,
-                zip(self.all_pipe_data, self.all_asset_positions),
+                zip(self.all_base_pipes, self.all_nodes_ordered),
             )
 
         self._reset_pipe_asset_data()
