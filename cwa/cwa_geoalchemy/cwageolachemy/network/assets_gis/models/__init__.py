@@ -1,5 +1,5 @@
 # geoalchemy models of data in postgis table exist here
-from .base_gis_asset import BaseAsset, BaseMultiStringAsset, BasePointAsset
+from .base_gis_asset import BaseAsset, BaseMainsAsset, BasePointAsset
 from .distribution_main import DistributionMain
 from .hydrant import Hydrant
 from .logger import Logger

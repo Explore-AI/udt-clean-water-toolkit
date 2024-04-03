@@ -1,5 +1,5 @@
-from ....core.db.gis_db import Base
 from ...assets_utilities.models.dma import DMA
+from cwageolachemy.config.db_config import Base
 from .base_gis_asset import BasePointAsset
 from sqlalchemy import Column, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped
