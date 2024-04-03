@@ -1,9 +1,9 @@
 from typing import List
 from sqlalchemy import Column, ForeignKey, Integer, Table
 from sqlalchemy.orm import Mapped, relationship
-from ....core.db.gis_db import Base
 from ...assets_utilities.models.dma import DMA
 from .base_gis_asset import BaseMainsAsset
+from cwageolachemy.config.db_config import Base
 
 trunkmain_dmas = Table(
     "assets_trunkmain_dmas",
@@ -16,3 +16,6 @@ trunkmain_dmas = Table(
 class TrunkMain(BaseMainsAsset):
     __tablename__ = "assets_trunkmain"
     dmas: Mapped[List[DMA]] = relationship(secondary=trunkmain_dmas)
+
+    class AssetMeta: 
+        asset_name = "trunk_main"
