@@ -61,8 +61,8 @@ for layer in "${!dictionary[@]}"; do
         fi
     done
 
-    # SQL statement to select desired columns
-    final_sql="SELECT $sql_statement FROM $layer"
+    # SQL statement to select desired columns and also convert to wkt
+    final_sql="SELECT $sql_statement,CAST(ST_AsText(ST_Transform("shape",4326)) AS TEXT) wkt_geom_4326 FROM $layer"
 
     # Final SQL command
 	echo -e "\e[32m ---------------------------------------------------- \033[0m"
@@ -74,52 +74,16 @@ for layer in "${!dictionary[@]}"; do
 done
 
 # Cleanup data
+# For geopackage you might need to run the following SELECT EnableGpkgAmphibiousMode();
 cat > cleanup.sql <<EOF
 SELECT load_extension("mod_spatialite");
-
-CREATE INDEX idx_dmaareacode
-ON dma (dmaareacode);
-
-CREATE INDEX idx_dmacode
-ON "wTrunkMain" ("DMACODE");
---Update DMA records
-
-UPDATE "wTrunkMain"
-SET "DMACODE" = sub.dmaareacode
-
-FROM (SELECT a.dmaareacode
-    FROM dma AS a
-    JOIN "wTrunkMain" AS b
-    ON st_within(b.geom ,a.geom)
-	where b."DMACODE" IS NULL) AS sub
-WHERE "wTrunkMain"."DMACODE" = sub.dmaareacode;
-
---Delete disjoint records
-DELETE FROM wChamber where "GISID" not in
-(SELECT a."GISID" from wChamber a
-join dma b
-on st_intersects(a.geom,b.geom));
-
--- Chamber doesn't have DMA code
-ALTER table "wChamber" add column "DMACODE" text;
-UPDATE "wChamber"
-SET "DMACODE" = sub.dmaareacode
-
-FROM (SELECT  a.dmaareacode
-    FROM dma AS a
-    JOIN "wChamber" AS b
-    ON st_intersects(a.geom ,b.geom)
-	where b."DMACODE" IS NULL) AS sub
-WHERE "wChamber"."DMACODE" is null;
-
-
 EOF
 
 # Check if SQLite3 is installed to run SQL against geopackage
+# Also Install the following apt update;apt install -y sqlite3 libsqlite3-mod-spatialite
 if dpkg -l | grep -q "sqlite3"; then
     echo "Running cleanup.sql script to sanitize the layers"
 	#sqlite3 data.gpkg < cleanup.sql
 else
     echo "Geopackage is not cleaned, please install SQLITE3 and run the script"
 fi
-
