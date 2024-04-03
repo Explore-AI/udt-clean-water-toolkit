@@ -1,12 +1,12 @@
 from ....core.db.gis_db import Base
 from ....core.constants import DEFAULT_SRID
 from sqlalchemy import Integer, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from geoalchemy2 import Geometry
 from datetime import datetime
 
 
-class BaseAsset(Base):
+class BaseAsset(DeclarativeBase):
     __abstract__ = True
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     gid: Mapped[int] = mapped_column(Integer)
