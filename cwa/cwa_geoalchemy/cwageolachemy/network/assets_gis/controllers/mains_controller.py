@@ -1,17 +1,13 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.dialects.postgresql import array_agg, array
-from sqlalchemy.sql import Select
+from sqlalchemy.sql import Select, cast
+from sqlalchemy import func, select
 from sqlalchemy.orm import aliased, Query
-from geoalchemy2.functions import (
-    ST_AsGeoJSON,
-    ST_AsEWKT,
-    ST_StartPoint,
-    ST_EndPoint,
-    ST_Touches,
-)
-from ..models import TrunkMain, DistributionMain
+from sqlalchemy.sql.expression import literal_column
+from geoalchemy2 import functions as geo_funcs
+from ..models import TrunkMain, DistributionMain, trunkmain_dmas
 from cwageolachemy.network.assets_utilities.models import Utility, DMA
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 
 class MainsController(ABC):
@@ -26,27 +22,57 @@ class MainsController(ABC):
 
     @staticmethod
     def generate_touches_subquery(
-        qs: Query, json_fields: dict, geometry_field: str = "geometry"
+        stmt: Select,
+        json_fields: dict,
+        model: Union[TrunkMain, DistributionMain],
+        geometry_field: str = "geometry",
     ) -> Any:
+        # :TODO Make this a Dynamic function
 
+        trunkmain_dmas_alias = aliased(trunkmain_dmas)
         dma_alias = aliased(DMA)
-        model = qs.column_descriptions[0]["entity"]
-        # create the touches condition 
-        touches_condition = ST_Touches(getattr(model, geometry_field))
+        utility_alias = aliased(Utility)
+        print(f"Model from entity: {model}")
 
-        subquery = qs.filter(touches_condition)
-        
-        # :TODO instead of for loop implement it subsequentially
-        # for k, v in json_fields.items(): 
-        #     if isinstance(v, array): 
-        #         subquery = subquery.add_columns(array_agg(dma_alias.id).label("dma_ids"))
-        #     elif k == "wkt": 
-        #         subquery = subquery.add_columns(ST_AsEWKT(getattr(model, geometry_field)).label(k))
-        #     else: 
-        #         subquery = subquery.add_columns(getattr(dma_alias, k).label(k))
-        
-        return subquery
-        
+        # create the touches condition
+        json_object_subquery = select(
+            func.json_build_object(
+                "id",
+                model.id,
+                "gid",
+                model.gid,
+                "geometry",
+                model.geometry,
+                "wkt",
+                geo_funcs.ST_AsText(getattr(model, geometry_field)),
+                "dma_ids",
+                array_agg(dma_alias.id),
+                "dma_names",
+                array_agg(dma_alias.name),
+                "dma_codes",
+                array_agg(dma_alias.code),
+                "utilities",
+                array_agg(utility_alias.name),
+                "asset_name",
+                literal_column(model.AssetMeta.asset_name),
+            ).label("json"),
+        )
+        sub_query = (
+            json_object_subquery.join(
+                trunkmain_dmas_alias, model.id == trunkmain_dmas_alias.c.trunkmain_id
+            )
+            .join(dma_alias, trunkmain_dmas.c.dma_id == dma_alias.id)
+            .join(utility_alias, dma_alias.utility_id == utility_alias.id)
+            .where(geo_funcs.ST_Touches(model.geometry, (model.geometry)))
+            .group_by(
+                model.id,
+                geo_funcs.ST_AsText(model.geometry),
+                geo_funcs.ST_StartPoint(model.geometry),
+                geo_funcs.ST_EndPoint(model.geometry),
+            )
+        )
+
+        return sub_query
 
     @staticmethod
     def get_asset_json_fields(geometry_field="geometry") -> dict:
@@ -54,7 +80,7 @@ class MainsController(ABC):
             "id": "id",
             "gid": "gid",
             "geometry": geometry_field,
-            "wkt": ST_AsEWKT(geometry_field),
+            "wkt": geo_funcs.ST_AsText(geometry_field),
             "dma_ids": array_agg(array("dmas")),
             "dma_names": array_agg(array("dma__name")),
             "dma_codes": array_agg(array("dma__code")),
@@ -68,9 +94,9 @@ class MainsController(ABC):
             "id": "id",
             "gid": "gid",
             "geometry": "geometry",
-            "wkt": ST_AsEWKT("geometry"),
-            "start_point": ST_StartPoint("geometry"),
-            "end_point": ST_EndPoint("geometry"),
+            "wkt": geo_funcs.ST_AsText("geometry"),
+            "start_point": geo_funcs.ST_StartPoint("geometry"),
+            "end_point": geo_funcs.ST_EndPoint("geometry"),
             "dma_ids": array_agg(array("dmas")),
             "dma_names": array_agg(array("dma__name")),
             "dma_codes": array_agg(array("dma__code")),
