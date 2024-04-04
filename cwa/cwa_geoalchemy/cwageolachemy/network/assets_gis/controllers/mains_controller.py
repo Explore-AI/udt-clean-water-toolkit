@@ -63,7 +63,8 @@ class MainsController(ABC):
                 geo_funcs.ST_AsText(model.geometry),
                 geo_funcs.ST_StartPoint(model.geometry),
                 geo_funcs.ST_EndPoint(model.geometry),
-            ).subquery()
+            )
+            .subquery()
         )
 
         return sub_query
@@ -99,7 +100,60 @@ class MainsController(ABC):
 
     @abstractmethod
     def _generate_mains_subqueries(self) -> Any:
-        pass
+        raise NotImplementedError(
+            "Function should be defined in the child class and not called explicitly. "
+        )
+
+    def generate_termini_subqueries(self, main_dmas: dict[str, Table]):
+        start_point_subqueries: list[Select] = []
+        end_point_subqueries: list[Select] = []
+
+        for model in [TrunkMain, DistributionMain]:
+            main_dmas_alias = aliased(main_dmas[model.AssetMeta.asset_name])
+
+            subquery_1 = (
+                select(
+                    model.gid,
+                )
+                .join_from(model, main_dmas_alias)
+                .where(
+                    geo_funcs.ST_Touches(
+                        model.geometry,
+                        geo_funcs.ST_AsText(geo_funcs.ST_StartPoint(model.geometry)),
+                    )
+                )
+            )
+
+            subquery_2 = (
+                select(
+                    model.gid,
+                )
+                .join_from(model, main_dmas_alias)
+                .where(
+                    geo_funcs.ST_Touches(
+                        model.geometry,
+                        geo_funcs.ST_AsText(geo_funcs.ST_EndPoint(model.geometry)),
+                    )
+                )
+            )
+
+            start_point_subqueries.append(subquery_1)
+            end_point_subqueries.append(subquery_2)
+
+        subquery_line_start = (
+            start_point_subqueries[0]
+            .union(*start_point_subqueries[1:])
+            .subquery()
+            .alias("sq_line_start")
+        )
+        subquery_line_end = (
+            end_point_subqueries[0]
+            .union(*end_point_subqueries[1:])
+            .subquery()
+            .alias("sq_line_end")
+        )
+
+        return (subquery_line_start, subquery_line_end)
 
     def _generate_asset_subqueries(self) -> Any:
         pass

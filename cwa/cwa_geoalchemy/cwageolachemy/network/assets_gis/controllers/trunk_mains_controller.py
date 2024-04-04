@@ -14,12 +14,21 @@ class TrunkMainsController(MainsController):
         subquery_dm_junctions = self.generate_touches_subquery(
             DistributionMain, distributionmain_dmas
         )
-        
+
+        termini_subqueries = self.generate_termini_subqueries(
+            {"distribution_main": distributionmain_dmas, "trunk_main": trunkmain_dmas}
+        )
+
         return {
-            "trunkmain_junctions": ARRAY(subquery_tm_junctions).label("trunkmain_junctions"), 
-            "distmain_junctions": ARRAY(subquery_dm_junctions).label("distmain_junctions"),
+            "trunkmain_junctions": ARRAY(subquery_tm_junctions).label(
+                "trunkmain_junctions"
+            ),
+            "distmain_junctions": ARRAY(subquery_dm_junctions).label(
+                "distmain_junctions"
+            ),
+            "line_start_intersection_gids": ARRAY(termini_subqueries[0]),
+            "line_end_intersection_gids": ARRAY(termini_subqueries[1]),
         }
-        
 
     def trunk_mains_to_geojson(self, properties=None):
         pass
