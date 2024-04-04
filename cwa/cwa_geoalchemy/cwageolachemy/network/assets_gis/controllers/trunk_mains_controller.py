@@ -1,42 +1,31 @@
 from .mains_controller import MainsController
-from ..models import TrunkMain, DistributionMain
-from typing import Any, List, Optional 
-from cwageolachemy.config.db_config import engine
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+from ..models import TrunkMain, DistributionMain, trunkmain_dmas, distributionmain_dmas
 from sqlalchemy.dialects.postgresql import array as ARRAY
+from sqlalchemy import func
 
 
-
-class TrunkMainsController(MainsController): 
+class TrunkMainsController(MainsController):
     model = TrunkMain
-    
+
     def _generate_mains_subqueries(self):
+        subquery_tm_junctions = self.generate_touches_subquery(
+            TrunkMain, trunkmain_dmas
+        )
+        subquery_dm_junctions = self.generate_touches_subquery(
+            DistributionMain, distributionmain_dmas
+        )
         
-        with Session(engine) as session:
-            # create query distribution and trunk query sets 
-            tm_query = session.query(self.model)
-            dm_query = session.query(DistributionMain)
-            
-            tm_stmt = select(TrunkMain)
-            dm_stmt = select(DistributionMain)
-            
-            json_fields = self.get_pipe_json_fields()
-            # create the touches subqueries
-            subquery_tm_junctions = self.generate_touches_subquery(tm_query, json_fields, TrunkMain).alias('trunkmain_junctions')
-            # subquery_dm_junctions
-            
-            print(subquery_tm_junctions)
-            # results = subquery_tm_junctions.all()
-            # for result in results[:10]: 
-            #     print(result)
-            
-            
-    def trunk_mains_to_geojson(self, properties=None): 
-        pass 
-    
+        return {
+            "trunkmain_junctions": ARRAY(subquery_tm_junctions).label("trunkmain_junctions"), 
+            "distmain_junctions": ARRAY(subquery_dm_junctions).label("distmain_junctions"),
+        }
+        
+
+    def trunk_mains_to_geojson(self, properties=None):
+        pass
+
     def trunk_mains_to_geojson2(self, properties=None):
-        pass 
-    
+        pass
+
     def trunk_mains_to_geodataframe(self, properties=None):
-        pass 
+        pass

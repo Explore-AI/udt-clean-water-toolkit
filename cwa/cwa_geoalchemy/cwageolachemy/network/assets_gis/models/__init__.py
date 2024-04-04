@@ -1,6 +1,6 @@
 # geoalchemy models of data in postgis table exist here
 from .base_gis_asset import BaseAsset, BaseMainsAsset, BasePointAsset
-from .distribution_main import DistributionMain
+from .distribution_main import DistributionMain, distributionmain_dmas
 from .hydrant import Hydrant
 from .logger import Logger
 from .network_meter import NetworkMeter
