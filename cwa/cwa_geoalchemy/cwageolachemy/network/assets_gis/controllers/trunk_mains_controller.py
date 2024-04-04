@@ -12,15 +12,24 @@ class TrunkMainsController(MainsController):
     model = TrunkMain
     
     def _generate_mains_subqueries(self):
-        print("Generate the mains subqueries")
+        
         with Session(engine) as session:
             # create query distribution and trunk query sets 
             tm_query = session.query(self.model)
             dm_query = session.query(DistributionMain)
             
-            json_fields = self.get_asset_json_fields()
-            subquery_tm_junctions = self.generate_touches_subquery(tm_query, json_fields)
+            tm_stmt = select(TrunkMain)
+            dm_stmt = select(DistributionMain)
+            
+            json_fields = self.get_pipe_json_fields()
+            # create the touches subqueries
+            subquery_tm_junctions = self.generate_touches_subquery(tm_query, json_fields, TrunkMain).alias('trunkmain_junctions')
+            # subquery_dm_junctions
+            
             print(subquery_tm_junctions)
+            # results = subquery_tm_junctions.all()
+            # for result in results[:10]: 
+            #     print(result)
             
             
     def trunk_mains_to_geojson(self, properties=None): 

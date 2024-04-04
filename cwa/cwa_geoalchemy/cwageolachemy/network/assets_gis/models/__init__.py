@@ -5,7 +5,7 @@ from .hydrant import Hydrant
 from .logger import Logger
 from .network_meter import NetworkMeter
 from .network_opt_valve import NetworkOptValve
-from .trunk_main import TrunkMain
+from .trunk_main import TrunkMain, trunkmain_dmas
 from .operational_site import OperationalSite
 from .pressure_control_valve import PressureControlValve
 from .pressure_fitting import PressureFitting
