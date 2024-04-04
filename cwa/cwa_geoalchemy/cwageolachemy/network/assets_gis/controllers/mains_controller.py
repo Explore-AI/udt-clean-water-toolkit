@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.dialects.postgresql import array_agg, array
 from sqlalchemy.sql import Select, cast
-from sqlalchemy import func, select
+from sqlalchemy import func, select, String, Text, Table, literal_column
 from sqlalchemy.orm import aliased, Query
 from sqlalchemy.sql.expression import literal_column
 from geoalchemy2 import functions as geo_funcs
-from ..models import TrunkMain, DistributionMain, trunkmain_dmas
+from ..models import TrunkMain, DistributionMain, trunkmain_dmas, distributionmain_dmas
 from cwageolachemy.network.assets_utilities.models import Utility, DMA
 from typing import Any, List, Optional, Union
 
@@ -22,54 +22,48 @@ class MainsController(ABC):
 
     @staticmethod
     def generate_touches_subquery(
-        stmt: Select,
-        json_fields: dict,
-        model: Union[TrunkMain, DistributionMain],
+        model: Optional[Union[TrunkMain, DistributionMain]],
+        associate_dmas_model: Optional[Table],
         geometry_field: str = "geometry",
     ) -> Any:
         # :TODO Make this a Dynamic function
 
-        trunkmain_dmas_alias = aliased(trunkmain_dmas)
+        main_dmas_alias = aliased(associate_dmas_model)
         dma_alias = aliased(DMA)
         utility_alias = aliased(Utility)
-        print(f"Model from entity: {model}")
-
-        # create the touches condition
-        json_object_subquery = select(
-            func.json_build_object(
-                "id",
-                model.id,
-                "gid",
-                model.gid,
-                "geometry",
-                model.geometry,
-                "wkt",
-                geo_funcs.ST_AsText(getattr(model, geometry_field)),
-                "dma_ids",
-                array_agg(dma_alias.id),
-                "dma_names",
-                array_agg(dma_alias.name),
-                "dma_codes",
-                array_agg(dma_alias.code),
-                "utilities",
-                array_agg(utility_alias.name),
-                "asset_name",
-                literal_column(model.AssetMeta.asset_name),
-            ).label("json"),
-        )
         sub_query = (
-            json_object_subquery.join(
-                trunkmain_dmas_alias, model.id == trunkmain_dmas_alias.c.trunkmain_id
+            select(
+                func.jsonb_build_object(
+                    literal_column("'id'"),
+                    cast(model.id, Text),
+                    literal_column("'gid'"),
+                    cast(model.gid, Text),
+                    literal_column("'geometry'"),
+                    cast(model.geometry, Text),
+                    literal_column("'wkt'"),
+                    cast(geo_funcs.ST_AsText(getattr(model, geometry_field)), Text),
+                    literal_column("'dma_ids'"),
+                    cast(array_agg(dma_alias.id), Text),
+                    literal_column("'dma_names'"),
+                    cast(array_agg(dma_alias.name), Text),
+                    literal_column("'dma_codes'"),
+                    cast(array_agg(dma_alias.code), Text),
+                    literal_column("'utilities'"),
+                    cast(array_agg(utility_alias.name), Text),
+                    literal_column("'asset_name'"),
+                    cast(literal_column(model.AssetMeta.asset_name), Text),
+                ).label("json"),
             )
-            .join(dma_alias, trunkmain_dmas.c.dma_id == dma_alias.id)
-            .join(utility_alias, dma_alias.utility_id == utility_alias.id)
-            .where(geo_funcs.ST_Touches(model.geometry, (model.geometry)))
+            .join_from(model, main_dmas_alias)
+            .join_from(main_dmas_alias, dma_alias)
+            .join_from(dma_alias, utility_alias)
+            .where(geo_funcs.ST_Touches(model.geometry, (TrunkMain.geometry)))
             .group_by(
                 model.id,
                 geo_funcs.ST_AsText(model.geometry),
                 geo_funcs.ST_StartPoint(model.geometry),
                 geo_funcs.ST_EndPoint(model.geometry),
-            )
+            ).subquery()
         )
 
         return sub_query
