@@ -5,7 +5,7 @@ from sqlalchemy import func, select, String, Text, Table, literal_column
 from sqlalchemy.orm import aliased, Query
 from sqlalchemy.sql.expression import literal_column
 from geoalchemy2 import functions as geo_funcs
-from ..models import TrunkMain, DistributionMain, trunkmain_dmas, distributionmain_dmas
+from ..models import *
 from cwageolachemy.network.assets_utilities.models import Utility, DMA
 from typing import Any, List, Optional, Union
 
@@ -15,10 +15,72 @@ class MainsController(ABC):
     default_properties = ["id", "gid"]
 
     def _generate_dwithin_subquery(
-        self, stmt_set, json_fields, geometry_field="geometry", inner_stmts={}
+        self, model: BaseAsset, asset_dmas, geometry_field="geometry", inner_stmts={}
     ) -> Any:
+        tm_touches_subquery = (
+            select(TrunkMain.gid)
+            .join_from(TrunkMain, trunkmain_dmas, isouter=True)
+            .where(
+                geo_funcs.ST_DWithin(
+                    TrunkMain.geometry, model.geometry, self.WITHIN_DISTANCE
+                )
+            )
+            .order_by(trunkmain_dmas.c.dma_id.asc())
+            .limit(20)
+            .scalar_subquery()
+            .label("trunkmain_touches")
+        )
 
-        pass
+        dm_touches_subquery = (
+            select(DistributionMain.gid)
+            .join_from(DistributionMain, distributionmain_dmas, isouter=True)
+            .where(
+                geo_funcs.ST_DWithin(
+                    DistributionMain.geometry, model.geometry, self.WITHIN_DISTANCE
+                )
+            )
+            .order_by(distributionmain_dmas.c.dma_id.asc())
+            .scalar_subquery()
+            .label("distributionmain_touches")
+        )
+
+        dwithin_asset_subquery = (
+            select(
+                func.jsonb_build_object(
+                    literal_column("'id'"),
+                    cast(model.id, Text),
+                    literal_column("'gid'"),
+                    cast(model.gid, Text),
+                    literal_column("'geometry'"),
+                    cast(model.geometry, Text),
+                    literal_column("'wkt'"),
+                    cast(geo_funcs.ST_AsText(model.geometry), Text),
+                    literal_column("'dma_ids'"),
+                    cast(array_agg(DMA.id), Text),
+                    literal_column("'dma_names'"),
+                    cast(array_agg(DMA.name), Text),
+                    literal_column("'dma_codes'"),
+                    cast(array_agg(DMA.code), Text),
+                    literal_column("'utilities'"),
+                    cast(array_agg(Utility.name), Text),
+                    literal_column("'tm_touches_gids'"),
+                    array_agg(tm_touches_subquery),
+                    literal_column("'dm_touches_gids'"),
+                    array_agg(dm_touches_subquery),
+                )
+            )
+            .join_from(model, asset_dmas, isouter=True)
+            .join_from(asset_dmas, DMA, isouter=True)
+            .join_from(DMA, Utility, isouter=True)
+            .where(geo_funcs.ST_DWithin(model.geometry, (TrunkMain.geometry), 0.5))
+            .group_by(
+                model.id,
+                geo_funcs.ST_AsText(model.geometry),
+            )
+            .scalar_subquery()
+        )
+
+        return dwithin_asset_subquery
 
     @staticmethod
     def generate_touches_subquery(
@@ -154,9 +216,35 @@ class MainsController(ABC):
         return (array_agg(subquery_line_start), array_agg(subquery_line_end))
 
     def _generate_asset_subqueries(self) -> Any:
-        json_fields = self.get_asset_json_fields()
+        logger_subquery = self._generate_dwithin_subquery(Logger, logger_dmas)
+        hydrant_subquery = self._generate_dwithin_subquery(Hydrant, hydrant_dmas)
+        pressure_fitting_subquery = self._generate_dwithin_subquery(
+            PressureFitting, pressurefitting_dmas
+        )
+        pressure_valve_subquery = self._generate_dwithin_subquery(
+            PressureControlValve, pressurecontrolvalve_dmas
+        )
+        network_meter_subquery = self._generate_dwithin_subquery(
+            NetworkMeter, networkmeter_dmas
+        )
+        chamber_subquery = self._generate_dwithin_subquery(Chamber, chamber_dmas)
+        operational_site_subquery = self._generate_dwithin_subquery(
+            OperationalSite, operationalsite_dmas
+        )
+        network_opt_valve_subquery = self._generate_dwithin_subquery(
+            NetworkOptValve, networkoptvalve_dmas
+        )
         
-        pass
+        return {
+            "loggers": logger_subquery.label("logger_data"),
+            "hydrants": hydrant_subquery.label("hydrants_data"),
+            "pressure_fittings": pressure_fitting_subquery.label("pressure_fitting_data"), 
+            "pressure_valve": pressure_valve_subquery.label("pressure_valve_data"),
+            "network_meters": network_meter_subquery.label("network_meter_data"),
+            "chambers": chamber_subquery.label("chamber_data"),
+            "operational_sites": operational_site_subquery.label("operational_site_data"), 
+            "network_opt_valve": network_opt_valve_subquery.label("network_opt_valve_data"),
+        }
 
     def get_pipe_point_relation_queryset(self) -> Any:
         mains_intersection_stmt = self._generate_mains_subqueries()
