@@ -1,7 +1,8 @@
 from .mains_controller import MainsController
 from ..models import TrunkMain, DistributionMain, trunkmain_dmas, distributionmain_dmas
 from sqlalchemy.dialects.postgresql import array as ARRAY
-from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import array_agg
+from sqlalchemy import func, select
 
 
 class TrunkMainsController(MainsController):
@@ -18,16 +19,15 @@ class TrunkMainsController(MainsController):
         termini_subqueries = self.generate_termini_subqueries(
             {"distribution_main": distributionmain_dmas, "trunk_main": trunkmain_dmas}
         )
-
         return {
-            "trunkmain_junctions": ARRAY(subquery_tm_junctions).label(
-                "trunkmain_junctions"
+            "trunkmain_junctions": subquery_tm_junctions.label("trunkmain_junctions"),
+            "distmain_junctions": subquery_dm_junctions.label("distmain_junctions"),
+            "line_start_intersection_gids": termini_subqueries[0].label(
+                "line_start_intersection_gids"
             ),
-            "distmain_junctions": ARRAY(subquery_dm_junctions).label(
-                "distmain_junctions"
+            "line_end_intersection_gids": termini_subqueries[1].label(
+                "line_end_intersection_gids"
             ),
-            "line_start_intersection_gids": ARRAY(termini_subqueries[0]),
-            "line_end_intersection_gids": ARRAY(termini_subqueries[1]),
         }
 
     def trunk_mains_to_geojson(self, properties=None):
