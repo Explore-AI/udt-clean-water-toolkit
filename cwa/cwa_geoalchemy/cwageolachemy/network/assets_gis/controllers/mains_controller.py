@@ -54,9 +54,9 @@ class MainsController(ABC):
                     cast(literal_column(model.AssetMeta.asset_name), Text),
                 ).label("json"),
             )
-            .join_from(model, main_dmas_alias)
-            .join_from(main_dmas_alias, dma_alias)
-            .join_from(dma_alias, utility_alias)
+            .join_from(model, main_dmas_alias, isouter=True)
+            .join_from(main_dmas_alias, dma_alias, isouter=True)
+            .join_from(dma_alias, utility_alias, isouter=True)
             .where(geo_funcs.ST_Touches(model.geometry, (TrunkMain.geometry)))
             .group_by(
                 model.id,
@@ -64,10 +64,10 @@ class MainsController(ABC):
                 geo_funcs.ST_StartPoint(model.geometry),
                 geo_funcs.ST_EndPoint(model.geometry),
             )
-            .subquery()
+            .scalar_subquery()
         )
 
-        return sub_query
+        return array_agg(sub_query)
 
     @staticmethod
     def get_asset_json_fields(geometry_field="geometry") -> dict:
@@ -143,19 +143,19 @@ class MainsController(ABC):
         subquery_line_start = (
             start_point_subqueries[0]
             .union(*start_point_subqueries[1:])
-            .subquery()
             .alias("sq_line_start")
         )
         subquery_line_end = (
             end_point_subqueries[0]
             .union(*end_point_subqueries[1:])
-            .subquery()
             .alias("sq_line_end")
         )
 
-        return (subquery_line_start, subquery_line_end)
+        return (array_agg(subquery_line_start), array_agg(subquery_line_end))
 
     def _generate_asset_subqueries(self) -> Any:
+        json_fields = self.get_asset_json_fields()
+        
         pass
 
     def get_pipe_point_relation_queryset(self) -> Any:
