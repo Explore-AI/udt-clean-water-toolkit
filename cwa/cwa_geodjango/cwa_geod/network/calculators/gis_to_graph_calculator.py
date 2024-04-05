@@ -223,54 +223,54 @@ class GisToGraphCalculator:
             if pipe["gid"] not in termini_intersecting_pipe_gids
         ]
 
-        non_termini_intersecting_pipes.append(
-            {
-                "id": 1,
-                "gid": 88888888,
-                "distance_from_pipe_start_cm": 73,
-                "intersection_point_geometry": base_pipe["start_point_geom"],
-            }
-        )
-        non_termini_intersecting_pipes.append(
-            {
-                "id": 2,
-                "gid": 333333,
-                "distance_from_pipe_start_cm": 50,
-                "intersection_point_geometry": base_pipe["start_point_geom"],
-            }
-        )
-        non_termini_intersecting_pipes.append(
-            {
-                "id": 3,
-                "gid": 999999,
-                "distance_from_pipe_start_cm": 50,
-                "intersection_point_geometry": base_pipe["start_point_geom"],
-            }
-        )
-        non_termini_intersecting_pipes.append(
-            {
-                "id": 4,
-                "gid": 77777,
-                "distance_from_pipe_start_cm": 73,
-                "intersection_point_geometry": base_pipe["start_point_geom"],
-            }
-        )
-        non_termini_intersecting_pipes.append(
-            {
-                "id": 5,
-                "gid": 111111,
-                "distance_from_pipe_start_cm": 73,
-                "intersection_point_geometry": base_pipe["start_point_geom"],
-            }
-        )
-        non_termini_intersecting_pipes.append(
-            {
-                "id": 6,
-                "gid": 222222,
-                "distance_from_pipe_start_cm": 35,
-                "intersection_point_geometry": base_pipe["start_point_geom"],
-            }
-        )
+        # non_termini_intersecting_pipes.append(
+        #     {
+        #         "id": 1,
+        #         "gid": 88888888,
+        #         "distance_from_pipe_start_cm": 73,
+        #         "intersection_point_geometry": base_pipe["start_point_geom"],
+        #     }
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {
+        #         "id": 2,
+        #         "gid": 333333,
+        #         "distance_from_pipe_start_cm": 50,
+        #         "intersection_point_geometry": base_pipe["start_point_geom"],
+        #     }
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {
+        #         "id": 3,
+        #         "gid": 999999,
+        #         "distance_from_pipe_start_cm": 50,
+        #         "intersection_point_geometry": base_pipe["start_point_geom"],
+        #     }
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {
+        #         "id": 4,
+        #         "gid": 77777,
+        #         "distance_from_pipe_start_cm": 73,
+        #         "intersection_point_geometry": base_pipe["start_point_geom"],
+        #     }
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {
+        #         "id": 5,
+        #         "gid": 111111,
+        #         "distance_from_pipe_start_cm": 73,
+        #         "intersection_point_geometry": base_pipe["start_point_geom"],
+        #     }
+        # )
+        # non_termini_intersecting_pipes.append(
+        #     {
+        #         "id": 6,
+        #         "gid": 222222,
+        #         "distance_from_pipe_start_cm": 35,
+        #         "intersection_point_geometry": base_pipe["start_point_geom"],
+        #     }
+        # )
 
         return non_termini_intersecting_pipes
 
@@ -427,9 +427,6 @@ class GisToGraphCalculator:
         nodes_ordered = self._set_point_asset_properties(
             base_pipe, nodes_ordered, point_assets_with_positions
         )
-        import pdb
-
-        pdb.set_trace()
 
         # self._calc_pipe_length_between_nodes(nodes_ordered)
 
