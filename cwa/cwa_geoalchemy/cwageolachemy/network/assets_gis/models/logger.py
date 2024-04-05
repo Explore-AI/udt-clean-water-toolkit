@@ -17,3 +17,6 @@ logger_dmas = Table(
 class Logger(BasePointAsset):
     __tablename__ = "assets_logger"
     dmas: Mapped[List[DMA]] = relationship(secondary=logger_dmas)
+    
+    class AssetMeta: 
+        asset_name = "hydrant"
