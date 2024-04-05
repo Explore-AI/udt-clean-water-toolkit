@@ -97,10 +97,10 @@ class GisToGraphCalculator:
         base_pipe["end_point_geom"] = qs_object.end_point_geom
 
         base_pipe["line_start_intersection_gids"] = []
-        base_pipe["line_end_intersection_ids"] = []
+        base_pipe["line_start_intersection_ids"] = []
         for line in qs_object.line_start_intersections:
             base_pipe["line_start_intersection_gids"].extend(line["gids"])
-            base_pipe["line_end_intersection_ids"].extend(line["ids"])
+            base_pipe["line_start_intersection_ids"].extend(line["ids"])
 
         base_pipe["line_end_intersection_gids"] = []
         base_pipe["line_end_intersection_ids"] = []
@@ -211,10 +211,10 @@ class GisToGraphCalculator:
         return object_intersections
 
     @staticmethod
-    def _get_non_termini_intersecting_pipes(base_pipe_data, junctions_with_positions):
+    def _get_non_termini_intersecting_pipes(base_pipe, junctions_with_positions):
         termini_intersecting_pipe_gids = (
-            base_pipe_data["line_start_intersection_gids"]
-            + base_pipe_data["line_end_intersection_gids"]
+            base_pipe["line_start_intersection_gids"]
+            + base_pipe["line_end_intersection_gids"]
         )
 
         non_termini_intersecting_pipes = [
@@ -223,24 +223,54 @@ class GisToGraphCalculator:
             if pipe["gid"] not in termini_intersecting_pipe_gids
         ]
 
-        # non_termini_intersecting_pipes.append(
-        #     {"gid": 88888888, "distance_from_pipe_start_cm": 73}
-        # )
-        # non_termini_intersecting_pipes.append(
-        #     {"gid": 333333, "distance_from_pipe_start_cm": 50}
-        # )
-        # non_termini_intersecting_pipes.append(
-        #     {"gid": 999999, "distance_from_pipe_start_cm": 50}
-        # )
-        # non_termini_intersecting_pipes.append(
-        #     {"gid": 77777, "distance_from_pipe_start_cm": 73}
-        # )
-        # non_termini_intersecting_pipes.append(
-        #     {"gid": 111111, "distance_from_pipe_start_cm": 73}
-        # )
-        # non_termini_intersecting_pipes.append(
-        #     {"gid": 222222, "distance_from_pipe_start_cm": 35}
-        # )
+        non_termini_intersecting_pipes.append(
+            {
+                "id": 1,
+                "gid": 88888888,
+                "distance_from_pipe_start_cm": 73,
+                "intersection_point_geometry": base_pipe["start_point_geom"],
+            }
+        )
+        non_termini_intersecting_pipes.append(
+            {
+                "id": 2,
+                "gid": 333333,
+                "distance_from_pipe_start_cm": 50,
+                "intersection_point_geometry": base_pipe["start_point_geom"],
+            }
+        )
+        non_termini_intersecting_pipes.append(
+            {
+                "id": 3,
+                "gid": 999999,
+                "distance_from_pipe_start_cm": 50,
+                "intersection_point_geometry": base_pipe["start_point_geom"],
+            }
+        )
+        non_termini_intersecting_pipes.append(
+            {
+                "id": 4,
+                "gid": 77777,
+                "distance_from_pipe_start_cm": 73,
+                "intersection_point_geometry": base_pipe["start_point_geom"],
+            }
+        )
+        non_termini_intersecting_pipes.append(
+            {
+                "id": 5,
+                "gid": 111111,
+                "distance_from_pipe_start_cm": 73,
+                "intersection_point_geometry": base_pipe["start_point_geom"],
+            }
+        )
+        non_termini_intersecting_pipes.append(
+            {
+                "id": 6,
+                "gid": 222222,
+                "distance_from_pipe_start_cm": 35,
+                "intersection_point_geometry": base_pipe["start_point_geom"],
+            }
+        )
 
         return non_termini_intersecting_pipes
 
@@ -274,7 +304,9 @@ class GisToGraphCalculator:
                 "intersection_point_geometry": base_pipe["start_point_geom"],
                 "node_id": self._encode_node_id(
                     base_pipe["start_point_geom"],
-                    sorted([base_pipe["id"], base_pipe["line_start_intersection_ids"]]),
+                    sorted(
+                        [base_pipe["id"], *base_pipe["line_start_intersection_ids"]]
+                    ),
                 ),
                 **base_pipe,
             },
@@ -285,8 +317,8 @@ class GisToGraphCalculator:
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["end_point_geom"],
                 "node_id": self._encode_node_id(
-                    sorted([base_pipe["id"], base_pipe["line_end_intersection_ids"]]),
-                    end_node_gids,
+                    base_pipe["end_point_geom"],
+                    sorted([base_pipe["id"], *base_pipe["line_end_intersection_ids"]]),
                 ),
                 **base_pipe,
             },
@@ -299,14 +331,17 @@ class GisToGraphCalculator:
     ):
         distances = [x["distance_from_pipe_start_cm"] for x in nodes_ordered]
 
+        position_index = 0
         for pipe in non_termini_intersecting_pipes:
+            pipe_id = pipe["id"]
             pipe_gid = pipe["gid"]
             # distance_from_start_cm must be an
             # int for sqid compatible hashing
             distance_from_pipe_start_cm = pipe["distance_from_pipe_start_cm"]
 
+            ids = sorted([pipe_id, base_pipe["id"]])
+            gids = sorted([pipe_gid, base_pipe["gid"]])
             if distance_from_pipe_start_cm not in distances:
-                gids = sorted([pipe_gid, base_pipe["gid"]])
 
                 position_index = bisect.bisect_right(
                     nodes_ordered,
@@ -327,7 +362,7 @@ class GisToGraphCalculator:
                         ],
                         "node_id": self._encode_node_id(
                             pipe["intersection_point_geometry"],
-                            gids,
+                            ids,
                         ),
                         **base_pipe,
                     },
@@ -343,7 +378,7 @@ class GisToGraphCalculator:
                 # TODO: This is inefficient. Should hash only once all gids are known.
                 nodes_ordered[position_index]["node_id"] = self._encode_node_id(
                     pipe["intersection_point_geometry"],
-                    sorted([base_pipe["gid"], *nodes_ordered[position_index]["gids"]]),
+                    ids,
                 )
 
         return nodes_ordered
@@ -363,9 +398,9 @@ class GisToGraphCalculator:
                         asset["intersection_point_geometry"],
                         sorted(
                             [
-                                asset["gid"],
-                                *asset["tm_touches_gids"],
-                                *asset["dm_touches_gids"],
+                                asset["id"],
+                                *asset["tm_touches_ids"],
+                                *asset["dm_touches_ids"],
                             ]
                         ),
                     ),
@@ -392,6 +427,9 @@ class GisToGraphCalculator:
         nodes_ordered = self._set_point_asset_properties(
             base_pipe, nodes_ordered, point_assets_with_positions
         )
+        import pdb
+
+        pdb.set_trace()
 
         # self._calc_pipe_length_between_nodes(nodes_ordered)
 

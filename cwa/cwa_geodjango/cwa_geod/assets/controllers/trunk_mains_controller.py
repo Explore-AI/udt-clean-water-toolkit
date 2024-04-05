@@ -39,15 +39,15 @@ class TrunkMainsController(MainsController):
         dm_qs = DistributionMain.objects.all()
 
         tm_inner_subquery = self._generate_dwithin_inner_subquery(
-            tm_qs, "gid", geometry_field=geometry_field
+            tm_qs, "id", geometry_field=geometry_field
         )
         dm_inner_subquery = self._generate_dwithin_inner_subquery(
-            dm_qs, "gid", geometry_field=geometry_field
+            dm_qs, "id", geometry_field=geometry_field
         )
 
         inner_subqueries = {
-            "tm_touches_gids": tm_inner_subquery,
-            "dm_touches_gids": dm_inner_subquery,
+            "tm_touches_ids": tm_inner_subquery,
+            "dm_touches_ids": dm_inner_subquery,
         }
 
         subquery = super()._generate_dwithin_subquery(
