@@ -274,7 +274,7 @@ class GisToGraphCalculator:
                 "intersection_point_geometry": base_pipe["start_point_geom"],
                 "node_id": self._encode_node_id(
                     base_pipe["start_point_geom"],
-                    start_node_gids,
+                    sorted([base_pipe["id"], base_pipe["line_start_intersection_ids"]]),
                 ),
                 **base_pipe,
             },
@@ -285,7 +285,7 @@ class GisToGraphCalculator:
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["end_point_geom"],
                 "node_id": self._encode_node_id(
-                    base_pipe["end_point_geom"],
+                    sorted([base_pipe["id"], base_pipe["line_end_intersection_ids"]]),
                     end_node_gids,
                 ),
                 **base_pipe,
