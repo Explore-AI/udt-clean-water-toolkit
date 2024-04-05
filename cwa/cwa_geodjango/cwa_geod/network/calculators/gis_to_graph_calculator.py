@@ -102,11 +102,17 @@ class GisToGraphCalculator:
             base_pipe["line_start_intersection_gids"].extend(line["gids"])
             base_pipe["line_start_intersection_ids"].extend(line["ids"])
 
+        base_pipe["line_start_intersection_gids"].remove(qs_object.gid)
+        base_pipe["line_start_intersection_ids"].remove(qs_object.id)
+
         base_pipe["line_end_intersection_gids"] = []
         base_pipe["line_end_intersection_ids"] = []
         for line in qs_object.line_end_intersections:
             base_pipe["line_end_intersection_gids"].extend(line["gids"])
             base_pipe["line_end_intersection_ids"].extend(line["ids"])
+
+        base_pipe["line_end_intersection_gids"].remove(qs_object.gid)
+        base_pipe["line_end_intersection_ids"].remove(qs_object.id)
 
         # base_pipe["start_geom_latlong"] = qs_object.start_geom_latlong
         # base_pipe["end_geom_latlong"] = qs_object.end_geom_latlong
