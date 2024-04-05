@@ -25,8 +25,8 @@ class DistributionMainsController(MainsController):
         subqueries = {
             "trunkmain_junctions": ArraySubquery(subquery_tm_junctions),
             "distmain_junctions": ArraySubquery(subquery_dm_junctions),
-            "line_start_intersection_gids": ArraySubquery(termini_subqueries[0]),
-            "line_end_intersection_gids": ArraySubquery(termini_subqueries[1]),
+            "line_start_intersections": ArraySubquery(termini_subqueries[0]),
+            "line_end_intersections": ArraySubquery(termini_subqueries[1]),
         }
 
         return subqueries
@@ -45,7 +45,10 @@ class DistributionMainsController(MainsController):
             dm_qs, "gid", geometry_field=geometry_field
         )
 
-        inner_subqueries = {"tm_touches_gids": tm_inner_subquery, "dm_touches_gids": dm_inner_subquery}
+        inner_subqueries = {
+            "tm_touches_gids": tm_inner_subquery,
+            "dm_touches_gids": dm_inner_subquery,
+        }
 
         subquery = super()._generate_dwithin_subquery(
             qs,

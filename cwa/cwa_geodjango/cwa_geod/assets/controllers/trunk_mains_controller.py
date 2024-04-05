@@ -25,8 +25,8 @@ class TrunkMainsController(MainsController):
         subqueries = {
             "trunkmain_junctions": ArraySubquery(subquery_tm_junctions),
             "distmain_junctions": ArraySubquery(subquery_dm_junctions),
-            "line_start_intersection_gids": ArraySubquery(termini_subqueries[0]),
-            "line_end_intersection_gids": ArraySubquery(termini_subqueries[1]),
+            "line_start_intersections": ArraySubquery(termini_subqueries[0]),
+            "line_end_intersections": ArraySubquery(termini_subqueries[1]),
         }
 
         return subqueries
