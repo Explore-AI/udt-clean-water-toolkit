@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.dialects.postgresql import array_agg, array
 from sqlalchemy.sql import Select, cast
-from sqlalchemy import func, select, String, Text, Table, literal_column
+from sqlalchemy import func, select, String, Text, Table, literal_column, text
 from sqlalchemy.orm import aliased, Query
 from sqlalchemy.sql.expression import literal_column
 from geoalchemy2 import functions as geo_funcs
@@ -205,15 +205,17 @@ class MainsController(ABC):
         subquery_line_start = (
             start_point_subqueries[0]
             .union(*start_point_subqueries[1:])
-            .alias("sq_line_start")
+            .scalar_subquery()
+            .alias("line_start_intersection_gids")
         )
         subquery_line_end = (
             end_point_subqueries[0]
             .union(*end_point_subqueries[1:])
-            .alias("sq_line_end")
+            .scalar_subquery()
+            .alias("line_end_intersection_gids")
         )
 
-        return (array_agg(subquery_line_start), array_agg(subquery_line_end))
+        return (subquery_line_start, subquery_line_end)
 
     def _generate_asset_subqueries(self) -> Any:
         logger_subquery = self._generate_dwithin_subquery(Logger, logger_dmas)
@@ -234,21 +236,92 @@ class MainsController(ABC):
         network_opt_valve_subquery = self._generate_dwithin_subquery(
             NetworkOptValve, networkoptvalve_dmas
         )
-        
+
         return {
-            "loggers": logger_subquery.label("logger_data"),
-            "hydrants": hydrant_subquery.label("hydrants_data"),
-            "pressure_fittings": pressure_fitting_subquery.label("pressure_fitting_data"), 
-            "pressure_valve": pressure_valve_subquery.label("pressure_valve_data"),
-            "network_meters": network_meter_subquery.label("network_meter_data"),
-            "chambers": chamber_subquery.label("chamber_data"),
-            "operational_sites": operational_site_subquery.label("operational_site_data"), 
-            "network_opt_valve": network_opt_valve_subquery.label("network_opt_valve_data"),
+            "loggers": logger_subquery,
+            "hydrants": hydrant_subquery,
+            "pressure_fittings": pressure_fitting_subquery,
+            "pressure_valve": pressure_valve_subquery,
+            "network_meters": network_meter_subquery,
+            "chambers": chamber_subquery,
+            "operational_sites": operational_site_subquery,
+            "network_opt_valve": network_opt_valve_subquery,
         }
 
-    def get_pipe_point_relation_queryset(self) -> Any:
+        # return {
+        #     "loggers": logger_subquery.label("logger_data"),
+        #     "hydrants": hydrant_subquery.label("hydrants_data"),
+        #     "pressure_fittings": pressure_fitting_subquery.label("pressure_fitting_data"),
+        #     "pressure_valve": pressure_valve_subquery.label("pressure_valve_data"),
+        #     "network_meters": network_meter_subquery.label("network_meter_data"),
+        #     "chambers": chamber_subquery.label("chamber_data"),
+        #     "operational_sites": operational_site_subquery.label("operational_site_data"),
+        #     "network_opt_valve": network_opt_valve_subquery.label("network_opt_valve_data"),
+        # }
+
+    def get_pipe_point_relation_queryset(
+        self, model: Union[DistributionMain, TrunkMain], main_dmas: Table
+    ) -> Any:
+
+        utility_alias = aliased(Utility)
+        dma_alias = aliased(DMA)
+        # get our subqueries
         mains_intersection_stmt = self._generate_mains_subqueries()
         asset_stmt = self._generate_asset_subqueries()
+        asset_name = model.AssetMeta.asset_name
+        # add the subqueries to the main query
+        point_relation_query = (
+            select(
+                model.id,
+                model.gid,
+                model.geometry,
+                model.modified_at,
+                model.created_at,
+                literal_column(asset_name).label("asset_name"),
+                geo_funcs.ST_AsText(geo_funcs.ST_Length(model.geometry)).label(
+                    "pipe_length"
+                ),
+                geo_funcs.ST_AsText(model.geometry).label("wkt"),
+                array_agg(main_dmas.c.dma_id).label("dma_ids"),
+                array_agg(dma_alias.code).label("dma_codes"),
+                array_agg(dma_alias.name).label("dma_names"),
+                geo_funcs.ST_AsText(geo_funcs.ST_StartPoint(model.geometry)).label(
+                    "start_point_geom"
+                ),
+                geo_funcs.ST_AsText(geo_funcs.ST_EndPoint(model.geometry)).label(
+                    "end_point_geom"
+                ),
+                array_agg(utility_alias.name).label("utility_names"),
+                mains_intersection_stmt["trunkmain_junctions"],
+                mains_intersection_stmt["distmain_junctions"],
+                array_agg(
+                    mains_intersection_stmt["line_start_intersection_gids"]
+                ).label("line_start_intersection_gids"),
+                array_agg(mains_intersection_stmt["line_end_intersection_gids"]).label(
+                    "line_end_intersection_gids"
+                ),
+                array_agg(asset_stmt["loggers"]).label("logger_data"),
+                array_agg(asset_stmt["hydrants"]).label("hydrant_data"),
+                array_agg(asset_stmt["pressure_fittings"]).label(
+                    "pressure_fitting_data"
+                ),
+                array_agg(asset_stmt["pressure_valve"]).label("pressure_valve_data"),
+                array_agg(asset_stmt["network_meters"]).label("network_meter_data"),
+                array_agg(asset_stmt["chambers"]).label("chamber_data"),
+                array_agg(asset_stmt["operational_sites"]).label(
+                    "operational_site_data"
+                ),
+                array_agg(asset_stmt["network_opt_valve"]).label(
+                    "network_opt_valve_data"
+                ),
+            )
+            .join_from(model, main_dmas, isouter=True)
+            .join_from(main_dmas, dma_alias, isouter=True)
+            .join_from(dma_alias, utility_alias, isouter=True)
+            .where(dma_alias.code.in_(["ZWAL4801", "ZCHESS12", "ZCHIPO01"]))
+            .group_by(dma_alias.id)
+        )
+        print(f"Point Relation query: {point_relation_query}")
 
     def get_geometry_queryset(self) -> Any:
         pass
