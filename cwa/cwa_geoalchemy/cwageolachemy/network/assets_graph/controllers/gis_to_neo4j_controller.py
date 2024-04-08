@@ -10,11 +10,14 @@ class GisToNeo4jController:
         pass
 
     def create_network(self):
-        pass
+        pipes_query = self._get_pipe_and_asset_data()
 
     def _get_pipe_and_asset_data(self):
         trunk_mains_statement = self.get_trunk_mains_data()
-        # distribution_mains_statement = ""
+        distribution_mains_statement = self.get_distribution_mains_data() 
+        unioned_query = trunk_mains_statement.union_all(distribution_mains_statement)
+        
+        return unioned_query
 
     def get_trunk_mains_data(self):
         tm: TrunkMainsController = TrunkMainsController()

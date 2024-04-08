@@ -1,8 +1,5 @@
 from .mains_controller import MainsController
 from ..models import TrunkMain, DistributionMain, trunkmain_dmas, distributionmain_dmas
-from sqlalchemy.dialects.postgresql import array as ARRAY
-from sqlalchemy.dialects.postgresql import array_agg
-from sqlalchemy import func, select
 
 
 class TrunkMainsController(MainsController):

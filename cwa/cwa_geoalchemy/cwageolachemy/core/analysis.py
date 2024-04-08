@@ -7,6 +7,6 @@ class Analysis():
     
     def run(self): 
         gis_to_neo4j_controller = GisToNeo4jController()
-        gis_to_neo4j_controller.get_trunk_mains_data()
+        gis_to_neo4j_controller.create_network()
     
 
