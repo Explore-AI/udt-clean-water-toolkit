@@ -248,17 +248,6 @@ class MainsController(ABC):
             "network_opt_valve": network_opt_valve_subquery,
         }
 
-        # return {
-        #     "loggers": logger_subquery.label("logger_data"),
-        #     "hydrants": hydrant_subquery.label("hydrants_data"),
-        #     "pressure_fittings": pressure_fitting_subquery.label("pressure_fitting_data"),
-        #     "pressure_valve": pressure_valve_subquery.label("pressure_valve_data"),
-        #     "network_meters": network_meter_subquery.label("network_meter_data"),
-        #     "chambers": chamber_subquery.label("chamber_data"),
-        #     "operational_sites": operational_site_subquery.label("operational_site_data"),
-        #     "network_opt_valve": network_opt_valve_subquery.label("network_opt_valve_data"),
-        # }
-
     def get_pipe_point_relation_queryset(
         self, model: Union[DistributionMain, TrunkMain], main_dmas: Table
     ) -> Select:
@@ -274,7 +263,7 @@ class MainsController(ABC):
             select(
                 model.id,
                 model.gid,
-                model.geometry,
+                geo_funcs.ST_AsText(model.geometry),
                 model.modified_at,
                 model.created_at,
                 literal_column(asset_name).label("asset_name"),
