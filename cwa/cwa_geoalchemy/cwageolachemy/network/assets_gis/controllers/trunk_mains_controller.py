@@ -22,12 +22,8 @@ class TrunkMainsController(MainsController):
         return {
             "trunkmain_junctions": subquery_tm_junctions.label("trunkmain_junctions"),
             "distmain_junctions": subquery_dm_junctions.label("distmain_junctions"),
-            "line_start_intersection_gids": termini_subqueries[0].label(
-                "line_start_intersection_gids"
-            ),
-            "line_end_intersection_gids": termini_subqueries[1].label(
-                "line_end_intersection_gids"
-            ),
+            "line_start_intersection_gids": termini_subqueries[0],
+            "line_end_intersection_gids": termini_subqueries[1],
         }
 
     def trunk_mains_to_geojson(self, properties=None):
