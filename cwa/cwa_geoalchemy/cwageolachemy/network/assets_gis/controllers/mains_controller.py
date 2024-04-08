@@ -261,7 +261,7 @@ class MainsController(ABC):
 
     def get_pipe_point_relation_queryset(
         self, model: Union[DistributionMain, TrunkMain], main_dmas: Table
-    ) -> Any:
+    ) -> Select:
 
         utility_alias = aliased(Utility)
         dma_alias = aliased(DMA)
@@ -315,13 +315,13 @@ class MainsController(ABC):
                     "network_opt_valve_data"
                 ),
             )
-            .join_from(model, main_dmas, isouter=True)
-            .join_from(main_dmas, dma_alias, isouter=True)
-            .join_from(dma_alias, utility_alias, isouter=True)
+            .join_from(model, main_dmas)
+            .join_from(main_dmas, dma_alias)
+            .join_from(dma_alias, utility_alias)
             .where(dma_alias.code.in_(["ZWAL4801", "ZCHESS12", "ZCHIPO01"]))
             .group_by(dma_alias.id)
         )
-        print(f"Point Relation query: {point_relation_query}")
+        return point_relation_query
 
     def get_geometry_queryset(self) -> Any:
         pass
