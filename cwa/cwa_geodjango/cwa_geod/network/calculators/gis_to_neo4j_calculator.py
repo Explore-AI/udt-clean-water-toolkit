@@ -193,7 +193,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self.all_base_pipes = []
         self.all_nodes_ordered = []
 
-    def _create_neo4j_graph(self) -> None:
+    def create_neo4j_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
         and point assets. Uses a map method to operate on the pipe
         and asset data.

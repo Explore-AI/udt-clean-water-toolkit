@@ -1,81 +1,22 @@
-from django.contrib.gis.geos import Point
-from django.db.models.query import QuerySet
 from networkx import Graph
 from . import GisToGraphCalculator
-from cwa_geod.core.constants import DEFAULT_SRID
 
 
-class GisToNetworkXCalculator(GisToGraphCalculator):
+class GisToNxCalculator(GisToGraphCalculator):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid: int):
-        self.srid: int = srid or DEFAULT_SRID
+    def __init__(self, config):
+        self.config = config
         self.G: Graph = Graph()
-        super().__init__(self.srid)
+        self.all_base_pipes = []
+        self.all_nodes_ordered = []
+        super().__init__(self.config)
 
-    def create_network2(self) -> Graph:
-        trunk_mains_nx: Graph = self.create_trunk_mains_graph()
-        # TODO: geospatial join on all the node assets
-        # TODO: add the nodes to the graph
-        return trunk_mains_nx
-
-    def create_network(self) -> Graph:
-        trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
-        distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
-
-        pipes_qs: QuerySet = trunk_mains_qs.union(distribution_mains_qs, all=True)
-
-        self.calc_pipe_point_relative_positions(pipes_qs)
-        self._create_networkx_graph()
-        return self.G
-
-    def _set_connected_asset_relations(
-        self, pipe_data: dict, assets_data: list
-    ) -> None:
-        node_id: str = f"{pipe_data['id']}-{pipe_data['gid']}"
-        start_of_line_point: Point = Point(
-            pipe_data["geometry"].coords[0][0], srid=DEFAULT_SRID
-        )
-        node_point_geometries: list = [start_of_line_point]
-        new_node_ids: list = [node_id]
-        for asset in assets_data:
-            asset_name: str = asset["data"]["asset_name"]
-
-            node_type: str = self._get_node_type(asset_name)
-
-            new_id: int = asset["data"]["id"]
-            new_gid: int = asset["data"]["gid"]
-            new_node_id: str = f"{new_id}-{new_gid}"
-
-            if not self.G.has_node(new_node_id):
-                self.G.add_node(
-                    new_node_id,
-                    position=asset["position"],
-                    node_type=node_type,
-                    coords=asset["intersection_point_geometry"].coords,
-                    **asset["data"],
-                )
-
-            edge_length: float = node_point_geometries[-1].distance(
-                asset["intersection_point_geometry"]
-            )
-
-            self.G.add_edge(
-                new_node_ids[-1],
-                new_node_id,
-                weight=edge_length,
-                id=pipe_data["id"],
-                gid=pipe_data["gid"],
-                normalised_position_on_pipe=asset["position"],
-            )
-            node_point_geometries.append(asset["intersection_point_geometry"])
-            new_node_ids.append(new_node_id)
-
-    def _set_pipe_connected_asset_relations(self) -> None:
-        """Connect pipes with related pipe and point assets.
-        Uses a map generator to operate on the pipe and asset
-        data.
+    def create_nx_graph(self) -> None:
+        """Iterate over pipes and connect related pipe interactions
+        and point assets. Uses a map method to operate on the pipe
+        and asset data.
 
         Params:
               None
@@ -83,34 +24,6 @@ class GisToNetworkXCalculator(GisToGraphCalculator):
               None
         """
 
-        def _map_pipe_connected_asset_relations(pipe_data: dict, assets_data: list):
-            node_id: str = f"{pipe_data['id']}-{pipe_data['gid']}"
-            if not self.G.has_node(node_id):
-                self.G.add_node(
-                    node_id,
-                    coords=pipe_data["geometry"].coords[0][0],
-                    **pipe_data,
-                )
-
-            self._set_connected_asset_relations(pipe_data, assets_data)
-
-        list(
-            map(
-                _map_pipe_connected_asset_relations,
-                self.all_pipe_data,
-                self.all_asset_positions,
-            )
-        )
-
-    def _create_networkx_graph(self) -> None:
-        self._set_pipe_connected_asset_relations()
-        # use when setting up multiprocessing
-        # https://stackoverflow.com/questions/32652149/combine-join-networkx-graphs
-
-        # TODO: remove from here as it contains specific nx methods
-
-    def create_trunk_mains_graph(self) -> Graph:
-        tm: TrunkMainsController = TrunkMainsController()
-
-        trunk_mains: QuerySet = tm.get_geometry_queryset()
-        return self.create_pipes_network(trunk_mains)
+        print("start")
+        print(self.all_base_pipes)
+        print(self.all_nodes_ordered)

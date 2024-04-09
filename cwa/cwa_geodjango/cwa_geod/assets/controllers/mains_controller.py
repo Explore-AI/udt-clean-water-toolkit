@@ -216,7 +216,9 @@ class MainsController(ABC, GeoDjangoDataManager):
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
+        qs = self.model.objects.filter(
+            dmas__code__in=["ZWAL4801", "ZCHESS12", "ZCHIPO01"]
+        ).prefetch_related("dmas", "dmas__utility")
 
         qs = qs.annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),

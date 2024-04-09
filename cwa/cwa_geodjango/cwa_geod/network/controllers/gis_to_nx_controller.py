@@ -1,22 +1,19 @@
 from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
-from ..calculators import GisToNeo4jCalculator
-from ..models import initialise_node_labels
+from ..calculators import GisToNxCalculator
 from cwa_geod.assets.controllers import (
     TrunkMainsController,
     DistributionMainsController,
 )
 
 
-class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
+class GisToNxController(NetworkController, GisToNxCalculator):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
     def __init__(self, config):
         self.config = config
-        initialise_node_labels()
         NetworkController.__init__(self, self.config.srid)
-        GisToNeo4jCalculator.__init__(self, self.config)
 
     def create_network(self):
         from timeit import default_timer as timer
@@ -35,29 +32,7 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
 
             self.calc_pipe_point_relative_positions(sliced_qs)
 
-            self.create_neo4j_graph()
-
-        end = timer()
-        print(end - start)
-
-    def create_network_parallel(self):
-        from timeit import default_timer as timer
-
-        start = timer()
-
-        pipes_qs = self._get_pipe_and_asset_data()
-
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-            print(offset, limit)
-
-            sliced_qs = list(pipes_qs[offset:limit])
-
-            self.calc_pipe_point_relative_positions_parallel(sliced_qs)
-
-            self._create_neo4j_graph_parallel()
+            self.create_nx_graph()
 
         end = timer()
         print(end - start)

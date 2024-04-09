@@ -1,1 +1,2 @@
 from .gis_to_neo4j_controller import GisToNeo4jController
+from .gis_to_nx_controller import GisToNxController
