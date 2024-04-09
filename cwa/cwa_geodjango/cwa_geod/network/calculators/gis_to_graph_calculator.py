@@ -49,7 +49,7 @@ class GisToGraphCalculator:
 
         # Convert all the data from intersecting pipes into
         # a list of dictionaries
-        pipe_junctions: list = self._combine_all_pipe_junnctions(pipe_qs_object)
+        pipe_junctions: list = self._combine_all_pipe_junctions(pipe_qs_object)
 
         # Convert all the data from point assets into a list of dictionaries
         point_assets: list = self._combine_all_point_assets(pipe_qs_object)
@@ -122,7 +122,7 @@ class GisToGraphCalculator:
 
         return base_pipe
 
-    def _combine_all_pipe_junnctions(self, pipe_qs_object: TrunkMain) -> list:
+    def _combine_all_pipe_junctions(self, pipe_qs_object: TrunkMain) -> list:
         return pipe_qs_object.trunkmain_junctions + pipe_qs_object.distmain_junctions
 
     def _combine_all_point_assets(self, pipe_qs_object: TrunkMain) -> list:
