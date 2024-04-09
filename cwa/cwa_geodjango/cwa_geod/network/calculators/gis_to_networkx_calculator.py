@@ -24,6 +24,9 @@ class GisToNxCalculator(GisToGraphCalculator):
               None
         """
 
-        print("start")
-        print(self.all_base_pipes)
-        print(self.all_nodes_ordered)
+        print("start here to create a networkx graph")
+
+        # these two vaiables should have everything you need to create a graph
+        # ony printing out the first element as it will be too much otherwise.
+        print(self.all_base_pipes[0])
+        print(self.all_nodes_ordered[0])
