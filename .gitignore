@@ -175,3 +175,4 @@ postgres-data
 #Pycharm
 .idea/
 *.DS_Store
+.vscode/
