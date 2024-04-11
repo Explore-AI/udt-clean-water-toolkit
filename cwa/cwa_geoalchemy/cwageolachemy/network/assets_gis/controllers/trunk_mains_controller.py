@@ -1,4 +1,4 @@
-from .mains_controller import MainsController
+from . import MainsController
 from ..models import TrunkMain, DistributionMain, trunkmain_dmas, distributionmain_dmas
 
 
