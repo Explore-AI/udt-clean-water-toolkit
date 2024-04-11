@@ -1,13 +1,24 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.dialects.postgresql import array_agg, array
 from sqlalchemy.sql import Select, cast
-from sqlalchemy import func, select, String, Text, Table, literal_column, text
+from sqlalchemy import (
+    func,
+    select,
+    String,
+    Text,
+    Table,
+    literal_column,
+    text,
+    union_all,
+)
 from sqlalchemy.orm import aliased, Query, joinedload
 from sqlalchemy.sql.expression import literal_column, literal
 from geoalchemy2 import functions as geo_funcs
 from ..models import *
 from cwageolachemy.network.assets_utilities.models import Utility, DMA
 from typing import Any, List, Optional, Union
+from cwageolachemy.config.db_config import engine
+from sqlalchemy.orm import Session
 
 
 class MainsController(ABC):
@@ -19,21 +30,19 @@ class MainsController(ABC):
     ) -> Any:
         trunkmain_dma_alias = aliased(trunkmain_dmas)
         distmain_dma_alias = aliased(distributionmain_dmas)
+        
         tm_touches_subquery = (
             select(TrunkMain.gid)
             .join_from(
                 trunkmain_dmas, model, trunkmain_dmas.c.dma_id == asset_dmas.c.dma_id
             )
-            # .join(TrunkMain, trunkmain_dma_alias.c.dma_id==asset_dmas.c.dma_id, isouter=True)
             .where(
                 geo_funcs.ST_DWithin(
                     TrunkMain.geometry, model.geometry, self.WITHIN_DISTANCE
                 )
             )
             .order_by(trunkmain_dmas.c.dma_id.asc())
-            .limit(1)
-            .scalar_subquery()
-            .label("trunkmain_touches")
+            .subquery()
         )
 
         dm_touches_subquery = (
@@ -43,16 +52,13 @@ class MainsController(ABC):
                 model,
                 distributionmain_dmas.c.dma_id == asset_dmas.c.dma_id,
             )
-            # .join(DistributionMain, distmain_dma_alias.c.dma_id==asset_dmas.c.dma_id, isouter=True)
             .where(
                 geo_funcs.ST_DWithin(
                     DistributionMain.geometry, model.geometry, self.WITHIN_DISTANCE
                 )
             )
             .order_by(distributionmain_dmas.c.dma_id.asc())
-            .limit(1)
-            .scalar_subquery()
-            .label("distributionmain_touches")
+            .subquery()
         )
 
         dwithin_asset_subquery = (
@@ -78,7 +84,7 @@ class MainsController(ABC):
                     array_agg(tm_touches_subquery),
                     literal_column("'dm_touches_gids'"),
                     array_agg(dm_touches_subquery),
-                )
+                ).label("json")
             )
             .join_from(model, asset_dmas, isouter=True)
             .join_from(asset_dmas, DMA, isouter=True)
@@ -88,8 +94,7 @@ class MainsController(ABC):
                 model.id,
                 geo_funcs.ST_AsText(model.geometry),
             )
-            .limit(1)
-            .scalar_subquery()
+            .subquery()
         )
 
         return dwithin_asset_subquery
@@ -131,7 +136,7 @@ class MainsController(ABC):
             .join_from(model, main_dmas_alias, isouter=True)
             .join_from(main_dmas_alias, dma_alias, isouter=True)
             .join_from(dma_alias, utility_alias, isouter=True)
-            .limit(1)
+            # .limit(1)
             .where(
                 geo_funcs.ST_Touches(
                     model.geometry, (geo_funcs.ST_Transform(TrunkMain.geometry, 27700))
@@ -146,7 +151,7 @@ class MainsController(ABC):
             .scalar_subquery()
         )
 
-        return array_agg(sub_query)
+        return sub_query
 
     @staticmethod
     def get_asset_json_fields(geometry_field="geometry") -> dict:
@@ -186,116 +191,111 @@ class MainsController(ABC):
     def generate_termini_subqueries(self, main_dmas: dict[str, Table]):
         start_point_subqueries: list[Select] = []
         end_point_subqueries: list[Select] = []
-
+        tm_alias = aliased(TrunkMain)
+        dm_alias = aliased(DistributionMain)
         # Get TrunkMain queries
         tm_subquery_1 = (
             select(
-                TrunkMain.gid,
+                func.jsonb_build_object(
+                    literal_column("'ids'"),
+                    array_agg(tm_alias.id),
+                    literal_column("'gids'"),
+                    array_agg(tm_alias.gid),
+                ).label("json")
             )
-            .join_from(TrunkMain, main_dmas["trunk_main"], isouter=True)
+            .join_from(tm_alias, main_dmas["trunk_main"], isouter=True)
             .where(
                 geo_funcs.ST_Touches(
-                    TrunkMain.geometry,
+                    tm_alias.geometry,
                     geo_funcs.ST_Transform(
                         geo_funcs.ST_StartPoint(TrunkMain.geometry), 27700
                     ),
                 )
             )
+            .group_by(tm_alias.id)
         )
 
         tm_subquery_2 = (
             select(
-                TrunkMain.gid,
+                func.jsonb_build_object(
+                    literal_column("'ids'"),
+                    array_agg(tm_alias.id),
+                    literal_column("'gids'"),
+                    array_agg(tm_alias.gid),
+                ).label("json")
             )
-            .join_from(TrunkMain, main_dmas["trunk_main"], isouter=True)
+            .join_from(tm_alias, main_dmas["trunk_main"], isouter=True)
             .where(
                 geo_funcs.ST_Touches(
-                    TrunkMain.geometry,
+                    tm_alias.geometry,
                     geo_funcs.ST_Transform(
                         geo_funcs.ST_EndPoint(TrunkMain.geometry), 27700
                     ),
                 )
             )
+            .group_by(TrunkMain.id)
         )
 
         # Get DistMain queries
         dm_subquery_1 = (
             select(
-                DistributionMain.gid,
+                func.jsonb_build_object(
+                    literal_column("'ids'"),
+                    array_agg(dm_alias.id),
+                    literal_column("'gids'"),
+                    array_agg(dm_alias.gid),
+                ).label("json")
             )
-            .join_from(DistributionMain, main_dmas["distribution_main"], isouter=True)
+            .join_from(dm_alias, main_dmas["distribution_main"], isouter=True)
             .where(
                 geo_funcs.ST_Touches(
-                    DistributionMain.geometry,
+                    dm_alias.geometry,
                     geo_funcs.ST_Transform(
                         geo_funcs.ST_StartPoint(DistributionMain.geometry), 27700
                     ),
                 )
             )
+            .group_by(dm_alias.id)
         )
         dm_subquery_2 = (
             select(
-                DistributionMain.gid,
+                func.jsonb_build_object(
+                    literal_column("'ids'"),
+                    array_agg(dm_alias.id),
+                    literal_column("'gids'"),
+                    array_agg(dm_alias.gid),
+                ).label("json")
             )
-            .join_from(DistributionMain, main_dmas["distribution_main"], isouter=True)
+            .join_from(dm_alias, main_dmas["distribution_main"], isouter=True)
             .where(
                 geo_funcs.ST_Touches(
-                    DistributionMain.geometry,
+                    dm_alias.geometry,
                     geo_funcs.ST_Transform(
                         geo_funcs.ST_EndPoint(DistributionMain.geometry), 27700
                     ),
                 )
             )
+            .group_by(dm_alias.id)
         )
 
-        start_point_subqueries: list[Select] = [tm_subquery_1, dm_subquery_1]
-        end_point_subqueries: list[Select] = [tm_subquery_2, dm_subquery_2]
-
-        # for model in [TrunkMain, DistributionMain]:
-        #     main_dmas_alias = main_dmas[model.AssetMeta.asset_name]
-
-        #     subquery_1 = (
-        #         select(
-        #             model.gid,
-        #         )
-        #         .join_from(model, main_dmas_alias, isouter=True)
-        #         .where(
-        #             geo_funcs.ST_Touches(
-        #                 model.geometry,
-        #                 geo_funcs.ST_Transform(geo_funcs.ST_StartPoint(model.geometry), 27700),
-        #             )
-        #         )
-        #     )
-
-        #     subquery_2 = (
-        #         select(
-        #             model.gid,
-        #         )
-        #         .join_from(model, main_dmas_alias, isouter=True)
-        #         .where(
-        #             geo_funcs.ST_Touches(
-        #                 model.geometry,
-        #                 geo_funcs.ST_Transform(geo_funcs.ST_EndPoint(model.geometry), 27700),
-        #             )
-        #         )
-        #     )
-
-        #     start_point_subqueries.append(subquery_1)
-        #     end_point_subqueries.append(subquery_2)
+        start_point_subqueries = [tm_subquery_1, dm_subquery_1]
+        end_point_subqueries = [tm_subquery_2, dm_subquery_2]
 
         subquery_line_start = (
-            start_point_subqueries[0]
-            .union(*start_point_subqueries[1:])
+            union_all(
+                start_point_subqueries[0], *start_point_subqueries[1:]
+            )
             .limit(1)
-            .scalar_subquery()
-            .alias("line_start_intersection_gids")
+            .subquery()
+            # .alias("line_start_intersection_gids")
         )
         subquery_line_end = (
-            end_point_subqueries[0]
-            .union(*end_point_subqueries[1:])
+            union_all(
+                end_point_subqueries[0], *end_point_subqueries[1:]
+            )
             .limit(1)
-            .scalar_subquery()
-            .alias("line_end_intersection_gids")
+            .subquery()
+            # .alias("line_end_intersection_gids")
         )
 
         return (subquery_line_start, subquery_line_end)
@@ -335,8 +335,8 @@ class MainsController(ABC):
         self, model: Union[DistributionMain, TrunkMain], main_dmas: Table
     ) -> Select:
 
-        # utility_alias = aliased(Utility)
-        # dma_alias = aliased(DMA)
+        uu_alias = aliased(Utility)  # utilities utility
+        ud_alias = aliased(DMA)  # utilities dma
         # get our subqueries
         mains_intersection_stmt = self._generate_mains_subqueries()
         asset_stmt = self._generate_asset_subqueries()
@@ -353,25 +353,27 @@ class MainsController(ABC):
                 geo_funcs.ST_Length(model.geometry).label("pipe_length"),
                 geo_funcs.ST_AsText(model.geometry).label("wkt"),
                 array_agg(main_dmas.c.dma_id).label("dma_ids"),
-                array_agg(DMA.code).label("dma_codes"),
-                array_agg(DMA.name).label("dma_names"),
+                array_agg(ud_alias.code).label("dma_codes"),
+                array_agg(ud_alias.name).label("dma_names"),
                 geo_funcs.ST_AsText(geo_funcs.ST_StartPoint(model.geometry)).label(
                     "start_point_geom"
                 ),
                 geo_funcs.ST_AsText(geo_funcs.ST_EndPoint(model.geometry)).label(
                     "end_point_geom"
                 ),
-                array_agg(Utility.name).label("utility_names"),
-                mains_intersection_stmt["trunkmain_junctions"],
-                mains_intersection_stmt["distmain_junctions"],
-                array_agg(
-                    mains_intersection_stmt["line_start_intersection_gids"]
-                ).label("line_start_intersection_gids"),
-                array_agg(mains_intersection_stmt["line_end_intersection_gids"]).label(
-                    "line_end_intersection_gids"
+                array_agg(uu_alias.name).label("utility_names"),
+                array_agg(mains_intersection_stmt["trunkmain_junctions"]).label(
+                    "trunkmain_junctions"
                 ),
-                array_agg(asset_stmt["loggers"]).label("logger_data"),
-                array_agg(asset_stmt["hydrants"]).label("hydrant_data"),
+                array_agg(mains_intersection_stmt["distmain_junctions"]).label(
+                    "distmain_junctions"
+                ),
+                array_agg(
+                    mains_intersection_stmt["line_start_intersection_gids"].c.json
+                ).label("line_start_intersections"),
+                array_agg(mains_intersection_stmt["line_end_intersection_gids"].c.json).label("line_end_intersections"),
+                # array_agg(asset_stmt["loggers"]).label("logger_data"),
+                # array_agg(asset_stmt["hydrants"]).label("hydrant_data"),
                 # array_agg(asset_stmt["pressure_fittings"]).label(
                 #     "pressure_fitting_data"
                 # ),
@@ -385,13 +387,13 @@ class MainsController(ABC):
                 #     "network_opt_valve_data"
                 # ),
             )
-            .options(joinedload(model.dmas))
+            # .options(joinedload(model.dmas))
             .join_from(model, main_dmas)
-            .join_from(main_dmas, DMA)
-            .join_from(DMA, Utility)
+            .join_from(main_dmas, ud_alias)
+            .join_from(ud_alias, uu_alias)
             .where(DMA.code.in_(["ZWAL4801", "ZCHESS12"]))
-            .limit(1)
-            .group_by(model.id, DMA.id)
+            .limit(20)
+            .group_by(model.id)
         )
         return point_relation_query
 
