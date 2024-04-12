@@ -28,11 +28,11 @@ class MainsController(ABC):
     def _generate_dwithin_subquery(
         self, model: BaseAsset, asset_dmas, geometry_field="geometry", inner_stmts={}
     ) -> Any:
-        trunkmain_dma_alias = aliased(trunkmain_dmas)
-        distmain_dma_alias = aliased(distributionmain_dmas)
+        # trunkmain_dma_alias = aliased(trunkmain_dmas)
+        # distmain_dma_alias = aliased(distributionmain_dmas)
         
         tm_touches_subquery = (
-            select(TrunkMain.gid)
+            select(TrunkMain.id)
             .join_from(
                 trunkmain_dmas, model, trunkmain_dmas.c.dma_id == asset_dmas.c.dma_id
             )
@@ -42,11 +42,12 @@ class MainsController(ABC):
                 )
             )
             .order_by(trunkmain_dmas.c.dma_id.asc())
-            .subquery()
+            .limit(1)
+            .scalar_subquery()
         )
 
         dm_touches_subquery = (
-            select(DistributionMain.gid)
+            select(DistributionMain.id)
             .join_from(
                 distributionmain_dmas,
                 model,
@@ -58,7 +59,8 @@ class MainsController(ABC):
                 )
             )
             .order_by(distributionmain_dmas.c.dma_id.asc())
-            .subquery()
+            .limit(1)
+            .scalar_subquery()
         )
 
         dwithin_asset_subquery = (
@@ -80,9 +82,9 @@ class MainsController(ABC):
                     cast(array_agg(DMA.code), Text),
                     literal_column("'utilities'"),
                     cast(array_agg(Utility.name), Text),
-                    literal_column("'tm_touches_gids'"),
+                    literal_column("'tm_touches_ids'"),
                     array_agg(tm_touches_subquery),
-                    literal_column("'dm_touches_gids'"),
+                    literal_column("'dm_touches_ids'"),
                     array_agg(dm_touches_subquery),
                 ).label("json")
             )
@@ -94,6 +96,7 @@ class MainsController(ABC):
                 model.id,
                 geo_funcs.ST_AsText(model.geometry),
             )
+            .limit(1)
             .subquery()
         )
 
@@ -136,7 +139,7 @@ class MainsController(ABC):
             .join_from(model, main_dmas_alias, isouter=True)
             .join_from(main_dmas_alias, dma_alias, isouter=True)
             .join_from(dma_alias, utility_alias, isouter=True)
-            # .limit(1)
+            .limit(1)
             .where(
                 geo_funcs.ST_Touches(
                     model.geometry, (geo_funcs.ST_Transform(TrunkMain.geometry, 27700))
@@ -148,7 +151,6 @@ class MainsController(ABC):
                 geo_funcs.ST_StartPoint(model.geometry),
                 geo_funcs.ST_EndPoint(model.geometry),
             )
-            .scalar_subquery()
         )
 
         return sub_query
@@ -287,7 +289,6 @@ class MainsController(ABC):
             )
             .limit(1)
             .subquery()
-            # .alias("line_start_intersection_gids")
         )
         subquery_line_end = (
             union_all(
@@ -295,7 +296,6 @@ class MainsController(ABC):
             )
             .limit(1)
             .subquery()
-            # .alias("line_end_intersection_gids")
         )
 
         return (subquery_line_start, subquery_line_end)
@@ -372,20 +372,20 @@ class MainsController(ABC):
                     mains_intersection_stmt["line_start_intersection_gids"].c.json
                 ).label("line_start_intersections"),
                 array_agg(mains_intersection_stmt["line_end_intersection_gids"].c.json).label("line_end_intersections"),
-                # array_agg(asset_stmt["loggers"]).label("logger_data"),
-                # array_agg(asset_stmt["hydrants"]).label("hydrant_data"),
-                # array_agg(asset_stmt["pressure_fittings"]).label(
-                #     "pressure_fitting_data"
-                # ),
-                # array_agg(asset_stmt["pressure_valve"]).label("pressure_valve_data"),
-                # array_agg(asset_stmt["network_meters"]).label("network_meter_data"),
-                # array_agg(asset_stmt["chambers"]).label("chamber_data"),
-                # array_agg(asset_stmt["operational_sites"]).label(
-                #     "operational_site_data"
-                # ),
-                # array_agg(asset_stmt["network_opt_valve"]).label(
-                #     "network_opt_valve_data"
-                # ),
+                array_agg(asset_stmt["loggers"].c.json).label("logger_data"),
+                array_agg(asset_stmt["hydrants"].c.json).label("hydrant_data"),
+                array_agg(asset_stmt["pressure_fittings"].c.json).label(
+                    "pressure_fitting_data"
+                ),
+                array_agg(asset_stmt["pressure_valve"].c.json).label("pressure_valve_data"),
+                array_agg(asset_stmt["network_meters"].c.json).label("network_meter_data"),
+                array_agg(asset_stmt["chambers"].c.json).label("chamber_data"),
+                array_agg(asset_stmt["operational_sites"].c.json).label(
+                    "operational_site_data"
+                ),
+                array_agg(asset_stmt["network_opt_valve"].c.json).label(
+                    "network_opt_valve_data"
+                ),
             )
             # .options(joinedload(model.dmas))
             .join_from(model, main_dmas)
