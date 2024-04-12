@@ -6,7 +6,7 @@ from neomodel.exceptions import UniqueProperty
 from cleanwater.exceptions import (
     InvalidPipeException,
 )
-from . import GisToGraphCalculator
+from cleanwater.calculators import GisToGraphCalculator
 from cwa_geod.core.constants import (
     PIPE_JUNCTION__NAME,
     TRUNK_MAIN__NAME,

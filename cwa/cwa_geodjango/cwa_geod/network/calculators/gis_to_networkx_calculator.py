@@ -1,5 +1,5 @@
 from networkx import Graph
-from . import GisToGraphCalculator
+from cleanwater.calculators import GisToGraphCalculator
 
 
 class GisToNxCalculator(GisToGraphCalculator):
