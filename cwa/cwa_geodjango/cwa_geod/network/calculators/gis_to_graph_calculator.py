@@ -68,7 +68,7 @@ class GisToGraphCalculator:
 
         # Set node properties and order them relative to the start point
         # of the line. The junction and asset nodes returned matches the
-        # actual physical order that occurs geospatially
+        # actual physical order that occurs geo-spatially
         nodes_ordered = self._set_node_properties(
             base_pipe, junctions_with_positions, point_assets_with_positions
         )
