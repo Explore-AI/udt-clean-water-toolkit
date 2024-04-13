@@ -182,7 +182,6 @@ class GisToGraphCalculator:
             for coords in intersection_geom.coords:
                 intersection_params = normalised_point_position_on_line(
                     base_pipe_geom,
-                    start_point_geom,
                     Point(coords, srid=self.config.srid),
                 )
 
