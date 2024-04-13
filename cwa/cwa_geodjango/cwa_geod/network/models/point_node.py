@@ -7,8 +7,7 @@ from neomodel import (
     ZeroOrOne,
 )
 from neomodel.contrib.spatial_properties import PointProperty
-from .trunk_main import TrunkMain
-from .distribution_main import DistributionMain
+from .pipe_relation import PipeRelation
 from cwa_geod.core.constants import UTILITIES
 
 
@@ -19,7 +18,4 @@ class PointNode(StructuredNode):
     y_coord = FloatProperty(required=True)
     node_id = StringProperty(unique_index=True, unique=True, required=True)
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
-    trunk_main = Relationship("PointNode", "trunk_main", model=TrunkMain)
-    distribution_main = Relationship(
-        "PointNode", "distribution_main", model=DistributionMain
-    )
+    pipe_relation = Relationship("PipeRelation", "pipe_relation", model=PipeRelation)

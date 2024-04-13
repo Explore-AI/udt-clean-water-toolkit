@@ -73,9 +73,38 @@ class GisToGraphCalculator:
             base_pipe, junctions_with_positions, point_assets_with_positions
         )
 
-        #        self._set_relationship_properties(base_pipe, nodes_ordered)
+        self._consolidate_nodes(nodes_ordered)
+
+        import pdb
+
+        pdb.set_trace()
 
         return base_pipe, nodes_ordered
+
+    def _consolidate_nodes(self, nodes_ordered):
+        consolidated_nodes = [[nodes_ordered[0]]]
+
+        prev_distance = round(nodes_ordered[0]["distance_from_pipe_start_cm"])
+        for node in nodes_ordered[1:]:
+            current_distance = round(node["distance_from_pipe_start_cm"])
+
+            if current_distance == prev_distance:
+                consolidated_nodes[-1].append(node)
+            else:
+                consolidated_nodes.append([node])
+
+            prev_distance = current_distance
+
+        x = []
+        import pdb
+
+        pdb.set_trace()
+        for nodes in consolidated_nodes:
+            nodes.append({"gids": []})
+
+        import pdb
+
+        pdb.set_trace()
 
     def _get_base_pipe_data(self, qs_object) -> dict:
         base_pipe: dict = {}
@@ -391,7 +420,9 @@ class GisToGraphCalculator:
     def _set_point_asset_properties(
         self, base_pipe, nodes_ordered, point_assets_with_positions
     ):
+
         for asset in point_assets_with_positions:
+
             # TODO: node_id may not be unique between assets. FIX by defining an asset_code
             bisect.insort(
                 nodes_ordered,
