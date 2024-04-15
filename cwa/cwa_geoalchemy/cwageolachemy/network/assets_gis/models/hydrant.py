@@ -17,3 +17,6 @@ hydrant_dmas = Table(
 class Hydrant(BasePointAsset):
     __tablename__ = "assets_hydrant"
     dmas: Mapped[List[DMA]] = relationship(secondary=hydrant_dmas)
+    
+    class AssetMeta: 
+        asset_name = "hydrant"

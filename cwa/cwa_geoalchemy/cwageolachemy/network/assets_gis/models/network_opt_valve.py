@@ -22,3 +22,6 @@ networkoptvalve_dmas = Table(
 class NetworkOptValve(BasePointAsset):
     __tablename__ = "assets_networkoptvalve"
     dmas: Mapped[List[DMA]] = relationship(secondary=networkoptvalve_dmas)
+    
+    class AssetMeta: 
+        asset_name = "network_opt_valve"

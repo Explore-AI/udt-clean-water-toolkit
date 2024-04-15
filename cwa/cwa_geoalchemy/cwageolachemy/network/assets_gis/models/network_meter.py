@@ -22,3 +22,6 @@ networkmeter_dmas = Table(
 class NetworkMeter(BasePointAsset):
     __tablename__ = "assets_networkmeter"
     dmas: Mapped[List[DMA]] = relationship(secondary=networkmeter_dmas)
+    
+    class AssetMeta: 
+        asset_name = "network_meter"

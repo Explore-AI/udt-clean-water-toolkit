@@ -22,3 +22,6 @@ pressurefitting_dmas = Table(
 class PressureFitting(BasePointAsset):
     __tablename__ = "assets_pressurefitting"
     dmas: Mapped[List[DMA]] = relationship(secondary=pressurefitting_dmas)
+    
+    class AssetMeta: 
+        asset_name = "pressure_fitting"

@@ -19,6 +19,16 @@ class GisToNeo4jController:
 
     def create_network(self):
         pipes_query = self._get_pipe_and_asset_data()
+        
+        with Session(engine) as session:
+            count = 0 
+            for pipe_data in session.execute(pipes_query).fetchall():
+                if count == 10: 
+                    break
+                else: 
+                    print(pipe_data)
+                    print('_'*100)
+                    count += 1
 
     def _get_pipe_and_asset_data(self):
         trunk_mains_statement = self.get_trunk_mains_data()

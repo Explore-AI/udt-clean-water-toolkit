@@ -17,3 +17,6 @@ chamber_dmas = Table(
 class Chamber(BasePointAsset):
     __tablename__ = "assets_chamber"
     dmas: Mapped[List[DMA]] = relationship(secondary=chamber_dmas)
+    
+    class AssetMeta: 
+        asset_name = "chamber"
