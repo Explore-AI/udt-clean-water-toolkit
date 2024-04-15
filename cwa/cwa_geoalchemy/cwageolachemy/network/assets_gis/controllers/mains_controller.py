@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from sqlalchemy.dialects.postgresql import array_agg, array
+from sqlalchemy.dialects.postgresql import array_agg, array, JSON
 from sqlalchemy.sql import Select, cast
 from sqlalchemy import (
     func,
@@ -72,7 +72,7 @@ class MainsController(ABC):
                     literal_column("'gid'"),
                     cast(model.gid, Text),
                     literal_column("'geometry'"),
-                    cast(model.geometry, Text),
+                    cast(geo_funcs.ST_AsGeoJSON(model.geometry), JSON),
                     literal_column("'wkt'"),
                     cast(geo_funcs.ST_AsText(model.geometry), Text),
                     literal_column("'dma_ids'"),
@@ -124,7 +124,7 @@ class MainsController(ABC):
                     literal_column("'gid'"),
                     cast(model.gid, Text),
                     literal_column("'geometry'"),
-                    cast(model.geometry, Text),
+                    cast(geo_funcs.ST_AsGeoJSON(model.geometry), JSON),
                     literal_column("'wkt'"),
                     cast(geo_funcs.ST_AsText(getattr(model, geometry_field)), Text),
                     literal_column("'dma_ids'"),
@@ -347,11 +347,11 @@ class MainsController(ABC):
         # add the subqueries to the main query
         point_relation_query = (
             select(
-                model.id,
-                model.gid,
-                geo_funcs.ST_AsText(model.geometry),
-                model.modified_at,
-                model.created_at,
+                model.id.label('id'),
+                model.gid.label('gid'),
+                cast(model.geometry, Text).label('geometry'),
+                model.modified_at.label('modified_at'),
+                model.created_at.label('created_at'),
                 literal(asset_name).label("asset_name"),
                 geo_funcs.ST_Length(model.geometry).label("pipe_length"),
                 geo_funcs.ST_AsText(model.geometry).label("wkt"),
@@ -390,13 +390,13 @@ class MainsController(ABC):
                     "network_opt_valve_data"
                 ),
             )
-            # .options(joinedload(model.dmas))
+            .options(joinedload(model.dmas))
             .join_from(model, main_dmas)
             .join_from(main_dmas, ud_alias)
             .join_from(ud_alias, uu_alias)
-            .where(DMA.code.in_(["ZWAL4801", "ZCHESS12"]))
-            .offset(50)
-            .limit(20)
+            # .where(DMA.code.in_(["ZWAL4801", "ZCHESS12", "ZCHIPO01"]))
+            .offset(200000)
+            .limit(5)
             .group_by(model.id)
         )
         return point_relation_query
