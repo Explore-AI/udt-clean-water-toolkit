@@ -209,7 +209,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         Returns:
               None
         """
+        import pdb
 
+        pdb.set_trace()
         list(
             map(
                 self._map_pipe_connected_asset_relations,
