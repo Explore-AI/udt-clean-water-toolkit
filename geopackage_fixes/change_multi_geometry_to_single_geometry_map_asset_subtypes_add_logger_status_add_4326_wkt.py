@@ -114,7 +114,7 @@ for layer_name in fiona.listlayers(old_gpkg):
         original_gdf['geometry'] = original_gdf['geometry'].apply(convert_multi_to_single)
         geomtype = original_gdf.geom_type.unique()
         # create string wkt geometry in EPSG 4326
-        original_gdf['wkt_geom_4326'] = wkt.dumps(original_gdf.geometry.to_crs('EPSG:4326'))
+        original_gdf['wkt_geom_4326'] = wkt.dumps(original_gdf['geometry'].to_crs('EPSG:4326'))
         print('MultiPoint to ', geomtype, ' successful!')
         # save out layer to new gpkg
         original_gdf.to_file(new_gpkg, driver="GPKG", layer=layer_name)
@@ -124,14 +124,14 @@ for layer_name in fiona.listlayers(old_gpkg):
         original_gdf['geometry'] = original_gdf['geometry'].apply(convert_multi_to_single)
         geomtype = original_gdf.geom_type.unique()
         # create string wkt geometry in EPSG 4326
-        original_gdf['wkt_geom_4326'] = wkt.dumps(original_gdf.geometry.to_crs('EPSG:4326'))
+        original_gdf['wkt_geom_4326'] = wkt.dumps(original_gdf['geometry'].to_crs('EPSG:4326'))
         print('MultiLineString to ', geomtype, ' successful!')
         # save out layer to new gpkg
         original_gdf.to_file(new_gpkg, driver="GPKG", layer=layer_name)
     else:
         print('no need to convert: ', geometry_type)
         # create string wkt geometry in EPSG 4326
-        original_gdf['wkt_geom_4326'] = wkt.dumps(original_gdf.geometry.to_crs('EPSG:4326'))
+        original_gdf['wkt_geom_4326'] = wkt.dumps(original_gdf['geometry'].to_crs('EPSG:4326'))
         # save out layer to new gpkg
         original_gdf.to_file(new_gpkg, driver="GPKG", layer=layer_name)
 
