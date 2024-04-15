@@ -1,4 +1,4 @@
-from neomodel import IntegerProperty
+from neomodel import IntegerProperty, StringProperty
 from .point_node import PointNode
 from cwa_geod.core.constants import POINT_ASSET__NAME
 
@@ -8,15 +8,3 @@ class PointAsset(PointNode):
 
     class AssetMeta:
         node_type = POINT_ASSET__NAME
-
-    @staticmethod
-    def get_all_asset_models():
-        return PointAsset.__subclasses__()
-
-    @classmethod
-    def asset_name_model_mapping(cls, asset_name):
-        for model in cls.get_all_asset_models():
-            if model.AssetMeta.asset_name == asset_name:
-                return model
-
-        return None
