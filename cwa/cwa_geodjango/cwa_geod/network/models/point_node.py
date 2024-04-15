@@ -4,7 +4,6 @@ from neomodel import (
     ArrayProperty,
     StringProperty,
     JSONProperty,
-    ZeroOrOne,
 )
 from neomodel.contrib.spatial_properties import PointProperty
 from .pipe_relation import PipeRelation
@@ -15,7 +14,9 @@ class PointNode(StructuredNode):
     __abstract__ = True
     dmas = JSONProperty(required=True)
     # location = PointProperty(crs="wgs-84", require=True)
+    gids = ArrayProperty(required=True, index=True)
+    asset_names = ArrayProperty(required=True, index=True)
     coords_27700 = ArrayProperty(required=True)
-    node_id = StringProperty(unique_index=True, unique=True, required=True)
+    node_key = StringProperty(unique_index=True, unique=True, required=True)
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
     pipe_relation = Relationship("PipeRelation", "pipe_relation", model=PipeRelation)

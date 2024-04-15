@@ -2,6 +2,7 @@ from multiprocessing.pool import ThreadPool
 from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
+from neomodel import db
 from neomodel.exceptions import UniqueProperty
 from cleanwater.exceptions import (
     InvalidPipeException,
@@ -132,27 +133,29 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
     def _create_nodes(self, base_pipe, all_node_properties):
 
-        import pdb
-
-        pdb.set_trace()
         all_nodes = []
         for node_properties in all_node_properties:
 
-            node_id = node_properties.get("node_id")
+            node_key = node_properties.get("node_key")
 
-            point_node = PointNode.nodes.get_or_none(node_id=node_id)
+            point_node = PointNode.nodes.get_or_none(node_key=node_key)
 
             if point_node:
                 all_nodes.append(point_node)
                 continue
 
-            node_types = node_properties.get("node_types")
+            node_types = sorted(node_properties.get("node_types"))
 
+            import pdb
+
+            pdb.set_trace()
             if node_types == [PIPE_JUNCTION__NAME]:
-                node = self._get_or_create_pipe_junctions_node(
-                    base_pipe, node_properties
-                )
-                all_nodes.append(node)
+                # node = self._get_or_create_pipe_junctions_node(
+                #     base_pipe, node_properties
+                # )
+
+                pass
+            # all_nodes.append(node)
 
             elif node_types == [PIPE_END__NAME]:
                 node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
@@ -163,7 +166,14 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 all_nodes.append(node)
 
             elif node_types == [PIPE_JUNCTION__NAME, POINT_ASSET__NAME]:
-                node = self._get_or_create_point_asset_node(base_pipe, node_properties)
+                # node = self._get_or_create_point_asset_node(base_pipe, node_properties)
+                # query = f""
+                query = f"CREATE (n:PipeJunction&PointAsset&PressureFitting {{utility='thames_water', coords_27700: {node_properties['coords_27700']}, node_key={node_properties['node_key']}, dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, pipe_gids: {node_properties['pipe_gids']}  }})"
+
+                import pdb
+
+                pdb.set_trace()
+                node = db.cypher_query(query)
                 all_nodes.append(node)
 
             elif node_types == [PIPE_END__NAME, POINT_ASSET__NAME]:
@@ -209,9 +219,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         Returns:
               None
         """
-        import pdb
 
-        pdb.set_trace()
         list(
             map(
                 self._map_pipe_connected_asset_relations,

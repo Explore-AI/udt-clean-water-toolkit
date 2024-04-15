@@ -98,7 +98,7 @@ class GisToGraphCalculator:
                         float(nodes[0]["intersection_point_geometry"].x),
                         float(nodes[0]["intersection_point_geometry"].y),
                     ],
-                    "node_id": self._encode_node_id(
+                    "node_key": self._encode_node_key(
                         nodes[0]["intersection_point_geometry"]
                     ),
                     "dmas": nodes[0]["dmas"],
@@ -119,7 +119,7 @@ class GisToGraphCalculator:
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
-                    merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
+                    merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
                     merged_nodes[-1]["node_types"] = list(
                         set(merged_nodes[-1]["node_types"])
                     )
@@ -405,7 +405,7 @@ class GisToGraphCalculator:
                 )
 
                 nodes_ordered.insert(
-                    # TODO: node_id may not be unique if different types of pipes have the same gid. FIX by defining a pipe_code
+                    # TODO: node_key may not be unique if different types of pipes have the same gid. FIX by defining a pipe_code
                     position_index,
                     {
                         "gids": gids,
@@ -428,7 +428,7 @@ class GisToGraphCalculator:
                 )
 
                 # TODO: This is inefficient. Should hash only once all gids are known.
-                # nodes_ordered[position_index]["node_id"] = self._encode_node_id(
+                # nodes_ordered[position_index]["node_key"] = self._encode_node_key(
                 #     pipe["intersection_point_geometry"],
                 #     ids,
                 # )
@@ -441,7 +441,7 @@ class GisToGraphCalculator:
 
         for asset in point_assets_with_positions:
 
-            # TODO: node_id may not be unique between assets. FIX by defining an asset_code
+            # TODO: node_key may not be unique between assets. FIX by defining an asset_code
             bisect.insort(
                 nodes_ordered,
                 {
@@ -449,7 +449,7 @@ class GisToGraphCalculator:
                     "node_type": POINT_ASSET__NAME,
                     "dmas": base_pipe["dma_codes"],
                     "utility_name": self._get_utility(base_pipe),
-                    # "node_id": self._encode_node_id(
+                    # "node_key": self._encode_node_key(
                     #     asset["intersection_point_geometry"],
                     #     sorted(
                     #         [
@@ -526,13 +526,13 @@ class GisToGraphCalculator:
         return json.dumps(dma_data)
 
     @staticmethod
-    def _encode_node_id(point):
+    def _encode_node_key(point):
         """
         Round and cast Point geometry coordinates to str to remove '.'
         then return back to int to make make coords sqid compatible.
 
         Note these are not coordinates but int representations of the
-        coordinates to ensure a unique node_id.
+        coordinates to ensure a unique node_key.
         """
 
         coord1_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
