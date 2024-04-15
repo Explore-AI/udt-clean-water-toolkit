@@ -30,6 +30,7 @@ class MainsController(ABC):
     ) -> Any:
         # trunkmain_dma_alias = aliased(trunkmain_dmas)
         # distmain_dma_alias = aliased(distributionmain_dmas)
+        asset_name = model.AssetMeta.asset_name
         
         tm_touches_subquery = (
             select(TrunkMain.id)
@@ -86,6 +87,8 @@ class MainsController(ABC):
                     array_agg(tm_touches_subquery),
                     literal_column("'dm_touches_ids'"),
                     array_agg(dm_touches_subquery),
+                    literal_column("'asset_name'"), 
+                    asset_name
                 ).label("json")
             )
             .join_from(model, asset_dmas, isouter=True)
@@ -392,6 +395,7 @@ class MainsController(ABC):
             .join_from(main_dmas, ud_alias)
             .join_from(ud_alias, uu_alias)
             .where(DMA.code.in_(["ZWAL4801", "ZCHESS12"]))
+            .offset(50)
             .limit(20)
             .group_by(model.id)
         )
