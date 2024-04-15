@@ -102,22 +102,27 @@ class GisToGraphCalculator:
                         nodes[0]["intersection_point_geometry"]
                     ),
                     "dmas": nodes[0]["dmas"],
+                    "node_types": [],
                 }
             )
             for node in nodes:
                 if node["node_type"] == PIPE_JUNCTION__NAME:
-                    merged_nodes[-1]["pipe_node_type"] = PIPE_JUNCTION__NAME
+                    merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
                     try:
                         merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
                     except KeyError:
                         merged_nodes[-1]["pipe_gids"] = node["pipe_gids"]
                 elif node["node_type"] == PIPE_END__NAME:
-                    merged_nodes[-1]["pipe_node_type"] = PIPE_END__NAME
+                    merged_nodes[-1]["node_types"].append(PIPE_END__NAME)
                     try:
                         merged_nodes[-1]["pipe_gid"].extend(node["gid"])
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
+                    merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
+                    merged_nodes[-1]["node_types"] = list(
+                        set(merged_nodes[-1]["node_types"])
+                    )
                     try:
                         merged_nodes[-1]["point_asset_gids"].append(node["gid"])
                         merged_nodes[-1]["point_asset_names"].append(node["asset_name"])
