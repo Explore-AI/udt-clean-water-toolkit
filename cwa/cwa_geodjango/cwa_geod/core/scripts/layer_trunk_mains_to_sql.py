@@ -23,16 +23,29 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        layer_mapping = {
-            "gid": "GISID",
-            "geometry": "MULTILINESTRING",
-        }
+        trunk_main_layer = ds[layer_index]
 
-        lm = LayerMapping(
-            TrunkMain, ds, layer_mapping, layer=layer_index, transform=False
-        )
-        lm.save(strict=True)
+        layer_gis_ids = trunk_main_layer.get_fields("GISID")
+        layer_geometries = trunk_main_layer.get_geoms()
+        geometries_wkt = trunk_main_layer.get_fields("wkt_geom_4326")
 
+        new_trunk_mains = []
+        for gid, geom, geom_4326 in zip(layer_gis_ids, layer_geometries, geometries_wkt):
+
+            new_trunk_main = TrunkMain(gid=gid, geometry=geom.wkt,
+                                       geometry_4326=geom_4326)
+            new_trunk_mains.append(new_trunk_main)
+
+            if len(new_trunk_mains) == 100000:
+                TrunkMain.objects.bulk_create(new_trunk_mains)
+                new_trunk_mains = []
+
+
+        # save the last set of data as it will probably be less than 100000
+        if new_trunk_mains:
+            TrunkMain.objects.bulk_create(new_trunk_mains)
+
+        
         DMAThroughModel = TrunkMain.dmas.through
         bulk_create_list = []
         for trunk_main in TrunkMain.objects.only("id", "geometry"):
