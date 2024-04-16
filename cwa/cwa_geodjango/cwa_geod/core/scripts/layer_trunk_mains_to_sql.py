@@ -25,12 +25,12 @@ Large numbers of features will take a long time to save."""
 
         trunk_main_layer = ds[layer_index]
 
-        layer_gis_ids = trunk_main_layer.get_fields("GISID")
-        layer_geometries = trunk_main_layer.get_geoms()
-        geometries_wkt = trunk_main_layer.get_fields("wkt_geom_4326")
 
         new_trunk_mains = []
-        for gid, geom, geom_4326 in zip(layer_gis_ids, layer_geometries, geometries_wkt):
+        for feature in trunk_main_layer:
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
 
             new_trunk_main = TrunkMain(gid=gid, geometry=geom.wkt,
                                        geometry_4326=geom_4326)
@@ -64,4 +64,11 @@ Large numbers of features will take a long time to save."""
                     DMAThroughModel(trunkmain_id=trunk_main.pk, dma_id=dma_id)
                 )
 
-        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=120000)
+            
+            if len(bulk_create_list) == 100000:
+                DMAThroughModel.objects.bulk_create(bulk_create_list)
+                bulk_create_list = []
+        
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)
