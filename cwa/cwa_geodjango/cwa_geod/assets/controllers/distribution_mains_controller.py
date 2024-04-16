@@ -46,8 +46,8 @@ class DistributionMainsController(MainsController):
         )
 
         inner_subqueries = {
-            "tm_touches_gids": tm_inner_subquery,
-            "dm_touches_gids": dm_inner_subquery,
+            "tm_touches_ids": tm_inner_subquery,
+            "dm_touches_ids": dm_inner_subquery,
         }
 
         subquery = super()._generate_dwithin_subquery(
