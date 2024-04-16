@@ -1,8 +1,10 @@
 import sys
-from os import environ
+from os import environ, makedirs
+from os.path import exists, join
 import psycopg2
-from requests import get, put, exceptions
+from requests import get, exceptions
 from requests.auth import HTTPBasicAuth
+import pdb
 
 
 class Downloader:
@@ -12,23 +14,21 @@ class Downloader:
             'GEO_PASS': environ.get('GEOSERVER_ADMIN_PASSWORD'),
             'GEO_WORKSPACE': environ.get('GEOSERVER_WORKSPACE', 'udt'),
             'GEOSERVER_INSTANCE_URL': environ.get('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
-            'DATABASE_HOST': environ.get('HOST'),
-            'DATABASE_USER': environ.get('POSTGRES_USER'),
+            'DATABASE_HOST': environ.get('HOST', 'udtpostgis'),
+            'DATABASE_USER': environ.get('POSTGRES_USER', 'udt'),
             'DATABASE_PASSWORD': environ.get('POSTGRES_PASS'),
-            'DATABASE_NAME': environ.get('POSTGRES_DB'),
+            'DATABASE_NAME': environ.get('POSTGRES_DB', 'udt'),
             'HEIGHT': 768,
             'WIDTH': 1024,
-            'FORMAT': 'image/svg',
-            'SRID': 27700
-
+            'FORMAT': 'image/svg'
         }
 
     # Function to retrieve spatial tables in PostgreSQL
     def pg_connection_details(self, pg_host, pg_user, pg_pass, pg_name):
         try:
-            connection = psycopg2.connect(host='%s' % pg_host, database='%s' % pg_name,
-                                          user='%s' % pg_user, password='%s' % pg_pass,
-                                          port=5432)
+
+            connection_params = f'host={pg_host} user={pg_user} password={pg_pass} dbname={pg_name} port=5432'
+            connection = psycopg2.connect(connection_params)
             cursor = connection.cursor()
 
             check_table = '''SELECT f_table_name FROM geometry_columns WHERE f_table_schema = 'public';'''
@@ -43,22 +43,25 @@ class Downloader:
                         ST_XMin(ST_Extent(geometry)) AS min_x,
                         ST_YMin(ST_Extent(geometry)) AS min_y,
                         ST_XMax(ST_Extent(geometry)) AS max_x,
-                        ST_YMax(ST_Extent(geometry)) AS max_y 
+                        ST_YMax(ST_Extent(geometry)) AS max_y ,
+                        ST_SRID(geometry) as srid
                     FROM 
-                        public.%s;
+                        public.%s
+                        GROUP BY srid;
                 ''' % single_table
 
                 cursor.execute(layer_bbox_query)
                 bbox_result = cursor.fetchone()
 
                 if bbox_result:
-                    min_x, min_y, max_x, max_y = bbox_result
-                    _tables_with_bbox.append((single_table, (min_x, min_y, max_x, max_y)))
+                    min_x, min_y, max_x, max_y, srid = bbox_result
+                    _tables_with_bbox.append((single_table, (min_x, min_y, max_x, max_y, srid)))
 
             cursor.close()
             connection.close()
 
         except psycopg2.OperationalError:
+            print("Could not connect to PostgreSQL")
             sys.exit(1)
 
         return _tables_with_bbox
@@ -70,6 +73,7 @@ class Downloader:
 
             with open(file_path, 'wb') as file:
                 file.write(response.content)
+            file.close()
 
             print("Image saved successfully:", file_path)
         except exceptions.RequestException as e:
@@ -80,22 +84,28 @@ class Downloader:
                            pg_name):
 
         auth = HTTPBasicAuth('%s' % username, '%s' % user_pass)
-
+        pdb.set_trace()
         pg_tables = self.pg_connection_details(pg_host, pg_user, pg_pass, pg_name)
+        print("Retrieving", pg_tables)
 
         for table_name, bbox in pg_tables:
             get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
                 geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1], bbox[2], bbox[3],
-                self.default['HEIGHT'], self.default['WIDTH'], self.default['SRID'], self.default['FORMAT'])
+                self.default['HEIGHT'], self.default['WIDTH'], bbox[4], self.default['FORMAT'])
+            print(get_map_url)
             image_extension = self.default['FORMAT'].split('/')[-1]
-            file_path = f"{table_name}.{image_extension}"
+            base_path = join("/geoserver_scripts", "output")
+            if not exists(base_path):
+                makedirs(base_path)
+            report_image = f"{table_name}.{image_extension}"
+            file_path = join(base_path, report_image)
+            print(file_path)
             # Download and save the image
             self.download_and_save_image(get_map_url, file_path, auth=auth)
 
     def geoserver_get_map(self):
 
         # Publish layers from database to GeoServer with default styles
-
         self.get_layer_snapshot(self.default['GEOSERVER_INSTANCE_URL'], self.default['GEO_USER'],
                                 self.default['GEO_PASS'], self.default['GEO_WORKSPACE'],
                                 self.default['DATABASE_HOST'],
