@@ -13,7 +13,7 @@ class DistributionMain(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
     class Meta:
-        ordering = ["dmas"]
+        ordering = ["dmas__id"]
 
     class AssetMeta:
         asset_name = DISTRIBUTION_MAIN__NAME
