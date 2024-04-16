@@ -23,13 +23,25 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        layer_mapping = {
-            "gid": "GISID",
-            "geometry": "POINT",
-        }
+        logger_layer = ds[layer_index]
 
-        lm = LayerMapping(Logger, ds, layer_mapping, layer=layer_index, transform=False)
-        lm.save(strict=True)
+        new_loggers = []
+        for feature in logger_layer:
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
+
+            new_logger = Logger(gid=gid, geometry=geom.wkt,
+                                       geometry_4326=geom_4326)
+            new_loggers.append(new_logger)
+
+            if len(new_loggers) == 100000:
+                Logger.objects.bulk_create(new_loggers)
+                new_loggers = []
+
+        # save the last set of data as it will probably be less than 100000
+        if new_loggers:
+            Logger.objects.bulk_create(new_loggers)
 
         DMAThroughModel = Logger.dmas.through
         bulk_create_list = []
@@ -50,4 +62,10 @@ Large numbers of features will take a long time to save."""
                 ]
             )
 
-        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=10000)
+            if len(bulk_create_list) == 100000:
+                    DMAThroughModel.objects.bulk_create(bulk_create_list)
+                    bulk_create_list = []
+
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)

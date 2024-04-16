@@ -23,16 +23,29 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        layer_mapping = {
-            "gid": "GISID",
-            "geometry": "POINT",
-            "subtype":"SUBTYPE"
-        }
+        operational_site_layer = ds[layer_index]
 
-        lm = LayerMapping(
-            OperationalSite, ds, layer_mapping, layer=layer_index, transform=False
-        )
-        lm.save(strict=True)
+        new_operational_sites = []
+        for feature in operational_site_layer:
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
+            subtype = feature.get("SUBTYPE")
+
+            new_operational_site = OperationalSite(gid=gid,
+                                                    geometry=geom.wkt,
+                                                    geometry_4326=geom_4326,
+                                                    subtype=subtype
+                                                    )
+            new_operational_sites.append(new_operational_site)
+
+            if len(new_operational_sites) == 100000:
+                OperationalSite.objects.bulk_create(new_operational_sites)
+                new_operational_sites = []
+
+        # save the last set of data as it will probably be less than 100000
+        if new_operational_sites:
+            OperationalSite.objects.bulk_create(new_operational_sites)
 
         DMAThroughModel = OperationalSite.dmas.through
         bulk_create_list = []
@@ -55,7 +68,10 @@ Large numbers of features will take a long time to save."""
                     for dma_id in dma_ids
                 ]
             )
+            if len(bulk_create_list) == 100000:
+                    DMAThroughModel.objects.bulk_create(bulk_create_list)
+                    bulk_create_list = []
 
-            # operational_site.dmas.add(*list(dma_ids))
-
-        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=2000)
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)

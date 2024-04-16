@@ -23,19 +23,30 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        layer_mapping = {
-            "gid": "GISID",
-            "geometry": "POINT",
-        }
+        chamber_layer = ds[layer_index]
 
-        lm = LayerMapping(
-            Chamber, ds, layer_mapping, layer=layer_index, transform=False
-        )
-        lm.save(strict=True)
+        new_chambers = []
+        for feature in chamber_layer:
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
+
+            new_chamber = Chamber(gid=gid, geometry=geom.wkt,
+                                       geometry_4326=geom_4326)
+            new_chambers.append(new_chamber)
+
+            if len(new_chambers) == 100000:
+                Chamber.objects.bulk_create(new_chambers)
+                new_chambers = []
+
+        # save the last set of data as it will probably be less than 100000
+        if new_chambers:
+            Chamber.objects.bulk_create(new_chambers)
+
+
 
         DMAThroughModel = Chamber.dmas.through
         bulk_create_list = []
-
         for chamber in Chamber.objects.only("id", "geometry"):
             wkt = chamber.geometry.wkt
 
@@ -53,4 +64,10 @@ Large numbers of features will take a long time to save."""
                 ]
             )
 
-        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=3000)
+            if len(bulk_create_list) == 100000:
+                    DMAThroughModel.objects.bulk_create(bulk_create_list)
+                    bulk_create_list = []
+
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)

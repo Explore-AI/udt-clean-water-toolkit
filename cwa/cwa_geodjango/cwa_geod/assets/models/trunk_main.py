@@ -16,7 +16,7 @@ class TrunkMain(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
     class Meta:
-        ordering = ["dmas_id"]
+        ordering = ["dmas__id"]
 
     class AssetMeta:
         asset_name = TRUNK_MAIN__NAME

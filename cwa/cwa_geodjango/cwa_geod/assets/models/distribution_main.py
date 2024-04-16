@@ -8,6 +8,9 @@ class DistributionMain(models.Model):
     geometry = models.LineStringField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
+    geometry_4326 = models.LineStringField(
+        spatial_index=True, null=False, blank=False, srid=4326
+    )
     dmas = models.ManyToManyField(DMA, related_name="dma_distribution_mains")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
