@@ -26,6 +26,7 @@ Large numbers of features will take a long time to save."""
         layer_mapping = {
             "gid": "GISID",
             "geometry": "POINT",
+            "acoustic_logger" : "Acoustic_Logger",
         }
 
         lm = LayerMapping(
