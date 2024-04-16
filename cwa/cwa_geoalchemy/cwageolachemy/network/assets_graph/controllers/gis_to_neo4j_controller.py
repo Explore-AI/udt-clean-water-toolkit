@@ -23,22 +23,22 @@ class GisToNeo4jController:
 
         with Session(engine) as session:
             count = 0
-            query_result = session.execute(pipes_query)
-            # for pipe_data in query_result:
-            #     if count == 5:
-            #         break
-            #     else:
-            #         print(f"Pipe Data Type: {type(pipe_data)}")
-            #         # print(f"Our column output data in the form of a dictionary: \n{pipe_data._asdict()}")
-            #         pipe_data_as_dict = pipe_data._asdict()
-            #         base_pipe_data = self._get_base_pipe_data(pipe_data_as_dict)
-            #         junctions_data = self._combine_all_pipe_junctions(pipe_data_as_dict)
-            #         assets_data = self._combine_all_point_assets(pipe_data_as_dict)
-            #         print(f"Base Pipe Data: {base_pipe_data}")
-            #         print(f"Junctions Data: {junctions_data}")
-            #         print(f"Assets Data: {assets_data}")
-            #         print("_" * 100)
-            #         count += 1
+            query_result = session.execute(select("*").select_from(pipes_query))
+            for pipe_data in query_result:
+                if count == 5:
+                    break
+                else:
+                    print(f"Pipe Data Type: {type(pipe_data)}")
+                    # print(f"Our column output data in the form of a dictionary: \n{pipe_data._asdict()}")
+                    pipe_data_as_dict = pipe_data._asdict()
+                    base_pipe_data = self._get_base_pipe_data(pipe_data_as_dict)
+                    junctions_data = self._combine_all_pipe_junctions(pipe_data_as_dict)
+                    assets_data = self._combine_all_point_assets(pipe_data_as_dict)
+                    print(f"Base Pipe Data: {base_pipe_data}")
+                    print(f"Junctions Data: {junctions_data}")
+                    print(f"Assets Data: {assets_data}")
+                    print("_" * 100)
+                    count += 1
 
     def _get_pipe_and_asset_data(self):
         trunk_mains_statement = self.get_trunk_mains_data()

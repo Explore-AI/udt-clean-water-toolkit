@@ -26,16 +26,19 @@ class MainsController(ABC):
     default_properties = ["id", "gid"]
 
     def _generate_dwithin_subquery(
-        self, model: BaseAsset, asset_dmas, geometry_field="geometry", inner_stmts={}
+        self, model: BaseAsset, asset_dmas, mains_model: Union[TrunkMain, DistributionMain]
     ) -> Any:
+        # :TODO: remove the limit keyword found in the subqueries
         # trunkmain_dma_alias = aliased(trunkmain_dmas)
         # distmain_dma_alias = aliased(distributionmain_dmas)
         asset_name = model.AssetMeta.asset_name
-        
+
         tm_touches_subquery = (
             select(TrunkMain.id)
-            .join_from(
-                trunkmain_dmas, model, trunkmain_dmas.c.dma_id == asset_dmas.c.dma_id
+            .outerjoin_from(
+                trunkmain_dmas, 
+                TrunkMain, 
+                TrunkMain.id == trunkmain_dmas.c.trunkmain_id
             )
             .where(
                 geo_funcs.ST_DWithin(
@@ -43,16 +46,18 @@ class MainsController(ABC):
                 )
             )
             .order_by(trunkmain_dmas.c.dma_id.asc())
+            # .offset(1)
             .limit(1)
-            .scalar_subquery()
+            # .correlate(model)
+            .subquery()
         )
 
         dm_touches_subquery = (
             select(DistributionMain.id)
-            .join_from(
+            .outerjoin_from(
                 distributionmain_dmas,
-                model,
-                distributionmain_dmas.c.dma_id == asset_dmas.c.dma_id,
+                DistributionMain,
+                DistributionMain.id == distributionmain_dmas.c.distributionmain_id,
             )
             .where(
                 geo_funcs.ST_DWithin(
@@ -60,8 +65,10 @@ class MainsController(ABC):
                 )
             )
             .order_by(distributionmain_dmas.c.dma_id.asc())
+            # .correlate(model)
+            # .offset(1)
             .limit(1)
-            .scalar_subquery()
+            .subquery()
         )
 
         dwithin_asset_subquery = (
@@ -84,23 +91,25 @@ class MainsController(ABC):
                     literal_column("'utilities'"),
                     cast(array_agg(Utility.name), Text),
                     literal_column("'tm_touches_ids'"),
-                    array_agg(tm_touches_subquery),
+                     array_agg(tm_touches_subquery),
                     literal_column("'dm_touches_ids'"),
                     array_agg(dm_touches_subquery),
-                    literal_column("'asset_name'"), 
-                    asset_name
+                    literal_column("'asset_name'"),
+                    asset_name,
                 ).label("json")
             )
+            .select_from(model)
             .join_from(model, asset_dmas, isouter=True)
             .join_from(asset_dmas, DMA, isouter=True)
             .join_from(DMA, Utility, isouter=True)
-            .where(geo_funcs.ST_DWithin(model.geometry, (TrunkMain.geometry), 0.5))
+            .where(geo_funcs.ST_DWithin(model.geometry, (mains_model.geometry), 0.5))
             .group_by(
                 model.id,
                 geo_funcs.ST_AsText(model.geometry),
             )
+            # .offset(2)
             .limit(1)
-            .subquery()
+            # .subquery()
         )
 
         return dwithin_asset_subquery
@@ -112,6 +121,7 @@ class MainsController(ABC):
         geometry_field: str = "geometry",
     ) -> Any:
         # :TODO Make this a Dynamic function
+        # :TODO: remove the limit keyword found in the subqueries
 
         main_dmas_alias = aliased(associate_dmas_model)
         dma_alias = aliased(DMA)
@@ -194,6 +204,8 @@ class MainsController(ABC):
         )
 
     def generate_termini_subqueries(self, main_dmas: dict[str, Table]):
+        # :TODO: remove the limit keyword found in the subqueries
+        # :TODO: Make this a Dynamic function
         start_point_subqueries: list[Select] = []
         end_point_subqueries: list[Select] = []
         tm_alias = aliased(TrunkMain)
@@ -287,40 +299,36 @@ class MainsController(ABC):
         end_point_subqueries = [tm_subquery_2, dm_subquery_2]
 
         subquery_line_start = (
-            union_all(
-                start_point_subqueries[0], *start_point_subqueries[1:]
-            )
+            union_all(start_point_subqueries[0], *start_point_subqueries[1:])
             .limit(1)
             .subquery()
         )
         subquery_line_end = (
-            union_all(
-                end_point_subqueries[0], *end_point_subqueries[1:]
-            )
+            union_all(end_point_subqueries[0], *end_point_subqueries[1:])
             .limit(1)
             .subquery()
         )
 
         return (subquery_line_start, subquery_line_end)
 
-    def _generate_asset_subqueries(self) -> Any:
-        logger_subquery = self._generate_dwithin_subquery(Logger, logger_dmas)
-        hydrant_subquery = self._generate_dwithin_subquery(Hydrant, hydrant_dmas)
+    def _generate_asset_subqueries(self, mains_model: Union[TrunkMain, DistributionMain]) -> Any:
+        logger_subquery = self._generate_dwithin_subquery(Logger, logger_dmas, mains_model)
+        hydrant_subquery = self._generate_dwithin_subquery(Hydrant, hydrant_dmas, mains_model)
         pressure_fitting_subquery = self._generate_dwithin_subquery(
-            PressureFitting, pressurefitting_dmas
+            PressureFitting, pressurefitting_dmas, mains_model
         )
         pressure_valve_subquery = self._generate_dwithin_subquery(
-            PressureControlValve, pressurecontrolvalve_dmas
+            PressureControlValve, pressurecontrolvalve_dmas, mains_model
         )
         network_meter_subquery = self._generate_dwithin_subquery(
-            NetworkMeter, networkmeter_dmas
+            NetworkMeter, networkmeter_dmas, mains_model
         )
-        chamber_subquery = self._generate_dwithin_subquery(Chamber, chamber_dmas)
+        chamber_subquery = self._generate_dwithin_subquery(Chamber, chamber_dmas, mains_model)
         operational_site_subquery = self._generate_dwithin_subquery(
-            OperationalSite, operationalsite_dmas
+            OperationalSite, operationalsite_dmas, mains_model
         )
         network_opt_valve_subquery = self._generate_dwithin_subquery(
-            NetworkOptValve, networkoptvalve_dmas
+            NetworkOptValve, networkoptvalve_dmas, mains_model
         )
 
         return {
@@ -342,16 +350,16 @@ class MainsController(ABC):
         ud_alias = aliased(DMA)  # utilities dma
         # get our subqueries
         mains_intersection_stmt = self._generate_mains_subqueries()
-        asset_stmt = self._generate_asset_subqueries()
+        asset_stmt = self._generate_asset_subqueries(mains_model=model)
         asset_name = model.AssetMeta.asset_name
         # add the subqueries to the main query
         point_relation_query = (
             select(
-                model.id.label('id'),
-                model.gid.label('gid'),
-                cast(model.geometry, Text).label('geometry'),
-                model.modified_at.label('modified_at'),
-                model.created_at.label('created_at'),
+                model.id.label("id"),
+                model.gid.label("gid"),
+                cast(model.geometry, Text).label("geometry"),
+                model.modified_at.label("modified_at"),
+                model.created_at.label("created_at"),
                 literal(asset_name).label("asset_name"),
                 geo_funcs.ST_Length(model.geometry).label("pipe_length"),
                 geo_funcs.ST_AsText(model.geometry).label("wkt"),
@@ -374,19 +382,25 @@ class MainsController(ABC):
                 array_agg(
                     mains_intersection_stmt["line_start_intersection_gids"].c.json
                 ).label("line_start_intersections"),
-                array_agg(mains_intersection_stmt["line_end_intersection_gids"].c.json).label("line_end_intersections"),
-                array_agg(asset_stmt["loggers"].c.json).label("logger_data"),
-                array_agg(asset_stmt["hydrants"].c.json).label("hydrant_data"),
+                array_agg(
+                    mains_intersection_stmt["line_end_intersection_gids"].c.json
+                ).label("line_end_intersections"),
+                array_agg(select(asset_stmt["loggers"].c.json).as_scalar()).label("logger_data"),
+                array_agg(select(asset_stmt["hydrants"].c.json).as_scalar()).label("hydrant_data"),
                 array_agg(asset_stmt["pressure_fittings"].c.json).label(
                     "pressure_fitting_data"
                 ),
-                array_agg(asset_stmt["pressure_valve"].c.json).label("pressure_valve_data"),
-                array_agg(asset_stmt["network_meters"].c.json).label("network_meter_data"),
+                array_agg(asset_stmt["pressure_valve"].c.json).label(
+                    "pressure_valve_data"
+                ),
+                array_agg(asset_stmt["network_meters"].c.json).label(
+                    "network_meter_data"
+                ),
                 array_agg(asset_stmt["chambers"].c.json).label("chamber_data"),
                 array_agg(asset_stmt["operational_sites"].c.json).label(
                     "operational_site_data"
                 ),
-                array_agg(asset_stmt["network_opt_valve"].c.json).label(
+                array_agg(select(asset_stmt["network_opt_valve"].c.json).as_scalar()).label(
                     "network_opt_valve_data"
                 ),
             )
