@@ -123,6 +123,9 @@ class GisToGraphCalculator:
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
+                    import pdb
+
+                    pdb.set_trace()
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
                     merged_nodes[-1]["node_types"] = list(
                         set(merged_nodes[-1]["node_types"])
