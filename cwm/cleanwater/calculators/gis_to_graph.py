@@ -12,6 +12,7 @@ from cwa_geod.core.constants import (
     POINT_ASSET__NAME,
     GEOS_LINESTRING_TYPES,
     GEOS_POINT_TYPES,
+    ASSET__LABELS,
 )
 
 
@@ -122,12 +123,12 @@ class GisToGraphCalculator:
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
-                    import pdb
-
-                    pdb.set_trace()
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
                     merged_nodes[-1]["node_types"] = list(
                         set(merged_nodes[-1]["node_types"])
+                    )
+                    merged_nodes[-1]["node_labels"].append(
+                        ASSET__LABELS[node["asset_name"]]
                     )
                     try:
                         merged_nodes[-1]["point_asset_gids"].append(node["gid"])

@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from cwa_geod.utilities.models import DMA
-from cwa_geod.core.constants import DEFAULT_SRID, NETWORK_OPT_VALVE_NAME
+from cwa_geod.core.constants import DEFAULT_SRID, NETWORK_OPT_VALVE__NAME
 
 
 class NetworkOptValve(models.Model):
@@ -17,4 +17,4 @@ class NetworkOptValve(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
     class AssetMeta:
-        asset_name = NETWORK_OPT_VALVE_NAME
+        asset_name = NETWORK_OPT_VALVE__NAME

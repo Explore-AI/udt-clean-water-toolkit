@@ -13,15 +13,15 @@ HYDRANT__NAME = "hydrant"
 
 LOGGER__NAME = "logger"
 
-NETWORK_METER_NAME = "network_meter"
+NETWORK_METER__NAME = "network_meter"
 
-NETWORK_OPT_VALVE_NAME = "network_opt_valve"
+NETWORK_OPT_VALVE__NAME = "network_opt_valve"
 
-OPERATIONAL_SITE_NAME = "operational_site"
+OPERATIONAL_SITE__NAME = "operational_site"
 
-PRESSURE_CONTROL_VALVE_NAME = "pressure_control_valve"
+PRESSURE_CONTROL_VALVE__NAME = "pressure_control_valve"
 
-PRESSURE_FITTING_NAME = "pressure_fitting"
+PRESSURE_FITTING__NAME = "pressure_fitting"
 
 PIPE_END__NAME = "pipe_end"
 
@@ -35,6 +35,19 @@ PIPE_ASSETS__CHOICES = [
 ]
 
 PIPE_ASSETS__NAMES = [TRUNK_MAIN__NAME, DISTRIBUTION_MAIN__NAME]
+
+ASSET__LABELS = {
+    TRUNK_MAIN__NAME: "TrunkMain",
+    DISTRIBUTION_MAIN__NAME: "DistributionMain",
+    CHAMBER__NAME: "Chamber",
+    HYDRANT__NAME: "Hydrant",
+    LOGGER__NAME: "Logger",
+    NETWORK_METER__NAME: "NetworkMeter",
+    NETWORK_OPT_VALVE__NAME: "network_opt_valve",
+    OPERATIONAL_SITE__NAME: "OperationalSite",
+    PRESSURE_CONTROL_VALVE__NAME: "PressureControlValve",
+    PRESSURE_FITTING__NAME: "PressureFitting",
+}
 
 
 GEOS_LINESTRING_TYPES = [1, 5]
