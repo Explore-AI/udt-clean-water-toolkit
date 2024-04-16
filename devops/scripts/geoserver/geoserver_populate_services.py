@@ -13,10 +13,10 @@ class Importer:
             'GEO_PASS': environ.get('GEOSERVER_ADMIN_PASSWORD'),
             'GEO_WORKSPACE': environ.get('GEOSERVER_WORKSPACE', 'udt'),
             'GEOSERVER_INSTANCE_URL': environ.get('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
-            'DATABASE_HOST': environ.get('HOST'),
-            'DATABASE_USER': environ.get('POSTGRES_USER'),
+            'DATABASE_HOST': environ.get('HOST', 'udtpostgis'),
+            'DATABASE_USER': environ.get('POSTGRES_USER', 'udt'),
             'DATABASE_PASSWORD': environ.get('POSTGRES_PASS'),
-            'DATABASE_NAME': environ.get('POSTGRES_DB')
+            'DATABASE_NAME': environ.get('POSTGRES_DB', 'udt')
 
         }
     # Function to create a workspace in GeoServer

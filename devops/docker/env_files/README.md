@@ -12,6 +12,10 @@ Docker environment variables are placed in this directory.
     MAXIMUM_MEMORY=4G
     STABLE_EXTENSIONS=
     COMMUNITY_EXTENSIONS=
+<<<<<<< HEAD
+    POSTGRES_PASS=
+=======
+>>>>>>> origin/feature/geoserver
     ```
 
 3. You will need to also add django env variables.
