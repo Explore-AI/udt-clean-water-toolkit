@@ -23,16 +23,30 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        layer_mapping = {
-            "gid": "GISID",
-            "geometry": "POINT",
-            "subtype":"SUBTYPE"
-        }
+        pressure_control_valve_layer = ds[layer_index]
 
-        lm = LayerMapping(
-            PressureControlValve, ds, layer_mapping, layer=layer_index, transform=False
-        )
-        lm.save(strict=True)
+        new_pressure_control_valves = []
+        for feature in pressure_control_valve_layer:
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
+            subtype = feature.get("SUBTYPE")
+
+            new_pressure_control_valve = PressureControlValve(gid=gid,
+                                                    geometry=geom.wkt,
+                                                    geometry_4326=geom_4326,
+                                                    subtype=subtype
+                                                    )
+            new_pressure_control_valves.append(new_pressure_control_valve)
+
+            if len(new_pressure_control_valves) == 100000:
+                PressureControlValve.objects.bulk_create(new_pressure_control_valves)
+                new_pressure_control_valves = []
+
+        # save the last set of data as it will probably be less than 100000
+        if new_pressure_control_valves:
+            PressureControlValve.objects.bulk_create(new_pressure_control_valves)
+
         DMAThroughModel = PressureControlValve.dmas.through
         bulk_create_list = []
 
@@ -57,5 +71,10 @@ Large numbers of features will take a long time to save."""
                 ]
             )
 
-            # pressure_control_valve.dmas.add(*list(dma_ids))
-        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=5000)
+            if len(bulk_create_list) == 100000:
+                    DMAThroughModel.objects.bulk_create(bulk_create_list)
+                    bulk_create_list = []
+
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)

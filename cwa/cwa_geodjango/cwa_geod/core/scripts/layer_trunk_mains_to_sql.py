@@ -63,7 +63,6 @@ Large numbers of features will take a long time to save."""
                 bulk_create_list.append(
                     DMAThroughModel(trunkmain_id=trunk_main.pk, dma_id=dma_id)
                 )
-
             
             if len(bulk_create_list) == 100000:
                 DMAThroughModel.objects.bulk_create(bulk_create_list)

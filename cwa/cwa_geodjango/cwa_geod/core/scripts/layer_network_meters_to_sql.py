@@ -23,16 +23,25 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        layer_mapping = {
-            "gid": "GISID",
-            "geometry": "POINT",
-            "subtype":"SUBTYPE"
-        }
+        network_meter_layer = ds[layer_index]
 
-        lm = LayerMapping(
-            NetworkMeter, ds, layer_mapping, layer=layer_index, transform=False
-        )
-        lm.save(strict=True)
+        new_network_meters = []
+        for feature in network_meter_layer:
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
+
+            new_network_meter = NetworkMeter(gid=gid, geometry=geom.wkt,
+                                       geometry_4326=geom_4326)
+            new_network_meters.append(new_network_meter)
+
+            if len(new_network_meters) == 100000:
+                NetworkMeter.objects.bulk_create(new_network_meters)
+                new_network_meters = []
+
+        # save the last set of data as it will probably be less than 100000
+        if new_network_meters:
+            NetworkMeter.objects.bulk_create(new_network_meters)
 
         DMAThroughModel = NetworkMeter.dmas.through
         bulk_create_list = []
@@ -52,5 +61,11 @@ Large numbers of features will take a long time to save."""
                     for dma_id in dma_ids
                 ]
             )
-            
-        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=100000)
+
+            if len(bulk_create_list) == 100000:
+                    DMAThroughModel.objects.bulk_create(bulk_create_list)
+                    bulk_create_list = []
+
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)

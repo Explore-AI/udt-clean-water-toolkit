@@ -23,16 +23,29 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        layer_mapping = {
-            "gid": "GISID",
-            "acoustic_logger" : "Acoustic_Logger",
-            "geometry": "POINT",
-        }
+        hydrants_layer = ds[layer_index]
 
-        lm = LayerMapping(
-            Hydrant, ds, layer_mapping, layer=layer_index, transform=False
-        )
-        lm.save(strict=True)
+        new_hydrants = []
+        for feature in hydrants_layer:
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
+            logger = feature.get("Acoustic_Logger")
+    
+
+            new_hydrant = Hydrant(gid=gid,
+                                  geometry=geom.wkt,
+                                  geometry_4326=geom_4326,
+                                  acoustic_logger=logger)
+            new_hydrants.append(new_hydrant)
+
+            if len(new_hydrants) == 100000:
+                Hydrant.objects.bulk_create(new_hydrants)
+                new_hydrants = []
+
+        # save tnew_hydrants of data as it will probably be less than 100000
+        if new_hydrants:
+            Hydrant.objects.bulk_create(new_hydrants)
 
         DMAThroughModel = Hydrant.dmas.through
         bulk_create_list = []
@@ -54,6 +67,10 @@ Large numbers of features will take a long time to save."""
                 ]
             )
 
-            # hydrant.dmas.add(*list(dma_ids))
+            if len(bulk_create_list) == 100000:
+                    DMAThroughModel.objects.bulk_create(bulk_create_list)
+                    bulk_create_list = []
 
-        DMAThroughModel.objects.bulk_create(bulk_create_list, batch_size=250000)
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)

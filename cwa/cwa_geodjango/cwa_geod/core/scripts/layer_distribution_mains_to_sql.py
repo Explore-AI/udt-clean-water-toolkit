@@ -24,11 +24,13 @@ class Command(BaseCommand):
 
         new_distribution_mains = []
         for feature in distribution_mains_layer:
-            gisid = feature.get("GISID")
+            gid = feature.get("GISID")
+            geom = feature.geom
+            geom_4326 = feature.get("wkt_geom_4326")
 
-            new_distribution_mains.append(
-                DistributionMain(gid=gisid, geometry=feature.geom.wkt)
-            )
+            new_distribution_main = DistributionMain(gid=gid, geometry=geom.wkt,
+                                       geometry_4326=geom_4326)
+            new_distribution_mains.append(new_distribution_main)
 
             if len(new_distribution_mains) == 100000:
                 DistributionMain.objects.bulk_create(new_distribution_mains)
@@ -39,13 +41,14 @@ class Command(BaseCommand):
             DistributionMain.objects.bulk_create(new_distribution_mains)
 
         for distribution_main in DistributionMain.objects.only("id", "geometry"):
-            wkt = distribution_main.geometry.wkt
+    
+                    wkt = distribution_main.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+                    dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
+                        "pk", flat=True
+                    )
 
-            if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                    if not dma_ids:
+                        dma_ids = [DMA.objects.get(name=r"undefined").pk]
 
-            distribution_main.dmas.add(*list(dma_ids))
+
