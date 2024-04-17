@@ -26,7 +26,7 @@ docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
 
 #docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
 
-docker exec -it ${CWA_GEODORM_CONTAINER_ID} /bin/bash /geoserver_scripts/geoserver_import.sh
+docker exec -it ${CWA_GEOSERVER_CONTAINER_ID} /bin/bash /geoserver_scripts/geoserver_import.sh
 echo
 echo "cwa_geodjango app dev setup complete."
 echo "cwa_geoalchemy app dev setup complete."

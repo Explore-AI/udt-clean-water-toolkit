@@ -19,6 +19,7 @@ class Importer:
             'DATABASE_NAME': environ.get('POSTGRES_DB', 'udt')
 
         }
+
     # Function to create a workspace in GeoServer
     def publish_workspace(self, geoserver_site_url, username, user_pass, workspace_name):
         geo = Geoserver(geoserver_site_url, username='%s' % username, password='%s' % user_pass)
@@ -47,7 +48,7 @@ class Importer:
                                     host='%s' % pg_host,
                                     pg_user='%s' % pg_user, pg_password='%s' % pg_pass)
 
-    # Function to retrieve spatial tables in PostgreSQL
+    # Function to retrieve spatial tables from PostgreSQL
     def pg_connection_details(self, pg_host, pg_user, pg_pass, pg_name):
         try:
 
