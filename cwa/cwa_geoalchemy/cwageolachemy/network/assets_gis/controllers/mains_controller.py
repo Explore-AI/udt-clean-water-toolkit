@@ -91,7 +91,7 @@ class MainsController(ABC):
                     literal_column("'utilities'"),
                     cast(array_agg(Utility.name), Text),
                     literal_column("'tm_touches_ids'"),
-                     array_agg(tm_touches_subquery),
+                    array_agg(tm_touches_subquery),
                     literal_column("'dm_touches_ids'"),
                     array_agg(dm_touches_subquery),
                     literal_column("'asset_name'"),
