@@ -4,7 +4,7 @@ from os.path import exists, join
 import psycopg2
 from requests import get, exceptions
 from requests.auth import HTTPBasicAuth
-import pdb
+import time
 
 
 class Downloader:
@@ -23,7 +23,7 @@ class Downloader:
             'FORMAT': 'image/svg'
         }
 
-    # Function to retrieve spatial tables in PostgreSQL
+    # Function to retrieve bbox and srid for layers in PostgreSQL DB
     def pg_connection_details(self, pg_host, pg_user, pg_pass, pg_name):
         try:
 
@@ -66,7 +66,8 @@ class Downloader:
 
         return _tables_with_bbox
 
-    def download_and_save_image(self, url, file_path, auth=None):
+    # Function to download and save images from WMS endpoints
+    def download_and_save_image(self, url, file_path):
         try:
             response = get(url)
             response.raise_for_status()
@@ -79,33 +80,31 @@ class Downloader:
         except exceptions.RequestException as e:
             print("Error downloading image:", e)
 
-    # Function to publish vector data as GeoServer layers
+    # Function to retrieve wms images from published GeoServer layers
     def get_layer_snapshot(self, geoserver_site_url, username, user_pass, workspace_name, pg_host, pg_user, pg_pass,
                            pg_name):
 
         auth = HTTPBasicAuth('%s' % username, '%s' % user_pass)
-        pdb.set_trace()
+
         pg_tables = self.pg_connection_details(pg_host, pg_user, pg_pass, pg_name)
-        print("Retrieving", pg_tables)
 
         for table_name, bbox in pg_tables:
             get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
                 geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1], bbox[2], bbox[3],
                 self.default['HEIGHT'], self.default['WIDTH'], bbox[4], self.default['FORMAT'])
-            print(get_map_url)
             image_extension = self.default['FORMAT'].split('/')[-1]
             base_path = join("/geoserver_scripts", "output")
             if not exists(base_path):
                 makedirs(base_path)
-            report_image = f"{table_name}.{image_extension}"
+            time_stamp = time.strftime("%Y%m%d-%H%M%S")
+            report_image = f"{table_name}_{time_stamp}.{image_extension}"
             file_path = join(base_path, report_image)
-            print(file_path)
             # Download and save the image
-            self.download_and_save_image(get_map_url, file_path, auth=auth)
+            self.download_and_save_image(get_map_url, file_path)
 
     def geoserver_get_map(self):
 
-        # Publish layers from database to GeoServer with default styles
+        # Download and save images from GeoServer WMS
         self.get_layer_snapshot(self.default['GEOSERVER_INSTANCE_URL'], self.default['GEO_USER'],
                                 self.default['GEO_PASS'], self.default['GEO_WORKSPACE'],
                                 self.default['DATABASE_HOST'],
