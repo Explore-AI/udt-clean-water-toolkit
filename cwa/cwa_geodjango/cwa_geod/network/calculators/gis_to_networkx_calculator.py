@@ -18,22 +18,12 @@ class GisToNxCalculator(GisToGraphCalculator):
 
     def extract_assets_and_junctions(self):
         """Extract assets and junctions from the input data"""
-        asset_keys = ['point_asset_names', 'node_id', 'pipe_gids']
+        nodes_with_pipes = []
+        for sublist in self.all_nodes_ordered:
+            for subdict in sublist:
+                nodes_with_pipes.append(subdict)
 
-        nodes_with_assets = [node for nodes in self.all_nodes_ordered
-                             for node in nodes if asset_keys[0] in node]
-
-        nodes_with_pipes = [node for nodes in self.all_nodes_ordered
-                            for node in nodes if asset_keys[0] not in node]
-
-        asset_dict = {}
         junctions_dict = {}
-
-        for idx, src_dict in enumerate(nodes_with_assets, start=1):
-            node_id = src_dict.get('node_id')
-            pipe_gids = src_dict.get('pipe_gids', [])
-
-            asset_dict[node_id] = pipe_gids
 
         for idx, src_dict in enumerate(nodes_with_pipes, start=1):
             node_id = src_dict.get('node_id')
@@ -41,7 +31,7 @@ class GisToNxCalculator(GisToGraphCalculator):
 
             junctions_dict[node_id] = pipe_gids
 
-        return asset_dict, junctions_dict
+        return junctions_dict
 
     def create_adjacency_dict(self, junctions_dict):
         # Initialize an empty adjacency list dictionary
@@ -62,11 +52,8 @@ class GisToNxCalculator(GisToGraphCalculator):
                     adjacency_list[node].append(other_node[0])
 
         # Create a graph from the adjacency list
+        print(adjacency_list)
         self.G = nx.Graph(adjacency_list)
-
-        # Print the adjacency list and the graph edges to verify
-        # print("Adjacency List:", adjacency_list)
-        # print("Graph Edges:", self.G.edges())
 
         # Plot and save the graph
         filename = 'Graph.png'
@@ -77,7 +64,7 @@ class GisToNxCalculator(GisToGraphCalculator):
 
     def create_nx_graph(self):
         """Create the NetworkX graph from the geospatial network"""
-        asset_dict, junctions_dict = self.extract_assets_and_junctions()
+        junctions_dict = self.extract_assets_and_junctions()
         self.create_adjacency_dict(junctions_dict)
 
         connected = len(list(nx.connected_components(self.G)))
