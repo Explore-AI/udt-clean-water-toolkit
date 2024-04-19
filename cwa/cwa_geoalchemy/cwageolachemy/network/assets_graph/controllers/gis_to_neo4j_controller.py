@@ -22,15 +22,15 @@ class GisToNeo4jController:
 
     def create_network(self):
         pipes_query = self._get_pipe_and_asset_data()
-        
-        # with Session(engine) as session:
-        #     count = 0
-        #     query_result = session.execute(select("*").select_from(pipes_query))
-        #     for pipe_data in query_result:
-        #         pipe_data_as_dict = pipe_data._asdict()
-        #         base_pipe_data = self._get_base_pipe_data(pipe_data_as_dict)
-        #         junctions_data = self._combine_all_pipe_junctions(pipe_data_as_dict)
-        #         assets_data = self._combine_all_point_assets(pipe_data_as_dict)
+
+        with Session(engine) as session:
+            count = 0
+            query_result = session.execute(select("*").select_from(pipes_query))
+            for pipe_data in query_result:
+                pipe_data_as_dict = pipe_data._asdict()
+                base_pipe_data = self._get_base_pipe_data(pipe_data_as_dict)
+                junctions_data = self._combine_all_pipe_junctions(pipe_data_as_dict)
+                assets_data = self._combine_all_point_assets(pipe_data_as_dict)
 
     def _get_pipe_and_asset_data(self):
         trunk_mains_statement = self.get_trunk_mains_data()
