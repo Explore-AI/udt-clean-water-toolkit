@@ -21,5 +21,3 @@ class PointNode(StructuredNode):
     node_id = StringProperty(unique_index=True, unique=True, required=True)
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
     pipe_relation = Relationship("PipeRelation", "pipe_relation", model=PipeRelation)
-
-    pass
