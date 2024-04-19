@@ -3,7 +3,7 @@ from .point_node import PointNode
 
 PIPE_JUNCTION__NAME = "pipe_junction"
 
-class PipeJunction(): 
+class PipeJunction(PointNode): 
     pipe_gids = ArrayProperty(required=True, index=True)
     
     class AssetMeta: 
