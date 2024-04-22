@@ -7,7 +7,6 @@ psycopg2==2.9.9
 pydantic==2.6.4
 pydantic-settings==2.2.1
 pydantic_core==2.16.3
-pydebug==1.0.3
 python-dotenv==1.0.1
 pytz==2024.1
 SQLAlchemy==2.0.28
