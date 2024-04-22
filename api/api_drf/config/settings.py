@@ -22,7 +22,8 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
 
     load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-
+from ....cwa.cwa_geodjango.cwa_geod.config.settings import *
+ 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
