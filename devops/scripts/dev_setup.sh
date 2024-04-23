@@ -10,13 +10,12 @@ echo "pip packages will be installed for the cwm in dev mode."
 echo
 
 
-# docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-neo4j.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml -f ../docker/docker-compose-cwa-geoalchemy-dev.yml -f ../docker/docker-compose-geoserver.yml up -d --build
-docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-neo4j.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml -f ../docker/docker-compose-cwa-geoalchemy-dev.yml up -d --build
+docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-neo4j.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml -f ../docker/docker-compose-cwa-geoalchemy-dev.yml -f ../docker/docker-compose-geoserver.yml up -d --build
 
 
 CWA_GEODORM_CONTAINER_ID=`docker ps | grep udtcwageodjangodev | grep cwa_geodjango_dev | awk '{ print $1 }'`
 CWA_GEOALCHEMY_CONTAINER_ID=`docker ps | grep udtcwageoalchemydev | grep cwa_geoalchemy_dev | awk '{ print $1 }'`
-# CWA_GEOSERVER_CONTAINER_ID=`docker ps | grep udtgeoserver | grep kartoza/geoserver:2.25.0 | awk '{ print $1 }'`
+CWA_GEOSERVER_CONTAINER_ID=`docker ps | grep udtgeoserver | grep kartoza/geoserver:2.25.0 | awk '{ print $1 }'`
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -r requirements.txt -r dev-requirements.txt
 
@@ -33,7 +32,7 @@ docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash ln -s /opt/cwa/cwa_geodjango/cw
 
 #docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
 
-# docker exec -it ${CWA_GEOSERVER_CONTAINER_ID} /bin/bash /geoserver_scripts/geoserver_import.sh
+docker exec -it ${CWA_GEOSERVER_CONTAINER_ID} /bin/bash /geoserver_scripts/geoserver_import.sh
 echo
 echo "cwa_geodjango app dev setup complete."
 echo "cwa_geoalchemy app dev setup complete."
