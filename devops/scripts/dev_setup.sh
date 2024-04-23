@@ -23,9 +23,7 @@ docker exec -it ${CWA_GEOALCHEMY_CONTAINER_ID} pip install -r requirements.txt
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
 
-# install DRF API dependencies 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash -c "cd /opt/udt/api/api_drf/ && pip install -r requirements.txt -r dev-requirements.txt"
-# sym link the file contents within the GeoDjango container 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash ln -s /opt/cwa/cwa_geodjango/cwa_geod/ /opt/api/api_drf/
 
 ./postgis/postgis_db_init.sh
