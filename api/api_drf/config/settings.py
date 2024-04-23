@@ -22,8 +22,8 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
 
     load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-from ....cwa.cwa_geodjango.cwa_geod.config.settings import *
- 
+from cwa_geod.config.settings import DATABASES
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "core",
     "cwa_geod.assets",
     "cwa_geod.utilities",
+    "cwa_geod.network", 
 ]
 
 MIDDLEWARE = [
@@ -84,16 +85,18 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": os.getenv("POSTGIS_DB_NAME__ENV_VAR"),
-        "USER": os.getenv("POSTGIS_DB_USER__ENV_VAR"),
-        "PASSWORD": os.getenv("POSTGIS_DEFAULT_DB_PASSWORD__ENV_VAR"),
-        "HOST": os.getenv("POSTGIS_DEFAULT_DB_HOST__ENV_VAR"),
-        "PORT": "5432",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.contrib.gis.db.backends.postgis",
+#         "NAME": os.getenv("POSTGIS_DB_NAME__ENV_VAR"),
+#         "USER": os.getenv("POSTGIS_DB_USER__ENV_VAR"),
+#         "PASSWORD": os.getenv("POSTGIS_DEFAULT_DB_PASSWORD__ENV_VAR"),
+#         "HOST": os.getenv("POSTGIS_DEFAULT_DB_HOST__ENV_VAR"),
+#         "PORT": "5432",
+#     }
+# }
+
+DATABASES = DATABASES
 
 # DATABASES = {
 #     "default": {
