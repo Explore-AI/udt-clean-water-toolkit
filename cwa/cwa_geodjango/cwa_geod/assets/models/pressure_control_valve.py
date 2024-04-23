@@ -10,9 +10,9 @@ class PressureControlValve(models.Model):
     geometry = models.PointField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
-    geometry_4326 = models.PointField(
-        spatial_index=True, null=False, blank=False, srid=4326
-    )
+    # geometry_4326 = models.PointField(
+    #     spatial_index=True, null=False, blank=False, srid=4326
+    # )
     subtype = models.CharField(null=False, blank=False)
     dmas = models.ManyToManyField(DMA, related_name="dma_pressure_control_valves")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
