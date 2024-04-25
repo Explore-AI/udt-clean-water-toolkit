@@ -3,7 +3,7 @@ from ..serializers import NetworkOptValveSerializer
 from rest_framework import viewsets
 
 
-class NetworkOptValveViewSet(viewsets.ModelViewSet):
+class NetworkOptValveViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = NetworkOptValve.objects.all()
     serializer_class = NetworkOptValveSerializer
     lookup_field = 'gid'
