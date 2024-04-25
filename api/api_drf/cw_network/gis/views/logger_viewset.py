@@ -3,7 +3,7 @@ from ..serializers import LoggerSerializer
 from rest_framework import viewsets
 
 
-class LoggerViewSet(viewsets.ModelViewSet):
+class LoggerViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Logger.objects.all()
     serializer_class = LoggerSerializer
     lookup_field = 'gid'

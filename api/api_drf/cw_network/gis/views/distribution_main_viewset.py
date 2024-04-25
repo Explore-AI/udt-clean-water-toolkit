@@ -3,7 +3,7 @@ from ..serializers import DistributionMainSerializer
 from rest_framework import viewsets
 
 
-class DistributionMainViewSet(viewsets.ModelViewSet):
+class DistributionMainViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = DistributionMain.objects.all()
     serializer_class = DistributionMainSerializer
     lookup_field = 'gid'
