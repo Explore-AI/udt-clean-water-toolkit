@@ -1,6 +1,6 @@
 from django.urls import path, include
 
 
-url_patterns = [
-    path('gis/', include('network.gis.urls'))
+urlpatterns = [
+    path('gis/', include('cw_network.gis.urls'))
 ]
