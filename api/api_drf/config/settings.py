@@ -45,11 +45,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "core",
     "cwa_geod.assets",
     "cwa_geod.utilities",
     "cwa_geod.network", 
-    "cw_network.gis.GisAssets"
+    "cw_network", 
+    "cw_network.gis.apps.GisAssets"
 ]
 
 MIDDLEWARE = [
