@@ -1,7 +1,7 @@
 import argparse
 from cwa_geod.core.conf import AppConf
 from cwa_geod.network.controllers import GisToNeo4jController, GisToNxController
-
+from cwa_geod.network.controllers import Convert2Wntr
 
 class Analysis(AppConf):
     def __init__(self):
@@ -14,6 +14,7 @@ class Analysis(AppConf):
         )
 
         parser.add_argument("-f", "--file")
+        parser.add_argument("-o", "--outputfile")
 
         return parser.parse_args()
 
@@ -39,11 +40,24 @@ class Analysis(AppConf):
         else:
             gis_to_neo4j.create_network()
 
+    def neo4j_to_inp(self) -> None:
+        convert2wntr = Convert2Wntr()
+        convert2wntr.convert(self.validated_config.batch_size)
+        convert2wntr.export_inp(self._set_args().outputfile)
+
+        
+    def neo4j_to_json(self) -> None:
+        convert2wntr = Convert2Wntr()
+        convert2wntr.convert(self.validated_config.batch_size)
+        convert2wntr.export_json(self._set_args().outputfile)
+
     def _get_run_methods(self):
 
         return {
             "gis2nx": self.cleanwater_gis2nx,
             "gis2neo4j": self.cleanwater_gis2neo4j,
+            "neo4j2inp": self.neo4j_to_inp,
+            "neo4j2json" : self.neo4j_to_json
         }
 
     @property
