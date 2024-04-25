@@ -25,13 +25,13 @@ class Neo4j2Wntr:
         for i in batch_result:
             start = i[1]._start_node
             x, y = start['x_coord'], start['y_coord']
-            start_node_elementid = start._id
-            start_node_id = self.add_node(start_node_elementid, x, y)
+            start_id = start._id
+            start_node_id = self.add_node(start_id, x, y)
 
             end = i[1]._end_node
             x, y = end['x_coord'], end['y_coord']
-            end_node_elementid = end._id
-            end_node_id = self.add_node(end_node_elementid, x, y)
+            end_id = end._id
+            end_node_id = self.add_node(end_id, x, y)
 
-            edge_elementid = i[1]._id
-            pipe_id = self.add_pipe(edge_elementid, start_node_id, end_node_id)
+            edge_id = i[1]._id
+            pipe_id = self.add_pipe(edge_id, start_node_id, end_node_id)
