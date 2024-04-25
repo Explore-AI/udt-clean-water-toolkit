@@ -168,7 +168,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             elif node_types == [PIPE_JUNCTION__NAME, POINT_ASSET__NAME]:
                 # node = self._get_or_create_point_asset_node(base_pipe, node_properties)
                 # query = f""
-                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility='thames_water', coords_27700: {node_properties['coords_27700']}, node_key={node_properties['node_key']}, dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, pipe_gids: {node_properties['pipe_gids']}  }})"
+                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'thames_water', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, pipe_gids: {node_properties['pipe_gids']} }}) return n"
 
                 import pdb
 
