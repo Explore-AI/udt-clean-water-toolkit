@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "cwa_geod.assets",
     "cwa_geod.utilities",
     "cwa_geod.network", 
+    "cw_network.gis.GisAssets"
 ]
 
 MIDDLEWARE = [
