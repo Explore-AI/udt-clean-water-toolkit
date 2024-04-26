@@ -128,15 +128,14 @@ class GisToGraphCalculator:
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
-                    merged_nodes[-1]["node_labels"].append(node["asset_label"])
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
-                    merged_nodes[-1]["node_types"] = list(
-                        set(merged_nodes[-1]["node_types"])
-                    )
+                    # merged_nodes[-1]["node_types"] = list(
+                    #     set(merged_nodes[-1]["node_types"])
+                    # )
                     merged_nodes[-1]["node_labels"].append(node["asset_label"])
-                    merged_nodes[-1]["node_labels"] = list(
-                        set(merged_nodes[-1]["node_labels"])
-                    )
+                    # merged_nodes[-1]["node_labels"] = list(
+                    #     set(merged_nodes[-1]["node_labels"])
+                    # )
                     try:
                         merged_nodes[-1]["point_asset_gids"].append(node["gid"])
                         merged_nodes[-1]["point_asset_names"].append(node["asset_name"])
