@@ -57,5 +57,5 @@ class ConfigValidator(forms.Form):
 
         if method in ("neo4j2wntrjson", "neo4j2wntrinp") and not outputfile:
             raise ValidationError(
-                "If method is 'neo4j2wntrjson', 'outputfile' must be specified."
+                "If 'method' is 'neo4j2wntrjson' or 'neo4j2wntrinp', 'outputfile' must be specified."
             )
