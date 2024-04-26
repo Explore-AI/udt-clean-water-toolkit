@@ -14,7 +14,6 @@ class Analysis(AppConf):
         )
 
         parser.add_argument("-f", "--file")
-        parser.add_argument("-o", "--outputfile")
 
         return parser.parse_args()
 
@@ -40,24 +39,41 @@ class Analysis(AppConf):
         else:
             gis_to_neo4j.create_network()
 
-    def neo4j_to_inp(self) -> None:
-        convert2wntr = Convert2Wntr()
-        convert2wntr.convert(self.validated_config.batch_size)
-        convert2wntr.export_inp(self._set_args().outputfile)
+    def neo4j_to_wntr_inp(self) -> None:
+        """
+        Converts data from Neo4j to Water Network Toolkit (WNTR) INP format and exports it.
 
+        Uses the Convert2Wntr class to convert the data and export it to INP format.
+
+        Returns:
+            None
+
+        """
+        convert2wntr = Convert2Wntr(self.validated_config)
+        convert2wntr.convert()
+        convert2wntr.export_inp()
         
-    def neo4j_to_json(self) -> None:
-        convert2wntr = Convert2Wntr()
-        convert2wntr.convert(self.validated_config.batch_size)
-        convert2wntr.export_json(self._set_args().outputfile)
+    def neo4j_to_wntr_json(self) -> None:
+        """
+        Converts data from Neo4j to Water Network Toolkit (WNTR) JSON format and exports it.
+
+        Uses the Convert2Wntr class to convert the data and export it to JSON format.
+
+        Returns:
+            None
+
+        """
+        convert2wntr = Convert2Wntr(self.validated_config)
+        convert2wntr.convert()
+        convert2wntr.export_json()
 
     def _get_run_methods(self):
 
         return {
             "gis2nx": self.cleanwater_gis2nx,
             "gis2neo4j": self.cleanwater_gis2neo4j,
-            "neo4j2inp": self.neo4j_to_inp,
-            "neo4j2json" : self.neo4j_to_json
+            "neo4j2wntrinp": self.neo4j_to_wntr_inp,
+            "neo4j2wntrjson" : self.neo4j_to_wntr_json
         }
 
     @property
