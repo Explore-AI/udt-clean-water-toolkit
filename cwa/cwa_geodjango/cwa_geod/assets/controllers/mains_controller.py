@@ -56,7 +56,8 @@ class MainsController(ABC, GeoDjangoDataManager):
             json=JSONObject(
                 **json_fields,
                 **inner_subqueries,
-                asset_name=Value(qs.model.AssetMeta.asset_name)
+                asset_name=Value(qs.model.AssetMeta.asset_name),
+                asset_label=Value(qs.model.__name__)
             )
         )
 
@@ -87,7 +88,9 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
             json=JSONObject(
-                **json_fields, asset_name=Value(qs.model.AssetMeta.asset_name)
+                **json_fields,
+                asset_name=Value(qs.model.AssetMeta.asset_name),
+                asset_label=Value(qs.model.__name__)
             ),
         )
 
@@ -98,18 +101,20 @@ class MainsController(ABC, GeoDjangoDataManager):
         end_point_subqueries = []
 
         for qs in querysets:
-            subquery1 = qs.filter(geometry__touches=OuterRef("start_point_geom")).values(json=JSONObject(gids=ArrayAgg("gid"),ids=ArrayAgg("id")))
-            subquery2 = qs.filter(geometry__touches=OuterRef("end_point_geom")).values(json=JSONObject(gids=ArrayAgg("gid"),ids=ArrayAgg("id")))
+            subquery1 = qs.filter(
+                geometry__touches=OuterRef("start_point_geom")
+            ).values(json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id")))
+            subquery2 = qs.filter(geometry__touches=OuterRef("end_point_geom")).values(
+                json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id"))
+            )
             start_point_subqueries.append(subquery1)
             end_point_subqueries.append(subquery2)
 
-        subquery_line_start = (
-            start_point_subqueries[0].union(*start_point_subqueries[0:])
+        subquery_line_start = start_point_subqueries[0].union(
+            *start_point_subqueries[0:]
         )
 
-        subquery_line_end = (
-            end_point_subqueries[0].union(*end_point_subqueries[0:])
-        )
+        subquery_line_end = end_point_subqueries[0].union(*end_point_subqueries[0:])
 
         return subquery_line_start, subquery_line_end
 
@@ -222,6 +227,7 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         qs = qs.annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),
+            asset_label=Value(qs.model.__name__),
             pipe_length=Length("geometry"),
             wkt=AsWKT("geometry"),
             dma_ids=ArrayAgg("dmas"),

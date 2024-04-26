@@ -12,7 +12,6 @@ from cwa_geod.core.constants import (
     POINT_ASSET__NAME,
     GEOS_LINESTRING_TYPES,
     GEOS_POINT_TYPES,
-    ASSET__LABELS,
 )
 
 
@@ -115,6 +114,7 @@ class GisToGraphCalculator:
                 if node["node_type"] == PIPE_JUNCTION__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
                     merged_nodes[-1]["node_labels"].append("PipeJunction")
+                    # merged_nodes[-1]["node_labels"].append(node["asset_label"])
                     try:
                         merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
                     except KeyError:
@@ -122,21 +122,20 @@ class GisToGraphCalculator:
                 elif node["node_type"] == PIPE_END__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_END__NAME)
                     merged_nodes[-1]["node_labels"].append("PipeEnd")
+                    # merged_nodes[-1]["node_labels"].append(node["asset_label"])
                     try:
                         merged_nodes[-1]["pipe_gid"].extend(node["gid"])
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
-                    import pdb
-
-                    pdb.set_trace()
-                    merged_nodes[-1]["node_label"] = self.asset_labels[node['asset_name']]
+                    merged_nodes[-1]["node_labels"].append(node["asset_label"])
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
                     merged_nodes[-1]["node_types"] = list(
                         set(merged_nodes[-1]["node_types"])
                     )
-                    merged_nodes[-1]["node_labels"].append(
-                        ASSET__LABELS[node["asset_name"]]
+                    merged_nodes[-1]["node_labels"].append(node["asset_label"])
+                    merged_nodes[-1]["node_labels"] = list(
+                        set(merged_nodes[-1]["node_labels"])
                     )
                     try:
                         merged_nodes[-1]["point_asset_gids"].append(node["gid"])
@@ -153,6 +152,7 @@ class GisToGraphCalculator:
         base_pipe["id"] = qs_object.pk
         base_pipe["gid"] = qs_object.gid
         base_pipe["asset_name"] = qs_object.asset_name
+        base_pipe["asset_label"] = qs_object.asset_label
         base_pipe["pipe_length"] = qs_object.pipe_length
         base_pipe["wkt"] = qs_object.wkt
         base_pipe["dma_ids"] = qs_object.dma_ids
