@@ -35,16 +35,16 @@ class Convert2Wntr(Neo4j2Wntr):
         offset = 0
         while True:
             results, m = db.cypher_query(f"MATCH (n)-[r]-(m) RETURN n, r, m limit {batch_size}")
-            records = list(results)  # Fetch all records from the result
+            records = list(results)
             if not records:
-                break  # No more records to fetch
+                break
 
-            yield results  # Yield the result object
-            offset += batch_size  # Increment offset for next batch
+            yield results
+            offset += batch_size
 
             if len(records) < batch_size:
-                break  # Last batch fetched
-
+                break
+            
     def convert(self):
         """
         Converts the Neo4j graph data to WNTR format.
