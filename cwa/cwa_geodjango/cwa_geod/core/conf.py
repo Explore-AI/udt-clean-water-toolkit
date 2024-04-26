@@ -21,6 +21,7 @@ class AppConf:
 
         self._validate_config(parser["app_config"])
 
+
     def _validate_config(self, parser_config):
         config = ConfigValidator(parser_config)
         is_valid = config.is_valid()
