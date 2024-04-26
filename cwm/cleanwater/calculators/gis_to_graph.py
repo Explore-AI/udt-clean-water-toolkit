@@ -17,8 +17,12 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraphCalculator:
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, srid, asset_labels, processor_count=None, chunk_size=None):
+        self.srid = srid
+        self.asset_labels = asset_labels
+        self.processor_count = processor_count
+        self.chunk_size = chunk_size
+
         self.all_base_pipes = []
         self.all_nodes_ordered = []
 
@@ -33,12 +37,12 @@ class GisToGraphCalculator:
         )
 
     def calc_pipe_point_relative_positions_parallel(self, pipes_qs: list) -> None:
-        with Pool(processes=self.config.processor_count) as p:
+        with Pool(processes=self.processor_count) as p:
             self.all_base_pipes, self.all_nodes_ordered = zip(
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs,
-                    self.config.chunk_size,
+                    self.chunk_size,
                 )
             )
 
@@ -123,9 +127,10 @@ class GisToGraphCalculator:
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
-                    # import pdb
+                    import pdb
 
-                    # pdb.set_trace()
+                    pdb.set_trace()
+                    merged_nodes[-1]["node_label"] = self.asset_labels[node['asset_name']]
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
                     merged_nodes[-1]["node_types"] = list(
                         set(merged_nodes[-1]["node_types"])
@@ -205,7 +210,7 @@ class GisToGraphCalculator:
 
     def _get_intersecting_geometry(self, base_pipe_geom, asset):
         # Geom of the intersecting pipe or asset
-        pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid=self.config.srid)
+        pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid=self.srid)
 
         # if pipe_or_asset_geom is a line then get the intersection point of the two lines
         if pipe_or_asset_geom.geom_typeid in GEOS_LINESTRING_TYPES:
@@ -499,7 +504,7 @@ class GisToGraphCalculator:
 
     def get_srid(self):
         """Get the currently used global srid"""
-        return self.config.srid
+        return self.srid
 
     @staticmethod
     def get_pipe_count(qs) -> QuerySet:

@@ -14,6 +14,7 @@ from cwa_geod.core.constants import (
     DISTRIBUTION_MAIN__NAME,
     PIPE_END__NAME,
     POINT_ASSET__NAME,
+    ASSET__LABELS,
 )
 from ..models import PointAsset, PipeEnd, PointNode, PipeJunction
 
@@ -28,7 +29,12 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self.all_base_pipes = []
         self.all_nodes_ordered = []
 
-        super().__init__(config)
+        super().__init__(
+            self.config.srid,
+            ASSET__LABELS,
+            processor_count=config.processor_count,
+            chunk_size=config.chunk_size,
+        )
 
     def _connect_nodes(self, base_pipe, start_node, end_node):
 
