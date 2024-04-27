@@ -132,6 +132,9 @@ class GisToGraphCalculator:
                 elif node["node_type"] == POINT_ASSET__NAME:
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
 
+                    merged_nodes[-1]["subtype"] = node.get("subtype")
+                    merged_nodes[-1]["acoustic_logger"] = node.get("acoustic_logger")
+
                     if len(merged_nodes[-1]["node_labels"]) == 1:
                         merged_nodes[-1]["node_labels"].append("PointAsset")
                     merged_nodes[-1]["node_labels"].append(node["asset_label"])

@@ -73,6 +73,19 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             for key, val in node_properties["point_assets_with_gids"].items()
         ]
 
+        # props = {
+        #     "utility": node_properties["utility"],
+        #     "coords_27700": node_properties["coords_27700"],
+        #     "node_key": node_properties["node_key"],
+        #     "dmas": node_properties["dmas"],
+        #     "node_types": node_properties["node_types"],
+        #     "asset_names": node_properties["point_asset_names"],
+        #     "asset_gids": node_properties["point_asset_gids"],
+        # }
+        import pdb
+
+        pdb.set_trace()
+
         try:
             query = f"""CREATE (n:{('&').join(node_properties['node_labels'])}
             {{utility:'{node_properties['utility']}',
