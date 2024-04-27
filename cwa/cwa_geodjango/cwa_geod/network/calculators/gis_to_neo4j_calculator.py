@@ -73,28 +73,27 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
     def _get_or_create_point_asset_node(self, node_properties):
 
-        asset_name = node_properties.get("asset_name")
-        node_id = node_properties.get("node_id")
-        gid = node_properties.get("gid")
-        dmas = node_properties.get("dmas")
-        geom = node_properties.get("intersection_point_geometry")
-        utility = node_properties.get("utility")
+        asset_gids = [
+            f"{key}: {val}"
+            for key, val in node_properties["point_assets_with_gids"].items()
+        ]
 
         try:
-            # TODO: would neomodel get_or_create work better here?
-            return PointNode.create(
-                {
-                    "node_id": node_id,
-                    "dmas": dmas,
-                    "gid": gid,
-                    "utility": utility,
-                    # TODO: why does geom.x return a numpy array
-                    "x_coord": geom.coords[0],
-                    "y_coord": geom.coords[1],
-                }
-            )[0]
+            query = f"""CREATE (
+            n:{('&').join(node_properties['node_labels'])}
+            {{utility:'{node_properties['utility']}',
+            coords_27700: {node_properties['coords_27700']},
+            node_key:'{node_properties['node_key']}',
+            dmas:'{node_properties['dmas']}',
+            node_types: {node_properties['node_types']},
+            asset_names: {node_properties['point_asset_names']},
+            asset_gids: {node_properties['point_asset_gids']},
+            {(',').join(asset_gids)} }})
+            return n"""
+            return db.cypher_query(query)[0][0][0]
+
         except UniqueProperty:
-            return PointNode.nodes.get_or_none(node_id=node_id)
+            return self._get_node_by_key(node_properties["node_key"])
 
     @staticmethod
     def _get_node_by_key(node_key):
@@ -144,16 +143,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 all_nodes.append(node)
 
             elif node_types == [POINT_ASSET__NAME]:
-                # node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
-                asset_gids = [
-                    f"{key}: {val}"
-                    for key, val in node_properties["point_assets_with_gids"].items()
-                ]
-
-                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, asset_names: {node_properties['point_asset_names']}, asset_gids: {node_properties['point_asset_gids']}, {(',').join(asset_gids)} }}) return n"
-
-                node = db.cypher_query(query)[0][0][0]
-
+                node = self._get_or_create_point_asset_node(node_properties)
                 all_nodes.append(node)
 
             elif node_types == [PIPE_JUNCTION__NAME, POINT_ASSET__NAME]:
