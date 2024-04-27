@@ -12,6 +12,16 @@ from cwa_geod.core.constants import UTILITIES
 
 class PointNode(StructuredNode):
     __abstract__ = True
+    __optional_labels__ = [
+        "NetworkOptValve",
+        "Hydrant",
+        "NetworkMeter",
+        "OperationalSite",
+        "Logger",
+        "Chamber",
+        "PressureFitting",
+        "PressureControlValve",
+    ]
 
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
     coords_27700 = ArrayProperty(required=True)

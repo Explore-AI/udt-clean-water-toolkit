@@ -9,12 +9,9 @@ from cleanwater.exceptions import (
 from cleanwater.calculators import GisToGraphCalculator
 from cwa_geod.core.constants import (
     PIPE_JUNCTION__NAME,
-    TRUNK_MAIN__NAME,
-    DISTRIBUTION_MAIN__NAME,
     PIPE_END__NAME,
     POINT_ASSET__NAME,
 )
-from ..models import PointAsset, PipeEnd, PointNode, PipeJunction
 
 
 class GisToNeo4jCalculator(GisToGraphCalculator):
@@ -51,25 +48,42 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
             db.cypher_query(query)
 
-    def _get_or_create_pipe_and_point_asset_node(self, node_properties):
+    @staticmethod
+    def _get_node_by_key(node_key):
+        point_node = db.cypher_query(
+            f"""match (n {{node_key:'{node_key}'}})
+        return n"""
+        )[0]
 
-        point_node_props = {
-            "utility": node_properties.get("utility"),
-            "coords_27700": node_properties.get("coords_27700"),
-            "node_key": node_properties.get("node_key"),
-            "dmas": node_properties.get("dmas"),
-            "node_types": node_properties.get("node_types"),
-            "asset_names": node_properties.get("point_asset_names"),
-            "asset_gids": node_properties.get("point_asset_gids"),
-        }
+        if point_node:
+            return point_node[0][0]
 
-        node = PointNode.create(point_node_props)[0]
+        return None
+
+    def _get_or_create_pipe_and_asset_node(self, node_properties):
+
+        asset_gids = [
+            f"{key}: {val}"
+            for key, val in node_properties["point_assets_with_gids"].items()
+        ]
 
         try:
-            # TODO: would neomodel get_or_create work better here?
-            return node
+            query = f"""CREATE (n:{('&').join(node_properties['node_labels'])}
+            {{utility:'{node_properties['utility']}',
+            coords_27700: {node_properties['coords_27700']},
+            node_key:'{node_properties['node_key']}',
+            dmas:'{node_properties['dmas']}',
+            node_types: {node_properties['node_types']},
+            asset_names: {node_properties['point_asset_names']},
+            asset_gids: {node_properties['point_asset_gids']},
+            {(',').join(asset_gids)} }})
+            return n
+            """
+
+            return db.cypher_query(query)[0][0][0]
+
         except UniqueProperty:
-            return PointNode.nodes.get_or_none(node_key=node_key)
+            return self._get_node_by_key(node_properties["node_key"])
 
     def _get_or_create_point_asset_node(self, node_properties):
 
@@ -89,23 +103,12 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             asset_names: {node_properties['point_asset_names']},
             asset_gids: {node_properties['point_asset_gids']},
             {(',').join(asset_gids)} }})
-            return n"""
+            return n
+            """
             return db.cypher_query(query)[0][0][0]
 
         except UniqueProperty:
             return self._get_node_by_key(node_properties["node_key"])
-
-    @staticmethod
-    def _get_node_by_key(node_key):
-        point_node = db.cypher_query(
-            f"""match (n {{node_key:'{node_key}'}})
-        return n"""
-        )[0]
-
-        if point_node:
-            return point_node[0][0]
-
-        return None
 
     def _create_pipe_junction_or_end_node(self, node_properties):
 
@@ -146,28 +149,12 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 node = self._get_or_create_point_asset_node(node_properties)
                 all_nodes.append(node)
 
-            elif node_types == [PIPE_JUNCTION__NAME, POINT_ASSET__NAME]:
-                # node = self._get_or_create_point_asset_node(base_pipe, node_properties)
-                asset_gids = [
-                    f"{key}: {val}"
-                    for key, val in node_properties["point_assets_with_gids"].items()
-                ]
+            elif node_types == [
+                PIPE_JUNCTION__NAME,
+                POINT_ASSET__NAME,
+            ] or node_types == node_types == [PIPE_END__NAME, POINT_ASSET__NAME]:
 
-                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, asset_names: {node_properties['point_asset_names']}, asset_gids: {node_properties['point_asset_gids']}, {(',').join(asset_gids)} }}) return n"
-
-                node = db.cypher_query(query)[0][0][0]
-                all_nodes.append(node)
-
-            elif node_types == [PIPE_END__NAME, POINT_ASSET__NAME]:
-                # node = self._get_or_create_point_asset_node(base_pipe, node_properties)
-                asset_gids = [
-                    f"{key}: {val}"
-                    for key, val in node_properties["point_assets_with_gids"].items()
-                ]
-
-                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, asset_names: {node_properties['point_asset_names']}, asset_gids: {node_properties['point_asset_gids']}, {(',').join(asset_gids)} }}) return n"
-
-                node = db.cypher_query(query)[0][0][0]
+                node = self._get_or_create_pipe_and_asset_node(node_properties)
                 all_nodes.append(node)
 
         return all_nodes

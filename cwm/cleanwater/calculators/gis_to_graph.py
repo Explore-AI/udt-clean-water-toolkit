@@ -106,7 +106,7 @@ class GisToGraphCalculator:
                     ),
                     "dmas": nodes[0]["dmas"],
                     "node_types": [],
-                    "node_labels": [],
+                    "node_labels": ["PointNode"],
                 }
             )
             for node in nodes:
@@ -126,7 +126,11 @@ class GisToGraphCalculator:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
+
+                    if len(merged_nodes[-1]["node_labels"]) == 1:
+                        merged_nodes[-1]["node_labels"].append("PointAsset")
                     merged_nodes[-1]["node_labels"].append(node["asset_label"])
+
                     try:
                         merged_nodes[-1]["point_asset_names"].append(node["asset_name"])
                         merged_nodes[-1]["point_asset_gids"].append(node["gid"])
