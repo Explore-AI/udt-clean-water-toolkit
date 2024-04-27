@@ -75,7 +75,9 @@ class GisToGraphCalculator:
         )
 
         merged_nodes = self._merge_nodes_on_position(nodes_ordered)
+        import pdb
 
+        pdb.set_trace()
         return base_pipe, merged_nodes
 
     def _merge_nodes_on_position(self, nodes_ordered):
@@ -100,6 +102,10 @@ class GisToGraphCalculator:
                     "coords_27700": [
                         float(nodes[0]["intersection_point_geometry"].x),
                         float(nodes[0]["intersection_point_geometry"].y),
+                    ],
+                    "coords_4326": [
+                        float(nodes[0]["intersection_point_geometry_4326"].x),
+                        float(nodes[0]["intersection_point_geometry_4326"].y),
                     ],
                     "node_key": self._encode_node_key(
                         nodes[0]["intersection_point_geometry"]
@@ -156,6 +162,7 @@ class GisToGraphCalculator:
         base_pipe["asset_label"] = qs_object.asset_label
         base_pipe["pipe_length"] = qs_object.pipe_length
         base_pipe["wkt"] = qs_object.wkt
+        base_pipe["wkt_4326"] = qs_object.wkt_4326
         base_pipe["dma_ids"] = qs_object.dma_ids
         base_pipe["dma_codes"] = qs_object.dma_codes
         base_pipe["dma_names"] = qs_object.dma_names
@@ -165,8 +172,11 @@ class GisToGraphCalculator:
 
         base_pipe["utilities"] = qs_object.utility_names
         base_pipe["geometry"] = qs_object.geometry
+        base_pipe["geometry_4326"] = qs_object.geometry_4326
         base_pipe["start_point_geom"] = qs_object.start_point_geom
         base_pipe["end_point_geom"] = qs_object.end_point_geom
+        base_pipe["start_point_geom_4326"] = qs_object.start_point_geom_4326
+        base_pipe["end_point_geom_4326"] = qs_object.end_point_geom_4326
 
         base_pipe["line_start_intersection_gids"] = []
         base_pipe["line_start_intersection_ids"] = []
@@ -209,9 +219,10 @@ class GisToGraphCalculator:
             + pipe_qs_object.network_opt_valve
         )
 
-    def _get_intersecting_geometry(self, base_pipe_geom, asset):
+    def _get_intersecting_geometry(self, base_pipe_geom, asset, srid):
+
         # Geom of the intersecting pipe or asset
-        pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid=self.srid)
+        pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid)
 
         # if pipe_or_asset_geom is a line then get the intersection point of the two lines
         if pipe_or_asset_geom.geom_typeid in GEOS_LINESTRING_TYPES:
@@ -228,10 +239,14 @@ class GisToGraphCalculator:
             )
 
     def _map_get_normalised_positions(
-        self, base_pipe_geom, junction_or_asset: dict
+        self, base_pipe_geom, base_pipe_geom_4326, junction_or_asset: dict
     ) -> list:
         intersection_geom = self._get_intersecting_geometry(
-            base_pipe_geom, junction_or_asset
+            base_pipe_geom, junction_or_asset, self.srid
+        )
+
+        intersection_geom_4326 = self._get_intersecting_geometry(
+            base_pipe_geom_4326, junction_or_asset, 4326
         )
 
         if intersection_geom.geom_type == "Point":
@@ -242,6 +257,7 @@ class GisToGraphCalculator:
                 {
                     **junction_or_asset,
                     "intersection_point_geometry": intersection_geom,
+                    "intersection_point_geometry_4326": intersection_geom_4326,
                     "distance_from_pipe_start_cm": round(intersection_params[0] * 100),
                     # distance returned is based on srid and should be in meters.
                     # Convert to cm and round.
@@ -284,7 +300,9 @@ class GisToGraphCalculator:
         # Not inefficient to use for loop with append here as the number
         # of intersecting junctions_and_assets for any given base pipe is not large
         for ja in intersected_objects:
-            intersection = self._map_get_normalised_positions(base_pipe["geometry"], ja)
+            intersection = self._map_get_normalised_positions(
+                base_pipe["geometry"], base_pipe["geometry_4326"], ja
+            )
             object_intersections += intersection
 
         return object_intersections
@@ -381,6 +399,7 @@ class GisToGraphCalculator:
                 "distance_from_pipe_start_cm": start_node_distance_cm,
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["start_point_geom"],
+                "intersection_point_geometry_4326": base_pipe["start_point_geom_4326"],
                 "utility_name": self._get_utility(base_pipe),
                 **base_pipe,
             },
@@ -390,6 +409,7 @@ class GisToGraphCalculator:
                 "distance_from_pipe_start_cm": end_node_distance_cm,
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["end_point_geom"],
+                "intersection_point_geometry_4326": base_pipe["end_point_geom_4326"],
                 "utility_name": self._get_utility(base_pipe),
                 **base_pipe,
             },
