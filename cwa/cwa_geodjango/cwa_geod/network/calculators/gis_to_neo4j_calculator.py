@@ -14,6 +14,12 @@ from cwa_geod.core.constants import (
 )
 
 
+MIXED_NODE_TYPES_SORTED = [
+    sorted([PIPE_JUNCTION__NAME, POINT_ASSET__NAME]),
+    sorted([PIPE_END__NAME, POINT_ASSET__NAME]),
+]
+
+
 class GisToNeo4jCalculator(GisToGraphCalculator):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
@@ -160,11 +166,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 node = self._get_or_create_point_asset_node(node_properties)
                 all_nodes.append(node)
 
-            elif node_types == [
-                PIPE_JUNCTION__NAME,
-                POINT_ASSET__NAME,
-            ] or node_types == node_types == [PIPE_END__NAME, POINT_ASSET__NAME]:
-
+            elif node_types in MIXED_NODE_TYPES_SORTED:
                 node = self._get_or_create_pipe_and_asset_node(node_properties)
                 all_nodes.append(node)
 

@@ -150,6 +150,11 @@ class GisToGraphCalculator:
                             f"{node['asset_name']}_gid": node["gid"]
                         }
 
+                # remove duplicates and sort node_types
+                merged_nodes[-1]["node_types"] = sorted(
+                    list(set((merged_nodes[-1]["node_types"])))
+                )
+
         return merged_nodes
 
     def _get_base_pipe_data(self, qs_object) -> dict:
