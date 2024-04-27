@@ -96,38 +96,51 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         except UniqueProperty:
             return PointNode.nodes.get_or_none(node_id=node_id)
 
-    def _create_nodes2(self, all_node_properties):
+    @staticmethod
+    def _get_node_by_key(node_key):
+        point_node = db.cypher_query(
+            f"""match (n {{node_key:'{node_key}'}})
+        return n"""
+        )[0]
+
+        if point_node:
+            return point_node[0][0]
+
+        return None
+
+    def _create_pipe_junction_or_end_node(self, node_properties):
+
+        try:
+            query = f"""CREATE (
+            n:{('&').join(node_properties['node_labels'])}
+            {{utility:'{node_properties['utility']}',
+            coords_27700: {node_properties['coords_27700']},
+            node_key:'{node_properties['node_key']}',
+            dmas:'{node_properties['dmas']}'
+            }}) return n
+            """
+            return db.cypher_query(query)[0][0][0]
+
+        except UniqueProperty:
+            return self._get_node_by_key(node_properties["node_key"])
+
+    def _create_nodes(self, all_node_properties):
 
         all_nodes = []
         for node_properties in all_node_properties:
 
             node_key = node_properties.get("node_key")
 
-            point_node = db.cypher_query(
-                f"match (n {{node_key:'{node_key}'}}) return n"
-            )[0]
+            point_node = self._get_node_by_key(node_key)
 
             if point_node:
-                all_nodes.append(point_node[0][0])
+                all_nodes.append(point_node)
                 continue
 
             node_types = sorted(node_properties.get("node_types"))
 
-            if node_types == [PIPE_JUNCTION__NAME]:
-                # node = self._get_or_create_pipe_junctions_node(
-                #     base_pipe, node_properties
-                # )
-
-                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}' }}) return n"
-
-                node = db.cypher_query(query)[0][0][0]
-                all_nodes.append(node)
-
-            elif node_types == [PIPE_END__NAME]:
-                # node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
-                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}' }}) return n"
-
-                node = db.cypher_query(query)[0][0][0]
+            if node_types == [PIPE_JUNCTION__NAME] or node_types == [PIPE_END__NAME]:
+                node = self._create_pipe_junction_or_end_node(node_properties)
                 all_nodes.append(node)
 
             elif node_types == [POINT_ASSET__NAME]:
@@ -185,7 +198,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self, base_pipe: dict, all_node_properties: list
     ):
 
-        all_nodes = self._create_nodes2(all_node_properties)
+        all_nodes = self._create_nodes(all_node_properties)
         self._create_relations(base_pipe, all_nodes)
 
     def _reset_pipe_asset_data(self):
