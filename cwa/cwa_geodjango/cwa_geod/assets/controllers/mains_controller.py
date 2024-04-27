@@ -135,7 +135,7 @@ class MainsController(ABC, GeoDjangoDataManager):
             "gid": "gid",
             "geometry": geometry_field,
             "wkt": AsWKT(geometry_field),
-            "geom_4326": "geometry_4326",
+            "geometry_4326": "geometry_4326",
             "wkt_4326": AsWKT("geometry_4326"),
             "dma_ids": ArrayAgg("dmas"),
             "dma_codes": ArrayAgg("dmas__code"),

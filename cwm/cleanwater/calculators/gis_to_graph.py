@@ -75,9 +75,7 @@ class GisToGraphCalculator:
         )
 
         merged_nodes = self._merge_nodes_on_position(nodes_ordered)
-        import pdb
 
-        pdb.set_trace()
         return base_pipe, merged_nodes
 
     def _merge_nodes_on_position(self, nodes_ordered):
@@ -96,6 +94,7 @@ class GisToGraphCalculator:
 
         merged_nodes = []
         for nodes in consolidated_nodes:
+
             merged_nodes.append(
                 {
                     "utility": nodes[0]["utility_name"],
@@ -219,10 +218,11 @@ class GisToGraphCalculator:
             + pipe_qs_object.network_opt_valve
         )
 
-    def _get_intersecting_geometry(self, base_pipe_geom, asset, srid):
+    @staticmethod
+    def _get_intersecting_geometry(base_pipe_geom, wkt, srid):
 
         # Geom of the intersecting pipe or asset
-        pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid)
+        pipe_or_asset_geom = GEOSGeometry(wkt, srid)
 
         # if pipe_or_asset_geom is a line then get the intersection point of the two lines
         if pipe_or_asset_geom.geom_typeid in GEOS_LINESTRING_TYPES:
@@ -242,11 +242,11 @@ class GisToGraphCalculator:
         self, base_pipe_geom, base_pipe_geom_4326, junction_or_asset: dict
     ) -> list:
         intersection_geom = self._get_intersecting_geometry(
-            base_pipe_geom, junction_or_asset, self.srid
+            base_pipe_geom, junction_or_asset["wkt"], self.srid
         )
 
         intersection_geom_4326 = self._get_intersecting_geometry(
-            base_pipe_geom_4326, junction_or_asset, 4326
+            base_pipe_geom_4326, junction_or_asset["wkt_4326"], 4326
         )
 
         if intersection_geom.geom_type == "Point":
@@ -258,10 +258,10 @@ class GisToGraphCalculator:
                     **junction_or_asset,
                     "intersection_point_geometry": intersection_geom,
                     "intersection_point_geometry_4326": intersection_geom_4326,
-                    "distance_from_pipe_start_cm": round(intersection_params[0] * 100),
                     # distance returned is based on srid and should be in meters.
                     # Convert to cm and round.
-                    "normalise_position": intersection_params[1],
+                    "distance_from_pipe_start_cm": round(intersection_params[0] * 100),
+                    "normalised_position": intersection_params[1],
                 }
             ]
 
@@ -277,12 +277,13 @@ class GisToGraphCalculator:
                     {
                         **junction_or_asset,
                         "intersection_point_geometry": intersection_geom,
+                        "intersection_point_geometry_4326": intersection_geom_4326,
+                        # distance returned is based on srid and should be in meters.
+                        # Convert to cm and round.
                         "distance_from_pipe_start_cm": round(
                             intersection_params[0] * 100
                         ),
-                        # distance returned is based on srid and should be in meters.
-                        # Convert to cm and round.
-                        "normalise_position": intersection_params[1],
+                        "normalised_position": intersection_params[1],
                     }
                 )
 
@@ -424,13 +425,11 @@ class GisToGraphCalculator:
 
         position_index = 0
         for pipe in non_termini_intersecting_pipes:
-            pipe_id = pipe["id"]
             pipe_gid = pipe["gid"]
             # distance_from_start_cm must be an
             # int for sqid compatible hashing
             distance_from_pipe_start_cm = pipe["distance_from_pipe_start_cm"]
 
-            ids = sorted([pipe_id, base_pipe["id"]])
             gids = sorted([pipe_gid, base_pipe["gid"]])
             if distance_from_pipe_start_cm not in distances:
 
@@ -441,7 +440,6 @@ class GisToGraphCalculator:
                 )
 
                 nodes_ordered.insert(
-                    # TODO: node_key may not be unique if different types of pipes have the same gid. FIX by defining a pipe_code
                     position_index,
                     {
                         "gids": gids,
@@ -463,12 +461,6 @@ class GisToGraphCalculator:
                     nodes_ordered[position_index]["gids"]
                 )
 
-                # TODO: This is inefficient. Should hash only once all gids are known.
-                # nodes_ordered[position_index]["node_key"] = self._encode_node_key(
-                #     pipe["intersection_point_geometry"],
-                #     ids,
-                # )
-
         return nodes_ordered
 
     def _set_point_asset_properties(
@@ -485,16 +477,6 @@ class GisToGraphCalculator:
                     "node_type": POINT_ASSET__NAME,
                     "dmas": base_pipe["dmas"],
                     "utility_name": self._get_utility(base_pipe),
-                    # "node_key": self._encode_node_key(
-                    #     asset["intersection_point_geometry"],
-                    #     sorted(
-                    #         [
-                    #             asset["id"],
-                    #             *asset["tm_touches_ids"],
-                    #             *asset["dm_touches_ids"],
-                    #         ]
-                    #     ),
-                    # ),
                     **asset,
                 },
                 key=lambda x: x["distance_from_pipe_start_cm"],

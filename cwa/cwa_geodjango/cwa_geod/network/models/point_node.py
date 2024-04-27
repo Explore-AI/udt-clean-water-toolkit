@@ -30,5 +30,5 @@ class PointNode(StructuredNode):
     node_types = ArrayProperty(required=True, index=True)
     asset_names = ArrayProperty(required=True, index=True)
     asset_gids = ArrayProperty(required=True, index=True)
-    # location = PointProperty(crs="wgs-84", require=True)
+    location = PointProperty(crs="wgs-84", require=True)
     pipe_main = Relationship("PipeMain", "pipe_main", model=PipeMain)

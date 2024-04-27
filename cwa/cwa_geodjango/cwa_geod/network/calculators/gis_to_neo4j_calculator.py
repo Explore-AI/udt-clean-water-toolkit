@@ -76,10 +76,13 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             node_types: {node_properties['node_types']},
             asset_names: {node_properties['point_asset_names']},
             asset_gids: {node_properties['point_asset_gids']},
+            location: point(
+            {{latitude: {node_properties['coords_4326'][0]},
+            longitude: {node_properties['coords_4326'][1]}}}
+            ),
             {(',').join(asset_gids)} }})
             return n
             """
-
             return db.cypher_query(query)[0][0][0]
 
         except UniqueProperty:
@@ -91,7 +94,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             f"{key}: {val}"
             for key, val in node_properties["point_assets_with_gids"].items()
         ]
-
         try:
             query = f"""CREATE (
             n:{('&').join(node_properties['node_labels'])}
@@ -102,9 +104,14 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             node_types: {node_properties['node_types']},
             asset_names: {node_properties['point_asset_names']},
             asset_gids: {node_properties['point_asset_gids']},
+            location: point(
+            {{latitude: {node_properties['coords_4326'][0]},
+            longitude: {node_properties['coords_4326'][1]}}}
+            ),
             {(',').join(asset_gids)} }})
             return n
             """
+
             return db.cypher_query(query)[0][0][0]
 
         except UniqueProperty:
@@ -118,7 +125,11 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             {{utility:'{node_properties['utility']}',
             coords_27700: {node_properties['coords_27700']},
             node_key:'{node_properties['node_key']}',
-            dmas:'{node_properties['dmas']}'
+            dmas:'{node_properties['dmas']}',
+            location: point(
+            {{latitude: {node_properties['coords_4326'][0]},
+            longitude: {node_properties['coords_4326'][1]}}}
+            )
             }}) return n
             """
             return db.cypher_query(query)[0][0][0]
