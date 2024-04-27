@@ -43,7 +43,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         if db.cypher_query(match_query)[0][0][0] == 0:
             query = f"""match (n {{node_key:'{start_node['node_key']}'}}),
             (m {{node_key:'{end_node['node_key']}'}})
-            create (n)-[:TrunkMain {{
+            create (n)-[:{base_pipe['asset_label']} {{
             gid: {base_pipe["gid"]},
             utility: '{start_node['utility']}'
             }}]->(m)"""
