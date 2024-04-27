@@ -33,7 +33,7 @@ class MainsController(ABC, GeoDjangoDataManager):
     def __init__(self, model):
         self.model = model
 
-    def _generate_dwithin_subquery(
+    def generate_dwithin_subquery(
         self,
         qs,
         json_fields,
@@ -188,40 +188,40 @@ class MainsController(ABC, GeoDjangoDataManager):
         json_fields = self.get_asset_json_fields()
 
         # This section is deliberately left verbose for clarity
-        subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
+        subquery3 = self.generate_dwithin_subquery(Logger.objects.all(), json_fields)
 
-        subquery4 = self._generate_dwithin_subquery(
+        subquery4 = self.generate_dwithin_subquery(
             Hydrant.objects.all(),
             json_fields,
             extra_json_fields={"acoustic_logger": "acoustic_logger"},
         )
 
-        subquery5 = self._generate_dwithin_subquery(
+        subquery5 = self.generate_dwithin_subquery(
             PressureFitting.objects.all(),
             json_fields,
             extra_json_fields={"subtype": "subtype"},
         )
 
-        subquery6 = self._generate_dwithin_subquery(
+        subquery6 = self.generate_dwithin_subquery(
             PressureControlValve.objects.all(),
             json_fields,
             extra_json_fields={"subtype": "subtype"},
         )
-        subquery7 = self._generate_dwithin_subquery(
+        subquery7 = self.generate_dwithin_subquery(
             NetworkMeter.objects.all(),
             json_fields,
             extra_json_fields={"subtype": "subtype"},
         )
 
-        subquery8 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
+        subquery8 = self.generate_dwithin_subquery(Chamber.objects.all(), json_fields)
 
-        subquery9 = self._generate_dwithin_subquery(
+        subquery9 = self.generate_dwithin_subquery(
             OperationalSite.objects.all(),
             json_fields,
             extra_json_fields={"subtype": "subtype"},
         )
 
-        subquery10 = self._generate_dwithin_subquery(
+        subquery10 = self.generate_dwithin_subquery(
             NetworkOptValve.objects.all(),
             json_fields,
             extra_json_fields={"acoustic_logger": "acoustic_logger"},

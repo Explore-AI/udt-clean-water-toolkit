@@ -31,8 +31,13 @@ class TrunkMainsController(MainsController):
 
         return subqueries
 
-    def _generate_dwithin_subquery(
-        self, qs, json_fields, geometry_field="geometry", inner_subqueries={}
+    def generate_dwithin_subquery(
+        self,
+        qs,
+        json_fields,
+        geometry_field="geometry",
+        inner_subqueries={},
+        extra_json_fields={},
     ):
 
         tm_qs = self.model.objects.all()
@@ -50,11 +55,12 @@ class TrunkMainsController(MainsController):
             "dm_touches_ids": dm_inner_subquery,
         }
 
-        subquery = super()._generate_dwithin_subquery(
+        subquery = super().generate_dwithin_subquery(
             qs,
             json_fields,
             geometry_field="geometry",
             inner_subqueries=inner_subqueries,
+            extra_json_fields=extra_json_fields,
         )
 
         return subquery

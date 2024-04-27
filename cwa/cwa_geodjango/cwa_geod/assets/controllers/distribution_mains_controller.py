@@ -32,7 +32,12 @@ class DistributionMainsController(MainsController):
         return subqueries
 
     def _generate_dwithin_subquery(
-        self, qs, json_fields, geometry_field="geometry", inner_subqueries={}
+        self,
+        qs,
+        json_fields,
+        geometry_field="geometry",
+        inner_subqueries={},
+        extra_json_fields={},
     ):
 
         tm_qs = TrunkMain.objects.all()
@@ -55,6 +60,7 @@ class DistributionMainsController(MainsController):
             json_fields,
             geometry_field="geometry",
             inner_subqueries=inner_subqueries,
+            extra_json_fields=extra_json_fields,
         )
 
         return subquery
