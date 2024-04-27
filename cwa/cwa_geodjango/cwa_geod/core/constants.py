@@ -36,20 +36,6 @@ PIPE_ASSETS__CHOICES = [
 
 PIPE_ASSETS__NAMES = [TRUNK_MAIN__NAME, DISTRIBUTION_MAIN__NAME]
 
-ASSET__LABELS = {
-    TRUNK_MAIN__NAME: "TrunkMain",
-    DISTRIBUTION_MAIN__NAME: "DistributionMain",
-    CHAMBER__NAME: "Chamber",
-    HYDRANT__NAME: "Hydrant",
-    LOGGER__NAME: "Logger",
-    NETWORK_METER__NAME: "NetworkMeter",
-    NETWORK_OPT_VALVE__NAME: "network_opt_valve",
-    OPERATIONAL_SITE__NAME: "OperationalSite",
-    PRESSURE_CONTROL_VALVE__NAME: "PressureControlValve",
-    PRESSURE_FITTING__NAME: "PressureFitting",
-}
-
-
 GEOS_LINESTRING_TYPES = [1, 5]
 
 GEOS_POINT_TYPES = [0]
@@ -58,3 +44,36 @@ UTILITIES = [
     ("thames_water", "Thames Water"),
     ("severn_trent_water", "Severn Trent Water"),
 ]
+
+# PIPE_MATERIALS = {"ductile_iron":"DI","cast_iron":"CI"}
+
+
+# CI	Cast Iron
+# PVC	Poly Vinyl Chloride
+# ST	Steel
+# WOOD	Wood
+# UNK	Unknown
+# OTH	Other
+# GS	Galvanized Steel
+# CL	Clay
+# AC	Asbestos Cement
+# AK	Alkathene
+# APC	Alloyed Polyvinyl Chloride
+# BPC	Biaxial Polyvinyl Chloride
+# BP	Barrier Pipe(Coated Aluminium)
+# BR	Brick
+# CR	Ceramic
+# CN	Concrete
+# CP	Copper
+# CC	Coated Copper
+# FG	Fibreglass
+# GI	Galvanised Iron
+# GRP	Glass Reinforced Plastic
+# LD	Lead
+# MOPC	Molecular Orientated Polyvinyl Chloride
+# POL	Polyethylene (Black Poly)
+# SI	Spun Iron
+# CS	Coated Steel
+# UPC	Unplasticised Polyvinyl Chloride
+# HPPE	PE100 - High Performance Polyethylene
+# MDPE	PE80 - Medium Density Polyethylen

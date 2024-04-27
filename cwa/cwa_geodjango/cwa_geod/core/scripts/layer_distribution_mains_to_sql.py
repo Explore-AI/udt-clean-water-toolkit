@@ -28,8 +28,9 @@ class Command(BaseCommand):
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
 
-            new_distribution_main = DistributionMain(gid=gid, geometry=geom.wkt,
-                                       geometry_4326=geom_4326)
+            new_distribution_main = DistributionMain(
+                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326
+            )
             new_distribution_mains.append(new_distribution_main)
 
             if len(new_distribution_mains) == 100000:
@@ -40,15 +41,30 @@ class Command(BaseCommand):
         if new_distribution_mains:
             DistributionMain.objects.bulk_create(new_distribution_mains)
 
+        DMAThroughModel = DistributionMain.dmas.through
+        bulk_create_list = []
         for distribution_main in DistributionMain.objects.only("id", "geometry"):
-    
-                    wkt = distribution_main.geometry.wkt
 
-                    dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                        "pk", flat=True
+            wkt = distribution_main.geometry.wkt
+
+            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
+                "pk", flat=True
+            )
+
+            if not dma_ids:
+                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+
+            for dma_id in dma_ids:
+                bulk_create_list.append(
+                    DMAThroughModel(
+                        distributionmain_id=distribution_main.pk, dma_id=dma_id
                     )
+                )
 
-                    if not dma_ids:
-                        dma_ids = [DMA.objects.get(name=r"undefined").pk]
+            if len(bulk_create_list) == 100000:
+                DMAThroughModel.objects.bulk_create(bulk_create_list)
+                bulk_create_list = []
 
-
+        # save the last set of data as it will probably be less than 100000
+        if bulk_create_list:
+            DMAThroughModel.objects.bulk_create(bulk_create_list)
