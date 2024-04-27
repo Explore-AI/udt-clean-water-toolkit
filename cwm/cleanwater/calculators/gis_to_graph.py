@@ -16,9 +16,8 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraphCalculator:
-    def __init__(self, srid, asset_labels, processor_count=None, chunk_size=None):
+    def __init__(self, srid, processor_count=None, chunk_size=None):
         self.srid = srid
-        self.asset_labels = asset_labels
         self.processor_count = processor_count
         self.chunk_size = chunk_size
 
@@ -114,7 +113,6 @@ class GisToGraphCalculator:
                 if node["node_type"] == PIPE_JUNCTION__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
                     merged_nodes[-1]["node_labels"].append("PipeJunction")
-                    # merged_nodes[-1]["node_labels"].append(node["asset_label"])
                     try:
                         merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
                     except KeyError:
@@ -122,26 +120,26 @@ class GisToGraphCalculator:
                 elif node["node_type"] == PIPE_END__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_END__NAME)
                     merged_nodes[-1]["node_labels"].append("PipeEnd")
-                    # merged_nodes[-1]["node_labels"].append(node["asset_label"])
                     try:
                         merged_nodes[-1]["pipe_gid"].extend(node["gid"])
                     except KeyError:
                         merged_nodes[-1]["pipe_gid"] = node["gid"]
                 elif node["node_type"] == POINT_ASSET__NAME:
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
-                    # merged_nodes[-1]["node_types"] = list(
-                    #     set(merged_nodes[-1]["node_types"])
-                    # )
                     merged_nodes[-1]["node_labels"].append(node["asset_label"])
-                    # merged_nodes[-1]["node_labels"] = list(
-                    #     set(merged_nodes[-1]["node_labels"])
-                    # )
                     try:
-                        merged_nodes[-1]["point_asset_gids"].append(node["gid"])
                         merged_nodes[-1]["point_asset_names"].append(node["asset_name"])
+                        merged_nodes[-1]["point_asset_gids"].append(node["gid"])
+                        merged_nodes[-1]["point_assets_with_gids"][
+                            f"{node['asset_name']}_gid"
+                        ] = node["gid"]
+
                     except KeyError:
-                        merged_nodes[-1]["point_asset_gids"] = [node["gid"]]
                         merged_nodes[-1]["point_asset_names"] = [node["asset_name"]]
+                        merged_nodes[-1]["point_asset_gids"] = [node["gid"]]
+                        merged_nodes[-1]["point_assets_with_gids"] = {
+                            f"{node['asset_name']}_gid": node["gid"]
+                        }
 
         return merged_nodes
 
@@ -461,7 +459,7 @@ class GisToGraphCalculator:
                 {
                     "distance_from_pipe_start_cm": asset["distance_from_pipe_start_cm"],
                     "node_type": POINT_ASSET__NAME,
-                    "dmas": base_pipe["dma_codes"],
+                    "dmas": base_pipe["dmas"],
                     "utility_name": self._get_utility(base_pipe),
                     # "node_key": self._encode_node_key(
                     #     asset["intersection_point_geometry"],

@@ -1,5 +1,4 @@
 from multiprocessing.pool import ThreadPool
-from django.db.models.query import QuerySet
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
 from neomodel import db
@@ -14,7 +13,6 @@ from cwa_geod.core.constants import (
     DISTRIBUTION_MAIN__NAME,
     PIPE_END__NAME,
     POINT_ASSET__NAME,
-    ASSET__LABELS,
 )
 from ..models import PointAsset, PipeEnd, PointNode, PipeJunction
 
@@ -31,99 +29,60 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
         super().__init__(
             self.config.srid,
-            ASSET__LABELS,
             processor_count=config.processor_count,
             chunk_size=config.chunk_size,
         )
 
     def _connect_nodes(self, base_pipe, start_node, end_node):
 
-        if not start_node.trunk_main.relationship(
-            end_node
-        ) and not start_node.distribution_main.relationship(end_node):
+        match_query = f"""match (n {{node_key:'{start_node['node_key']}'}})-
+        [r:TrunkMain]-
+        (m {{node_key:'{end_node['node_key']}'}}) return count(r)
+        """
 
-            relation_data = {
-                # "relation_id": relation_id,
-                "dmas": base_pipe["dmas"],
-                "gid": base_pipe["gid"],
-                "utility": base_pipe["utility_name"],
-            }
-            pipe_name = base_pipe["asset_name"]
+        if db.cypher_query(match_query)[0][0][0] == 0:
+            query = f"""match (n {{node_key:'{start_node['node_key']}'}}),
+            (m {{node_key:'{end_node['node_key']}'}})
+            create (n)-[:TrunkMain {{
+            gid: {base_pipe["gid"]},
+            utility: '{start_node['utility']}'
+            }}]->(m)"""
+            # "pipe_type": base_pipe["asset_name"],
 
-            if pipe_name == TRUNK_MAIN__NAME:
-                start_node.trunk_main.connect(end_node, relation_data)
-            elif pipe_name == DISTRIBUTION_MAIN__NAME:
-                start_node.distribution_main.connect(end_node, relation_data)
-            else:
-                InvalidPipeException(f"Invalid pipe detected: {pipe_name}.")
+            db.cypher_query(query)
 
-        # end_neo_point = NeomodelPoint(
-        #     (end_geom_latlong.x, end_geom_latlong.y), crs="wgs-84"
-        # )
+    def _get_or_create_pipe_and_point_asset_node(self, node_properties):
 
-    def _get_or_create_pipe_junctions_node(self, base_pipe, node_properties):
+        point_node_props = {
+            "utility": node_properties.get("utility"),
+            "coords_27700": node_properties.get("coords_27700"),
+            "node_key": node_properties.get("node_key"),
+            "dmas": node_properties.get("dmas"),
+            "node_types": node_properties.get("node_types"),
+            "asset_names": node_properties.get("point_asset_names"),
+            "asset_gids": node_properties.get("point_asset_gids"),
+        }
 
-        node_id = node_properties.get("node_id")
-        gids = node_properties.get("gids")
-        dmas = node_properties.get("dmas")
-        geom = node_properties.get("intersection_point_geometry")
-        # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
-        utility = base_pipe.get("utility_name")
+        node = PointNode.create(point_node_props)[0]
 
         try:
             # TODO: would neomodel get_or_create work better here?
-            return PipeJunction.create(
-                {
-                    "node_id": node_id,
-                    "dmas": dmas,
-                    "gids": gids,
-                    "utility": utility,
-                    # TODO: why does geom.x return a numpy array
-                    "x_coord": geom.coords[0],
-                    "y_coord": geom.coords[1],
-                }
-            )[0]
+            return node
         except UniqueProperty:
-            return PipeJunction.nodes.get_or_none(node_id=node_id)
+            return PointNode.nodes.get_or_none(node_key=node_key)
 
-    def _get_or_create_pipe_end_node(self, base_pipe, node_properties):
-        node_id = node_properties.get("node_id")
-        gid = node_properties.get("gid")
-        dmas = node_properties.get("dmas")
-        geom = node_properties.get("intersection_point_geometry")
-        # pipe_type = node_properties.get("asset_name") #TODO: re-add pipe types.
-        utility = base_pipe.get("utility_name")
-
-        try:
-            # TODO: would neomodel get_or_create work better here?
-            return PipeEnd.create(
-                {
-                    "node_id": node_id,
-                    "dmas": dmas,
-                    "gid": gid,
-                    "utility": utility,
-                    # TODO: why does geom.x return a numpy array
-                    "x_coord": geom.coords[0],
-                    "y_coord": geom.coords[1],
-                }
-            )[0]
-        except UniqueProperty:
-            return PipeEnd.nodes.get_or_none(node_id=node_id)
-
-    def _get_or_create_point_asset_node(self, base_pipe, node_properties):
+    def _get_or_create_point_asset_node(self, node_properties):
 
         asset_name = node_properties.get("asset_name")
-        asset_model = PointAsset.asset_name_model_mapping(asset_name)
-
         node_id = node_properties.get("node_id")
         gid = node_properties.get("gid")
         dmas = node_properties.get("dmas")
         geom = node_properties.get("intersection_point_geometry")
-        utility = base_pipe.get("utility_name")
+        utility = node_properties.get("utility")
 
         try:
             # TODO: would neomodel get_or_create work better here?
-            return asset_model.create(
+            return PointNode.create(
                 {
                     "node_id": node_id,
                     "dmas": dmas,
@@ -135,61 +94,78 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 }
             )[0]
         except UniqueProperty:
-            return asset_model.nodes.get_or_none(node_id=node_id)
+            return PointNode.nodes.get_or_none(node_id=node_id)
 
-    def _create_nodes(self, base_pipe, all_node_properties):
+    def _create_nodes2(self, all_node_properties):
 
         all_nodes = []
         for node_properties in all_node_properties:
 
             node_key = node_properties.get("node_key")
 
-            point_node = PointNode.nodes.get_or_none(node_key=node_key)
+            point_node = db.cypher_query(
+                f"match (n {{node_key:'{node_key}'}}) return n"
+            )[0]
 
             if point_node:
-                all_nodes.append(point_node)
+                all_nodes.append(point_node[0][0])
                 continue
 
             node_types = sorted(node_properties.get("node_types"))
 
-            import pdb
-
-            pdb.set_trace()
             if node_types == [PIPE_JUNCTION__NAME]:
                 # node = self._get_or_create_pipe_junctions_node(
                 #     base_pipe, node_properties
                 # )
 
-                pass
-            # all_nodes.append(node)
+                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}' }}) return n"
+
+                node = db.cypher_query(query)[0][0][0]
+                all_nodes.append(node)
 
             elif node_types == [PIPE_END__NAME]:
-                node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
+                # node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
+                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}' }}) return n"
+
+                node = db.cypher_query(query)[0][0][0]
                 all_nodes.append(node)
 
             elif node_types == [POINT_ASSET__NAME]:
-                node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
+                # node = self._get_or_create_pipe_end_node(base_pipe, node_properties)
+                asset_gids = [
+                    f"{key}: {val}"
+                    for key, val in node_properties["point_assets_with_gids"].items()
+                ]
+
+                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, asset_names: {node_properties['point_asset_names']}, asset_gids: {node_properties['point_asset_gids']}, {(',').join(asset_gids)} }}) return n"
+
+                node = db.cypher_query(query)[0][0][0]
+
                 all_nodes.append(node)
 
             elif node_types == [PIPE_JUNCTION__NAME, POINT_ASSET__NAME]:
                 # node = self._get_or_create_point_asset_node(base_pipe, node_properties)
-                # query = f""
-                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'thames_water', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, pipe_gids: {node_properties['pipe_gids']} }}) return n"
+                asset_gids = [
+                    f"{key}: {val}"
+                    for key, val in node_properties["point_assets_with_gids"].items()
+                ]
 
-                import pdb
+                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, asset_names: {node_properties['point_asset_names']}, asset_gids: {node_properties['point_asset_gids']}, {(',').join(asset_gids)} }}) return n"
 
-                pdb.set_trace()
-                node = db.cypher_query(query)
+                node = db.cypher_query(query)[0][0][0]
                 all_nodes.append(node)
 
             elif node_types == [PIPE_END__NAME, POINT_ASSET__NAME]:
-                node = self._get_or_create_point_asset_node(base_pipe, node_properties)
+                # node = self._get_or_create_point_asset_node(base_pipe, node_properties)
+                asset_gids = [
+                    f"{key}: {val}"
+                    for key, val in node_properties["point_assets_with_gids"].items()
+                ]
+
+                query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{utility:'{node_properties['utility']}', coords_27700: {node_properties['coords_27700']}, node_key:'{node_properties['node_key']}', dmas:'{node_properties['dmas']}', node_types: {node_properties['node_types']}, asset_names: {node_properties['point_asset_names']}, asset_gids: {node_properties['point_asset_gids']}, {(',').join(asset_gids)} }}) return n"
+
+                node = db.cypher_query(query)[0][0][0]
                 all_nodes.append(node)
-
-        # if self.base_pipe["gid"] == 838147:
-        #     import pdb
-
-        #     pdb.set_trace()
 
         return all_nodes
 
@@ -198,7 +174,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
         for next_node in all_nodes[1:]:
             # need to sort to ensure cardinality is maintained
-            sorted_nodes = sorted([current_node, next_node], key=lambda x: x.node_id)
+            sorted_nodes = sorted(
+                [current_node, next_node], key=lambda node: node["node_key"]
+            )
 
             self._connect_nodes(base_pipe, sorted_nodes[0], sorted_nodes[1])
             current_node = next_node
@@ -207,7 +185,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self, base_pipe: dict, all_node_properties: list
     ):
 
-        all_nodes = self._create_nodes(base_pipe, all_node_properties)
+        all_nodes = self._create_nodes2(all_node_properties)
         self._create_relations(base_pipe, all_nodes)
 
     def _reset_pipe_asset_data(self):
