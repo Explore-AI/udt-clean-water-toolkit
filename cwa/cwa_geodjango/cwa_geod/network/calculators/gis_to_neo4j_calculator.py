@@ -100,6 +100,8 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             f"{key}: {val}"
             for key, val in node_properties["point_assets_with_gids"].items()
         ]
+        # acoustic_logger: {node_properties['acoustic_logger']},
+        # subtype: {node_properties['subtype']},
         try:
             query = f"""CREATE (
             n:{('&').join(node_properties['node_labels'])}

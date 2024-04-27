@@ -4,6 +4,7 @@ from neomodel import (
     ArrayProperty,
     StringProperty,
     JSONProperty,
+    BooleanProperty,
 )
 from neomodel.contrib.spatial_properties import PointProperty
 from .pipe_main import PipeMain
@@ -26,6 +27,8 @@ class PointNode(StructuredNode):
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
     coords_27700 = ArrayProperty(required=True)
     node_key = StringProperty(unique_index=True, unique=True, required=True)
+    subtype = StringProperty(index=True)
+    acoustic_logger = BooleanProperty(index=True)
     dmas = JSONProperty(required=True)
     node_types = ArrayProperty(required=True, index=True)
     asset_names = ArrayProperty(required=True, index=True)

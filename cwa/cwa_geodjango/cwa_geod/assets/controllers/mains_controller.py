@@ -34,7 +34,12 @@ class MainsController(ABC, GeoDjangoDataManager):
         self.model = model
 
     def _generate_dwithin_subquery(
-        self, qs, json_fields, geometry_field="geometry", inner_subqueries={}
+        self,
+        qs,
+        json_fields,
+        geometry_field="geometry",
+        inner_subqueries={},
+        extra_json_fields={},
     ):
         """
         Generates a subquery where the inner query is filtered if its geometery object
@@ -55,6 +60,7 @@ class MainsController(ABC, GeoDjangoDataManager):
         ).values(
             json=JSONObject(
                 **json_fields,
+                **extra_json_fields,
                 **inner_subqueries,
                 asset_name=Value(qs.model.AssetMeta.asset_name),
                 asset_label=Value(qs.model.__name__)
@@ -184,27 +190,41 @@ class MainsController(ABC, GeoDjangoDataManager):
         # This section is deliberately left verbose for clarity
         subquery3 = self._generate_dwithin_subquery(Logger.objects.all(), json_fields)
 
-        subquery4 = self._generate_dwithin_subquery(Hydrant.objects.all(), json_fields)
+        subquery4 = self._generate_dwithin_subquery(
+            Hydrant.objects.all(),
+            json_fields,
+            extra_json_fields={"acoustic_logger": "acoustic_logger"},
+        )
 
         subquery5 = self._generate_dwithin_subquery(
-            PressureFitting.objects.all(), json_fields
+            PressureFitting.objects.all(),
+            json_fields,
+            extra_json_fields={"subtype": "subtype"},
         )
 
         subquery6 = self._generate_dwithin_subquery(
-            PressureControlValve.objects.all(), json_fields
+            PressureControlValve.objects.all(),
+            json_fields,
+            extra_json_fields={"subtype": "subtype"},
         )
         subquery7 = self._generate_dwithin_subquery(
-            NetworkMeter.objects.all(), json_fields
+            NetworkMeter.objects.all(),
+            json_fields,
+            extra_json_fields={"subtype": "subtype"},
         )
 
         subquery8 = self._generate_dwithin_subquery(Chamber.objects.all(), json_fields)
 
         subquery9 = self._generate_dwithin_subquery(
-            OperationalSite.objects.all(), json_fields
+            OperationalSite.objects.all(),
+            json_fields,
+            extra_json_fields={"subtype": "subtype"},
         )
 
         subquery10 = self._generate_dwithin_subquery(
-            NetworkOptValve.objects.all(), json_fields
+            NetworkOptValve.objects.all(),
+            json_fields,
+            extra_json_fields={"acoustic_logger": "acoustic_logger"},
         )
 
         subqueries = {
