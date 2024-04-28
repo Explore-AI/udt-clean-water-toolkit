@@ -22,10 +22,10 @@ class GisToGraphCalculator:
         self.chunk_size = chunk_size
 
         self.all_base_pipes = []
-        self.all_nodes_ordered = []
+        self.all_nodes_by_pipe = []
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
-        self.all_base_pipes, self.all_nodes_ordered = list(
+        self.all_base_pipes, self.all_nodes_by_pipe = list(
             zip(
                 *map(
                     self._map_relative_positions_calc,
@@ -36,7 +36,7 @@ class GisToGraphCalculator:
 
     def calc_pipe_point_relative_positions_parallel(self, pipes_qs: list) -> None:
         with Pool(processes=self.processor_count) as p:
-            self.all_base_pipes, self.all_nodes_ordered = zip(
+            self.all_base_pipes, self.all_nodes_by_pipe = zip(
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs,
@@ -74,9 +74,30 @@ class GisToGraphCalculator:
             base_pipe, junctions_with_positions, point_assets_with_positions
         )
 
-        merged_nodes = self._merge_nodes_on_position(nodes_ordered)
+        nodes_by_pipe = self._merge_nodes_on_position(nodes_ordered)
 
-        return base_pipe, merged_nodes
+        # edges_by_pipe = self._get_edges_by_pipe(base_pipe, nodes_by_pipe)
+
+        return base_pipe, nodes_by_pipe  # , edges_by_pipe
+
+    def _get_edges_by_pipe(self, base_pipe, nodes_by_pipe):
+        edges_by_pipe = []
+
+        from_node = nodes_by_pipe[0]
+        for to_node in nodes_by_pipe[1:]:
+            edges_by_pipe.append(
+                {
+                    "from_node_key": from_node["node_key"],
+                    "to_node_key": to_node["node_key"],
+                    "gid": base_pipe["gid"],
+                    "asset_name": base_pipe["asset_name"],
+                    "asset_label": base_pipe["asset_label"],
+                    "dmas": base_pipe["dmas"],
+                }
+            )
+            from_node = to_node
+
+        return edges_by_pipe
 
     def _merge_nodes_on_position(self, nodes_ordered):
         consolidated_nodes = [[nodes_ordered[0]]]

@@ -28,7 +28,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         self.config = config
 
         self.all_base_pipes = []
-        self.all_nodes_ordered = []
+        self.all_nodes_by_pipe = []
 
         super().__init__(
             self.config.srid,
@@ -50,7 +50,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             gid: {base_pipe["gid"]},
             utility: '{start_node['utility']}'
             }}]->(m)"""
-            # "pipe_type": base_pipe["asset_name"],
 
             db.cypher_query(query)
 
@@ -183,7 +182,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         current_node = all_nodes[0]
 
         for next_node in all_nodes[1:]:
-            # need to sort to ensure cardinality is maintained
+            # Need to sort to ensure cardinality is maintained.
+            # If not sorted a relationship that already exists
+            # on the DB may be duplicated
             sorted_nodes = sorted(
                 [current_node, next_node], key=lambda node: node["node_key"]
             )
@@ -201,7 +202,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
     def _reset_pipe_asset_data(self):
         # reset all_pipe_data and all_asset_positions to manage memory
         self.all_base_pipes = []
-        self.all_nodes_ordered = []
+        self.all_nodes_by_pipe = []
 
     def create_neo4j_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
@@ -218,7 +219,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             map(
                 self._map_pipe_connected_asset_relations,
                 self.all_base_pipes,
-                self.all_nodes_ordered,
+                self.all_nodes_by_pipe,
             )
         )
 
@@ -238,7 +239,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         with ThreadPool(self.config.thread_count) as p:
             p.starmap(
                 self._map_pipe_connected_asset_relations,
-                zip(self.all_base_pipes, self.all_nodes_ordered),
+                zip(self.all_base_pipes, self.all_nodes_by_pipe),
             )
 
         self._reset_pipe_asset_data()
