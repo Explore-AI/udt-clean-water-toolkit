@@ -27,7 +27,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
     def __init__(self, config):
         self.config = config
 
-        self.all_base_pipes = []
+        self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
 
         super().__init__(
@@ -36,19 +36,20 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             chunk_size=config.chunk_size,
         )
 
-    def _connect_nodes(self, base_pipe, start_node, end_node):
+    def _connect_nodes(self, edge_by_pipe, start_node, end_node):
+
+        asset_label = edge_by_pipe["asset_label"]
 
         match_query = f"""match (n {{node_key:'{start_node['node_key']}'}})-
-        [r:TrunkMain]-
+        [r:{asset_label}]-
         (m {{node_key:'{end_node['node_key']}'}}) return count(r)
         """
 
         if db.cypher_query(match_query)[0][0][0] == 0:
             query = f"""match (n {{node_key:'{start_node['node_key']}'}}),
             (m {{node_key:'{end_node['node_key']}'}})
-            create (n)-[:{base_pipe['asset_label']} {{
-            gid: {base_pipe["gid"]},
-            utility: '{start_node['utility']}'
+            create (n)-[:{asset_label} {{
+            gid: {edge_by_pipe["gid"]}
             }}]->(m)"""
 
             db.cypher_query(query)
@@ -178,10 +179,10 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
         return all_nodes
 
-    def _create_relations(self, base_pipe, all_nodes):
+    def _create_relations(self, edges_by_pipe, all_nodes):
         current_node = all_nodes[0]
 
-        for next_node in all_nodes[1:]:
+        for next_node, edge_by_pipe in zip(all_nodes[1:], edges_by_pipe):
             # Need to sort to ensure cardinality is maintained.
             # If not sorted a relationship that already exists
             # on the DB may be duplicated
@@ -189,19 +190,19 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
                 [current_node, next_node], key=lambda node: node["node_key"]
             )
 
-            self._connect_nodes(base_pipe, sorted_nodes[0], sorted_nodes[1])
+            self._connect_nodes(edge_by_pipe, sorted_nodes[0], sorted_nodes[1])
             current_node = next_node
 
     def _map_pipe_connected_asset_relations(
-        self, base_pipe: dict, all_node_properties: list
+        self, edges_by_pipe: dict, all_node_properties: list
     ):
 
         all_nodes = self._create_nodes(all_node_properties)
-        self._create_relations(base_pipe, all_nodes)
+        self._create_relations(edges_by_pipe, all_nodes)
 
     def _reset_pipe_asset_data(self):
         # reset all_pipe_data and all_asset_positions to manage memory
-        self.all_base_pipes = []
+        self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
 
     def create_neo4j_graph(self) -> None:
@@ -218,7 +219,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         list(
             map(
                 self._map_pipe_connected_asset_relations,
-                self.all_base_pipes,
+                self.all_edges_by_pipe,
                 self.all_nodes_by_pipe,
             )
         )
@@ -239,7 +240,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         with ThreadPool(self.config.thread_count) as p:
             p.starmap(
                 self._map_pipe_connected_asset_relations,
-                zip(self.all_base_pipes, self.all_nodes_by_pipe),
+                zip(self.all_edges_by_pipe, self.all_nodes_by_pipe),
             )
 
         self._reset_pipe_asset_data()

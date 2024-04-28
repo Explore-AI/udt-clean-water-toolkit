@@ -21,11 +21,11 @@ class GisToGraphCalculator:
         self.processor_count = processor_count
         self.chunk_size = chunk_size
 
-        self.all_base_pipes = []
+        self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
-        self.all_base_pipes, self.all_nodes_by_pipe = list(
+        self.all_nodes_by_pipe, self.all_edges_by_pipe = list(
             zip(
                 *map(
                     self._map_relative_positions_calc,
@@ -36,7 +36,7 @@ class GisToGraphCalculator:
 
     def calc_pipe_point_relative_positions_parallel(self, pipes_qs: list) -> None:
         with Pool(processes=self.processor_count) as p:
-            self.all_base_pipes, self.all_nodes_by_pipe = zip(
+            self.all_nodes_by_pipe, self.all_edges_by_pipe = zip(
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs,
@@ -76,9 +76,9 @@ class GisToGraphCalculator:
 
         nodes_by_pipe = self._merge_nodes_on_position(nodes_ordered)
 
-        # edges_by_pipe = self._get_edges_by_pipe(base_pipe, nodes_by_pipe)
+        edges_by_pipe = self._get_edges_by_pipe(base_pipe, nodes_by_pipe)
 
-        return base_pipe, nodes_by_pipe  # , edges_by_pipe
+        return nodes_by_pipe, edges_by_pipe
 
     def _get_edges_by_pipe(self, base_pipe, nodes_by_pipe):
         edges_by_pipe = []
