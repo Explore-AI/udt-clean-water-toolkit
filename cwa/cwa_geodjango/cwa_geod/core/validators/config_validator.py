@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 
 class ConfigValidator(forms.Form):
     method = forms.CharField(max_length=20, required=True)
+    neoj4_point = forms.BooleanField(required=False)
     srid = forms.IntegerField(required=True)
     batch_size = forms.IntegerField(required=True)
     chunk_size = forms.IntegerField(required=False)

@@ -40,14 +40,14 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
         asset_label = edge_by_pipe["asset_label"]
 
-        match_query = f"""match (n {{node_key:'{start_node['node_key']}'}})-
+        match_query = f"""match (n:PointNode {{node_key:'{start_node['node_key']}'}})-
         [r:{asset_label}]-
-        (m {{node_key:'{end_node['node_key']}'}}) return count(r)
+        (m:PointNode {{node_key:'{end_node['node_key']}'}}) return count(r)
         """
 
         if db.cypher_query(match_query)[0][0][0] == 0:
-            query = f"""match (n {{node_key:'{start_node['node_key']}'}}),
-            (m {{node_key:'{end_node['node_key']}'}})
+            query = f"""match (n:PointNode {{node_key:'{start_node['node_key']}'}}),
+            (m:PointNode {{node_key:'{end_node['node_key']}'}})
             create (n)-[:{asset_label} {{
             gid: {edge_by_pipe["gid"]}
             }}]->(m)"""
@@ -57,7 +57,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
     @staticmethod
     def _get_node_by_key(node_key):
         point_node = db.cypher_query(
-            f"""match (n {{node_key:'{node_key}'}})
+            f"""match (n:PointNode {{node_key:'{node_key}'}})
         return n"""
         )[0]
 
@@ -75,7 +75,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         dmas:'{node_properties['dmas']}',
         node_types: {node_properties['node_types']},
         asset_names: {node_properties['point_asset_names']},
-        asset_gids: {node_properties['point_asset_gids']},
+        asset_gids: {node_properties['point_asset_gids']}
         """
 
         asset_gids = [
@@ -86,23 +86,23 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         acoustic_logger = node_properties.get("acoustic_logger")
         subtype = node_properties.get("subtype")
 
-        point = f"""location: point(
-        {{latitude: {node_properties['coords_4326'][0]},
-         longitude: {node_properties['coords_4326'][1]}}}
-        )"""
+        # point = f"""location: point(
+        # {{latitude: {node_properties['coords_4326'][0]},
+        #  longitude: {node_properties['coords_4326'][1]}}}
+        # )"""
 
         query = f"CREATE (n:{('&').join(node_properties['node_labels'])} {{"
         query += props
 
-        query += f"{(', ').join(asset_gids)},"
+        query += f",{(', ').join(asset_gids)}"
 
         if acoustic_logger:
-            query += f"acoustic_logger: '{acoustic_logger}',"
+            query += f", acoustic_logger: '{acoustic_logger}',"
 
         if subtype:
-            query += f"subtype: '{subtype}',"
+            query += f", subtype: '{subtype}'"
 
-        query += point
+        #query += point
         query += f"}}) return n"
 
         return query
@@ -115,13 +115,13 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         {{utility:'{node_properties['utility']}',
         coords_27700: {node_properties['coords_27700']},
         node_key:'{node_properties['node_key']}',
-        dmas:'{node_properties['dmas']}',
-        location: point(
-        {{latitude: {node_properties['coords_4326'][0]},
-        longitude: {node_properties['coords_4326'][1]}}}
-        )
+        dmas:'{node_properties['dmas']}'
         }}) return n
         """
+        #         location: point(
+        # {{latitude: {node_properties['coords_4326'][0]},
+        # longitude: {node_properties['coords_4326'][1]}}}
+        # )
         return query
 
     def _get_or_create_pipe_and_asset_node(self, node_properties):
