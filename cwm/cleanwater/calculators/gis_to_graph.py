@@ -1,6 +1,8 @@
 import json
 import bisect
 from multiprocessing import Pool
+from shapely.ops import substring
+from shapely import LineString as Linestr, Point as Pnt, line_locate_point
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point
 from django.db.models.query import QuerySet
 from cwa_geod.config.settings import sqids
@@ -23,7 +25,40 @@ class GisToGraphCalculator:
 
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
+        self.line_substrings = []
 
+    def create_line_substring(self):
+
+        for nodes, pipe in zip(self.all_nodes_ordered, self.all_base_pipes):
+            start_node = nodes[0]
+            line_parts = []
+            for node in nodes[0:]:
+                first_node_coords = start_node["coords_27700"]
+                next_node_coords = node["coords_27700"]
+                geom_line = pipe["wkt"]
+                coords = geom_line.replace("LINESTRING", "").strip("()").split(",")
+                line_coords = [tuple(map(float, coord.split())) for coord in coords]
+                line = Linestr(line_coords)
+                # Create Shapely Points from the node coordinates
+                point_a = Pnt(first_node_coords[0], first_node_coords[1])
+                point_b = Pnt(next_node_coords[0], next_node_coords[1])
+
+                # Location of the points along the line
+                initial_point = line_locate_point(line, point_a)
+                next_point = line_locate_point(line, point_b)
+
+                # Calculate the line substring
+                line_part = substring(line, initial_point, next_point, normalized=True)
+                sub_line_length = line_part.length
+
+                # Add the line substring, length to the list of line parts
+                line_parts.append((line_part, sub_line_length))
+
+                # Update the first node coordinates for the next iteration
+                first_node_coords = next_node_coords
+
+            # Add the list of line parts to the main list
+            self.line_substrings.append(line_parts)
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         self.all_nodes_by_pipe, self.all_edges_by_pipe = list(
             zip(
