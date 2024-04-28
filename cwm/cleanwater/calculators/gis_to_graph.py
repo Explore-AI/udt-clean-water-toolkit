@@ -16,15 +16,11 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraphCalculator:
-    def __init__(
-        self,
-        srid,
-        processor_count=None,
-        chunk_size=None,
-    ):
+    def __init__(self, srid, processor_count=None, chunk_size=None, neoj4_point=False):
         self.srid = srid
         self.processor_count = processor_count
         self.chunk_size = chunk_size
+        self.neoj4_point = neoj4_point
 
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
@@ -279,8 +275,8 @@ class GisToGraphCalculator:
             base_pipe_geom, junction_or_asset["wkt"], self.srid
         )
 
-        # if not intersection_geom_4326.coords:
-        #     intersection_geom_4326 = intersection_geom.transform(4326, clone=True)
+        if self.neoj4_point:
+            intersection_geom_4326 = intersection_geom.transform(4326, clone=True)
 
         if intersection_geom.geom_type == "Point":
             intersection_params = normalised_point_position_on_line(

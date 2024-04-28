@@ -34,6 +34,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             self.config.srid,
             processor_count=config.processor_count,
             chunk_size=config.chunk_size,
+            neoj4_point=self.config.neoj4_point
         )
 
     def _connect_nodes(self, edge_by_pipe, start_node, end_node):
