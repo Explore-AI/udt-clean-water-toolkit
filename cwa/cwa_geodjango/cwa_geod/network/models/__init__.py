@@ -14,6 +14,5 @@ def initialise_node_labels():
     node_count = db.cypher_query("match (n) return count (n);")[0][0][0]
 
     if node_count == 0:
-        remove_all_labels()
         install_labels(PipeMain, quiet=False)
         install_labels(PointNode, quiet=False)
