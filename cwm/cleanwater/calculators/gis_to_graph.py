@@ -284,6 +284,9 @@ class GisToGraphCalculator:
             base_pipe_geom_4326, junction_or_asset["wkt_4326"], 4326
         )
 
+        if not intersection_geom_4326.coords:
+            intersection_geom_4326 = intersection_geom.transform(4326, clone=True)
+
         if intersection_geom.geom_type == "Point":
             intersection_params = normalised_point_position_on_line(
                 base_pipe_geom, intersection_geom.coords
@@ -477,7 +480,7 @@ class GisToGraphCalculator:
                 nodes_ordered.insert(
                     position_index,
                     {
-                        "gids": gids,
+                        "pipe_gids": gids,
                         "node_type": PIPE_JUNCTION__NAME,
                         "utility_name": self._get_utility(base_pipe),
                         "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
@@ -494,9 +497,9 @@ class GisToGraphCalculator:
 
                 distances.append(distance_from_pipe_start_cm)
             else:
-                nodes_ordered[position_index]["gids"].append(pipe_gid)
-                nodes_ordered[position_index]["gids"] = sorted(
-                    nodes_ordered[position_index]["gids"]
+                nodes_ordered[position_index]["pipe_gids"].append(pipe_gid)
+                nodes_ordered[position_index]["pipe_gids"] = sorted(
+                    nodes_ordered[position_index]["pipe_gids"]
                 )
 
         return nodes_ordered
