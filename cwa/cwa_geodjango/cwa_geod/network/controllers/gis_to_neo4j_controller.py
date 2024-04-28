@@ -53,11 +53,21 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
             limit = offset + self.config.batch_size
             print(offset, limit)
 
+            t0 = timer()
+
             sliced_qs = list(pipes_qs[offset:limit])
+            t1 = timer()
+            print("qs", t1 - t0)
+
 
             self.calc_pipe_point_relative_positions_parallel(sliced_qs)
+            t2 = timer()
+            print("calc", t2 - t1)
+
 
             self._create_neo4j_graph_parallel()
+            t3 = timer()
+            print("create", t3 - t2)
 
         end = timer()
         print(end - start)
