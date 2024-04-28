@@ -140,7 +140,7 @@ class GisToGraphCalculator:
                     if acoustic_logger:
                         merged_nodes[-1]["acoustic_logger"] = acoustic_logger
 
-                    if len(merged_nodes[-1]["node_labels"]) == 1:
+                    if "PointAsset" not in merged_nodes[-1]["node_labels"]:
                         merged_nodes[-1]["node_labels"].append("PointAsset")
                     merged_nodes[-1]["node_labels"].append(node["asset_label"])
 

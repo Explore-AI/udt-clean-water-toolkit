@@ -125,7 +125,6 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         return query
 
     def _get_or_create_pipe_and_asset_node(self, node_properties):
-
         try:
             query = self.create_node_asset_query(node_properties)
             return db.cypher_query(query)[0][0][0]
