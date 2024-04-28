@@ -116,6 +116,12 @@ class GisToGraphCalculator:
         merged_nodes = []
         for nodes in consolidated_nodes:
 
+            try:
+                x = float(nodes[0]["intersection_point_geometry"].x)
+            except:
+                import pdb
+
+                pdb.set_trace()
             merged_nodes.append(
                 {
                     "utility": nodes[0]["utility_name"],
