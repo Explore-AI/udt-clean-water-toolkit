@@ -98,7 +98,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         query += f",{(', ').join(asset_gids)}"
 
         if acoustic_logger:
-            query += f", acoustic_logger: '{acoustic_logger}',"
+            query += f", acoustic_logger: '{acoustic_logger}'"
 
         if subtype:
             query += f", subtype: '{subtype}'"
