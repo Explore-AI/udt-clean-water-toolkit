@@ -26,7 +26,7 @@ class PointNode(StructuredNode):
 
     utility = StringProperty(required=True, index=True, choices=UTILITIES)
     coords_27700 = ArrayProperty(required=True)
-    node_key = StringProperty(unique_index=True, unique=True, required=True)
+    node_key = StringProperty(unique_index=True, unique=True, index=True, required=True)
     subtype = StringProperty(index=True)
     acoustic_logger = BooleanProperty(index=True)
     dmas = JSONProperty(required=True)

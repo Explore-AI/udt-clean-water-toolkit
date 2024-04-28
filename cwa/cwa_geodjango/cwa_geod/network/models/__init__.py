@@ -15,7 +15,5 @@ def initialise_node_labels():
 
     if node_count == 0:
         remove_all_labels()
-        install_labels(PipeEnd, quiet=True)
-        install_labels(PipeMain, quiet=True)
-        install_labels(PipeJunction, quiet=True)
-        install_labels(PointAsset, quiet=True)
+        install_labels(PipeMain, quiet=False)
+        install_labels(PointNode, quiet=False)
