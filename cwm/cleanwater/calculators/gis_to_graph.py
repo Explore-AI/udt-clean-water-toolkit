@@ -116,12 +116,6 @@ class GisToGraphCalculator:
         merged_nodes = []
         for nodes in consolidated_nodes:
 
-            try:
-                x = float(nodes[0]["intersection_point_geometry"].x)
-            except:
-                import pdb
-
-                pdb.set_trace()
             merged_nodes.append(
                 {
                     "utility": nodes[0]["utility_name"],
@@ -141,6 +135,7 @@ class GisToGraphCalculator:
                     "node_labels": ["PointNode"],
                 }
             )
+
             for node in nodes:
                 if node["node_type"] == PIPE_JUNCTION__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
@@ -489,6 +484,9 @@ class GisToGraphCalculator:
                         "dmas": base_pipe["dmas"],
                         "intersection_point_geometry": pipe[
                             "intersection_point_geometry"
+                        ],
+                        "intersection_point_geometry_4326": pipe[
+                            "intersection_point_geometry_4326"
                         ],
                         **base_pipe,
                     },
