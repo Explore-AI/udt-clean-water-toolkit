@@ -109,7 +109,7 @@ class GisToGraphCalculator:
                     "asset_name": base_pipe["asset_name"],
                     "asset_label": base_pipe["asset_label"],
                     "dmas": base_pipe["dmas"],
-                    "segment_length": math.round(line_segment.length, 5),
+                    "segment_length": round(line_segment.length, 5),
                     "segment_wkt": line_segment.wkt,
                 }
             )
