@@ -148,7 +148,7 @@ class GisToGraphCalculator:
                     try:
                         merged_nodes[-1]["pipe_gids"].extend(node["gid"])
                     except KeyError:
-                        merged_nodes[-1]["pipe_gids"] = node["gid"]
+                        merged_nodes[-1]["pipe_gids"] = [node["gid"]]
                 elif node["node_type"] == POINT_ASSET__NAME:
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
 
