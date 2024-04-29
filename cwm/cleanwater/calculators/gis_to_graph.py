@@ -141,14 +141,14 @@ class GisToGraphCalculator:
                     try:
                         merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
                     except KeyError:
-                        merged_nodes[-1]["pipe_gids"] = [node["pipe_gids"]]
+                        merged_nodes[-1]["pipe_gids"] = node["pipe_gids"]
                 elif node["node_type"] == PIPE_END__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_END__NAME)
                     merged_nodes[-1]["node_labels"].append("PipeEnd")
                     try:
-                        merged_nodes[-1]["pipe_gids"].extend(node["gid"])
+                        merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
                     except KeyError:
-                        merged_nodes[-1]["pipe_gids"] = [node["gid"]]
+                        merged_nodes[-1]["pipe_gids"] = node["pipe_gids"]
                 elif node["node_type"] == POINT_ASSET__NAME:
                     merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
 
