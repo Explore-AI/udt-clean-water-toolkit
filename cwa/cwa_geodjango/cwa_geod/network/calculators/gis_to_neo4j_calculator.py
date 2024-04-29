@@ -34,7 +34,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             self.config.srid,
             processor_count=config.processor_count,
             chunk_size=config.chunk_size,
-            neoj4_point=self.config.neoj4_point
+            neoj4_point=self.config.neoj4_point,
         )
 
     def _connect_nodes(self, edge_by_pipe, start_node, end_node):
@@ -50,7 +50,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             query = f"""match (n:PointNode {{node_key:'{start_node['node_key']}'}}),
             (m:PointNode {{node_key:'{end_node['node_key']}'}})
             create (n)-[:{asset_label} {{
-            gid: {edge_by_pipe["gid"]}
+            gid: {edge_by_pipe["gid"]},
+            segment_wkt: '{edge_by_pipe["segment_wkt"]}',
+            segment_length: {edge_by_pipe["segment_length"]}
             }}]->(m)"""
 
             db.cypher_query(query)
@@ -103,7 +105,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
         if subtype:
             query += f", subtype: '{subtype}'"
 
-        #query += point
+        # query += point
         query += f"}}) return n"
 
         return query

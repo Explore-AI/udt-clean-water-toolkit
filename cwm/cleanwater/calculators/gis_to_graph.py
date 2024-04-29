@@ -1,8 +1,10 @@
 import json
 import bisect
 from multiprocessing import Pool
-from django.contrib.gis.geos import GEOSGeometry, LineString, Point
+from django.contrib.gis.geos import GEOSGeometry
 from django.db.models.query import QuerySet
+from shapely.ops import substring
+from shapely import LineString, Point, line_locate_point
 from cwa_geod.config.settings import sqids
 from cleanwater.core.utils import normalised_point_position_on_line
 from cwa_geod.assets.models.trunk_main import TrunkMain
@@ -87,6 +89,18 @@ class GisToGraphCalculator:
 
         from_node = nodes_by_pipe[0]
         for to_node in nodes_by_pipe[1:]:
+
+            from_node_pnt = Point(from_node["coords_27700"])
+            to_node_pnt = Point(to_node["coords_27700"])
+            line_geom = LineString(base_pipe["geometry"].coords)
+
+            from_location = line_locate_point(line_geom, from_node_pnt)
+            to_location = line_locate_point(line_geom, to_node_pnt)
+
+            line_segment = substring(
+                line_geom, from_location, to_location, normalized=True
+            )
+
             edges_by_pipe.append(
                 {
                     "from_node_key": from_node["node_key"],
@@ -95,6 +109,8 @@ class GisToGraphCalculator:
                     "asset_name": base_pipe["asset_name"],
                     "asset_label": base_pipe["asset_label"],
                     "dmas": base_pipe["dmas"],
+                    "segment_length": math.round(line_segment.length, 5),
+                    "segment_wkt": line_segment.wkt,
                 }
             )
             from_node = to_node
