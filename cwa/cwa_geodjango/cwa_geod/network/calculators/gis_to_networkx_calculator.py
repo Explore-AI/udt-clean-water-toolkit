@@ -9,9 +9,16 @@ class GisToNxCalculator(GisToGraphCalculator):
     def __init__(self, config):
         self.config = config
         self.G: Graph = Graph()
-        self.all_base_pipes = []
-        self.all_nodes_ordered = []
-        super().__init__(self.config)
+
+        self.all_edges_by_pipe = []
+        self.all_nodes_by_pipe = []
+
+        super().__init__(
+            self.config.srid,
+            processor_count=config.processor_count,
+            chunk_size=config.chunk_size,
+            neoj4_point=self.config.neoj4_point,
+        )
 
     def create_nx_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
@@ -28,5 +35,8 @@ class GisToNxCalculator(GisToGraphCalculator):
 
         # these two vaiables should have everything you need to create a graph
         # ony printing out the first element as it will be too much otherwise.
-        print(self.all_base_pipes[0])
-        print(self.all_nodes_ordered[0])
+        print(self.all_nodes_by_pipe)
+        print(self.all_edges_by_pipe)
+        import pdb
+
+        pdb.set_trace()
