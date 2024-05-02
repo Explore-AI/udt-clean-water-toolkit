@@ -1,6 +1,6 @@
 from .trunkmain_viewset import TrunkMainViewSet
 from .distribution_main_viewset import DistributionMainViewSet
-from .chambers_viewset import ChamberViewSet
+from .chamber_viewset import ChamberViewSet
 from .hydrant_viewset import HydrantViewSet
 from .logger_viewset import LoggerViewSet
 from .network_meter_viewset import NetworkMeterViewSet

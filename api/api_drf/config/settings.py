@@ -51,8 +51,7 @@ INSTALLED_APPS = [
     "cwageodjango.assets",
     "cwageodjango.utilities",
     "cwageodjango.network",
-    # "cw_network",
-    # "cw_network.gis.apps.GisAssets"
+    "cw_gis_assets",
 ]
 
 MIDDLEWARE = [

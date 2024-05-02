@@ -1,7 +1,6 @@
-# add gis urls here
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import (
+from .viewsets import (
     TrunkMainViewSet,
     DistributionMainViewSet,
     ChamberViewSet,
@@ -16,7 +15,7 @@ from .views import (
 
 
 router = DefaultRouter()
-router.register(r"trunkmain", TrunkMainViewSet, basename="trunkmain")
+router.register(r"trunk_main", TrunkMainViewSet, basename="trunk_main")
 router.register(
     r"distribution_main", DistributionMainViewSet, basename="distribution_main"
 )
@@ -35,6 +34,8 @@ router.register(
     PressureControlValveViewSet,
     basename="pressure_control_valve",
 )
-router.register(r"pressure_fitting", PressureFittingViewSet, basename="pressure_fitting")
+router.register(
+    r"pressure_fitting", PressureFittingViewSet, basename="pressure_fitting"
+)
 
 urlpatterns = router.urls
