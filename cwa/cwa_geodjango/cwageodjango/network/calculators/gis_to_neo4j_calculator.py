@@ -12,6 +12,7 @@ from cwageodjango.core.constants import (
     PIPE_END__NAME,
     POINT_ASSET__NAME,
 )
+from cwageodjango.config.settings import sqids
 
 
 MIXED_NODE_TYPES_SORTED = [
@@ -32,6 +33,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
 
         super().__init__(
             self.config.srid,
+            sqids,
             processor_count=config.processor_count,
             chunk_size=config.chunk_size,
             neoj4_point=self.config.neoj4_point,
