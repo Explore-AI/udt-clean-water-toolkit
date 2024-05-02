@@ -2,6 +2,7 @@ import argparse
 from cwageodjango.core.conf import AppConf
 from cwageodjango.network.controllers import GisToNeo4jController, GisToNxController
 from cwageodjango.network.controllers import Convert2Wntr
+from cwageodjango.network.controllers import Convert2Networkit
 
 class Analysis(AppConf):
     def __init__(self):
@@ -67,13 +68,20 @@ class Analysis(AppConf):
         convert2wntr.convert()
         convert2wntr.export_json()
 
+    def neo4j_to_networkit_graphml(self) -> None:
+        convert2networkit = Convert2Networkit(self.validated_config)
+        convert2networkit.convert()
+        convert2networkit.export_graphml()
+
+
     def _get_run_methods(self):
 
         return {
             "gis2nx": self.cleanwater_gis2nx,
             "gis2neo4j": self.cleanwater_gis2neo4j,
             "neo4j2wntrinp": self.neo4j_to_wntr_inp,
-            "neo4j2wntrjson" : self.neo4j_to_wntr_json
+            "neo4j2wntrjson" : self.neo4j_to_wntr_json,
+            "neo4j2networkitgraphml" : self.neo4j_to_networkit_graphml
         }
 
     @property
