@@ -1,7 +1,8 @@
-from cwa_geod.assets.models import Logger
-from rest_framework import serializers 
+from cwageodjango.assets.models import Logger
+from rest_framework import serializers
 
-class LoggerSerializer(serializers.ModelSerializer): 
-    class Meta: 
+
+class LoggerSerializer(serializers.ModelSerializer):
+    class Meta:
         model = Logger
-        fields = ['gid', 'geometry', 'dmas', 'modified_at', 'created_at']
+        fields = ["gid", "geometry", "dmas", "modified_at", "created_at"]

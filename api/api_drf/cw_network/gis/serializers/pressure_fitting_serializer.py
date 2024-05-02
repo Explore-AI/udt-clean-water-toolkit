@@ -1,7 +1,8 @@
-from cwa_geod.assets.models import PressureFitting
-from rest_framework import serializers 
+from cwageodjango.assets.models import PressureFitting
+from rest_framework import serializers
 
-class PressureFittingSerializer(serializers.ModelSerializer): 
-    class Meta: 
+
+class PressureFittingSerializer(serializers.ModelSerializer):
+    class Meta:
         model = PressureFitting
-        fields = ['gid', 'geometry', 'dmas', 'modified_at', 'created_at']
+        fields = ["gid", "geometry", "dmas", "modified_at", "created_at"]

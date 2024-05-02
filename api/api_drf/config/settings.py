@@ -22,7 +22,7 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
 
     load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-from cwa_geod.config.settings import *
+from cwageodjango.config.settings import *
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -45,13 +45,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     "rest_framework",
     "core",
-    "cwa_geod.assets",
-    "cwa_geod.utilities",
-    "cwa_geod.network", 
-    "cw_network", 
-    "cw_network.gis.apps.GisAssets"
+    "cwageodjango.assets",
+    "cwageodjango.utilities",
+    "cwageodjango.network",
+    # "cw_network",
+    # "cw_network.gis.apps.GisAssets"
 ]
 
 MIDDLEWARE = [

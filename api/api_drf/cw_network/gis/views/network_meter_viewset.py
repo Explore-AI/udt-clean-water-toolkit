@@ -1,4 +1,4 @@
-from cwa_geod.assets.models.network_meter import NetworkMeter
+from cwageodjango.assets.models.network_meter import NetworkMeter
 from ..serializers import NetworkMeterSerializer
 from rest_framework import viewsets
 
@@ -6,4 +6,4 @@ from rest_framework import viewsets
 class NetworkMeterViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = NetworkMeter.objects.all()
     serializer_class = NetworkMeterSerializer
-    lookup_field = 'gid'
+    lookup_field = "gid"
