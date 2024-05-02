@@ -29,7 +29,7 @@ class Convert2Networkit(Neo4j2Networkit):
             yield results
             offset += batch_size
 
-            if len(records) < batch_size:
+            if len(records) <= batch_size:
                 break
             
     def convert(self):
