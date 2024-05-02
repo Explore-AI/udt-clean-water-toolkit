@@ -5,10 +5,8 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.db.models.query import QuerySet
 from shapely.ops import substring
 from shapely import LineString, Point, line_locate_point
-from cwa_geod.config.settings import sqids
 from cleanwater.core.utils import normalised_point_position_on_line
-from cwa_geod.assets.models.trunk_main import TrunkMain
-from cwa_geod.core.constants import (
+from core.constants import (
     PIPE_END__NAME,
     PIPE_JUNCTION__NAME,
     POINT_ASSET__NAME,
@@ -18,8 +16,11 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraphCalculator:
-    def __init__(self, srid, processor_count=None, chunk_size=None, neoj4_point=False):
+    def __init__(
+        self, srid, sqids, processor_count=None, chunk_size=None, neoj4_point=False
+    ):
         self.srid = srid
+        self.sqids = sqids
         self.processor_count = processor_count
         self.chunk_size = chunk_size
         self.neoj4_point = neoj4_point
@@ -47,7 +48,7 @@ class GisToGraphCalculator:
                 )
             )
 
-    def _map_relative_positions_calc(self, pipe_qs_object: TrunkMain):
+    def _map_relative_positions_calc(self, pipe_qs_object):
 
         # Convert the base pipe data from a queryset object to a dictionary
         base_pipe: dict = self._get_base_pipe_data(pipe_qs_object)
@@ -582,8 +583,7 @@ class GisToGraphCalculator:
 
         return json.dumps(dma_data)
 
-    @staticmethod
-    def _encode_node_key(point):
+    def _encode_node_key(self, point):
         """
         Round and cast Point geometry coordinates to str to remove '.'
         then return back to int to make make coords sqid compatible.
@@ -594,7 +594,7 @@ class GisToGraphCalculator:
 
         coord1_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
         coord2_repr = int(str(round(point.coords[1], 3)).replace(".", ""))
-        return sqids.encode(
+        return self.sqids.encode(
             [
                 coord1_repr,
                 coord2_repr,

@@ -11,6 +11,7 @@ class DistributionMain(models.Model):
     geometry_4326 = models.LineStringField(
         spatial_index=True, null=False, blank=False, srid=4326
     )
+    material = models.CharField(max_length=255, null=False, blank=False, db_index=True)
     dmas = models.ManyToManyField(DMA, related_name="dma_distribution_mains")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)

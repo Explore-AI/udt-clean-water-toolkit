@@ -24,27 +24,26 @@ Large numbers of features will take a long time to save."""
 
         trunk_main_layer = ds[layer_index]
 
-
         new_trunk_mains = []
         for feature in trunk_main_layer:
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
+            material = feature.get("MATERIAL") or "unknown"
 
-            new_trunk_main = TrunkMain(gid=gid, geometry=geom.wkt,
-                                       geometry_4326=geom_4326)
+            new_trunk_main = TrunkMain(
+                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326, material=material
+            )
             new_trunk_mains.append(new_trunk_main)
 
             if len(new_trunk_mains) == 100000:
                 TrunkMain.objects.bulk_create(new_trunk_mains)
                 new_trunk_mains = []
 
-
         # save the last set of data as it will probably be less than 100000
         if new_trunk_mains:
             TrunkMain.objects.bulk_create(new_trunk_mains)
 
-        
         DMAThroughModel = TrunkMain.dmas.through
         bulk_create_list = []
         for trunk_main in TrunkMain.objects.only("id", "geometry"):
@@ -62,11 +61,11 @@ Large numbers of features will take a long time to save."""
                 bulk_create_list.append(
                     DMAThroughModel(trunkmain_id=trunk_main.pk, dma_id=dma_id)
                 )
-            
+
             if len(bulk_create_list) == 100000:
                 DMAThroughModel.objects.bulk_create(bulk_create_list)
                 bulk_create_list = []
-        
+
         # save the last set of data as it will probably be less than 100000
         if bulk_create_list:
             DMAThroughModel.objects.bulk_create(bulk_create_list)
