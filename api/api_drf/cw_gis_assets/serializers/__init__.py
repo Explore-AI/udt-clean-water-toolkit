@@ -1,5 +1,5 @@
 from .distribution_main_serializer import DistributionMainSerializer
-from .trunkmain_serializer import TrunkMainSerializer
+from .trunkmain_serializer import TrunkMainSerializer, TrunkMainGeoJsonSerializer
 from .chamber_serializer import ChamberSerializer
 from .hydrant_serializer import HydrantSerializer
 from .network_meter_serializer import NetworkMeterSerializer

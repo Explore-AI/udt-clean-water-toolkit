@@ -1,4 +1,4 @@
-from .trunkmain_viewset import TrunkMainViewSet
+from .trunkmain_viewset import TrunkMainViewSet, TrunkMainGeoJsonViewSet
 from .distribution_main_viewset import DistributionMainViewSet
 from .chamber_viewset import ChamberViewSet
 from .hydrant_viewset import HydrantViewSet
