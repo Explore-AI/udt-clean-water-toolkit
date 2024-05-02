@@ -27,7 +27,7 @@ class Command(BaseCommand):
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
-            material = feature.get("MATERIAL")
+            material = feature.get("MATERIAL") or "unknown"
 
             new_distribution_main = DistributionMain(
                 gid=gid, geometry=geom.wkt, geometry_4326=geom_4326, material=material
