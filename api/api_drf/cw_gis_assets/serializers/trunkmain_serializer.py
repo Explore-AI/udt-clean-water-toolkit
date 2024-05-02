@@ -11,28 +11,33 @@ class TrunkMainSerializer(serializers.ModelSerializer):
 
 
 class TrunkMainGeoJsonSerializer(serializers.ModelSerializer):
+
+    geojson = serializers.SerializerMethodField()
+
     class Meta:
         model = TrunkMain
-        fields = ["gid", "geometry"]
-        read_only_fields = ("id",)
+        fields = ["geojson"]
 
-    def to_representation(self, instance, srid):
-        srid: int | None = srid
+    def get_geojson(self, obj):
+        return obj
 
-        # geo_data: dict = {
-        #     "type": "FeatureCollection",
-        #     "crs": {"type": "name", "properties": {"name": f"EPSG:{srid}"}},
-        #     "features": list(qs),
-        # }
-        # return json.dumps(geo_data)
+    # def to_representation(self, instance, srid):
+    #     srid: int | None = srid
 
-        geo_data: dict = {
-            "type": "Feature",
-            # "crs": {"type": "name", "properties": {"name": f"EPSG:{srid}"}},
-            "properties": {
-                "gid": instance.gid
-            },
-            "geometry": json.loads(instance.geometry),
-        }
+    #     # geo_data: dict = {
+    #     #     "type": "FeatureCollection",
+    #     #     "crs": {"type": "name", "properties": {"name": f"EPSG:{srid}"}},
+    #     #     "features": list(qs),
+    #     # }
+    #     # return json.dumps(geo_data)
 
-        return geo_data
+    #     geo_data: dict = {
+    #         "type": "Feature",
+    #         # "crs": {"type": "name", "properties": {"name": f"EPSG:{srid}"}},
+    #         "properties": {
+    #             "gid": instance.gid
+    #         },
+    #         "geometry": json.loads(instance.geometry),
+    #     }
+
+    #     return geo_data
