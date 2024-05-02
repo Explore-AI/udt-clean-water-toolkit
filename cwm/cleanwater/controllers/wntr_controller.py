@@ -59,7 +59,7 @@ class Neo4j2Wntr:
         self.wn.add_pipe(pipe_id, start_node_id, end_node_id)
         return pipe_id
         
-    def _process_batch(self, batch_result):
+    def process_batch(self, batch_result):
         """
         Processes a batch of results from Neo4j query and adds corresponding nodes and pipes to the water network model.
 
