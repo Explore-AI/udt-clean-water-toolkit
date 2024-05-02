@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 
 class ConfigValidator(forms.Form):
-    method = forms.CharField(max_length=20, required=True)
+    method = forms.CharField(max_length=23, required=True)
     neoj4_point = forms.BooleanField(required=False)
     srid = forms.IntegerField(required=True)
     batch_size = forms.IntegerField(required=True)
@@ -13,7 +13,7 @@ class ConfigValidator(forms.Form):
     parallel = forms.BooleanField(required=False)
     thread_count = forms.IntegerField(required=False)
     processor_count = forms.IntegerField(required=False)
-    outputfile = forms.CharField(max_length=20, required=False)
+    outputfile = forms.CharField(max_length=23, required=False)
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
     def clean(self):

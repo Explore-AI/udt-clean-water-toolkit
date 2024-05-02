@@ -42,7 +42,7 @@ class Convert2Wntr(Neo4j2Wntr):
             yield results
             offset += batch_size
 
-            if len(records) < batch_size:
+            if len(records) <= batch_size:
                 break
             
     def convert(self):
