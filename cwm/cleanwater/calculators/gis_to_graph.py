@@ -5,8 +5,8 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.db.models.query import QuerySet
 from shapely.ops import substring
 from shapely import LineString, Point, line_locate_point
-from cleanwater.core.utils import normalised_point_position_on_line
-from core.constants import (
+from ..core.utils import normalised_point_position_on_line
+from ..core.constants import (
     PIPE_END__NAME,
     PIPE_JUNCTION__NAME,
     POINT_ASSET__NAME,
@@ -249,10 +249,10 @@ class GisToGraphCalculator:
 
         return base_pipe
 
-    def _combine_all_pipe_junctions(self, pipe_qs_object: TrunkMain) -> list:
+    def _combine_all_pipe_junctions(self, pipe_qs_object) -> list:
         return pipe_qs_object.trunkmain_junctions + pipe_qs_object.distmain_junctions
 
-    def _combine_all_point_assets(self, pipe_qs_object: TrunkMain) -> list:
+    def _combine_all_point_assets(self, pipe_qs_object) -> list:
         return (
             pipe_qs_object.chamber_data
             + pipe_qs_object.operational_site_data
