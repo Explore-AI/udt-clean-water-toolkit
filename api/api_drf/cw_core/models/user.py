@@ -1,5 +1,5 @@
 from django.db import models
-from core.models.user_manager import UserManager
+from .user_manager import UserManager
 from django.core.validators import EmailValidator
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _

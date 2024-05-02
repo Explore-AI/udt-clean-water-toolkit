@@ -47,10 +47,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.gis",
     "rest_framework",
-    "core",
+    "cwageodjango.core",
     "cwageodjango.assets",
     "cwageodjango.utilities",
     "cwageodjango.network",
+    "cw_core",
     "cw_gis_assets",
 ]
 
@@ -173,7 +174,7 @@ LOGGING = {
     },
 }
 
-AUTH_USER_MODEL = "core.User"
+AUTH_USER_MODEL = "cw_core.User"
 
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
