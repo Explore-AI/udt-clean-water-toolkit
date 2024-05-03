@@ -42,6 +42,7 @@ class Analysis(AppConf):
     def cleanwater_gis2networkit(self) -> None:
             gis_to_nk = GisToNkController(self.validated_config)
             gis_to_nk.create_network()
+            gis_to_nk.export_graphml()
 
 
     def neo4j_to_wntr_inp(self) -> None:
