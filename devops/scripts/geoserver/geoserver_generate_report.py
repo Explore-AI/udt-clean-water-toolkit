@@ -31,34 +31,38 @@ class Downloader:
             connection = psycopg2.connect(connection_params)
             cursor = connection.cursor()
 
-            check_table = '''SELECT f_table_name FROM geometry_columns WHERE f_table_schema = 'public';'''
-            cursor.execute(check_table)
-            _tables = [row[0] for row in cursor.fetchall()]
-
+            _extension_loaded = "SELECT extname FROM pg_extension where extname = 'postgis';"
+            cursor.execute(_extension_loaded)
+            extension_loaded = cursor.fetchone()
             _tables_with_bbox = []
+            if extension_loaded:
 
-            for single_table in _tables:
-                layer_bbox_query = '''
-                    SELECT 
-                        ST_XMin(ST_Extent(geometry)) AS min_x,
-                        ST_YMin(ST_Extent(geometry)) AS min_y,
-                        ST_XMax(ST_Extent(geometry)) AS max_x,
-                        ST_YMax(ST_Extent(geometry)) AS max_y ,
-                        ST_SRID(geometry) as srid
-                    FROM 
-                        public.%s
-                        GROUP BY srid;
-                ''' % single_table
+                check_table = '''SELECT f_table_name FROM geometry_columns WHERE f_table_schema = 'public';'''
+                cursor.execute(check_table)
+                _tables = [row[0] for row in cursor.fetchall()]
 
-                cursor.execute(layer_bbox_query)
-                bbox_result = cursor.fetchone()
+                for single_table in _tables:
+                    layer_bbox_query = '''
+                        SELECT 
+                            ST_XMin(ST_Extent(geometry)) AS min_x,
+                            ST_YMin(ST_Extent(geometry)) AS min_y,
+                            ST_XMax(ST_Extent(geometry)) AS max_x,
+                            ST_YMax(ST_Extent(geometry)) AS max_y ,
+                            ST_SRID(geometry) as srid
+                        FROM 
+                            public.%s
+                            GROUP BY srid;
+                    ''' % single_table
 
-                if bbox_result:
-                    min_x, min_y, max_x, max_y, srid = bbox_result
-                    _tables_with_bbox.append((single_table, (min_x, min_y, max_x, max_y, srid)))
+                    cursor.execute(layer_bbox_query)
+                    bbox_result = cursor.fetchone()
 
-            cursor.close()
-            connection.close()
+                    if bbox_result:
+                        min_x, min_y, max_x, max_y, srid = bbox_result
+                        _tables_with_bbox.append((single_table, (min_x, min_y, max_x, max_y, srid)))
+
+                cursor.close()
+                connection.close()
 
         except psycopg2.OperationalError:
             print("Could not connect to PostgreSQL")
@@ -67,40 +71,45 @@ class Downloader:
         return _tables_with_bbox
 
     # Function to download and save images from WMS endpoints
-    def download_and_save_image(self, url, file_path):
-        try:
-            response = get(url)
-            response.raise_for_status()
+    def download_and_save_image(self, url, file_path, username, user_pass):
+        url_set = set()  # Create a set to store URLs
+        auth = HTTPBasicAuth('%s' % username, '%s' % user_pass)
 
-            with open(file_path, 'wb') as file:
-                file.write(response.content)
-            file.close()
+        if url in url_set:  # Check if the URL already exists
+            print("Image already downloaded, skipping:", url)
+        else:
+            try:
+                response = get(url, auth=auth)
+                response.raise_for_status()
+                with open(file_path, 'wb') as file:
+                    file.write(response.content)
+                file.close()
 
-            print("Image saved successfully:", file_path)
-        except exceptions.RequestException as e:
-            print("Error downloading image:", e)
+                print("Image saved successfully:", file_path)
+                url_set.add(url)  # Add the URL to the set
+            except exceptions.RequestException as e:
+                print("Error downloading image:", e)
 
     # Function to retrieve wms images from published GeoServer layers
     def get_layer_snapshot(self, geoserver_site_url, username, user_pass, workspace_name, pg_host, pg_user, pg_pass,
                            pg_name):
 
-        auth = HTTPBasicAuth('%s' % username, '%s' % user_pass)
-
         pg_tables = self.pg_connection_details(pg_host, pg_user, pg_pass, pg_name)
 
-        for table_name, bbox in pg_tables:
-            get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
-                geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1], bbox[2], bbox[3],
-                self.default['HEIGHT'], self.default['WIDTH'], bbox[4], self.default['FORMAT'])
-            image_extension = self.default['FORMAT'].split('/')[-1]
-            base_path = join("/geoserver_scripts", "output")
-            if not exists(base_path):
-                makedirs(base_path)
-            time_stamp = time.strftime("%Y%m%d-%H%M%S")
-            report_image = f"{table_name}_{time_stamp}.{image_extension}"
-            file_path = join(base_path, report_image)
-            # Download and save the image
-            self.download_and_save_image(get_map_url, file_path)
+        if pg_tables:
+            for table_name, bbox in pg_tables:
+                get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
+                    geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1], bbox[2], bbox[3],
+                    self.default['HEIGHT'], self.default['WIDTH'], bbox[4], self.default['FORMAT'])
+                image_extension = self.default['FORMAT'].split('/')[-1]
+                base_path = join("/geoserver_scripts", "output")
+                if not exists(base_path):
+                    makedirs(base_path)
+                time_stamp = time.strftime("%Y%m%d-%H%M%S")
+                report_image = f"{table_name}_{time_stamp}.{image_extension}"
+                file_path = join(base_path, report_image)
+                # Download and save the image
+                self.download_and_save_image(get_map_url, file_path, username, user_pass)
 
     def geoserver_get_map(self):
 
