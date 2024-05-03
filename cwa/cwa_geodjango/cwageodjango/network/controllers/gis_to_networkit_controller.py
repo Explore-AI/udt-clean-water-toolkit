@@ -1,5 +1,6 @@
 from django.db.models.query import QuerySet
 from cleanwater.controllers.network_controller import NetworkController
+import networkit as nk
 from ..calculators import GisToNkCalculator
 from cwageodjango.assets.controllers import (
     TrunkMainsController,
@@ -12,8 +13,9 @@ class GisToNkController(NetworkController, GisToNkCalculator):
 
     def __init__(self, config):
         self.config = config
-        super().__init__(config.srid)
-        super().__init__(config)
+
+        NetworkController.__init__(self, self.config.srid)
+        GisToNkCalculator.__init__(self, self.config)
 
     def create_network(self):
         from timeit import default_timer as timer
@@ -27,7 +29,7 @@ class GisToNkController(NetworkController, GisToNkCalculator):
         for offset in range(query_offset, query_limit, self.config.batch_size):
             limit = offset + self.config.batch_size
 
-            print(offset, limit, "a")
+            #print(offset, limit, "a")
             sliced_qs = list(pipes_qs[offset:limit])
 
             self.calc_pipe_point_relative_positions(sliced_qs)
@@ -35,7 +37,10 @@ class GisToNkController(NetworkController, GisToNkCalculator):
             self.create_nk_graph()
 
         end = timer()
-        print(end - start)
+        #print(end - start)
+
+    def export_graphml(self):
+        nk.writeGraph(self.G, self.config.outputfile , nk.Format.GML)
 
     def _get_query_offset_limit(self, pipes_qs):
         pipe_count = self.get_pipe_count(pipes_qs)
