@@ -1,10 +1,10 @@
 from .trunkmain_viewset import TrunkMainViewSet, TrunkMainGeoJsonViewSet
-from .distribution_main_viewset import DistributionMainViewSet
-from .chamber_viewset import ChamberViewSet
-from .hydrant_viewset import HydrantViewSet
-from .logger_viewset import LoggerViewSet
-from .network_meter_viewset import NetworkMeterViewSet
-from .network_opt_valve_viewset import NetworkOptValveViewSet
-from .operational_site_viewset import OperationalSiteViewSet
-from .pressure_control_valve_viewset import PressureControlValveViewSet
-from .pressure_fitting_viewset import PressureFittingViewSet
+from .distribution_main_viewset import DistributionMainViewSet, DistributionMainGeoJsonViewSet
+from .chamber_viewset import ChamberViewSet, ChamberGeoJsonViewSet
+from .hydrant_viewset import HydrantViewSet, HydrantGeoJsonViewSet
+from .logger_viewset import LoggerViewSet, LoggerGeoJsonViewSet
+from .network_meter_viewset import NetworkMeterViewSet, NetworkMeterGeoJsonViewSet
+from .network_opt_valve_viewset import NetworkOptValveViewSet, NetworkOptValveGeoJsonViewSet
+from .operational_site_viewset import OperationalSiteViewSet, OperationalSiteGeoJsonViewSet
+from .pressure_control_valve_viewset import PressureControlValveViewSet, PressureControlValveGeoJsonViewSet
+from .pressure_fitting_viewset import PressureFittingViewSet, PressureFittingGeoJsonViewSet

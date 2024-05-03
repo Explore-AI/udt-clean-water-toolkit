@@ -1,10 +1,6 @@
 from cwageodjango.assets.models import TrunkMain
-from config.viewsets import BaseModelViewSet
+from config.viewsets import BaseModelViewSet, BaseGeoJsonViewSet
 from config.filters import BaseFilter
-from django.db.models.functions import JSONObject
-from django.db.models import JSONField
-from django.db.models.expressions import Value
-from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
 from ..serializers import TrunkMainSerializer, TrunkMainGeoJsonSerializer
 
 
@@ -22,34 +18,7 @@ class TrunkMainViewSet(BaseModelViewSet):
     http_method_names = ["get"]
 
 
-class TrunkMainGeoJsonViewSet(BaseModelViewSet):
+class TrunkMainGeoJsonViewSet(BaseGeoJsonViewSet):
     http_method_names = ["get"]
     serializer_class = TrunkMainGeoJsonSerializer
-
-    def get_queryset(self):
-        """Define our custom queryset, that returns a GeoJSON and not our model object"""
-        properties = {"id", "gid"}
-        json_properties = dict(zip(properties, properties))
-        qs = (
-            TrunkMain.objects.values(*properties)
-            .annotate(
-                geojson=JSONObject(
-                    properties=JSONObject(**json_properties),
-                    type=Value("Feature"),
-                    geometry=Cast(AsGeoJSON("geometry", crs=True), JSONField()),
-                ),
-            )
-            .values_list("geojson", flat=True)
-        )
-        return qs
-
-    # def list(self, request, *args, **kwargs):
-    #     """Custom Response for list API calls"""
-    #     query_set = self.get_queryset()
-    #     features = [json.dumps(feature) for feature in query_set]
-    #     feature_collection = {
-    #         "type": "FeatureCollection",
-    #         "crs": {"type": "name", "properties": {"name": f"EPSG:{27700}"}},
-    #         "features": features,
-    #     }
-    #     return Response(feature_collection, content_type="application/geo+json")
+    model = TrunkMain

@@ -1,5 +1,5 @@
 from cwageodjango.assets.models import Hydrant
-from config.viewsets import BaseModelViewSet
+from config.viewsets import BaseModelViewSet, BaseGeoJsonViewSet
 from config.filters import BaseFilter
 from ..serializers import HydrantSerializer
 
@@ -16,3 +16,6 @@ class HydrantViewSet(BaseModelViewSet):
     serializer_class = HydrantSerializer
     filterset_class = HydrantFilter
     http_method_names = ["get"]
+
+class HydrantGeoJsonViewSet(BaseGeoJsonViewSet): 
+    pass 
