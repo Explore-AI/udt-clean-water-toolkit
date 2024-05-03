@@ -19,6 +19,6 @@ class TrunkMainViewSet(BaseModelViewSet):
 
 
 class TrunkMainGeoJsonViewSet(BaseGeoJsonViewSet):
+    model = TrunkMain
     http_method_names = ["get"]
     serializer_class = TrunkMainGeoJsonSerializer
-    model = TrunkMain
