@@ -107,6 +107,7 @@ class GisToGraphCalculator:
                     "from_node_key": from_node["node_key"],
                     "to_node_key": to_node["node_key"],
                     "gid": base_pipe["gid"],
+                    "material": base_pipe["material"],
                     "asset_name": base_pipe["asset_name"],
                     "asset_label": base_pipe["asset_label"],
                     "dmas": base_pipe["dmas"],
