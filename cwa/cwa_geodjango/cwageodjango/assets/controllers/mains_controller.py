@@ -164,6 +164,7 @@ class MainsController(ABC, GeoDjangoDataManager):
             "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
+            "material": "material",
             "start_point_geom": LineStartPoint("geometry"),
             "end_point_geom": LineEndPoint("geometry"),
             "dma_ids": ArrayAgg("dmas"),

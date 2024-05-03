@@ -201,6 +201,9 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
     def _map_pipe_connected_asset_relations(
         self, edges_by_pipe: dict, all_node_properties: list
     ):
+        import pdb
+
+        pdb.set_trace()
 
         all_nodes = self._create_nodes(all_node_properties)
         self._create_relations(edges_by_pipe, all_nodes)
