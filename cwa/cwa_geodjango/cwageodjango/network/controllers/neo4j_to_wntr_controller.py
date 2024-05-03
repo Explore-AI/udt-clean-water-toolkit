@@ -42,7 +42,7 @@ class Convert2Wntr(Neo4j2Wntr):
             yield results
             offset += batch_size
 
-            if len(records) < batch_size:
+            if len(records) <= batch_size:
                 break
             
     def convert(self):
@@ -51,7 +51,7 @@ class Convert2Wntr(Neo4j2Wntr):
 
         """
         for batch_result in self.query_graph(self.config.batch_size):
-            self._process_batch(batch_result)
+            self.process_batch(batch_result)
 
     def export_inp(self):
         """
@@ -60,7 +60,7 @@ class Convert2Wntr(Neo4j2Wntr):
         """
         wntr.network.write_inpfile(self.wn, filename=self.config.outputfile)
 
-    def export_json(self, filename):
+    def export_json(self):
         """
         Exports the WNTR model to a JSON format.
 

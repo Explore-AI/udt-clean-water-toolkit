@@ -1,7 +1,7 @@
 from cwageodjango.assets.models import TrunkMain
-from config.viewsets import BaseModelViewSet
+from config.viewsets import BaseModelViewSet, BaseGeoJsonViewSet
 from config.filters import BaseFilter
-from ..serializers import TrunkMainSerializer
+from ..serializers import TrunkMainSerializer, TrunkMainGeoJsonSerializer
 
 
 class TrunkMainFilter(BaseFilter):
@@ -16,3 +16,9 @@ class TrunkMainViewSet(BaseModelViewSet):
     serializer_class = TrunkMainSerializer
     filterset_class = TrunkMainFilter
     http_method_names = ["get"]
+
+
+class TrunkMainGeoJsonViewSet(BaseGeoJsonViewSet):
+    model = TrunkMain
+    http_method_names = ["get"]
+    serializer_class = TrunkMainGeoJsonSerializer
