@@ -37,6 +37,7 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
             print("qs", t1 - t0)
 
             self.calc_pipe_point_relative_positions(sliced_qs)
+            sliced_qs = []
             t2 = timer()
             print("calc", t2 - t1)
 
@@ -66,11 +67,10 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
             t1 = timer()
             print("qs", t1 - t0)
 
-
             self.calc_pipe_point_relative_positions_parallel(sliced_qs)
+            sliced_qs = []
             t2 = timer()
             print("calc", t2 - t1)
-
 
             self._create_neo4j_graph_parallel()
             t3 = timer()
