@@ -1,0 +1,20 @@
+version: '3.9'
+
+volumes:
+   geoserver-data:
+
+services:
+
+   geoserver:
+      image: kartoza/geoserver:2.25.0
+      container_name: udtgeoserver
+      volumes:
+        - geoserver-data:/opt/geoserver/data_dir
+        - ../../devops/scripts/geoserver:/geoserver_scripts
+      ports:
+        - "8080:8080"
+      restart: on-failure
+      env_file:
+        - ./env_files/.geoserver_env
+      depends_on:
+        - udtpostgis

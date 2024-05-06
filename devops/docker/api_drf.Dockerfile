@@ -1,0 +1,30 @@
+FROM python:3.11
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+# ARG DEBIAN_FRONTEND=noninteractive
+
+# ensure local python is preferred over distribution python
+# ENV PATH /usr/local/bin:$PATH
+
+RUN mkdir -p /opt/udt/api/api_drf/
+RUN mkdir -p /opt/udt/cwa/cwa_geodjango/ 
+RUN mkdir -p /opt/udt/cwm/ 
+RUN mkdir -p /opt/udt/data/
+
+WORKDIR /opt/udt/api/api_drf/
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libpq-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# copy the contents of the api_drf file to the container 
+# COPY ../../api/api_drf .
+
+RUN pip3 install --upgrade pip
+
+EXPOSE 8080
+# ENTRYPOINT [ "python3" ]
+# CMD ["manage.py", "runserver", "0.0.0.0:8080"]

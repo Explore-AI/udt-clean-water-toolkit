@@ -1,1 +1,1 @@
-from .base_model_viewset import BaseModelViewSet
+from .base_model_viewset import BaseModelViewSet, BaseGeoJsonViewSet

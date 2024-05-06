@@ -1,12 +1,12 @@
 import json
 import bisect
 from multiprocessing import Pool
-from django.contrib.gis.geos import GEOSGeometry, LineString, Point
+from django.contrib.gis.geos import GEOSGeometry
 from django.db.models.query import QuerySet
-from cwa_geod.config.settings import sqids
-from cleanwater.core.utils import normalised_point_position_on_line
-from cwa_geod.assets.models.trunk_main import TrunkMain
-from cwa_geod.core.constants import (
+from shapely.ops import substring
+from shapely import LineString, Point, line_locate_point
+from ..core.utils import normalised_point_position_on_line
+from ..core.constants import (
     PIPE_END__NAME,
     PIPE_JUNCTION__NAME,
     POINT_ASSET__NAME,
@@ -16,13 +16,20 @@ from cwa_geod.core.constants import (
 
 
 class GisToGraphCalculator:
-    def __init__(self, config):
-        self.config = config
-        self.all_base_pipes = []
-        self.all_nodes_ordered = []
+    def __init__(
+        self, srid, sqids, processor_count=None, chunk_size=None, neoj4_point=False
+    ):
+        self.srid = srid
+        self.sqids = sqids
+        self.processor_count = processor_count
+        self.chunk_size = chunk_size
+        self.neoj4_point = neoj4_point
+
+        self.all_edges_by_pipe = []
+        self.all_nodes_by_pipe = []
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
-        self.all_base_pipes, self.all_nodes_ordered = list(
+        self.all_nodes_by_pipe, self.all_edges_by_pipe = list(
             zip(
                 *map(
                     self._map_relative_positions_calc,
@@ -32,16 +39,17 @@ class GisToGraphCalculator:
         )
 
     def calc_pipe_point_relative_positions_parallel(self, pipes_qs: list) -> None:
-        with Pool(processes=self.config.processor_count) as p:
-            self.all_base_pipes, self.all_nodes_ordered = zip(
+        with Pool(processes=self.processor_count) as p:
+            self.all_nodes_by_pipe, self.all_edges_by_pipe = zip(
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
                     pipes_qs,
-                    self.config.chunk_size,
+                    self.chunk_size,
                 )
             )
 
-    def _map_relative_positions_calc(self, pipe_qs_object: TrunkMain):
+    def _map_relative_positions_calc(self, pipe_qs_object):
+
         # Convert the base pipe data from a queryset object to a dictionary
         base_pipe: dict = self._get_base_pipe_data(pipe_qs_object)
 
@@ -71,9 +79,45 @@ class GisToGraphCalculator:
             base_pipe, junctions_with_positions, point_assets_with_positions
         )
 
-        merged_nodes = self._merge_nodes_on_position(nodes_ordered)
+        nodes_by_pipe = self._merge_nodes_on_position(nodes_ordered)
 
-        return base_pipe, merged_nodes
+        edges_by_pipe = self._get_edges_by_pipe(base_pipe, nodes_by_pipe)
+
+        return nodes_by_pipe, edges_by_pipe
+
+    def _get_edges_by_pipe(self, base_pipe, nodes_by_pipe):
+        edges_by_pipe = []
+
+        from_node = nodes_by_pipe[0]
+        for to_node in nodes_by_pipe[1:]:
+
+            from_node_pnt = Point(from_node["coords_27700"])
+            to_node_pnt = Point(to_node["coords_27700"])
+            line_geom = LineString(base_pipe["geometry"].coords)
+
+            from_location = line_locate_point(line_geom, from_node_pnt)
+            to_location = line_locate_point(line_geom, to_node_pnt)
+
+            line_segment = substring(
+                line_geom, from_location, to_location, normalized=True
+            )
+
+            edges_by_pipe.append(
+                {
+                    "from_node_key": from_node["node_key"],
+                    "to_node_key": to_node["node_key"],
+                    "gid": base_pipe["gid"],
+                    "material": base_pipe["material"],
+                    "asset_name": base_pipe["asset_name"],
+                    "asset_label": base_pipe["asset_label"],
+                    "dmas": base_pipe["dmas"],
+                    "segment_length": round(line_segment.length, 5),
+                    "segment_wkt": line_segment.wkt,
+                }
+            )
+            from_node = to_node
+
+        return edges_by_pipe
 
     def _merge_nodes_on_position(self, nodes_ordered):
         consolidated_nodes = [[nodes_ordered[0]]]
@@ -91,6 +135,7 @@ class GisToGraphCalculator:
 
         merged_nodes = []
         for nodes in consolidated_nodes:
+
             merged_nodes.append(
                 {
                     "utility": nodes[0]["utility_name"],
@@ -98,37 +143,63 @@ class GisToGraphCalculator:
                         float(nodes[0]["intersection_point_geometry"].x),
                         float(nodes[0]["intersection_point_geometry"].y),
                     ],
-                    "node_id": self._encode_node_id(
+                    "node_key": self._encode_node_key(
                         nodes[0]["intersection_point_geometry"]
                     ),
                     "dmas": nodes[0]["dmas"],
                     "node_types": [],
+                    "node_labels": ["PointNode"],
                 }
             )
+
             for node in nodes:
                 if node["node_type"] == PIPE_JUNCTION__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
+                    merged_nodes[-1]["node_labels"].append("PipeJunction")
                     try:
                         merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
                     except KeyError:
                         merged_nodes[-1]["pipe_gids"] = node["pipe_gids"]
                 elif node["node_type"] == PIPE_END__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_END__NAME)
+                    merged_nodes[-1]["node_labels"].append("PipeEnd")
                     try:
-                        merged_nodes[-1]["pipe_gid"].extend(node["gid"])
+                        merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
                     except KeyError:
-                        merged_nodes[-1]["pipe_gid"] = node["gid"]
+                        merged_nodes[-1]["pipe_gids"] = node["pipe_gids"]
                 elif node["node_type"] == POINT_ASSET__NAME:
-                    merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
-                    merged_nodes[-1]["node_types"] = list(
-                        set(merged_nodes[-1]["node_types"])
-                    )
+                    merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
+
+                    subtype = node.get("subtype")
+                    if subtype:
+                        merged_nodes[-1]["subtype"] = subtype
+
+                    acoustic_logger = node.get("acoustic_logger")
+                    if acoustic_logger:
+                        merged_nodes[-1]["acoustic_logger"] = acoustic_logger
+
+                    if "PointAsset" not in merged_nodes[-1]["node_labels"]:
+                        merged_nodes[-1]["node_labels"].append("PointAsset")
+                    merged_nodes[-1]["node_labels"].append(node["asset_label"])
+
                     try:
-                        merged_nodes[-1]["point_asset_gids"].append(node["gid"])
                         merged_nodes[-1]["point_asset_names"].append(node["asset_name"])
+                        merged_nodes[-1]["point_asset_gids"].append(node["gid"])
+                        merged_nodes[-1]["point_assets_with_gids"][
+                            f"{node['asset_name']}_gid"
+                        ] = node["gid"]
+
                     except KeyError:
-                        merged_nodes[-1]["point_asset_gids"] = [node["gid"]]
                         merged_nodes[-1]["point_asset_names"] = [node["asset_name"]]
+                        merged_nodes[-1]["point_asset_gids"] = [node["gid"]]
+                        merged_nodes[-1]["point_assets_with_gids"] = {
+                            f"{node['asset_name']}_gid": node["gid"]
+                        }
+
+                # remove duplicates and sort node_types
+                merged_nodes[-1]["node_types"] = sorted(
+                    list(set((merged_nodes[-1]["node_types"])))
+                )
 
         return merged_nodes
 
@@ -138,8 +209,10 @@ class GisToGraphCalculator:
         base_pipe["id"] = qs_object.pk
         base_pipe["gid"] = qs_object.gid
         base_pipe["asset_name"] = qs_object.asset_name
+        base_pipe["asset_label"] = qs_object.asset_label
         base_pipe["pipe_length"] = qs_object.pipe_length
         base_pipe["wkt"] = qs_object.wkt
+        base_pipe["material"] = qs_object.material
         base_pipe["dma_ids"] = qs_object.dma_ids
         base_pipe["dma_codes"] = qs_object.dma_codes
         base_pipe["dma_names"] = qs_object.dma_names
@@ -178,10 +251,10 @@ class GisToGraphCalculator:
 
         return base_pipe
 
-    def _combine_all_pipe_junctions(self, pipe_qs_object: TrunkMain) -> list:
+    def _combine_all_pipe_junctions(self, pipe_qs_object) -> list:
         return pipe_qs_object.trunkmain_junctions + pipe_qs_object.distmain_junctions
 
-    def _combine_all_point_assets(self, pipe_qs_object: TrunkMain) -> list:
+    def _combine_all_point_assets(self, pipe_qs_object) -> list:
         return (
             pipe_qs_object.chamber_data
             + pipe_qs_object.operational_site_data
@@ -193,9 +266,11 @@ class GisToGraphCalculator:
             + pipe_qs_object.network_opt_valve
         )
 
-    def _get_intersecting_geometry(self, base_pipe_geom, asset):
+    @staticmethod
+    def _get_intersecting_geometry(base_pipe_geom, wkt, srid):
+
         # Geom of the intersecting pipe or asset
-        pipe_or_asset_geom = GEOSGeometry(asset["wkt"], srid=self.config.srid)
+        pipe_or_asset_geom = GEOSGeometry(wkt, srid)
 
         # if pipe_or_asset_geom is a line then get the intersection point of the two lines
         if pipe_or_asset_geom.geom_typeid in GEOS_LINESTRING_TYPES:
@@ -214,9 +289,13 @@ class GisToGraphCalculator:
     def _map_get_normalised_positions(
         self, base_pipe_geom, junction_or_asset: dict
     ) -> list:
+
         intersection_geom = self._get_intersecting_geometry(
-            base_pipe_geom, junction_or_asset
+            base_pipe_geom, junction_or_asset["wkt"], self.srid
         )
+
+        if self.neoj4_point:
+            intersection_geom_4326 = intersection_geom.transform(4326, clone=True)
 
         if intersection_geom.geom_type == "Point":
             intersection_params = normalised_point_position_on_line(
@@ -226,10 +305,10 @@ class GisToGraphCalculator:
                 {
                     **junction_or_asset,
                     "intersection_point_geometry": intersection_geom,
-                    "distance_from_pipe_start_cm": round(intersection_params[0] * 100),
                     # distance returned is based on srid and should be in meters.
                     # Convert to cm and round.
-                    "normalise_position": intersection_params[1],
+                    "distance_from_pipe_start_cm": round(intersection_params[0] * 100),
+                    "normalised_position": intersection_params[1],
                 }
             ]
 
@@ -245,12 +324,12 @@ class GisToGraphCalculator:
                     {
                         **junction_or_asset,
                         "intersection_point_geometry": intersection_geom,
+                        # distance returned is based on srid and should be in meters.
+                        # Convert to cm and round.
                         "distance_from_pipe_start_cm": round(
                             intersection_params[0] * 100
                         ),
-                        # distance returned is based on srid and should be in meters.
-                        # Convert to cm and round.
-                        "normalise_position": intersection_params[1],
+                        "normalised_position": intersection_params[1],
                     }
                 )
 
@@ -388,13 +467,11 @@ class GisToGraphCalculator:
 
         position_index = 0
         for pipe in non_termini_intersecting_pipes:
-            pipe_id = pipe["id"]
             pipe_gid = pipe["gid"]
             # distance_from_start_cm must be an
             # int for sqid compatible hashing
             distance_from_pipe_start_cm = pipe["distance_from_pipe_start_cm"]
 
-            ids = sorted([pipe_id, base_pipe["id"]])
             gids = sorted([pipe_gid, base_pipe["gid"]])
             if distance_from_pipe_start_cm not in distances:
 
@@ -405,10 +482,9 @@ class GisToGraphCalculator:
                 )
 
                 nodes_ordered.insert(
-                    # TODO: node_id may not be unique if different types of pipes have the same gid. FIX by defining a pipe_code
                     position_index,
                     {
-                        "gids": gids,
+                        "pipe_gids": gids,
                         "node_type": PIPE_JUNCTION__NAME,
                         "utility_name": self._get_utility(base_pipe),
                         "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
@@ -422,16 +498,10 @@ class GisToGraphCalculator:
 
                 distances.append(distance_from_pipe_start_cm)
             else:
-                nodes_ordered[position_index]["gids"].append(pipe_gid)
-                nodes_ordered[position_index]["gids"] = sorted(
-                    nodes_ordered[position_index]["gids"]
+                nodes_ordered[position_index]["pipe_gids"].append(pipe_gid)
+                nodes_ordered[position_index]["pipe_gids"] = sorted(
+                    nodes_ordered[position_index]["pipe_gids"]
                 )
-
-                # TODO: This is inefficient. Should hash only once all gids are known.
-                # nodes_ordered[position_index]["node_id"] = self._encode_node_id(
-                #     pipe["intersection_point_geometry"],
-                #     ids,
-                # )
 
         return nodes_ordered
 
@@ -441,24 +511,14 @@ class GisToGraphCalculator:
 
         for asset in point_assets_with_positions:
 
-            # TODO: node_id may not be unique between assets. FIX by defining an asset_code
+            # TODO: node_key may not be unique between assets. FIX by defining an asset_code
             bisect.insort(
                 nodes_ordered,
                 {
                     "distance_from_pipe_start_cm": asset["distance_from_pipe_start_cm"],
                     "node_type": POINT_ASSET__NAME,
-                    "dmas": base_pipe["dma_codes"],
+                    "dmas": base_pipe["dmas"],
                     "utility_name": self._get_utility(base_pipe),
-                    # "node_id": self._encode_node_id(
-                    #     asset["intersection_point_geometry"],
-                    #     sorted(
-                    #         [
-                    #             asset["id"],
-                    #             *asset["tm_touches_ids"],
-                    #             *asset["dm_touches_ids"],
-                    #         ]
-                    #     ),
-                    # ),
                     **asset,
                 },
                 key=lambda x: x["distance_from_pipe_start_cm"],
@@ -489,7 +549,7 @@ class GisToGraphCalculator:
 
     def get_srid(self):
         """Get the currently used global srid"""
-        return self.config.srid
+        return self.srid
 
     @staticmethod
     def get_pipe_count(qs) -> QuerySet:
@@ -525,19 +585,18 @@ class GisToGraphCalculator:
 
         return json.dumps(dma_data)
 
-    @staticmethod
-    def _encode_node_id(point):
+    def _encode_node_key(self, point):
         """
         Round and cast Point geometry coordinates to str to remove '.'
         then return back to int to make make coords sqid compatible.
 
         Note these are not coordinates but int representations of the
-        coordinates to ensure a unique node_id.
+        coordinates to ensure a unique node_key.
         """
 
         coord1_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
         coord2_repr = int(str(round(point.coords[1], 3)).replace(".", ""))
-        return sqids.encode(
+        return self.sqids.encode(
             [
                 coord1_repr,
                 coord2_repr,

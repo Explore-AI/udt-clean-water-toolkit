@@ -22,6 +22,7 @@ if os.path.exists(os.path.join(BASE_DIR, ".env")):
 
     load_dotenv(os.path.join(BASE_DIR, ".env"))
 
+from cwageodjango.config.settings import *
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -44,9 +45,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "core",
-    "cwa_geod.assets",
-    "cwa_geod.utilities",
+    "django.contrib.gis",
+    "rest_framework",
+    "cwageodjango.core",
+    "cwageodjango.assets",
+    "cwageodjango.utilities",
+    "cwageodjango.network",
+    "cw_core",
+    "cw_gis_assets",
 ]
 
 MIDDLEWARE = [
@@ -93,6 +99,8 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+# DATABASES = DATABASES
 
 # DATABASES = {
 #     "default": {
@@ -166,7 +174,7 @@ LOGGING = {
     },
 }
 
-AUTH_USER_MODEL = "core.User"
+AUTH_USER_MODEL = "cw_core.User"
 
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)

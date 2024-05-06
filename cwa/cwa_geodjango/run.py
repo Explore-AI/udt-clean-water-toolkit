@@ -1,5 +1,5 @@
 import setup  # Required. Do not remove.
-from cwa_geod.core.analysis import Analysis
+from cwageodjango.core.analysis import Analysis
 
 
 def main():

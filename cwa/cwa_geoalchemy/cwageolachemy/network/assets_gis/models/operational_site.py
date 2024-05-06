@@ -22,3 +22,6 @@ operationalsite_dmas = Table(
 class OperationalSite(BasePointAsset):
     __tablename__ = "assets_operationalsite"
     dmas: Mapped[List[DMA]] = relationship(secondary=operationalsite_dmas)
+    
+    class AssetMeta: 
+        asset_name = "operational_site"

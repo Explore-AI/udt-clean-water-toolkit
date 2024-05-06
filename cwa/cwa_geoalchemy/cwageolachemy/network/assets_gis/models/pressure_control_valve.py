@@ -22,3 +22,6 @@ pressurecontrolvalve_dmas = Table(
 class PressureControlValve(BasePointAsset):
     __tablename__ = "assets_pressurecontrolvalve"
     dmas: Mapped[List[DMA]] = relationship(secondary=pressurecontrolvalve_dmas)
+    
+    class AssetMeta: 
+        asset_name = "pressure_control_valve"
