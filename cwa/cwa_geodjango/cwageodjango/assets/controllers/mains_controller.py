@@ -252,15 +252,23 @@ class MainsController(ABC, GeoDjangoDataManager):
         }
         return subqueries
 
-    def get_pipe_point_relation_queryset(self):
+    @staticmethod
+    def _filter_by_dma(qs, filters):
+        dma_codes = filters.get("dma_codes")
+
+        if not dma_codes:
+            return qs
+
+        return qs.filter(dmas__code__in=filters.get("dma_codes"))
+
+    def get_pipe_point_relation_queryset(self, filters):
         mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
-        # .filter(
-        #     dmas__code__in=["ZWAL4801", "ZCHESS12", "ZCHIPO01"]
-        # )
+
+        qs = self._filter_by_dma(qs, filters)
 
         qs = qs.annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),
