@@ -43,37 +43,6 @@ class GisToNxCalculator(GisToGraphCalculator):
         self._connected_components()
         self._plot_graph()
 
-    def _remove_unconnected_nodes(self):
-        # Get a list of isolated nodes
-        isolated_nodes = list(nx.isolates(self.G))
-
-        # Remove isolated nodes from the graph
-        self.G.remove_nodes_from(isolated_nodes)
-        num_isolated_nodes = len(isolated_nodes)
-        print("Number of isolated nodes removed:", num_isolated_nodes)
-
-    def _connected_components(self):
-        connected = len(list(nx.connected_components(self.G)))
-        print('Connected components:', connected)
-
-    def _plot_graph(self):
-        # Plot and save the graph
-        filename = "Graph.svg"
-        # Define edge positions (you can use any layout algorithm)
-        pos = nx.spring_layout(self.G)
-        # Draw the graph nodes and edges
-        plt.figure(figsize=(30, 30))
-        nx.draw(
-            self.G, pos, with_labels=False, node_color="red", node_size=15, font_size=8
-        )
-        nx.draw_networkx_edges(self.G, pos, edge_color="black", width=1)
-        # Draw edge labels using the 'weight' attribute
-        #edge_labels = nx.get_edge_attributes(self.G, "gid")
-        #nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels)
-        plt.savefig(filename, format="svg")
-        plt.close()
-        print("file 'graph.svg' successfully saved")
-
     def _gather_edges(self):
         edges = []
         for sublist in self.all_edges_by_pipe:
@@ -116,3 +85,49 @@ class GisToNxCalculator(GisToGraphCalculator):
                 if key not in ["from_node_key", "to_node_key"]
             }
             self.G.add_edge(from_node, to_node, **attributes)
+
+    def _remove_unconnected_nodes(self):
+        # Get a list of isolated nodes
+        isolated_nodes = list(nx.isolates(self.G))
+
+        # Remove isolated nodes from the graph
+        self.G.remove_nodes_from(isolated_nodes)
+        num_isolated_nodes = len(isolated_nodes)
+        print("Number of isolated nodes removed:", num_isolated_nodes)
+
+    def _connected_components(self):
+        connected = len(list(nx.connected_components(self.G)))
+        print('Connected components:', connected)
+
+    def _plot_graph(self):
+        # Output name
+        filename = "Graph.svg"
+
+        # Define edge positions
+        pos = nx.spring_layout(self.G, scale=10)
+
+        # Extracting node and edge labels from the graph
+        node_labels = nx.get_node_attributes(self.G, "node_labels").values()
+        edge_labels = nx.get_edge_attributes(self.G, "asset_name").values()
+
+        # Define colour map based on node and edge labels
+        nodes_colour_map = ['blue' if 'Hydrant' in labels
+                            else 'yellow' if 'NetworkOptValve' in labels
+                            else 'red' for labels in node_labels]
+
+        edges_colour_map = ['black' if 'TrunkMain' in labels
+                            else 'orange' for labels in edge_labels]
+
+        # Draw the graph nodes and edges
+        plt.figure(figsize=(30, 30))
+        nx.draw(
+            self.G, pos, with_labels=False, node_color=nodes_colour_map, node_size=15, font_size=2
+        )
+        nx.draw_networkx_edges(self.G, pos, edge_color=edges_colour_map, width=1)
+
+        # Draw edge labels using the gid attribute
+        edge_labels = nx.get_edge_attributes(self.G, "gid")
+        nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels)
+        plt.savefig(filename, format="svg")
+        plt.close()
+        print("file 'Graph.svg' successfully saved")
