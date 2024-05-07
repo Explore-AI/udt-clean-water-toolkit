@@ -15,6 +15,7 @@ class ConfigValidator(forms.Form):
     processor_count = forms.IntegerField(required=False)
     outputfile = forms.CharField(max_length=256, required=False)
     dma_codes = forms.CharField(max_length=256, required=False)
+    
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
     def clean(self):
