@@ -6,7 +6,6 @@ class GisToNkCalculator(GisToGraphCalculator):
     """
     Calculate network graph from geospatial asset data.
     """
-
     def __init__(self, config):
         self.config = config
         self.G: Graph = nk.Graph(edgesIndexed=True)
