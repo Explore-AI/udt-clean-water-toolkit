@@ -40,10 +40,6 @@ class Analysis(AppConf):
 
 
     def cleanwater_gis2networkit(self) -> None:
-            """
-            Convert GIS data to Networkit format.
-            
-            """
             gis_to_nk = GisToNkController(self.validated_config)
             gis_to_nk.create_network()
             gis_to_nk.export_graphml()
