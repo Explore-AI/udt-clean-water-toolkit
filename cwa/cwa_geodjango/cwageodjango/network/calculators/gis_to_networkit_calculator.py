@@ -3,6 +3,9 @@ from cleanwater.calculators import GisToGraphCalculator
 from cwageodjango.config.settings import sqids
 
 class GisToNkCalculator(GisToGraphCalculator):
+    """
+    Calculate network graph from geospatial asset data.
+    """
 
     def __init__(self, config):
         self.config = config
@@ -24,9 +27,24 @@ class GisToNkCalculator(GisToGraphCalculator):
         )
 
     def add_pipe(self, start_node_id, end_node_id):
+        """
+        Add a pipe to the network graph.
+
+        Args:
+            start_node_id: ID of the starting node of the pipe.
+            end_node_id: ID of the ending node of the pipe.
+
+        """
         self.G.addEdge(start_node_id, end_node_id, addMissing=True)
 
     def create_nk_graph(self) -> None:
+        """
+        Create a Networkit graph from geospatial asset data.
+
+        Iterates through pipe and node data to construct the network graph with
+        appropriate attributes.
+
+        """
         n = 0
         node_index = {}
 
@@ -52,8 +70,8 @@ class GisToNkCalculator(GisToGraphCalculator):
             self.edgelabel[from_node_id, to_node_id] = pipe[0]['asset_label']
             self.edgegid[from_node_id, to_node_id] = str(edge_gid)
 
-            # Add node labels
-            # Assuming asset_label is the label for both from_node and to_node
-            asset_label = pipe[0]['asset_label']
-            self.nodelabel[from_node_id] = asset_label
-            self.nodelabel[to_node_id] = asset_label
+            for n in self.all_nodes_by_pipe[i]:
+                if n.get('node_key') == from_node_key:
+                    self.nodelabel[from_node_id] = n.get('node_labels')[-1]
+                elif n.get('node_key') == to_node_key:
+                    self.nodelabel[to_node_id] = n.get('node_labels')[-1]
