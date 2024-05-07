@@ -1,7 +1,7 @@
 from cwageodjango.assets.models import Chamber
-from config.viewsets import BaseModelViewSet
+from config.viewsets import BaseModelViewSet, BaseGeoJsonViewSet
 from config.filters import BaseFilter
-from ..serializers import ChamberSerializer
+from ..serializers import ChamberSerializer, ChamberGeoJsonSerializer
 
 
 class ChamberFilter(BaseFilter):
@@ -16,3 +16,10 @@ class ChamberViewSet(BaseModelViewSet):
     serializer_class = ChamberSerializer
     filterset_class = ChamberFilter
     http_method_names = ["get"]
+    
+
+class ChamberGeoJsonViewSet(BaseGeoJsonViewSet):
+    model = Chamber
+    serializer_class = ChamberGeoJsonSerializer
+    http_method_names = ["get"]
+    

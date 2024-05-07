@@ -44,6 +44,9 @@ class GisToNkCalculator(GisToGraphCalculator):
         appropriate attributes.
 
         """
+        self.G.addEdge(start_node_id, end_node_id, addMissing=True)
+
+    def create_nk_graph(self) -> None:
         n = 0
         node_index = {}
 
@@ -74,3 +77,8 @@ class GisToNkCalculator(GisToGraphCalculator):
                     self.nodelabel[from_node_id] = n.get('node_labels')[-1]
                 elif n.get('node_key') == to_node_key:
                     self.nodelabel[to_node_id] = n.get('node_labels')[-1]
+            # Add node labels
+            # Assuming asset_label is the label for both from_node and to_node
+            asset_label = pipe[0]['asset_label']
+            self.nodelabel[from_node_id] = asset_label
+            self.nodelabel[to_node_id] = asset_label

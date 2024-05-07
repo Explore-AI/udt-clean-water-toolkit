@@ -53,6 +53,7 @@ class GisToNeo4jCalculator(GisToGraphCalculator):
             (m:PointNode {{node_key:'{end_node['node_key']}'}})
             create (n)-[:{asset_label} {{
             gid: {edge_by_pipe["gid"]},
+            material: '{edge_by_pipe["material"]}',
             segment_wkt: '{edge_by_pipe["segment_wkt"]}',
             segment_length: {edge_by_pipe["segment_length"]}
             }}]->(m)"""

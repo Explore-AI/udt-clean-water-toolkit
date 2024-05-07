@@ -55,24 +55,32 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         """
 
-        subquery = qs.filter(
-            geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
-        ).values(
-            json=JSONObject(
-                **json_fields,
-                **extra_json_fields,
-                **inner_subqueries,
-                asset_name=Value(qs.model.AssetMeta.asset_name),
-                asset_label=Value(qs.model.__name__)
+        subquery = (
+            qs.filter(
+                geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
             )
+            .values(
+                json=JSONObject(
+                    **json_fields,
+                    **extra_json_fields,
+                    **inner_subqueries,
+                    asset_name=Value(qs.model.AssetMeta.asset_name),
+                    asset_label=Value(qs.model.__name__)
+                )
+            )
+            .order_by("pk")
         )
 
         return subquery
 
     def _generate_dwithin_inner_subquery(self, qs, field, geometry_field="geometry"):
-        inner_subquery = qs.filter(
-            geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
-        ).values_list(field, flat=True)
+        inner_subquery = (
+            qs.filter(
+                geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
+            )
+            .values_list(field, flat=True)
+            .order_by("pk")
+        )
 
         return ArraySubquery(inner_subquery)
 
@@ -92,12 +100,16 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         """
 
-        subquery = qs.filter(geometry__touches=OuterRef(geometry_field)).values(
-            json=JSONObject(
-                **json_fields,
-                asset_name=Value(qs.model.AssetMeta.asset_name),
-                asset_label=Value(qs.model.__name__)
-            ),
+        subquery = (
+            qs.filter(geometry__touches=OuterRef(geometry_field))
+            .values(
+                json=JSONObject(
+                    **json_fields,
+                    asset_name=Value(qs.model.AssetMeta.asset_name),
+                    asset_label=Value(qs.model.__name__)
+                ),
+            )
+            .order_by("pk")
         )
 
         return subquery
@@ -107,12 +119,18 @@ class MainsController(ABC, GeoDjangoDataManager):
         end_point_subqueries = []
 
         for qs in querysets:
-            subquery1 = qs.filter(
-                geometry__touches=OuterRef("start_point_geom")
-            ).values(json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id")))
-            subquery2 = qs.filter(geometry__touches=OuterRef("end_point_geom")).values(
-                json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id"))
+            subquery1 = (
+                qs.filter(geometry__touches=OuterRef("start_point_geom"))
+                .values(json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id")))
+                .order_by("pk")
             )
+
+            subquery2 = (
+                qs.filter(geometry__touches=OuterRef("end_point_geom"))
+                .values(json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id")))
+                .order_by("pk")
+            )
+
             start_point_subqueries.append(subquery1)
             end_point_subqueries.append(subquery2)
 
@@ -164,6 +182,7 @@ class MainsController(ABC, GeoDjangoDataManager):
             "gid": "gid",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
+            "material": "material",
             "start_point_geom": LineStartPoint("geometry"),
             "end_point_geom": LineEndPoint("geometry"),
             "dma_ids": ArrayAgg("dmas"),
@@ -233,15 +252,23 @@ class MainsController(ABC, GeoDjangoDataManager):
         }
         return subqueries
 
-    def get_pipe_point_relation_queryset(self):
+    @staticmethod
+    def _filter_by_dma(qs, filters):
+        dma_codes = filters.get("dma_codes")
+
+        if not dma_codes:
+            return qs
+
+        return qs.filter(dmas__code__in=filters.get("dma_codes"))
+
+    def get_pipe_point_relation_queryset(self, filters):
         mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
-        # .filter(
-        #     dmas__code__in=["ZWAL4801", "ZCHESS12", "ZCHIPO01"]
-        # )
+
+        qs = self._filter_by_dma(qs, filters)
 
         qs = qs.annotate(
             asset_name=Value(self.model.AssetMeta.asset_name),
@@ -256,7 +283,9 @@ class MainsController(ABC, GeoDjangoDataManager):
             utility_names=ArrayAgg("dmas__utility__name"),
         )
 
-        qs = qs.annotate(**mains_intersection_subqueries, **asset_subqueries)
+        qs = qs.annotate(**mains_intersection_subqueries, **asset_subqueries).order_by(
+            "pk"
+        )
 
         return qs
 

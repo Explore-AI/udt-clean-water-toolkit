@@ -1,7 +1,7 @@
 from cwageodjango.assets.models import DistributionMain
-from config.viewsets import BaseModelViewSet
+from config.viewsets import BaseModelViewSet, BaseGeoJsonViewSet
 from config.filters import BaseFilter
-from ..serializers import DistributionMainSerializer
+from ..serializers import DistributionMainSerializer, DistributionMainGeoJsonSerializer
 
 
 class DistributionMainFilter(BaseFilter):
@@ -16,3 +16,9 @@ class DistributionMainViewSet(BaseModelViewSet):
     serializer_class = DistributionMainSerializer
     filterset_class = DistributionMainFilter
     http_method_names = ["get"]
+
+class DistributionMainGeoJsonViewSet(BaseGeoJsonViewSet):
+    http_method_names = ["get"]
+    serializer_class = DistributionMainGeoJsonSerializer
+    model = DistributionMain
+    

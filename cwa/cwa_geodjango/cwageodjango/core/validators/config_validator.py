@@ -15,7 +15,7 @@ class ConfigValidator(forms.Form):
     processor_count = forms.IntegerField(required=False)
     outputfile = forms.CharField(max_length=256, required=False)
     dma_codes = forms.CharField(max_length=256, required=False)
-    
+
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
     def clean(self):
@@ -42,7 +42,7 @@ class ConfigValidator(forms.Form):
             raise ValidationError(
                 "If parallel is set to 'True' both 'thread_count' and 'processor_count' must be specified."
             )
-        
+
     def validate_outputfile(self, cleaned_data):
         """
         Validates the 'outputfile' field based on the 'method' field in the cleaned data.
@@ -61,3 +61,19 @@ class ConfigValidator(forms.Form):
             raise ValidationError(
                 "If 'method' is 'neo4j2wntrjson' or 'neo4j2wntrinp', 'outputfile' must be specified."
             )
+
+    def clean_dma_codes(self):
+
+        data = self.cleaned_data.get("dma_codes")
+
+        if not data:
+            return None
+
+        # TODO: add explicit exception handles
+        try:
+            dma_codes = data.split(",")
+            dma_codes = [code.strip() for code in dma_codes]
+        except:
+            raise ValidationError("Incorrect format for dma_codes")
+
+        return dma_codes

@@ -12,8 +12,8 @@ class DistributionMainsController(MainsController):
         super().__init__(self.model)
 
     def _generate_mains_subqueries(self):
-        tm_qs = TrunkMain.objects.all()
-        dm_qs = self.model.objects.all()
+        tm_qs = TrunkMain.objects.all().order_by("pk")
+        dm_qs = self.model.objects.all().order_by("pk")
         json_fields = self.get_pipe_json_fields()
 
         subquery_tm_junctions = self.generate_touches_subquery(tm_qs, json_fields)

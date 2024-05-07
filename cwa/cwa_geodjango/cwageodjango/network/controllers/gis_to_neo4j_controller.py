@@ -37,6 +37,7 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
             print("qs", t1 - t0)
 
             self.calc_pipe_point_relative_positions(sliced_qs)
+            sliced_qs = []
             t2 = timer()
             print("calc", t2 - t1)
 
@@ -66,11 +67,10 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
             t1 = timer()
             print("qs", t1 - t0)
 
-
             self.calc_pipe_point_relative_positions_parallel(sliced_qs)
+            sliced_qs = []
             t2 = timer()
             print("calc", t2 - t1)
-
 
             self._create_neo4j_graph_parallel()
             t3 = timer()
@@ -96,16 +96,19 @@ class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
 
     # This fn is a candidate to be abstracted out into the NetworkController
     def _get_pipe_and_asset_data(self) -> QuerySet:
-        trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
-        distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
+
+        filters = {"dma_codes": self.config.dma_codes}
+
+        trunk_mains_qs: QuerySet = self.get_trunk_mains_data(filters)
+        distribution_mains_qs: QuerySet = self.get_distribution_mains_data(filters)
 
         pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
         return pipes_qs
 
-    def get_trunk_mains_data(self) -> QuerySet:
+    def get_trunk_mains_data(self, filters={}) -> QuerySet:
         tm: TrunkMainsController = TrunkMainsController()
-        return tm.get_pipe_point_relation_queryset()
+        return tm.get_pipe_point_relation_queryset(filters)
 
-    def get_distribution_mains_data(self) -> QuerySet:
+    def get_distribution_mains_data(self, filters={}) -> QuerySet:
         dm: DistributionMainsController = DistributionMainsController()
-        return dm.get_pipe_point_relation_queryset()
+        return dm.get_pipe_point_relation_queryset(filters)

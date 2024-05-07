@@ -39,6 +39,8 @@ class GisToNkController(NetworkController, GisToNkCalculator):
         for offset in range(query_offset, query_limit, self.config.batch_size):
             limit = offset + self.config.batch_size
 
+            #print(offset, limit, "a")
+            
             sliced_qs = list(pipes_qs[offset:limit])
 
             self.calc_pipe_point_relative_positions(sliced_qs)
@@ -71,6 +73,14 @@ class GisToNkController(NetworkController, GisToNkCalculator):
             tuple: A tuple containing the query offset and limit values.
 
         """
+
+        #print(end - start)
+
+    def export_graphml(self):
+        nk.writeGraph(self.G, self.config.outputfile , nk.Format.GML)
+
+    def _get_query_offset_limit(self, pipes_qs):
+      
         pipe_count = self.get_pipe_count(pipes_qs)
 
         if not self.config.query_limit or self.config.query_limit == pipe_count:
@@ -96,6 +106,8 @@ class GisToNkController(NetworkController, GisToNkCalculator):
             QuerySet: A QuerySet object containing pipe and asset data.
 
         """
+    # This fn is a candidate to be abstracted out into the NetworkController
+    def _get_pipe_and_asset_data(self) -> QuerySet:
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
         distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
 

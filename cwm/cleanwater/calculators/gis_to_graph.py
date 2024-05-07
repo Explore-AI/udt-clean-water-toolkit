@@ -107,6 +107,7 @@ class GisToGraphCalculator:
                     "from_node_key": from_node["node_key"],
                     "to_node_key": to_node["node_key"],
                     "gid": base_pipe["gid"],
+                    "material": base_pipe["material"],
                     "asset_name": base_pipe["asset_name"],
                     "asset_label": base_pipe["asset_label"],
                     "dmas": base_pipe["dmas"],
@@ -211,6 +212,7 @@ class GisToGraphCalculator:
         base_pipe["asset_label"] = qs_object.asset_label
         base_pipe["pipe_length"] = qs_object.pipe_length
         base_pipe["wkt"] = qs_object.wkt
+        base_pipe["material"] = qs_object.material
         base_pipe["dma_ids"] = qs_object.dma_ids
         base_pipe["dma_codes"] = qs_object.dma_codes
         base_pipe["dma_names"] = qs_object.dma_names
