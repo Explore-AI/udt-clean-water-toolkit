@@ -1,6 +1,6 @@
 import argparse
 from cwageodjango.core.conf import AppConf
-from cwageodjango.network.controllers import GisToNeo4jController, GisToNxController, GisToNkController, Convert2Wntr, Convert2Networkit
+from cwageodjango.network.controllers import GisToNeo4jController, GisToNxController, GisToNkController, Convert2Wntr, Convert2Networkit, AcousticLoggerCoverage
 
 class Analysis(AppConf):
     def __init__(self):
@@ -78,6 +78,11 @@ class Analysis(AppConf):
         convert2networkit.convert()
         convert2networkit.export_graphml()
 
+
+    def calc_acoustic_coverage(self):
+        acoustic_coverage = AcousticLoggerCoverage()
+        acoustic_coverage.print_nodes()
+
     def _get_run_methods(self):
 
         return {
@@ -86,7 +91,8 @@ class Analysis(AppConf):
             "gis2nk": self.cleanwater_gis2networkit,
             "neo4j2wntrinp": self.neo4j_to_wntr_inp,
             "neo4j2wntrjson" : self.neo4j_to_wntr_json,
-            "neo4j2networkitgraphml" : self.neo4j_to_networkit_graphml
+            "neo4j2networkitgraphml" : self.neo4j_to_networkit_graphml,
+            "cover" : self.calc_acoustic_coverage
         }
 
     @property
