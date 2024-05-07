@@ -13,7 +13,7 @@ class ConfigValidator(forms.Form):
     parallel = forms.BooleanField(required=False)
     thread_count = forms.IntegerField(required=False)
     processor_count = forms.IntegerField(required=False)
-    outputfile = forms.CharField(max_length=23, required=False)
+    outputfile = forms.CharField(max_length=256, required=False)
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
     def clean(self):
