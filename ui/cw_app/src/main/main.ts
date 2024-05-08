@@ -14,6 +14,8 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+const config = require("dotenv");
+config.config();
 
 class AppUpdater {
   constructor() {
@@ -78,6 +80,9 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
+        webgl: true,
+        nodeIntegration: true,
+        // contextIsolation: false // Be cautious with security implications
     },
   });
 
