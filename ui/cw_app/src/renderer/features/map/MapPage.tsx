@@ -4,32 +4,39 @@ import { MapViewState } from '@deck.gl/core';
 import { Map } from 'react-map-gl';
 // import StaticMap from 'react-map-gl';
 import { BASEMAP } from '@deck.gl/carto';
+import 'dotenv';
 
+const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
-const MAPBOX_TOKEN = "";
 if (!MAPBOX_TOKEN) {
     throw new Error('Missing Mapbox token');
 }
 
 const INITIAL_VIEW_STATE: MapViewState = {
-    longitude: -122.4,
-    latitude: 37.8,
-    zoom: 15,
+    longitude: -0.118092,
+    latitude: 51.5074,
+    zoom: 10,
     bearing: 0,
     pitch: 30,
 };
 
 export default function MapPage() {
-    console.log(MAPBOX_TOKEN);
     return (
-        <div style={{ border: '1px solid black' }}>
+        <div
+            style={{
+                width: '99vw',
+                height: '600px',
+            }}
+        >
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}
             >
                 <Map
-                    mapStyle={BASEMAP.DARK_MATTER}
+                    initialViewState={INITIAL_VIEW_STATE}
+                    mapStyle={BASEMAP.POSITRON}
                     mapboxAccessToken={MAPBOX_TOKEN}
+                    style={{ width: '500px', height: '500px' }}
                 />
             </DeckGL>
         </div>
