@@ -1,79 +1,22 @@
-import sys
-from os import environ, makedirs
+from os import makedirs
 from os.path import exists, join
-import psycopg2
 from requests import get, exceptions
-from requests.auth import HTTPBasicAuth
+from utils.utils import GeoServerConfig, DBConnection
 import time
 
 
 class Downloader:
     def __init__(self):
-        self.default = {
-            'GEO_USER': environ.get('GEOSERVER_ADMIN_USER', 'admin'),
-            'GEO_PASS': environ.get('GEOSERVER_ADMIN_PASSWORD'),
-            'GEO_WORKSPACE': environ.get('GEOSERVER_WORKSPACE', 'udt'),
-            'GEOSERVER_INSTANCE_URL': environ.get('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
-            'DATABASE_HOST': environ.get('HOST', 'udtpostgis'),
-            'DATABASE_USER': environ.get('POSTGRES_USER', 'udt'),
-            'DATABASE_PASSWORD': environ.get('POSTGRES_PASS'),
-            'DATABASE_NAME': environ.get('POSTGRES_DB', 'udt'),
-            'HEIGHT': 768,
-            'WIDTH': 1024,
-            'FORMAT': 'image/svg'
-        }
-
-    # Function to retrieve bbox and srid for layers in PostgreSQL DB
-    def pg_connection_details(self, pg_host, pg_user, pg_pass, pg_name):
-        try:
-
-            connection_params = f'host={pg_host} user={pg_user} password={pg_pass} dbname={pg_name} port=5432'
-            connection = psycopg2.connect(connection_params)
-            cursor = connection.cursor()
-
-            _extension_loaded = "SELECT extname FROM pg_extension where extname = 'postgis';"
-            cursor.execute(_extension_loaded)
-            extension_loaded = cursor.fetchone()
-            _tables_with_bbox = []
-            if extension_loaded:
-
-                check_table = '''SELECT f_table_name FROM geometry_columns WHERE f_table_schema = 'public';'''
-                cursor.execute(check_table)
-                _tables = [row[0] for row in cursor.fetchall()]
-
-                for single_table in _tables:
-                    layer_bbox_query = '''
-                        SELECT 
-                            ST_XMin(ST_Extent(geometry)) AS min_x,
-                            ST_YMin(ST_Extent(geometry)) AS min_y,
-                            ST_XMax(ST_Extent(geometry)) AS max_x,
-                            ST_YMax(ST_Extent(geometry)) AS max_y ,
-                            ST_SRID(geometry) as srid
-                        FROM 
-                            public.%s
-                            GROUP BY srid;
-                    ''' % single_table
-
-                    cursor.execute(layer_bbox_query)
-                    bbox_result = cursor.fetchone()
-
-                    if bbox_result:
-                        min_x, min_y, max_x, max_y, srid = bbox_result
-                        _tables_with_bbox.append((single_table, (min_x, min_y, max_x, max_y, srid)))
-
-                cursor.close()
-                connection.close()
-
-        except psycopg2.OperationalError:
-            print("Could not connect to PostgreSQL")
-            sys.exit(1)
-
-        return _tables_with_bbox
+        self.geoserver_config = GeoServerConfig()
+        self.geoserver_auth = self.geoserver_config.geoserver_auth
 
     # Function to download and save images from WMS endpoints
-    def download_and_save_image(self, url, file_path, username, user_pass):
+    def generate_output(self, url, file_path):
+        """"
+        Helper function to save the output to a file
+        """
         url_set = set()  # Create a set to store URLs
-        auth = HTTPBasicAuth('%s' % username, '%s' % user_pass)
+        auth = self.geoserver_auth.auth
 
         if url in url_set:  # Check if the URL already exists
             print("Image already downloaded, skipping:", url)
@@ -84,42 +27,68 @@ class Downloader:
                 with open(file_path, 'wb') as file:
                     file.write(response.content)
                 file.close()
-
                 print("Image saved successfully:", file_path)
                 url_set.add(url)  # Add the URL to the set
             except exceptions.RequestException as e:
                 print("Error downloading image:", e)
 
     # Function to retrieve wms images from published GeoServer layers
-    def get_layer_snapshot(self, geoserver_site_url, username, user_pass, workspace_name, pg_host, pg_user, pg_pass,
-                           pg_name):
+    def get_layer_snapshot(self, geoserver_site_url, workspace_name):
+        """
+        Download the snapshot of the layer based on the Get-map bbox
+        Args:
+            geoserver_site_url:
+            workspace_name:
 
-        pg_tables = self.pg_connection_details(pg_host, pg_user, pg_pass, pg_name)
+        Returns:
+
+        """
+        auth = self.geoserver_auth.auth
+        db_conn = DBConnection()
+        pg_tables = db_conn.pg_extent_details()
 
         if pg_tables:
             for table_name, bbox in pg_tables:
-                get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
-                    geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1], bbox[2], bbox[3],
-                    self.default['HEIGHT'], self.default['WIDTH'], bbox[4], self.default['FORMAT'])
-                image_extension = self.default['FORMAT'].split('/')[-1]
-                base_path = join("/geoserver_scripts", "output")
-                if not exists(base_path):
-                    makedirs(base_path)
-                time_stamp = time.strftime("%Y%m%d-%H%M%S")
-                report_image = f"{table_name}_{time_stamp}.{image_extension}"
-                file_path = join(base_path, report_image)
-                # Download and save the image
-                self.download_and_save_image(get_map_url, file_path, username, user_pass)
+                # Check if the store already exists
+                try:
+                    rest_url = '%s/rest/workspaces/%s/datastores/%s.json' % (
+                        geoserver_site_url, workspace_name, workspace_name)
+                    response = get(rest_url, auth=auth)
+                    response.raise_for_status()
+                except exceptions.HTTPError:
+                    # Check if the layer is defined
+                    try:
+                        layer_url = "%s/rest/workspaces/%s/datastores/%s/featuretypes/%s.json" % (
+                            geoserver_site_url, self.geoserver_config.default['GEO_WORKSPACE'],
+                            self.geoserver_config.default['GEO_WORKSPACE'], table_name)
+                        response = get(layer_url, auth=auth)
+                        response.raise_for_status()
+                    except exceptions.HTTPError:
+                        get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
+                            geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1],
+                            bbox[2],
+                            bbox[3],
+                            self.geoserver_config.default['HEIGHT'], self.geoserver_config.default['WIDTH'], bbox[4],
+                            self.geoserver_config.default['FORMAT'])
+                        image_extension = self.geoserver_config.default['FORMAT'].split('/')[-1]
+                        base_path = join("/geoserver_scripts", "output")
+                        if not exists(base_path):
+                            makedirs(base_path)
+                        time_stamp = time.strftime("%Y%m%d-%H%M%S")
+                        report_image = f"{table_name}_{time_stamp}.{image_extension}"
+                        file_path = join(base_path, report_image)
+                        # Download and save the image
+                        self.generate_output(get_map_url, file_path)
 
     def geoserver_get_map(self):
 
-        # Download and save images from GeoServer WMS
-        self.get_layer_snapshot(self.default['GEOSERVER_INSTANCE_URL'], self.default['GEO_USER'],
-                                self.default['GEO_PASS'], self.default['GEO_WORKSPACE'],
-                                self.default['DATABASE_HOST'],
-                                self.default['DATABASE_USER'],
-                                self.default['DATABASE_PASSWORD'],
-                                self.default['DATABASE_NAME'])
+        """
+        Prints maps in various formats based on get-map requests to the GeoServer service
+        Returns:
+
+        """
+        self.get_layer_snapshot(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                                self.geoserver_config.default['GEO_WORKSPACE'])
 
 
 if __name__ == '__main__':
