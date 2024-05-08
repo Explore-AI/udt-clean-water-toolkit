@@ -1,8 +1,7 @@
-import os
 from os import makedirs
 from os.path import exists, join
 from random import randint
-from requests import get, put, post, exceptions
+from requests import get, put, exceptions
 from utils.utils import GeoServerConfig, DBConnection
 
 
