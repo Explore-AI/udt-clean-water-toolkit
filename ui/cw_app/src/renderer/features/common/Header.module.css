@@ -1,25 +1,26 @@
 .header {
-    height: 84px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Higher z-index value */
+    height: calc(5rem * var(--mantine-scale));
     width: 99vw;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    /* margin-top: 4px; */
     background-color: var(--mantine-color-body);
-    border-bottom: 1px solid
-        light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+    border-bottom: 1px solid var(--mantine-color-gray-3);
 }
 
 .inner {
-    height: 84px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    height: calc(5rem * var(--mantine-scale));
 }
 
 .links {
-    padding-top: var(--mantine-spacing-lg);
-    height: 84px;
-    /* display: flex;
-    flex-direction: column;
-    justify-content: space-between; */
+    padding-top: var(--mantine-spacing-xl);
+    height: calc(5rem * var(--mantine-scale));
 }
 
 .mainLinks {
@@ -29,21 +30,14 @@
 .mainLink {
     text-transform: uppercase;
     font-size: var(--mantine-font-size-xs);
-    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-1));
-    padding: 7px var(--mantine-spacing-sm);
+    color: var(--mantine-color-gray-6);
+    padding: calc(0.85rem * var(--mantine-scale)) var(--mantine-spacing-sm);
     font-weight: 700;
     border-bottom: 2px solid transparent;
     text-decoration: none;
     transition:
         border-color 100ms ease,
         color 100ms ease;
-
-    @mixin hover {
-        color: light-dark(
-            var(--mantine-color-black),
-            var(--mantine-color-white)
-        );
-    }
     &[data-active] {
         color: light-dark(
             var(--mantine-color-black),
@@ -53,17 +47,6 @@
     }
 }
 
-.secondaryLink {
-    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-1));
-    font-size: var(--mantine-font-size-xs);
-    text-transform: uppercase;
-    transition: color 100ms ease;
-
-    @mixin hover {
-        color: light-dark(
-            var(--mantine-color-black),
-            var(--mantine-color-white)
-        );
-        text-decoration: none;
-    }
+.mainLink:hover {
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
 }
