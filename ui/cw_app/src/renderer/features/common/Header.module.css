@@ -4,9 +4,8 @@
     left: 0;
     z-index: 1000; /* Higher z-index value */
     height: calc(5rem * var(--mantine-scale));
-    width: 99vw;
+    width: 100vw;
     margin-bottom: 10px;
-    /* margin-top: 4px; */
     background-color: var(--mantine-color-body);
     border-bottom: 1px solid var(--mantine-color-gray-3);
 }
