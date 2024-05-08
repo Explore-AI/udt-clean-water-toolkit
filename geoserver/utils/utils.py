@@ -81,6 +81,67 @@ class DBConnection:
 
         return _tables_with_bbox
 
+    def pg_dma_extent_details(self, dma_codes):
+        """Retrieve database connection params from PostgreSQL, returns list of tables and srid"""
+
+        try:
+            cursor = self.conn.cursor()
+
+            _extension_loaded = "SELECT extname FROM pg_extension where extname = 'postgis';"
+            cursor.execute(_extension_loaded)
+            extension_loaded = cursor.fetchone()
+            _tables_with_bbox = []
+            if extension_loaded:
+                check_dma_table = '''SELECT EXISTS(SELECT 1 FROM geometry_columns \
+                WHERE f_table_schema = 'public' AND f_table_name = 'utilities_dma'); '''
+                print(check_dma_table)
+                cursor.execute(check_dma_table)
+                table_value = cursor.fetchone()
+                if table_value:
+                    if isinstance(dma_codes, list):
+                        for dma in dma_codes:
+                            layer_bbox_query = '''
+                                SELECT 
+                                    ST_XMin(ST_Extent(geometry)) AS min_x,
+                                    ST_YMin(ST_Extent(geometry)) AS min_y,
+                                    ST_XMax(ST_Extent(geometry)) AS max_x,
+                                    ST_YMax(ST_Extent(geometry)) AS max_y ,
+                                    ST_SRID(geometry) as srid
+                                FROM 
+                                    public."utilities_dma" where code = '%s'
+                                    GROUP BY srid;
+                            ''' % dma
+
+                            cursor.execute(layer_bbox_query)
+                            bbox_result = cursor.fetchone()
+
+                            if bbox_result:
+                                min_x, min_y, max_x, max_y, srid = bbox_result
+                                _tables_with_bbox.append((dma, (min_x, min_y, max_x, max_y, srid)))
+                    else:
+                        layer_bbox_query = '''
+                            SELECT 
+                                ST_XMin(ST_Extent(geometry)) AS min_x,
+                                ST_YMin(ST_Extent(geometry)) AS min_y,
+                                ST_XMax(ST_Extent(geometry)) AS max_x,
+                                ST_YMax(ST_Extent(geometry)) AS max_y ,
+                                ST_SRID(geometry) as srid
+                            FROM 
+                                public."utilities_dma" where code = '%s'
+                                GROUP BY srid;
+                        ''' % dma_codes
+                        cursor.execute(layer_bbox_query)
+                        bbox_result = cursor.fetchone()
+
+                        if bbox_result:
+                            min_x, min_y, max_x, max_y, srid = bbox_result
+                            _tables_with_bbox.append((dma_codes, (min_x, min_y, max_x, max_y, srid)))
+
+        except OperationalError:
+            print("Could not connect to PostgreSQL")
+            exit(1)
+        return _tables_with_bbox
+
     def pg_spatial_tables(self):
         try:
             cursor = self.conn.cursor()
@@ -94,7 +155,7 @@ class DBConnection:
                 _tables = [row for row in cursor.fetchall()]
             cursor.close()
         except OperationalError:
-            sys.exit(1)
+            exit(1)
         return _tables
 
     @staticmethod
