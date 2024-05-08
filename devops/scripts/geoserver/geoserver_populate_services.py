@@ -176,23 +176,16 @@ class Importer:
                                                        % workspace_name, store_name='%s' % workspace_name,
                                              pg_table='%s' % table)
                     # Add checks to see if SLD exists
-                    self.generate_layer_style(geom_type, table, data_path)
-                    style_path = join(data_path, 'styles')
-                    os.chdir(style_path)
-                    style_rest_url = geoserver_site_url + '/rest/styles'
-                    payload = f"<style><name>{table}</name><filename>{table}.sld</filename></style>"
-                    headers = {
-                        "Content-type": "text/xml"
-                    }
-                    auth = self.geoserver_auth.auth
+                    layer_sld_file = self.generate_layer_style(geom_type, table, data_path)
+                    response = geo.upload_style(path=r'%s' % layer_sld_file, workspace='%s' % workspace_name)
 
-                    response = post(style_rest_url, headers=headers, data=payload, auth=auth)
-                    if response.ok:
+                    if response == 200:
                         geo.publish_style(layer_name='%s' % table, style_name='%s' % table,
                                           workspace='%s' % workspace_name)
                     else:
                         print(f"Failed to create style. Status code: {response.status_code}")
 
+    # TODO Add function to update the layer based on new attributes
     # Function to update bounding box of layer
     def recalculate_bbox(self, geo_site_url, workspace_name):
         """
