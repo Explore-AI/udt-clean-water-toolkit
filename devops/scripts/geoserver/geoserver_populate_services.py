@@ -1,43 +1,27 @@
 import os
-import sys
-from os import environ, makedirs
+from os import makedirs
 from os.path import exists, join
-import psycopg2
-from geo.Geoserver import Geoserver
-from requests import get, put, post, exceptions
-from requests.auth import HTTPBasicAuth
 from random import randint
-
-
-class GeoServerAuth:
-    def __init__(self, geoserver_site_url, username, password):
-        self.geo = Geoserver(geoserver_site_url, username=username, password=password)
-        self.auth = HTTPBasicAuth(username, password)
+from requests import get, put, post, exceptions
+from utils.utils import GeoServerConfig, DBConnection
 
 
 class Importer:
     def __init__(self):
-        self.default = {
-            'GEO_USER': environ.get('GEOSERVER_ADMIN_USER', 'admin'),
-            'GEO_PASS': environ.get('GEOSERVER_ADMIN_PASSWORD'),
-            'GEO_WORKSPACE': environ.get('GEOSERVER_WORKSPACE', 'udt'),
-            'GEOSERVER_INSTANCE_URL': environ.get('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
-            'DATABASE_HOST': environ.get('HOST', 'udtpostgis'),
-            'DATABASE_USER': environ.get('POSTGRES_USER', 'udt'),
-            'DATABASE_PASSWORD': environ.get('POSTGRES_PASS'),
-            'DATABASE_NAME': environ.get('POSTGRES_DB', 'udt'),
-            'GEOSERVER_DATA_DIR': environ.get('GEOSERVER_DATA_DIR', '/opt/geoserver/data_dir')
-
-        }
-        # Initialize GeoServerAuth instance
-        self.geoserver_auth = GeoServerAuth(
-            self.default['GEOSERVER_INSTANCE_URL'],
-            self.default['GEO_USER'],
-            self.default['GEO_PASS']
-        )
+        self.geoserver_config = GeoServerConfig()
+        self.geoserver_auth = self.geoserver_config.geoserver_auth
 
     # Function to create a workspace in GeoServer
     def publish_workspace(self, geoserver_site_url, workspace_name):
+        """
+        Args:
+            geoserver_site_url: i.e. https://geoserver
+            workspace_name: i.e. udt
+
+        Returns:
+            GeoServer workspace object name corresponding to workspace_name
+
+        """
         geo = self.geoserver_auth.geo
         auth = self.geoserver_auth.auth
         try:
@@ -51,6 +35,18 @@ class Importer:
     # Function to create a store in GeoServer
     def publish_store(self, geoserver_site_url, workspace_name, pg_host, pg_user, pg_pass,
                       pg_name):
+        """
+        Args:
+            geoserver_site_url:
+            workspace_name:
+            pg_host:
+            pg_user:
+            pg_pass:
+            pg_name:
+
+        Returns: GeoServer store connecting to PostgreSQL database
+
+        """
         geo = self.geoserver_auth.geo
         auth = self.geoserver_auth.auth
         try:
@@ -63,31 +59,20 @@ class Importer:
                                     host='%s' % pg_host,
                                     pg_user='%s' % pg_user, pg_password='%s' % pg_pass)
 
-    # Function to retrieve spatial tables from PostgreSQL
-    def pg_connection_details(self, pg_host, pg_user, pg_pass, pg_name):
-        try:
-            connection = psycopg2.connect(host='%s' % pg_host, database='%s' % pg_name,
-                                          user='%s' % pg_user, password='%s' % pg_pass,
-                                          port=5432)
-            cursor = connection.cursor()
-            _extension_loaded = "SELECT extname FROM pg_extension where extname = 'postgis';"
-            cursor.execute(_extension_loaded)
-            extension_loaded = cursor.fetchone()
-            _tables = []  # Define _tables as an empty list
-            if extension_loaded:
-                check_table = '''SELECT f_table_name,type from geometry_columns WHERE f_table_schema = 'public';'''
-                cursor.execute(check_table)
-                _tables = [row for row in cursor.fetchall()]
-            cursor.close()
-            connection.close()
-        except psycopg2.OperationalError:
-            sys.exit(1)
-        return _tables
-
     def generate_random_color(self):
         return '#{:06x}'.format(randint(0, 0xFFFFFF))
 
     def generate_layer_style(self, geom_type, layer_name, data_path):
+        """
+        Generate a random layer style based on the geom_type and layer_name, storing it in a given path
+        Args:
+            geom_type:
+            layer_name:
+            data_path:
+
+        Returns: SLD document for each layer resource
+
+        """
         std_color = self.generate_random_color()
         if 'POLYGON' in geom_type:
             sld_xml = f'''
@@ -163,12 +148,21 @@ class Importer:
         return layer_sld
 
     # Function to publish vector data as GeoServer layers
-    def publish_layer_stores(self, geoserver_site_url, workspace_name, pg_host, pg_user, pg_pass,
-                             pg_name, data_path):
+    def publish_layer_stores(self, geoserver_site_url, workspace_name, data_path):
+        """
+        Publish all vector layers in a PostgreSQL database.
+        Args:
+            geoserver_site_url:
+            workspace_name:
+            data_path:
+
+        Returns: GeoServer layers with some default styles assigned
+
+        """
         geo = self.geoserver_auth.geo
         auth = self.geoserver_auth.auth
-
-        pg_tables = self.pg_connection_details(pg_host, pg_user, pg_pass, pg_name)
+        db_conn = DBConnection()
+        pg_tables = db_conn.pg_spatial_tables()
 
         if pg_tables:
             for table, geom_type in pg_tables:
@@ -182,7 +176,7 @@ class Importer:
                                                        % workspace_name, store_name='%s' % workspace_name,
                                              pg_table='%s' % table)
                     # Add checks to see if SLD exists
-                    style_params = self.generate_layer_style(geom_type, table, data_path)
+                    self.generate_layer_style(geom_type, table, data_path)
                     style_path = join(data_path, 'styles')
                     os.chdir(style_path)
                     style_rest_url = geoserver_site_url + '/rest/styles'
@@ -200,11 +194,21 @@ class Importer:
                         print(f"Failed to create style. Status code: {response.status_code}")
 
     # Function to update bounding box of layer
-    def recalculate_bbox(self, geo_site_url, workspace_name, pg_host, pg_user, pg_pass, pg_name):
+    def recalculate_bbox(self, geo_site_url, workspace_name):
+        """
+        Recalculate the bounding box of published resources if the data has been updated in the database
+        Args:
+            geo_site_url:
+            workspace_name:
+
+        Returns:
+
+        """
         auth = self.geoserver_auth.auth
         headers = {"Content-type": "text/xml"}
         xml_data = "<featureType><enabled>true</enabled></featureType>"
-        _tables = self.pg_connection_details(pg_host, pg_user, pg_pass, pg_name)
+        db_conn = DBConnection()
+        _tables = db_conn.pg_extent_details()
         if _tables:
             for table, geom_type in _tables:
                 rest_url = '%s/rest/workspaces/%s/datastores/%s/featuretypes/%s?recalculate=nativebbox,latlonbbox' % (
@@ -214,29 +218,32 @@ class Importer:
                     return response.raise_for_status()
 
     def geoserver_requests(self):
+        """
+        Procedure to automate the geoserver requests so that we can be able to view the OGC services
+        Returns:
+
+        """
         # Create geoserver workspace and set it as a default one
-        self.publish_workspace(self.default['GEOSERVER_INSTANCE_URL'], self.default['GEO_WORKSPACE'])
+        self.publish_workspace(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                               self.geoserver_config.default['GEO_WORKSPACE'])
 
         # Create Database store connecting to PostgreSQL database
-        self.publish_store(self.default['GEOSERVER_INSTANCE_URL'],
-                           self.default['GEO_WORKSPACE'], self.default['DATABASE_HOST'],
-                           self.default['DATABASE_USER'],
-                           self.default['DATABASE_PASSWORD'], self.default['DATABASE_NAME'])
+        self.publish_store(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                           self.geoserver_config.default['GEO_WORKSPACE'],
+                           self.geoserver_config.default['DATABASE_HOST'],
+                           self.geoserver_config.default['DATABASE_USER'],
+                           self.geoserver_config.default['DATABASE_PASSWORD'],
+                           self.geoserver_config.default['DATABASE_NAME'])
 
         # Publish layers from database to GeoServer with default styles
 
-        self.publish_layer_stores(self.default['GEOSERVER_INSTANCE_URL'], self.default['GEO_WORKSPACE'],
-                                  self.default['DATABASE_HOST'],
-                                  self.default['DATABASE_USER'],
-                                  self.default['DATABASE_PASSWORD'],
-                                  self.default['DATABASE_NAME'],
-                                  self.default['GEOSERVER_DATA_DIR'])
+        self.publish_layer_stores(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                                  self.geoserver_config.default['GEO_WORKSPACE'],
+                                  self.geoserver_config.default['GEOSERVER_DATA_DIR'])
 
         # Recalculate layer bounds in GeoServer layers in case the data has changed
-        self.recalculate_bbox(self.default['GEOSERVER_INSTANCE_URL'], self.default['GEO_WORKSPACE'],
-                              self.default['DATABASE_HOST'],
-                              self.default['DATABASE_USER'],
-                              self.default['DATABASE_PASSWORD'], self.default['DATABASE_NAME'])
+        self.recalculate_bbox(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                              self.geoserver_config.default['GEO_WORKSPACE'])
 
 
 if __name__ == '__main__':
