@@ -1,32 +1,69 @@
-/* Add CSS styles here */
-
 .header {
-    height: rem(56px);
-    margin-bottom: rem(120px);
+    height: 84px;
+    width: 99vw;
+    margin-bottom: 12px;
     background-color: var(--mantine-color-body);
-    border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-    padding-left: var(--mantine-spacing-md);
-    padding-right: var(--mantine-spacing-md);
+    border-bottom: 1px solid
+        light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
 
 .inner {
-    height: rem(56px);
+    height: 84px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
-.link {
-    display: block;
-    line-height: 1;
-    padding: rem(8px) rem(12px);
-    border-radius: var(--mantine-radius-sm);
+.links {
+    padding-top: var(--mantine-spacing-lg);
+    height: 84px;
+    /* display: flex;
+    flex-direction: column;
+    justify-content: space-between; */
+}
+
+.mainLinks {
+    margin-right: calc(var(--mantine-spacing-sm) * -3);
+}
+
+.mainLink {
+    text-transform: uppercase;
+    font-size: var(--mantine-font-size-xs);
+    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-1));
+    padding: 7px var(--mantine-spacing-sm);
+    font-weight: 700;
+    border-bottom: 2px solid transparent;
     text-decoration: none;
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
-    font-size: var(--mantine-font-size-sm);
-    font-weight: 500;
+    transition:
+        border-color 100ms ease,
+        color 100ms ease;
 
     @mixin hover {
-        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+        color: light-dark(
+            var(--mantine-color-black),
+            var(--mantine-color-white)
+        );
+    }
+    &[data-active] {
+        color: light-dark(
+            var(--mantine-color-black),
+            var(--mantine-color-white)
+        );
+        border-bottom-color: var(--mantine-color-blue-6);
+    }
+}
+
+.secondaryLink {
+    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-1));
+    font-size: var(--mantine-font-size-xs);
+    text-transform: uppercase;
+    transition: color 100ms ease;
+
+    @mixin hover {
+        color: light-dark(
+            var(--mantine-color-black),
+            var(--mantine-color-white)
+        );
+        text-decoration: none;
     }
 }
