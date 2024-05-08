@@ -15,6 +15,7 @@ services:
       - ../../cwm:/opt/udt/cwm/
       - ../../data:/opt/udt/data/
       - ../../api/api_drf:/opt/udt/api/api_drf/
+      - ../../geoserver:/geoserver_scripts
     ports: 
       - "8083:8000"
     restart: always
