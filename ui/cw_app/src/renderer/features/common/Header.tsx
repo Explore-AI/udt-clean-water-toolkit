@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container,Group, Burger, Box } from '@mantine/core';
+import { Container,Group, Burger, Box, rem } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
 import WaterLogo from '../../../../assets/water.svg';
@@ -37,7 +37,7 @@ export default function Header() {
                 <Container className={styles.inner}>
                     <Group>
                         <img src={WaterLogo} alt="Water Logo" width={30} />
-                        <p> Clean Water Application </p>
+                        <h2> Clean Water Application </h2>
                     </Group>
                     <Box visibleFrom="sm" className={styles.links}>
                         <Group gap={1} className={styles.mainLinks}>
