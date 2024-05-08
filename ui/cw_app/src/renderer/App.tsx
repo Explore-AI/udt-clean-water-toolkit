@@ -11,7 +11,9 @@ export default function App() {
   return (
     <>
         <Header />
-        <MapPage />
+        <div id="detail"> 
+          <Outlet />
+        </div>
     </>
   );
 }
