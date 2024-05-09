@@ -1,12 +1,13 @@
 import App from './App';
-import NotFoundErrorPage from './features/common/NotFoundErrorPage';
-import MapPage from './features/map/MapPage';
-import GraphViewPage from './features/graph/GraphPage';
-import SchematicViewPage from './features/schematic/SchematicPage';
-import AnalysisViewPage from './features/analysis/AnalysisPage';
+import NotFoundErrorPage from './core/NotFoundErrorPage';
+import MapPage from './map/components/MapPage';
+import GraphViewPage from './graph/GraphPage';
+import SchematicViewPage from './schematic/SchematicPage';
+import AnalysisViewPage from './analysis/AnalysisPage';
 import {
     createHashRouter,
 } from 'react-router-dom';
+
 // use HashRouter as it is meant for file based environments
 const router = createHashRouter([
     {
@@ -38,4 +39,4 @@ const router = createHashRouter([
     },
 ]);
 
-export { router }; 
+export { router };

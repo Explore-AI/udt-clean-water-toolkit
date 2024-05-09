@@ -3,7 +3,7 @@ import { Container,Group, Burger, Box, rem } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
 import WaterLogo from '../../../../assets/water.svg';
-import styles from './Header.module.css';
+import styles from '../css/Header.module.css';
 
 const links = [
     { link: '/', label: 'Home' },
