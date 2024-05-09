@@ -117,7 +117,7 @@ class GisToNxCalculator(GisToGraphCalculator):
                 pos = nx.spring_layout(G, scale=10)
 
                 # Extracting node and edge labels from the graph
-                node_labels = nx.get_node_attributes(G, "node_label").values()
+                node_labels = nx.get_node_attributes(G, "node_labels").values()
                 edge_labels = nx.get_edge_attributes(G, "asset_name").values()
 
                 # Define colour map based on node and edge labels
@@ -148,7 +148,7 @@ class GisToNxCalculator(GisToGraphCalculator):
             pos = nx.spring_layout(G, scale=10)
 
             # Extracting node and edge labels from the graph
-            node_labels = nx.get_node_attributes(G, "node_label").values()
+            node_labels = nx.get_node_attributes(G, "node_labels").values()
             edge_labels = nx.get_edge_attributes(G, "asset_name").values()
 
             # Define colour map based on node and edge labels
