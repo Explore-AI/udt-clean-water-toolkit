@@ -1,0 +1,14 @@
+.container {
+    /* border: 1px solid green;  */
+    height: calc(2pxrem * var(--mantine-scale)); 
+    width: calc(17rem * var(--mantine-scale)); 
+    position: absolute; 
+    right: 50px; 
+    top: 20px; 
+    z-index: 3; 
+}
+
+.icon {
+    width: calc(1rem * var(--mantine-scale)); 
+    height: calc(1rem * var(--mantine-scale)); 
+}
