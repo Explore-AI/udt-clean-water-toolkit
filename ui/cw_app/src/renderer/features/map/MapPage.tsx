@@ -2,9 +2,10 @@
 import DeckGL from '@deck.gl/react';
 import { MapViewState } from '@deck.gl/core';
 import { Map } from 'react-map-gl';
-// import StaticMap from 'react-map-gl';
 import { BASEMAP } from '@deck.gl/carto';
+import styles from './MapPage.module.css'; 
 import 'dotenv';
+import SearchWidget from '../common/SearchWidget';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
@@ -23,11 +24,9 @@ const INITIAL_VIEW_STATE: MapViewState = {
 export default function MapPage() {
     return (
         <div
-            style={{
-                width: '99vw',
-                height: '600px',
-            }}
+            className={styles['page-container']}
         >
+            <SearchWidget />
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}

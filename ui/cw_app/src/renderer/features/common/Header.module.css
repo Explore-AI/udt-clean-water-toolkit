@@ -2,7 +2,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1000; /* Higher z-index value */
+    z-index: 10; /* Higher z-index value */
     height: calc(5rem * var(--mantine-scale));
     width: 100vw;
     margin-bottom: 10px;

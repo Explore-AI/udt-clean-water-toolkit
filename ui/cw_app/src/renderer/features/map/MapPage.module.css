@@ -1,0 +1,9 @@
+.page-container {
+    width: 100vw; 
+    height: 85vh;
+    top: calc(0.125rem * var(--mantine-scale));
+    position: relative;
+    z-index: 1;  
+    border: 1px solid black; 
+}
+
