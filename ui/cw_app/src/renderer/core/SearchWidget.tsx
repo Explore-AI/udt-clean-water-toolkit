@@ -23,6 +23,7 @@ export default function SearchWidget() {
                     placeholder="Search Location Here"
                     onChange={(event) => handleInputChange(event)}
                     value={value}
+                    classNames={{ input: styles.input}}
                     rightSection={
                         <CloseButton 
                             aria-label='Clear Input'

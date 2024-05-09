@@ -7,8 +7,7 @@ import { BASEMAP } from '@deck.gl/carto';
 import styles from '../css/MapPage.module.css';
 import SearchWidget from '../../core/SearchWidget'
 import BaseLayout from '../../core/components/BaseLayout'
-
-const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
+import { MAPBOX_TOKEN } from '../../core/constants';
 
 if (!MAPBOX_TOKEN) {
     throw new Error('Missing Mapbox token');

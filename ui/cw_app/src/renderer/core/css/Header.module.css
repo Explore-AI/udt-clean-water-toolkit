@@ -8,13 +8,16 @@
     margin-bottom: 10px;
     background-color: var(--mantine-color-body);
     border-bottom: 1px solid var(--mantine-color-gray-3);
+    padding-right: calc(2rem * var(--mantine-scale));
 }
 
 .inner {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* align-content: flex-start; */
     justify-content: space-between;
     height: calc(5rem * var(--mantine-scale));
+    /* border: 1px solid green; */
 }
 
 .links {

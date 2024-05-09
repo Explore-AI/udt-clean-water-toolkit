@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container,Group, Burger, Box, rem } from '@mantine/core';
+import { Container, Group, Burger, Box, rem } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
 import WaterLogo from '../../../../assets/water.svg';
@@ -34,10 +34,10 @@ export default function Header() {
     return (
         <>
             <header className={styles.header}>
-                <Container className={styles.inner}>
+                <Container className={styles.inner} fluid>
                     <Group>
                         <img src={WaterLogo} alt="Water Logo" width={30} />
-                        <h2> Clean Water Application </h2>
+                        <h2> Unlocking Digital Twin Application </h2>
                     </Group>
                     <Box visibleFrom="sm" className={styles.links}>
                         <Group gap={1} className={styles.mainLinks}>
@@ -48,7 +48,6 @@ export default function Header() {
                     <Burger
                         opened={opened}
                         onClick={toggle}
-                        className={styles.burger}
                         size="sm"
                         hiddenFrom="sm"
                     />

@@ -1,9 +1,9 @@
 import App from './App';
 import NotFoundErrorPage from './core/NotFoundErrorPage';
 import MapPage from './map/components/MapPage';
-import GraphViewPage from './graph/GraphPage';
-import SchematicViewPage from './schematic/SchematicPage';
-import AnalysisViewPage from './analysis/AnalysisPage';
+import GraphViewPage from './graph/components/GraphPage';
+import SchematicViewPage from './schematic/components/SchematicPage';
+import AnalysisViewPage from './analysis/components/AnalysisPage';
 import {
     createHashRouter,
 } from 'react-router-dom';

@@ -1,7 +1,12 @@
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
+import React from 'react'; 
 
-export default function BaseLayout(props) {
+type childrenProps = {
+    children: React.ReactNode
+}
+
+export default function BaseLayout(props: childrenProps) {
 
     return (
         <>
