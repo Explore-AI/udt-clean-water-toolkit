@@ -26,7 +26,8 @@ class GeoServerConfig:
             'GEOSERVER_DATA_DIR': environ.get('GEOSERVER_DATA_DIR', '/opt/geoserver/data_dir'),
             'HEIGHT': 768,
             'WIDTH': 1024,
-            'FORMAT': 'image/svg'
+            'FORMAT': 'image/svg',
+            'DMA_CODES': environ.get('DMA_CODES', ['ZWAL4801', 'ZCHESS12', 'ZCHIPO01'])
         }
         # Initialize GeoServerAuth instance
         self.geoserver_auth = GeoServerAuth(
