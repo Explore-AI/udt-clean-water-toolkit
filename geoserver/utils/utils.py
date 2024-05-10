@@ -74,7 +74,8 @@ class DBConnection:
                     if bbox_result:
                         min_x, min_y, max_x, max_y, srid = bbox_result
                         _tables_with_bbox.append((single_table, (min_x, min_y, max_x, max_y, srid)))
-
+            cursor.close()
+            #self.conn.close()
         except OperationalError:
             print("Could not connect to PostgreSQL")
             exit(1)
@@ -136,6 +137,8 @@ class DBConnection:
                         if bbox_result:
                             min_x, min_y, max_x, max_y, srid = bbox_result
                             _tables_with_bbox.append((dma_codes, (min_x, min_y, max_x, max_y, srid)))
+            cursor.close()
+            #self.conn.close()
 
         except OperationalError:
             print("Could not connect to PostgreSQL")
@@ -154,6 +157,7 @@ class DBConnection:
                 cursor.execute(check_table)
                 _tables = [row for row in cursor.fetchall()]
             cursor.close()
+            #self.conn.close()
         except OperationalError:
             exit(1)
         return _tables
@@ -177,3 +181,9 @@ class DBConnection:
         :return: psycopg2.cursor
         """
         return self.conn.cursor()
+
+    def close_conn(self):
+        """
+        Close the database connection
+        """
+        self.conn.close()
