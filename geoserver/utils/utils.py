@@ -95,7 +95,6 @@ class DBConnection:
             if extension_loaded:
                 check_dma_table = '''SELECT EXISTS(SELECT 1 FROM geometry_columns \
                 WHERE f_table_schema = 'public' AND f_table_name = 'utilities_dma'); '''
-                print(check_dma_table)
                 cursor.execute(check_dma_table)
                 table_value = cursor.fetchone()
                 if table_value:
