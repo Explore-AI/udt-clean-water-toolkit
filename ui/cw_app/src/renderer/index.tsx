@@ -5,6 +5,8 @@ import {
 } from 'react-router-dom';
 import { createTheme, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+
+
 import { router as AppRouter } from './routes';
 
 const theme = createTheme({
