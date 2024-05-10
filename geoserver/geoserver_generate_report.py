@@ -79,7 +79,7 @@ class Downloader:
                         # Download and save the image
                         self.generate_output(get_map_url, file_path)
 
-    def get_layer_snapshot_per_dma(self, geoserver_site_url, workspace_name):
+    def get_layer_snapshot_per_dma(self, geoserver_site_url, workspace_name, codes):
         """
         Download the snapshot of the layer based on the Get-map bbox of a DMA
         Args:
@@ -109,8 +109,7 @@ class Downloader:
                     layer_response = get(layer_url, auth=auth)
                     layer_response.raise_for_status()
                     if layer_response.status_code == 200:
-                        dma_region_codes = ['ZWAL4801', 'ZCHESS12', 'ZCHIPO01']
-                        dma_codes_list = db_conn.pg_dma_extent_details(dma_region_codes)
+                        dma_codes_list = db_conn.pg_dma_extent_details(codes)
                         for code, coordinates in dma_codes_list:
                             min_x, min_y, max_x, max_y, srid = coordinates
                             # TODO fix bbox assignment
@@ -150,27 +149,13 @@ class Downloader:
 
         """
         self.get_layer_snapshot_per_dma(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
-                                        self.geoserver_config.default['GEO_WORKSPACE'])
+                                        self.geoserver_config.default['GEO_WORKSPACE'],
+                                        self.geoserver_config.default['DMA_CODES'])
 
 
 if __name__ == '__main__':
     importer = Downloader()
     importer.geoserver_get_map()
     importer.dma_get_map()
-    # # TODO add option to run specific function
-    # if len(sys.argv) < 2:
-    #     # If no function name is provided, run all functions
-    #     functions_to_run = [
-    #         'geoserver_get_map',
-    #         'dma_get_map'
-    #     ]
-    # else:
-    #     # If a function name is provided, run only that function
-    #     functions_to_run = [sys.argv[1]]
-    #
-    # for function_name in functions_to_run:
-    #     if hasattr(Downloader, function_name):
-    #         func = getattr(Downloader, function_name)
-    #         func()  # Call the specified function
-    #     else:
-    #         print(f"Function '{function_name}' not found in Downloader class")
+    # TODO add option to run specific function
+
