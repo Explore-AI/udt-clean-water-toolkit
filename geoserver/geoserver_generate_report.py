@@ -1,20 +1,10 @@
-import sys
+import time
 from os import makedirs
 from os.path import exists, join
+
 from requests import get, exceptions
+
 from utils.utils import GeoServerConfig, DBConnection
-import time
-from optparse import OptionParser
-
-parser = OptionParser()
-parser.add_option(
-    "-l", "--dma_list", dest="dma_list", help="list of all dma files", metavar="dma_list")
-(options, args) = parser.parse_args()
-
-if options.dma_list is None:
-    dma_region_codes = ['ZWAL4801']
-else:
-    dma_region_codes = options.dma_list
 
 
 class Downloader:
@@ -67,31 +57,31 @@ class Downloader:
                         geoserver_site_url, workspace_name, workspace_name)
                     response = get(rest_url, auth=auth)
                     response.raise_for_status()
-                except exceptions.HTTPError:
-                    # Check if the layer is defined
-                    try:
+                    if response.status_code == 200:
                         layer_url = "%s/rest/workspaces/%s/datastores/%s/featuretypes/%s.json" % (
                             geoserver_site_url, self.geoserver_config.default['GEO_WORKSPACE'],
                             self.geoserver_config.default['GEO_WORKSPACE'], table_name)
-                        response = get(layer_url, auth=auth)
-                        response.raise_for_status()
-                    except exceptions.HTTPError:
-                        get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s\
-                        &bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
-                            geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1],
-                            bbox[2],
-                            bbox[3],
-                            self.geoserver_config.default['HEIGHT'], self.geoserver_config.default['WIDTH'], bbox[4],
-                            self.geoserver_config.default['FORMAT'])
-                        image_extension = self.geoserver_config.default['FORMAT'].split('/')[-1]
-                        base_path = join("/geoserver_scripts", "output")
-                        if not exists(base_path):
-                            makedirs(base_path)
-                        time_stamp = time.strftime("%Y%m%d-%H%M%S")
-                        report_image = f"{table_name}_{time_stamp}.{image_extension}"
-                        file_path = join(base_path, report_image)
-                        # Download and save the image
-                        self.generate_output(get_map_url, file_path)
+                        layer_response = get(layer_url, auth=auth)
+                        layer_response.raise_for_status()
+                        if layer_response.status_code == 200:
+                            get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
+                                geoserver_site_url, workspace_name, workspace_name, table_name, bbox[0], bbox[1],
+                                bbox[2],
+                                bbox[3],
+                                self.geoserver_config.default['HEIGHT'], self.geoserver_config.default['WIDTH'],
+                                bbox[4],
+                                self.geoserver_config.default['FORMAT'])
+                            image_extension = self.geoserver_config.default['FORMAT'].split('/')[-1]
+                            base_path = join("/geoserver_scripts", "output")
+                            if not exists(base_path):
+                                makedirs(base_path)
+                            time_stamp = time.strftime("%Y%m%d-%H%M%S")
+                            report_image = f"{table_name}_{time_stamp}.{image_extension}"
+                            file_path = join(base_path, report_image)
+                            # Download and save the image
+                            self.generate_output(get_map_url, file_path)
+                except exceptions.HTTPError:
+                    print("Store is not defined")
 
     def get_layer_snapshot_per_dma(self, geoserver_site_url, workspace_name):
         """
@@ -107,43 +97,49 @@ class Downloader:
         auth = self.geoserver_auth.auth
         db_conn = DBConnection()
         spatial_tables = db_conn.pg_spatial_tables()
+
         if spatial_tables:
             for table_name, geom_type in spatial_tables:
+
                 # Check if the store already exists
                 try:
                     rest_url = '%s/rest/workspaces/%s/datastores/%s.json' % (
                         geoserver_site_url, workspace_name, workspace_name)
                     response = get(rest_url, auth=auth)
                     response.raise_for_status()
-                except exceptions.HTTPError:
-                    # Check if the layer is defined
-                    try:
+                    if response.status_code == 200:
                         layer_url = "%s/rest/workspaces/%s/datastores/%s/featuretypes/%s.json" % (
                             geoserver_site_url, self.geoserver_config.default['GEO_WORKSPACE'],
                             self.geoserver_config.default['GEO_WORKSPACE'], table_name)
-                        response = get(layer_url, auth=auth)
-                        response.raise_for_status()
-                    except exceptions.HTTPError:
-                        dma_codes_list = db_conn.pg_dma_extent_details(dma_region_codes)
-                        for code, coordinates in dma_codes_list:
-                            min_x, min_y, max_x, max_y, srid = coordinates
-                            # TODO fix bbox assignment
-                            get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&\
-                            bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
-                                geoserver_site_url, workspace_name, workspace_name, table_name, min_x, min_y,
-                                max_x,
-                                max_y,
-                                self.geoserver_config.default['HEIGHT'], self.geoserver_config.default['WIDTH'], max_y,
-                                self.geoserver_config.default['FORMAT'])
-                            image_ext = self.geoserver_config.default['FORMAT'].split('/')[-1]
-                            base_path = join("/geoserver_scripts", "output")
-                            if not exists(base_path):
-                                makedirs(base_path)
-                            time_stamp = time.strftime("%Y%m%d-%H%M%S")
-                            report_image = f"{table_name}_{code}_{time_stamp}.{image_ext}"
-                            file_path = join(base_path, report_image)
-                            # Download and save the image
-                            self.generate_output(get_map_url, file_path)
+                        layer_response = get(layer_url, auth=auth)
+                        layer_response.raise_for_status()
+                        if layer_response.status_code == 200:
+                            dma_region_codes = ['ZWAL4801', 'ZCHESS12', 'ZCHIPO01']
+                            dma_codes_list = db_conn.pg_dma_extent_details(dma_region_codes)
+                            for code, coordinates in dma_codes_list:
+                                min_x, min_y, max_x, max_y, srid = coordinates
+                                # TODO fix bbox assignment
+                                get_map_url = '%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s:%s&bbox=%s,%s,%s,%s&width=%s&height=%s&srs=EPSG:%s&styles=&format=%s' % (
+                                    geoserver_site_url, workspace_name, workspace_name, table_name, min_x, min_y,
+                                    max_x,
+                                    max_y,
+                                    self.geoserver_config.default['HEIGHT'], self.geoserver_config.default['WIDTH'],
+                                    srid,
+                                    self.geoserver_config.default['FORMAT'])
+
+                                print(get_map_url)
+                                image_ext = self.geoserver_config.default['FORMAT'].split('/')[-1]
+                                base_path = join("/geoserver_scripts", "output")
+                                if not exists(base_path):
+                                    makedirs(base_path)
+                                time_stamp = time.strftime("%Y%m%d-%H%M%S")
+                                report_image = f"{table_name}_{code}_{time_stamp}.{image_ext}"
+                                file_path = join(base_path, report_image)
+                                # Download and save the image
+                                self.generate_output(get_map_url, file_path)
+
+                except exceptions.HTTPError:
+                    print("checking if layer is published")
 
     def geoserver_get_map(self):
 
@@ -168,22 +164,22 @@ class Downloader:
 
 if __name__ == '__main__':
     importer = Downloader()
-    # importer.geoserver_get_map()
-    # importer.dma_get_map()
-    # TODO add option to run specific function
-    if len(sys.argv) < 2:
-        # If no function name is provided, run all functions
-        functions_to_run = [
-            'geoserver_get_map',
-            'dma_get_map'
-        ]
-    else:
-        # If a function name is provided, run only that function
-        functions_to_run = [sys.argv[1]]
-
-    for function_name in functions_to_run:
-        if hasattr(Downloader, function_name):
-            func = getattr(Downloader, function_name)
-            func()  # Call the specified function
-        else:
-            print(f"Function '{function_name}' not found in Downloader class")
+    importer.geoserver_get_map()
+    importer.dma_get_map()
+    # # TODO add option to run specific function
+    # if len(sys.argv) < 2:
+    #     # If no function name is provided, run all functions
+    #     functions_to_run = [
+    #         'geoserver_get_map',
+    #         'dma_get_map'
+    #     ]
+    # else:
+    #     # If a function name is provided, run only that function
+    #     functions_to_run = [sys.argv[1]]
+    #
+    # for function_name in functions_to_run:
+    #     if hasattr(Downloader, function_name):
+    #         func = getattr(Downloader, function_name)
+    #         func()  # Call the specified function
+    #     else:
+    #         print(f"Function '{function_name}' not found in Downloader class")
