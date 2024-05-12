@@ -10,7 +10,6 @@ import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
-import DotEnv from 'dotenv-webpack'; 
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
@@ -63,11 +62,6 @@ const configuration: webpack.Configuration = {
 
   module: {
     rules: [
-      // {
-      //   test: /\.css$/,
-      //   include: [webpackPaths.srcRendererPath, /\.module\.s?(c|a)ss$/],
-      //   use: ['style-loader', 'css-loader', 'postcss-loader'],
-      // }, 
       {
         test: /\.s?(c|a)ss$/,
         use: [
@@ -80,14 +74,13 @@ const configuration: webpack.Configuration = {
               importLoaders: 1,
             },
           },
-          'postcss-loader',
-          // 'sass-loader',
+          'sass-loader',
         ],
         include: /\.module\.s?(c|a)ss$/,
       },
       {
         test: /\.s?css$/,
-        use: ['style-loader', 'css-loader', 'postcss-loader'],
+        use: ['style-loader', 'css-loader', 'sass-loader'],
         exclude: /\.module\.s?(c|a)ss$/,
       },
       // Fonts
@@ -146,13 +139,6 @@ const configuration: webpack.Configuration = {
      * By default, use 'development' as NODE_ENV. This can be overriden with
      * 'staging', for example, by changing the ENV variables in the npm scripts
      */
-    
-    new DotEnv({
-      path: `${webpackPaths.rootPath}/.env`,
-      safe: true, 
-      systemvars: true
-    }),
-
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
     }),

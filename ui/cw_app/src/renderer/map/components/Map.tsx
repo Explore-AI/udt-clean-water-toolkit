@@ -1,26 +1,24 @@
 // Our Map Page details exists here
-import 'dotenv';
 import DeckGL from '@deck.gl/react';
+import styles from '../css/MapPage.module.css';
+import SearchWidget from '../../core/components/SearchWidget';
+import BaseLayout from '../../core/components/BaseLayout';
 import { MapViewState } from '@deck.gl/core';
 import { Map } from 'react-map-gl';
 import { BASEMAP } from '@deck.gl/carto';
-import styles from '../css/MapPage.module.css';
-import SearchWidget from '../../core/SearchWidget';
-import BaseLayout from '../../core/components/BaseLayout';
+import { MAPBOX_TOKEN } from '../../config';
+import { MVTLayer } from '@deck.gl/geo-layers';
 import {
     MAPBOX_TOKEN,
     LAYER_NAMES,
     MVT_LAYER_URL,
     LAYER_NAME_COLOR_CODES
-} from '../../core/constants';
-import { MVTLayer } from '@deck.gl/geo-layers';
-
+} from '../../core';
 
 if (!MAPBOX_TOKEN) {
     throw new Error('Missing Mapbox token');
 }
 
-// Define the structure of the tooltip
 const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,
     latitude: 51.5074,
@@ -50,8 +48,7 @@ export default function MapPage() {
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}
-                layers={layers}
-            >
+                layers={layers}>
                 <Map
                     initialViewState={INITIAL_VIEW_STATE}
                     mapStyle={BASEMAP.POSITRON}
@@ -59,6 +56,6 @@ export default function MapPage() {
                     style={{ width: '500px', height: '500px' }}
                 />
             </DeckGL>
-            <>
+        </>
     );
 }

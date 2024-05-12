@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Container, Group, Burger, Box, rem } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
-import WaterLogo from '../../../../assets/water.svg';
+import WaterLogo from '../images/water.svg';
 import styles from '../css/Header.module.css';
 
 const links = [
@@ -15,44 +15,41 @@ const links = [
 
 export default function Header() {
     const [opened, { toggle }] = useDisclosure(false);
-    const [active, setActive] = useState(0);
+  const [active, setActive] = useState(0);
 
-    const items = links.map((link, index) => (
-        <Link
-            key={link.label}
-            to={link.link}
-            className={styles.mainLink}
-            data-active={index === active || undefined}
-            onClick={() => {
-                setActive(index);
-            }}
-        >
-            {link.label}
-        </Link>
-    ));
+  const linkButtons = links.map((link, index) => (
+    <Link
+      key={link.label}
+      to={link.link}
+      className={styles.mainLink}
+      data-active={index === active || undefined}
+      onClick={() => {
+        setActive(index);
+      }}
+    >
+      {link.label}
+    </Link>
+  ));
 
-    return (
-        <>
-            <header className={styles.header}>
-                <Container className={styles.inner} fluid>
-                    <Group>
-                        <img src={WaterLogo} alt="Water Logo" width={30} />
-                        <h2> Unlocking Digital Twin Application </h2>
-                    </Group>
-                    <Box visibleFrom="sm" className={styles.links}>
-                        <Group gap={1} className={styles.mainLinks}>
-                            {items}
-                        </Group>
-                    </Box>
-
-                    <Burger
-                        opened={opened}
-                        onClick={toggle}
-                        size="sm"
-                        hiddenFrom="sm"
-                    />
-                </Container>
-            </header>
-        </>
-    );
+  return (
+    <>
+      <div className={styles.header}>
+        <div className={styles.titleBlock}>
+          <img src={WaterLogo} alt="Water Logo" className={styles.logo} width={30} />
+          <h3> Unlocking Digital Twin POC </h3>
+        </div>
+        <div className={styles.links}>
+            { linkButtons }
+        </div>
+        <div className={styles.menuBlock}>
+          <Burger
+            opened={opened}
+            onClick={toggle}
+            size="sm"
+            hiddenFrom="sm"
+          />
+        </div>
+      </div>
+    </>
+  );
 }

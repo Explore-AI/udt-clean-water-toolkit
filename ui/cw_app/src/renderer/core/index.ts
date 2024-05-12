@@ -1,6 +1,4 @@
-import 'dotenv';
-
-export const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
+import GEOSEVER_URL from '../config'
 
 export type LayerNames = {
     [key: string]: string;
@@ -37,9 +35,9 @@ export const LAYER_NAME_COLOR_CODES = {
 };
 
 export const MVT_LAYER_URL = (asset_name: string) => {
-    return `http://localhost:8080/geoserver/gwc/service/tms/1.0.0/udt:${asset_name}@EPSG:900913@pbf/{z}/{x}/{-y}.pbf`;
+    return `{GEOSEVER_URL}/geoserver/gwc/service/tms/1.0.0/udt:${asset_name}@EPSG:900913@pbf/{z}/{x}/{-y}.pbf`;
 };
 
 export const MVT_LAYER_URL_TWO = (asset_name: string) => {
-    return `http://localhost:8080/geoserver/udt/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:${asset_name}&STYLE=&TILEMATRIX=EPSG:900913:13&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}`;
+    return `{GEOSEVER_URL}/geoserver/udt/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:${asset_name}&STYLE=&TILEMATRIX=EPSG:900913:13&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}`;
 };
