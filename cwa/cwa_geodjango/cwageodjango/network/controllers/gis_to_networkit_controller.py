@@ -1,5 +1,4 @@
 from django.db.models.query import QuerySet
-from cleanwater.controllers.network_controller import NetworkController
 import networkit as nk
 from ..calculators import GisToNkCalculator
 from cwageodjango.assets.controllers import (
@@ -7,7 +6,7 @@ from cwageodjango.assets.controllers import (
     DistributionMainsController,
 )
 
-class GisToNkController(NetworkController, GisToNkCalculator):
+class GisToNkController(GisToNkCalculator):
     """
     Create a NetworKit graph of assets from a geospatial
     network of assets

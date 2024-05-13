@@ -3,9 +3,6 @@ from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
 from neomodel import db
 from neomodel.exceptions import UniqueProperty
-from cleanwater.exceptions import (
-    InvalidPipeException,
-)
 from cleanwater.transform import GisToGraph
 from cwageodjango.core.constants import (
     PIPE_JUNCTION__NAME,
