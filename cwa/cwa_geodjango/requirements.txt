@@ -9,5 +9,5 @@ sqids==0.4.1
 shapely==2.0.3
 wntr==1.1.0
 networkit==11.0
-#geoserver-rest==2.7.0
+geoserver-rest==2.7.0
 contextily==1.6.0
