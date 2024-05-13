@@ -12,8 +12,7 @@ class GisToNxController(GisToNxCalculator):
 
     def __init__(self, config):
         self.config = config
-        NetworkController.__init__(self, self.config.srid)
-        GisToNxCalculator.__init__(self, self.config)
+        super().__init__(self.config)
 
     def create_network(self):
         from timeit import default_timer as timer
