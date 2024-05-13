@@ -6,10 +6,6 @@ import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import BasePage from './core/components/BasePage';
 
-/* const config = require("dotenv");
- * config.config(); */
-
-
 export default function App() {
   return (
     <Router>
