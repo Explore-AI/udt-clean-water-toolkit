@@ -1,0 +1,8 @@
+.searchBox {
+  height: calc(2pxrem * var(--mantine-scale));
+  width: calc(17rem * var(--mantine-scale));
+  position: absolute;
+  left: 20px;
+  top: 80px;
+  z-index: 3;
+}

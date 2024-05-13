@@ -1,6 +1,6 @@
 // Our Map Page details exists here
 import DeckGL from '@deck.gl/react';
-import styles from '../css/MapPage.module.css';
+import styles from '../css/Map.module.css';
 import SearchWidget from '../../core/components/SearchWidget';
 import BaseLayout from '../../core/components/BaseLayout';
 import { MapViewState } from '@deck.gl/core';
@@ -43,19 +43,21 @@ const layers = Object.entries(LAYER_NAMES).map(([key, value]) => {
 export default function MapPage() {
 
     return (
-        <>
-            <SearchWidget />
-            <DeckGL
-                initialViewState={INITIAL_VIEW_STATE}
-                controller={{ scrollZoom: true }}
-                layers={layers}>
-                <Map
-                    initialViewState={INITIAL_VIEW_STATE}
-                    mapStyle={BASEMAP.POSITRON}
-                    mapboxAccessToken={MAPBOX_TOKEN}
-                    style={{ width: '500px', height: '500px' }}
-                />
-            </DeckGL>
-        </>
+      <>
+        <div className={styles.searchBox}>
+          <SearchWidget />
+        </div>
+        <DeckGL
+          initialViewState={INITIAL_VIEW_STATE}
+          controller={{ scrollZoom: true }}
+          layers={layers}>
+          <Map
+            initialViewState={INITIAL_VIEW_STATE}
+            mapStyle={BASEMAP.POSITRON}
+            mapboxAccessToken={MAPBOX_TOKEN}
+            style={{ width: '500px', height: '500px' }}
+          />
+        </DeckGL>
+      </>
     );
 }
