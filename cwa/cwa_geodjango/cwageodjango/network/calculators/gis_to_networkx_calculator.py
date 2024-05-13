@@ -1,11 +1,16 @@
+import pdb
+import json
 from networkx import Graph
 import networkx as nx
-from cleanwater.calculators import GisToGraphCalculator
+from cleanwater.transform import GisToGraph
 from cwageodjango.config.settings import sqids
 import matplotlib.pyplot as plt
+import geopandas as gpd
+from shapely import wkt
+from shapely.geometry import Point
 
 
-class GisToNxCalculator(GisToGraphCalculator):
+class GisToNxCalculator(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
@@ -41,7 +46,9 @@ class GisToNxCalculator(GisToGraphCalculator):
         self._add_edges_to_graph(edges)
         self._remove_unconnected_nodes()
         self._connected_components()
-        self._plot_graph()
+        G = self.G
+        self._plot_graph(G)
+        self._spatial_plot(G)
 
     def _gather_edges(self):
         edges = []
@@ -99,35 +106,213 @@ class GisToNxCalculator(GisToGraphCalculator):
         connected = len(list(nx.connected_components(self.G)))
         print('Connected components:', connected)
 
-    def _plot_graph(self):
-        # Output name
-        filename = "Graph.svg"
+    @staticmethod
+    def _plot_graph(G):
+        dma_codes = GisToNxCalculator._get_dma_codes_from_graph(G)
+        if dma_codes:
+            for dma in dma_codes:
+                filename = f"dma_{dma}_graph.svg"
 
-        # Define edge positions
-        pos = nx.spring_layout(self.G, scale=10)
+                # Define edge positions
+                pos = nx.spring_layout(G, scale=10)
 
-        # Extracting node and edge labels from the graph
-        node_labels = nx.get_node_attributes(self.G, "node_labels").values()
-        edge_labels = nx.get_edge_attributes(self.G, "asset_name").values()
+                # Extracting node and edge labels from the graph
+                node_labels = nx.get_node_attributes(G, "node_labels").values()
+                edge_labels = nx.get_edge_attributes(G, "asset_name").values()
 
-        # Define colour map based on node and edge labels
-        nodes_colour_map = ['blue' if 'Hydrant' in labels
-                            else 'yellow' if 'NetworkOptValve' in labels
-                            else 'red' for labels in node_labels]
+                # Define colour map based on node and edge labels
+                nodes_colour_map = ['blue' if 'Hydrant' in labels
+                                    else 'yellow' if 'NetworkOptValve' in labels
+                                    else 'red' for labels in node_labels]
 
-        edges_colour_map = ['black' if 'TrunkMain' in labels
-                            else 'orange' for labels in edge_labels]
+                edges_colour_map = ['black' if 'TrunkMain' in labels
+                                    else 'orange' for labels in edge_labels]
 
-        # Draw the graph nodes and edges
-        plt.figure(figsize=(30, 30))
-        nx.draw(
-            self.G, pos, with_labels=False, node_color=nodes_colour_map, node_size=15, font_size=2
-        )
-        nx.draw_networkx_edges(self.G, pos, edge_color=edges_colour_map, width=1)
+                # Draw the graph nodes and edges
+                plt.figure(figsize=(30, 30))
+                nx.draw(
+                    G, pos, with_labels=False, node_color=nodes_colour_map, node_size=15, font_size=2
+                )
+                nx.draw_networkx_edges(G, pos, edge_color=edges_colour_map, width=1)
 
-        # Draw edge labels using the gid attribute
-        edge_labels = nx.get_edge_attributes(self.G, "gid")
-        nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels)
-        plt.savefig(filename, format="svg")
-        plt.close()
-        print("file 'Graph.svg' successfully saved")
+                # Draw edge labels using the gid attribute
+                edge_labels = nx.get_edge_attributes(G, "gid")
+                nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+                plt.savefig(filename, format="svg")
+                plt.close()
+                print(f"file {filename} successfully saved")
+        else:
+            filename = "dma_unknown_graph.svg"
+
+            # Define edge positions
+            pos = nx.spring_layout(G, scale=10)
+
+            # Extracting node and edge labels from the graph
+            node_labels = nx.get_node_attributes(G, "node_labels").values()
+            edge_labels = nx.get_edge_attributes(G, "asset_name").values()
+
+            # Define colour map based on node and edge labels
+            nodes_colour_map = ['blue' if 'Hydrant' in labels
+                                else 'yellow' if 'NetworkOptValve' in labels
+                                else 'red' for labels in node_labels]
+
+            edges_colour_map = ['black' if 'TrunkMain' in labels
+                                else 'orange' for labels in edge_labels]
+
+            # Draw the graph nodes and edges
+            plt.figure(figsize=(30, 30))
+            nx.draw(
+                G, pos, with_labels=False, node_color=nodes_colour_map, node_size=15, font_size=2
+            )
+            nx.draw_networkx_edges(G, pos, edge_color=edges_colour_map, width=1)
+
+            # Draw edge labels using the gid attribute
+            edge_labels = nx.get_edge_attributes(G, "gid")
+            nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+            plt.savefig(filename, format="svg")
+            plt.close()
+            print(f"file {filename} successfully saved")
+
+    @staticmethod
+    def _spatial_plot(G):
+        dma_codes = GisToNxCalculator._get_dma_codes_from_graph(G)
+        if dma_codes:
+            for dma in dma_codes:
+                filename = f'dma_{dma}_SpatialPlot.svg'
+                # if no dma codes, plot entire graph, otherwise filter by code, produce one map per code
+                nodes_gdf = GisToNxCalculator._create_nodes_gdf(G)
+                edges_gdf = GisToNxCalculator._create_edges_gdf(G)
+
+                # Define colour mapping dictionaries
+                default_node_colour = 'gray'
+                default_edge_colour = 'gray'
+                nodes_colour_map = {'Hydrant': 'blue', 'NetworkOptValve': 'yellow', 'pipe_junction': 'red'}
+                edges_colour_map = {'TrunkMain': 'black', 'DistributionMain': 'orange'}
+
+                nodes_gdf['node_colour'] = nodes_gdf['node_label'].map(lambda x: nodes_colour_map.get(x, default_node_colour))
+                edges_gdf['edge_colour'] = edges_gdf['asset_label'].map(lambda x: edges_colour_map.get(x, default_edge_colour))
+
+                # Plot GeoDataFrames
+                fig, ax = plt.subplots(figsize=(30, 30))
+                edges_gdf.plot(ax=ax, color=edges_gdf['edge_colour'], label='Pipe Features', legend=True)
+                nodes_gdf.plot(ax=ax, color=nodes_gdf['node_colour'], markersize=5, label='Point Assets', legend=True)
+
+                # Add OpenStreetMap basemap
+                #ctx.add_basemap(ax, crs=edges_gdf.crs.to_string(), source=ctx.providers.OpenStreetMap.Mapnik)
+
+                # Add labels for nodes and edges
+                # for idx, row in nodes_gdf.iterrows():
+                #     ax.annotate(text=row['node_key'], xy=(row['geometry'].x, row['geometry'].y), xytext=(3, 3),
+                #                 textcoords="offset points")
+
+                # for idx, row in edges_gdf.iterrows():
+                #     ax.annotate(text=row['gid'], xy=(row['geometry'].coords[0]), xytext=(3, 3),
+                #                 textcoords="offset points")
+
+                # Add legend, title
+                ax.legend()
+                ax.set_title('Neo4j Graph as Geo-Spatial Plot')
+
+                # Save plot as SVG
+                plt.savefig(filename, format='svg')
+                plt.close()
+                print(f"file {filename} successfully saved")
+        else:
+            filename = 'dma_unknown_SpatialPlot.svg'
+            # if no dma codes, plot entire graph, otherwise filter by code, produce one map per code
+            nodes_gdf = GisToNxCalculator._create_nodes_gdf(G)
+            edges_gdf = GisToNxCalculator._create_edges_gdf(G)
+
+            # Define colour mapping dictionaries
+            default_node_colour = 'gray'
+            default_edge_colour = 'gray'
+            nodes_colour_map = {'Hydrant': 'blue', 'NetworkOptValve': 'yellow', 'pipe_junction': 'red'}
+            edges_colour_map = {'TrunkMain': 'black', 'DistributionMain': 'orange'}
+
+            nodes_gdf['node_colour'] = nodes_gdf['node_label'].map(
+                lambda x: nodes_colour_map.get(x, default_node_colour))
+            edges_gdf['edge_colour'] = edges_gdf['asset_label'].map(
+                lambda x: edges_colour_map.get(x, default_edge_colour))
+
+            # Plot GeoDataFrames
+            fig, ax = plt.subplots(figsize=(30, 30))
+            edges_gdf.plot(ax=ax, color=edges_gdf['edge_colour'], label='Pipe Features', legend=True)
+            nodes_gdf.plot(ax=ax, color=nodes_gdf['node_colour'], markersize=5, label='Point Assets', legend=True)
+
+            # Add OpenStreetMap basemap
+            # ctx.add_basemap(ax, crs=edges_gdf.crs.to_string(), source=ctx.providers.OpenStreetMap.Mapnik)
+
+            # Add labels for nodes and edges
+            # for idx, row in nodes_gdf.iterrows():
+            #     ax.annotate(text=row['node_key'], xy=(row['geometry'].x, row['geometry'].y), xytext=(3, 3),
+            #                 textcoords="offset points")
+
+            # for idx, row in edges_gdf.iterrows():
+            #     ax.annotate(text=row['gid'], xy=(row['geometry'].coords[0]), xytext=(3, 3),
+            #                 textcoords="offset points")
+
+            # Add legend, title
+            ax.legend()
+            ax.set_title('Neo4j Graph as Geo-Spatial Plot')
+
+            # Save plot as SVG
+            plt.savefig(filename, format='svg')
+            plt.close()
+            print(f"file {filename} successfully saved")
+
+    @staticmethod
+    def _create_nodes_gdf(nxgraph):
+        # Extract attributes for each node
+        node_data = []
+        for node, attributes in nxgraph.nodes(data=True):
+            node_key = node
+            node_label = attributes.get('node_labels')[-1]
+            dmas_str = attributes.get('dmas', '[]')
+            dmas = json.loads(dmas_str)
+            dma_code = dmas[0]['code']
+            coords = attributes.get('coords_27700')
+            x_coord, y_coord = coords
+            geometry = Point(x_coord, y_coord)
+            node_data.append((node_key, node_label, dma_code, geometry))
+
+        # Create GeoDataFrame for nodes
+        nodes_gdf = gpd.GeoDataFrame(node_data,
+                                     columns=['node_key', 'node_label', 'dma_code', 'geometry'],
+                                     crs='EPSG:27700')
+
+        # pdb.set_trace()
+        return nodes_gdf
+
+    @staticmethod
+    def _create_edges_gdf(nxgraph):
+        # Extracting attributes for each edge
+        edge_data = []
+        for source, target, attributes in nxgraph.edges(data=True):
+            gid = attributes.get('gid')
+            asset_label = attributes.get('asset_label')
+            dmas_str = attributes.get('dmas', '[]')
+            dmas = json.loads(dmas_str)
+            dma_code = dmas[0]['code']
+            segment_wkt = attributes.get('segment_wkt')
+            geometry = wkt.loads(segment_wkt)
+            edge_data.append((gid, asset_label, dma_code, geometry))
+
+        # Create GeoDataFrame for edges
+        edges_gdf = gpd.GeoDataFrame(edge_data,
+                                     columns=['gid', 'asset_label', 'dma_code', 'geometry'],
+                                     crs='EPSG:27700')
+
+        return edges_gdf
+
+    @staticmethod
+    def _get_dma_codes_from_graph(nxgraph):
+        # method for collecting list of DMA codes from graph
+        dma_codes = []
+        for _, attributes in nxgraph.nodes(data=True):
+            dmas_str = attributes.get('dmas', '[]')
+            dmas = json.loads(dmas_str)
+            dma_code = dmas[0]['code']
+            if dma_code not in dma_codes:
+                dma_codes.append(dma_code)
+
+        return dma_codes

@@ -1,8 +1,8 @@
 import networkit as nk
-from cleanwater.calculators import GisToGraphCalculator
+from cleanwater.transform import GisToGraph
 from cwageodjango.config.settings import sqids
 
-class GisToNkCalculator(GisToGraphCalculator):
+class GisToNkCalculator(GisToGraph):
     """
     Calculate network graph from geospatial asset data.
     """

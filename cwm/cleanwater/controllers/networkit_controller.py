@@ -1,36 +1,44 @@
 import networkit as nk
 
+
 class Neo4j2Networkit:
+    values_to_drop = ["PointAsset", "PointNode"]
+
     def __init__(self):
         self.G = nk.Graph(edgesIndexed=True)
         self.edgelabel = self.G.attachEdgeAttribute("label", str)
         self.edgegid = self.G.attachEdgeAttribute("gid", str)
         self.nodelabel = self.G.attachNodeAttribute("label", str)
-        self.values_to_drop = ['PointAsset', 'PointNode']
-    
+
     def add_pipe(self, start_node_id, end_node_id):
         self.G.addEdge(start_node_id, end_node_id, addMissing=True)
 
+    def get_node_attributes(self, node_type, attribute):
+        node = getattr(attribute[1], node_type)
 
-    def process_batch(self, batch_result):
-        for i in batch_result:
-            start = i[1]._start_node
-            x, y = start['x_coord'], start['y_coord']
-            start_node_id = start._id
-            start_node_label = [x for x in list(start.labels) if i not in self.values_to_drop][0]
-        
-            end = i[1]._end_node
-            x, y = end['x_coord'], end['y_coord']
-            end_node_id = end._id
-            end_node_label = [x for x in list(end.labels) if i not in self.values_to_drop][0]
-        
-            edge_id = i[1]._id
-            edge_label = i[1].type
-            edge_gid = str(i[1]['gid'])    
-            
+        node_id = node._id
+        node_label = [
+            x for x in list(node.labels) if attribute not in self.values_to_drop
+        ][0]
+
+        self.nodelabel[node_id] = node_label
+
+        return node_id
+
+    def set_edge_attributes(self, start_node_id, end_node_id, attribute):
+        # edge_id = attribute[1]._id
+        edge_label = attribute[1].type
+        edge_gid = str(attribute[1]["gid"])
+
+        self.edgelabel[start_node_id, end_node_id] = edge_label
+        self.edgegid[start_node_id, end_node_id] = edge_gid
+
+    def convert_neo4j_to_nk(self, graph):
+
+        for attribute in graph:
+
+            start_node_id = self.get_node_attributes("_start_node", attribute)
+            end_node_id = self.get_node_attributes("_end_node", attribute)
+
             self.add_pipe(start_node_id, end_node_id)
-    
-            self.edgelabel[start_node_id, end_node_id] = edge_label
-            self.edgegid[start_node_id, end_node_id] = edge_gid
-            self.nodelabel[start_node_id] = start_node_label
-            self.nodelabel[end_node_id] = end_node_label
+            self.set_edge_attributes(start_node_id, end_node_id, attribute)

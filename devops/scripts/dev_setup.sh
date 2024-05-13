@@ -24,11 +24,10 @@ docker exec -it ${CWA_GEOALCHEMY_CONTAINER_ID} pip install -r requirements.txt
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash -c "cd /opt/udt/api/api_drf/ && pip install -r requirements.txt -r dev-requirements.txt"
+
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash ln -s /opt/cwa/cwa_geodjango/cwa_geod/ /opt/api/api_drf/
 
 ./postgis/postgis_db_init.sh
-
-#docker exec -it ${CWA_GEODORM_CONTAINER_ID} python3 main.py migrate
 
 echo
 echo "cwa_geodjango app dev setup complete."

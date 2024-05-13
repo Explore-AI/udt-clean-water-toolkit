@@ -15,7 +15,7 @@ from ..core.constants import (
 )
 
 
-class GisToGraphCalculator:
+class GisToGraph:
     def __init__(
         self, srid, sqids, processor_count=None, chunk_size=None, neoj4_point=False
     ):
