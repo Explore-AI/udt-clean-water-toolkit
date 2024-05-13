@@ -6,7 +6,7 @@ services:
     image: api_drf
     build: 
       context: ./
-      dockerfile: api_drf.Dockerfile
+      dockerfile: Dockerfile_api_drf
     links: 
       - udtpostgis
       - udtcwageodjangodev

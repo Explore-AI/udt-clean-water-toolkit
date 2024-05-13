@@ -2,7 +2,7 @@ import pdb
 import json
 from networkx import Graph
 import networkx as nx
-from cleanwater.calculators import GisToGraphCalculator
+from cleanwater.transform import GisToGraph
 from cwageodjango.config.settings import sqids
 import matplotlib.pyplot as plt
 import geopandas as gpd
@@ -10,7 +10,7 @@ from shapely import wkt
 from shapely.geometry import Point
 
 
-class GisToNxCalculator(GisToGraphCalculator):
+class GisToNxCalculator(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
