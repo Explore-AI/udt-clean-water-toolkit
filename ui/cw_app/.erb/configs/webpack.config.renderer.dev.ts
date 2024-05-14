@@ -62,6 +62,11 @@ const configuration: webpack.Configuration = {
 
   module: {
     rules: [
+      // {
+      //   test: /\.css$/,
+      //   include: [/\.module\.s?(c|a)ss$/],
+      //   use: ['style-loader', 'css-loader', 'postcss-loader'],
+      // }, 
       {
         test: /\.s?(c|a)ss$/,
         use: [

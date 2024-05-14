@@ -1,0 +1,8 @@
+.button {
+    /* background: linear-gradient(45deg, #4b6cb7 10%, #253b67 90%); */
+    background-color: var(--mantine-color-blue-9);
+    color: var(--mantine-color-white);
+    border-width: 0;
+    margin: 2px;
+    font-size: 10px;
+}

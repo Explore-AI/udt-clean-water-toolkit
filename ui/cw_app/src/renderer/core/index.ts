@@ -1,4 +1,5 @@
 import { GEOSERVER_URL } from '../config';
+import { MapViewState } from '@deck.gl/core';
 
 export type LayerNames = {
     [key: string]: string;
@@ -40,4 +41,25 @@ export const MVT_LAYER_URL = (asset_name: string) => {
 
 export const MVT_LAYER_URL_TWO = (asset_name: string) => {
     return `${GEOSERVER_URL}/geoserver/udt/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:${asset_name}&STYLE=&TILEMATRIX=EPSG:900913:13&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}`;
+};
+
+export const DEFAULT_LAYER_TOGGLE = {
+    chambers: true,
+    distribution_main: true,
+    hydrants: true,
+    loggers: true,
+    network_meter: true,
+    network_opt_valve: true,
+    operational_site: true,
+    pressure_control_valve: true,
+    pressure_fitting: true,
+    trunkmain: true,
+}
+
+export const INITIAL_VIEW_STATE: MapViewState = {
+    longitude: -0.118092,
+    latitude: 51.5074,
+    zoom: 10,
+    bearing: 0,
+    pitch: 30,
 };

@@ -1,8 +1,36 @@
 .searchBox {
-  height: calc(2rem * var(--mantine-scale));
-  width: calc(17rem * var(--mantine-scale));
-  position: absolute;
-  left: 20px;
-  top: 80px;
-  z-index: 3;
+    height: calc(2rem * var(--mantine-scale));
+    width: calc(17rem * var(--mantine-scale));
+    position: absolute;
+    left: 20px;
+    top: 50px;
+    z-index: 3;
+}
+
+.control {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: 50px;
+    z-index: 3;
+    top: 90px;
+    left: 20px; 
+    border: 1px solid red; 
+}
+.layerTogglePopup{
+    position: absolute; 
+    top: 120px; 
+    left: 80px; 
+    z-index: 4; 
+    height: 500px; 
+}
+
+
+.basemapTogglePopup {
+    position: absolute; 
+    top: 150px; 
+    left: 80px; 
+    z-index: 4; 
+    height: 300px; 
 }

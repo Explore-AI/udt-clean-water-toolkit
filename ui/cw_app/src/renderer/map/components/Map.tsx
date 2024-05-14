@@ -1,6 +1,6 @@
 // Our Map Page details exists here
 import DeckGL from '@deck.gl/react';
-import * as styles from '../css/Map.module.css';
+
 import SearchWidget from '../../core/components/SearchWidget';
 import BaseLayout from '../../core/components/BaseLayout';
 import { MapViewState } from '@deck.gl/core';
@@ -11,20 +11,26 @@ import { MVTLayer } from '@deck.gl/geo-layers';
 import {
     LAYER_NAMES,
     MVT_LAYER_URL,
-    LAYER_NAME_COLOR_CODES
+    LAYER_NAME_COLOR_CODES,
+    DEFAULT_LAYER_TOGGLE,
 } from '../../core';
+import GeoSpatialControls from './MapControl';
+import * as styles from '../css/Map.module.css';
+import { useState, useContext } from 'react';
+import { MapContext } from '../context/MapContext';
+import ToggleViewPopup from './TogglePopup';
 
 if (!MAPBOX_TOKEN) {
     throw new Error('Missing Mapbox token');
 }
 
-const INITIAL_VIEW_STATE: MapViewState = {
-    longitude: -0.118092,
-    latitude: 51.5074,
-    zoom: 10,
-    bearing: 0,
-    pitch: 30,
-};
+// const INITIAL_VIEW_STATE: MapViewState = {
+//     longitude: -0.118092,
+//     latitude: 51.5074,
+//     zoom: 10,
+//     bearing: 0,
+//     pitch: 30,
+// };
 
 // const layers = Object.entries(LAYER_NAMES).map(([key, value]) => {
 //     return new MVTLayer({
@@ -40,24 +46,42 @@ const INITIAL_VIEW_STATE: MapViewState = {
 // })
 
 export default function MapPage() {
-
+    const { initialView, showBaseMapToggle, showLayerToggle } = useContext(MapContext); 
+    
     return (
-      <>
-        <div className={styles.searchBox}>
-          <SearchWidget />
-        </div>
-        <DeckGL
-          initialViewState={INITIAL_VIEW_STATE}
-          controller={{ scrollZoom: true }}
-          // layers={layers}
-          >
-          <Map
-            initialViewState={INITIAL_VIEW_STATE}
-            mapStyle={BASEMAP.POSITRON}
-            mapboxAccessToken={MAPBOX_TOKEN}
-            style={{ width: '500px', height: '500px' }}
-          />
-        </DeckGL>
-      </>
+        <>
+            <div className={styles.searchBox}>
+                <SearchWidget />
+            </div>
+            <div className={styles.control}>
+                <GeoSpatialControls />
+            </div>
+            {
+                showLayerToggle && 
+                <div className={styles.layerTogglePopup} > 
+                    <ToggleViewPopup message='Layer Toggle'/>
+                </div>
+            }
+            {
+                showBaseMapToggle && 
+                <div className={styles.basemapTogglePopup} > 
+                    <ToggleViewPopup message='Basemap Toggle' />
+                </div>
+            }
+
+            <DeckGL
+                initialViewState={initialView}
+                controller={{ scrollZoom: true }}
+                // layers={layers}
+            >
+                <Map
+                    initialViewState={initialView}
+                    mapStyle={BASEMAP.POSITRON}
+                    mapboxAccessToken={MAPBOX_TOKEN}
+                    style={{ width: '500px', height: '500px' }}
+                    attributionControl={false}
+                />
+            </DeckGL>
+        </>
     );
 }
