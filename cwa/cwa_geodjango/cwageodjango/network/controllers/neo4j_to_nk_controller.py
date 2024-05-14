@@ -1,9 +1,9 @@
 import networkit as nk
 from neomodel import db
-from cleanwater.controllers.networkit_controller import Neo4j2Networkit
+from cleanwater.transform import Neo4jToNk
 
 
-class Convert2Networkit(Neo4j2Networkit):
+class Neo4jToNkController(Neo4jToNk):
     def __init__(self, config):
         self.config = config
         super().__init__()
