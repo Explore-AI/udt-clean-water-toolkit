@@ -177,3 +177,4 @@ postgres-data
 *.DS_Store
 .vscode/
 *.geoserver_env
+devops/scripts/geoserver/output

@@ -6,9 +6,9 @@ import AnalysisPage from '../../analysis/components/AnalysisPage'
 function BaseRouter() {
   return (
     <Routes>
-      <Route path="/" exact={true} element={<Map/>} />
-      <Route path="/graph" exact={true} element={<Graph/>} />
-      <Route path="/analysis" exact={true} element={<AnalysisPage/>} />
+      <Route path="/" element={<Map/>} />
+      <Route path="/graph" element={<Graph/>} />
+      <Route path="/analysis" element={<AnalysisPage/>} />
     </Routes>
   );
 }
