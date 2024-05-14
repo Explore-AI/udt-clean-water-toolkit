@@ -1,15 +1,15 @@
 // Our Map Page details exists here
 import styles from '../css/MapPage.module.css';
-import BaseLayout from '../../core/components/BaseLayout';
+import MapLayout from '../../core/components/MapLayout';
 import Map from './Map'
 
 export default function MapPage() {
 
     return (
-        <BaseLayout>
-            <div className={styles['page-container']}>
-                <Map/>
-            </div>
-        </BaseLayout>
+      <MapLayout>
+        <div className={styles['page-container']}>
+          <Map/>
+        </div>
+      </MapLayout>
     );
 }
