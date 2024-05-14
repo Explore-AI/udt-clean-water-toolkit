@@ -1,9 +1,10 @@
 import networkit as nk
 from neomodel import db
 from cleanwater.transform import Neo4jToNk
+from cleanwater.data_managers import NetworkDataManager
 
 
-class Neo4jToNkController(Neo4jToNk):
+class Neo4jToNkController(Neo4jToNk, NetworkDataManager):
     def __init__(self, config):
         self.config = config
         super().__init__()
@@ -44,4 +45,4 @@ class Neo4jToNkController(Neo4jToNk):
             self.convert_neo4j_to_nk(graph)
 
     def export_graphml(self):
-        nk.writeGraph(self.G, self.config.outputfile, nk.Format.GML)
+        self.nk_to_graphml(self.G, self.config.outputfile)

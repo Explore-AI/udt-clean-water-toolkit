@@ -2,6 +2,10 @@ import networkit as nk
 
 
 class Neo4jToNk:
+    """
+    Converts a list of edges and nodes from Neo4J to NetworkIt
+    """
+
     values_to_drop = ["PointAsset", "PointNode"]
 
     def __init__(self):
