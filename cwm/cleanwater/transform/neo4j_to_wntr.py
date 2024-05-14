@@ -1,15 +1,13 @@
-from sqids import Sqids
 from wntr import network
 
 class Neo4j2Wntr:
     """
-    Class for converting data from Neo4j graph database to Water Network Toolkit (WNTR) format.
+    Convert a Neo4j graph the to Water Network Toolkit (WNTR) format.
 
     """
-    def __init__(self):
+    def __init__(self, sqids):
         self.wn = network.WaterNetworkModel()
-        self.sqid_alphabet = '9ItmZiAJ4OFa6MPCv5sDEpyGb2UQfWhTNlrgcnB0odz8KqVkRX3L1wYHeSu7jx'
-        self.sqids = Sqids(alphabet=self.sqid_alphabet)
+        self.sqids = sqids
 
     def generate_unique_id(self, input_string):
         """
@@ -41,7 +39,7 @@ class Neo4j2Wntr:
         node_id = self.generate_unique_id(id)
         self.wn.add_junction(node_id, coordinates=(x, y))
         return node_id
-    
+
     def add_pipe(self, edge_id, start_node_id, end_node_id):
         """
         Adds a pipe to the water network model.
@@ -56,10 +54,12 @@ class Neo4j2Wntr:
 
         """
         pipe_id = self.generate_unique_id(edge_id)
+
         self.wn.add_pipe(pipe_id, start_node_id, end_node_id)
+
         return pipe_id
-        
-    def process_batch(self, batch_result):
+
+    def create_graph(self, graph):
         """
         Processes a batch of results from Neo4j query and adds corresponding nodes and pipes to the water network model.
 
@@ -67,16 +67,18 @@ class Neo4j2Wntr:
             batch_result (list): List of results from Neo4j query.
 
         """
-        for i in batch_result:
-            start = i[1]._start_node
+        for attributes in graph
+            start = attributes[1]._start_node
             x, y = start['x_coord'], start['y_coord']
             start_id = start._id
             start_node_id = self.add_node(start_id, x, y)
 
-            end = i[1]._end_node
+            end = attributes[1]._end_node
             x, y = end['x_coord'], end['y_coord']
             end_id = end._id
             end_node_id = self.add_node(end_id, x, y)
 
-            edge_id = i[1]._id
-            pipe_id = self.add_pipe(edge_id, start_node_id, end_node_id)
+            edge_id = attributes[1]._id
+            self.add_pipe(edge_id, start_node_id, end_node_id)
+
+            return self.wn

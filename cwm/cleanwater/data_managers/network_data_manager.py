@@ -1,7 +1,9 @@
 # from geopandas import GeoDataFrame
-#from momepy import gdf_to_nx
+# from momepy import gdf_to_nx
+import wntr
 import networkit as nk
-from networkx import Graph
+
+# from networkx import Graph
 from . import GeoDjangoDataManager
 
 
@@ -25,3 +27,22 @@ class NetworkDataManager(GeoDjangoDataManager):
     @staticmethod
     def nk_to_graphml(graph, out_file):
         nk.writeGraph(graph, out_file, nk.Format.GML)
+
+    @staticmethod
+    def wntr_to_inp(graph, out_file):
+        """
+        Exports the WNTR model to an INP (EPANET input file) format.
+
+        """
+        wntr.network.write_inpfile(graph, filename=out_file)
+
+    @staticmethod
+    def wntr_to_json(graph, out_file):
+        """
+        Exports the WNTR model to a JSON format.
+
+        Parameters:
+            filename (str): Name of the JSON file to export.
+
+        """
+        wntr.network.write_json(graph, path_or_buf=out_file)
