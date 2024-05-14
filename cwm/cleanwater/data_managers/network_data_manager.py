@@ -22,5 +22,6 @@ class NetworkDataManager(GeoDjangoDataManager):
     #     gdf: GeoDataFrame = geodataframe.explode(index_parts=True)
     #     return gdf_to_nx(gdf, approach="primal")
 
+    @staticmethod
     def nk_to_graphml(graph, out_file):
         nk.writeGraph(graph, out_file, nk.Format.GML)
