@@ -5,7 +5,12 @@ type Inputs = {
   exampleRequired: string
 }
 
-export default function AnalysisForm(props) {
+type childrenProps = {
+  children: React.ReactNode
+}
+
+
+export default function AnalysisForm(props: childrenProps) {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<Inputs>()
   const { onSubmit } = props
 
@@ -18,9 +23,11 @@ export default function AnalysisForm(props) {
       <div>
         <input defaultValue="test" {...register("example")} />
       </div>
+
       <div>
         <input {...register("exampleRequired", { required: true })} />
       </div>
+
         {errors.exampleRequired && <span>This field is required</span>}
 
       <div>
