@@ -16,6 +16,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@mantine/hooks": "^7.9.1",
     "css-loader": "^7.1.1",
     "postcss": "^8.4.38",
     "postcss-loader": "^8.1.1",

@@ -43,18 +43,45 @@ export const MVT_LAYER_URL_TWO = (asset_name: string) => {
     return `${GEOSERVER_URL}/geoserver/udt/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:${asset_name}&STYLE=&TILEMATRIX=EPSG:900913:13&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}`;
 };
 
-export const DEFAULT_LAYER_TOGGLE = {
-    chambers: true,
-    distribution_main: true,
-    hydrants: true,
-    loggers: true,
-    network_meter: true,
-    network_opt_valve: true,
-    operational_site: true,
-    pressure_control_valve: true,
-    pressure_fitting: true,
-    trunkmain: true,
-}
+export const DEFAULT_LAYER_TOGGLE = [
+    { visible: false, label: 'Chambers', key: 'chambers'},
+    { visible: false, label: 'Distribution Main', key:'distribution_main' },
+    { visible: false, label: 'Hydrants', key: 'hydrants' },
+    { visible: false, label: 'Loggers', key: 'loggers' },
+    { visible: false, label: 'Network Meter', key: 'network_meter' },
+    { visible: false, label: 'Network Opt Valve', key: 'network_opt_valve' },
+    { visible: false, label: 'Operational Site', key: 'operational_site' },
+    { visible: false, label: 'Pressure Control Valve', key: 'pressure_control_valve' },
+    { visible: false, label: 'Pressure Fitting', key: 'pressure_fitting' },
+    { visible: false, label: 'Trunk Main', key: 'trunkmain' },
+];
+
+export const DEFAULT_BASEMAP_TOGGLE = [
+    {
+        visible: true,
+        label: 'Open Street Map',
+        map_url: 'mapbox://styles/mapbox/streets-v12',
+        key: 'open_street_map'
+    },
+    {
+        visible: false,
+        label: 'Satellite Map',
+        map_url: 'mapbox://styles/mapbox/satellite-v9',
+        key: 'satellite_map'
+    },
+    {
+        visible: false,
+        label: 'Dark Map',
+        map_url: 'mapbox://styles/mapbox/dark-v11',
+        key: 'dark_map'
+    },
+    {
+        visible: false,
+        label: 'Terrain',
+        map_url: 'mapbox://styles/mapbox/outdoors-v12',
+        key: 'terrain_map'
+    },
+];
 
 export const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,

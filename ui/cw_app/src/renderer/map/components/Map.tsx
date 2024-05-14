@@ -13,12 +13,14 @@ import {
     MVT_LAYER_URL,
     LAYER_NAME_COLOR_CODES,
     DEFAULT_LAYER_TOGGLE,
+    DEFAULT_BASEMAP_TOGGLE,
 } from '../../core';
 import GeoSpatialControls from './MapControl';
 import * as styles from '../css/Map.module.css';
 import { useState, useContext } from 'react';
 import { MapContext } from '../context/MapContext';
 import ToggleViewPopup from './TogglePopup';
+import { LayerToggleObject, BasemapToggleObject, LayerToggle, BasemapToggle } from '../types/types';
 
 if (!MAPBOX_TOKEN) {
     throw new Error('Missing Mapbox token');
@@ -46,8 +48,15 @@ if (!MAPBOX_TOKEN) {
 // })
 
 export default function MapPage() {
-    const { initialView, showBaseMapToggle, showLayerToggle } = useContext(MapContext); 
-    
+    const { initialView, showBaseMapToggle, showLayerToggle } =
+        useContext(MapContext);
+    const [toggleLayers, setToggleLayers] =
+        useState<LayerToggle[]>(DEFAULT_LAYER_TOGGLE);
+    const [toggleBaseMap, setToggleBaseMap] = useState<BasemapToggle[]>(
+        DEFAULT_BASEMAP_TOGGLE,
+    );
+    console.log(`Your Toggling Layers: ${toggleLayers}`);
+    console.log(`Your Toggling BaseMap: ${toggleBaseMap}`);
     return (
         <>
             <div className={styles.searchBox}>
@@ -56,18 +65,17 @@ export default function MapPage() {
             <div className={styles.control}>
                 <GeoSpatialControls />
             </div>
-            {
-                showLayerToggle && 
-                <div className={styles.layerTogglePopup} > 
-                    <ToggleViewPopup message='Layer Toggle'/>
+            {showLayerToggle && (
+                <div className={styles.layerTogglePopup}>
+                    <ToggleViewPopup toggleList={toggleLayers} />
                 </div>
-            }
-            {
+            )}
+            {/* {
                 showBaseMapToggle && 
                 <div className={styles.basemapTogglePopup} > 
                     <ToggleViewPopup message='Basemap Toggle' />
                 </div>
-            }
+            } */}
 
             <DeckGL
                 initialViewState={initialView}

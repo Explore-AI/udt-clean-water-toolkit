@@ -15,22 +15,22 @@
     width: 50px;
     z-index: 3;
     top: 90px;
-    left: 20px; 
-    border: 1px solid red; 
+    left: 20px;
+    border: 1px solid red;
 }
-.layerTogglePopup{
-    position: absolute; 
-    top: 120px; 
-    left: 80px; 
-    z-index: 4; 
-    height: 500px; 
+.layerTogglePopup {
+    position: absolute;
+    top: 120px;
+    left: 80px;
+    z-index: 4;
+    height: 300px;
+    width: 220px;
 }
-
 
 .basemapTogglePopup {
-    position: absolute; 
-    top: 150px; 
-    left: 80px; 
-    z-index: 4; 
-    height: 300px; 
+    position: absolute;
+    top: 150px;
+    left: 80px;
+    z-index: 4;
+    height: 300px;
 }
