@@ -23,17 +23,19 @@ export const LAYER_NAMES = {
 };
 
 export const LAYER_NAME_COLOR_CODES = {
-    chambers: [245, 183, 177],
-    distribution_main: [162, 217, 206],
-    hydrants: [0, 158, 222],
-    loggers: [249, 231, 159],
-    network_meter: [88, 214, 141],
-    network_opt_valve: [165, 105, 189],
-    operational_site: [165, 105, 189],
-    pressure_control_valve: [211, 84, 0],
-    pressure_fitting: [74, 35, 90],
-    trunkmain: [33, 97, 140],
+    assets_chamber: [245, 183, 177],
+    assets_distributionmain: [162, 217, 206],
+    assets_hydrant: [0, 158, 222],
+    assets_logger: [249, 231, 159],
+    assets_networkmeter: [88, 214, 141],
+    assets_networkoptvalve: [165, 105, 189],
+    assets_operationalsite: [165, 105, 189],
+    assets_pressurecontrolvalve: [211, 84, 0],
+    assets_pressurefitting: [74, 35, 90],
+    assets_trunkmain: [33, 97, 140],
 };
+
+export type LayerKey = keyof typeof LAYER_NAME_COLOR_CODES; 
 
 export const MVT_LAYER_URL = (asset_name: string) => {
     return `${GEOSERVER_URL}/geoserver/gwc/service/tms/1.0.0/udt:${asset_name}@EPSG:900913@pbf/{z}/{x}/{-y}.pbf`;
@@ -44,16 +46,56 @@ export const MVT_LAYER_URL_TWO = (asset_name: string) => {
 };
 
 export const DEFAULT_LAYER_TOGGLE = [
-    { visible: false, label: 'Chambers', key: 'chambers'},
-    { visible: false, label: 'Distribution Main', key:'distribution_main' },
-    { visible: false, label: 'Hydrants', key: 'hydrants' },
-    { visible: false, label: 'Loggers', key: 'loggers' },
-    { visible: false, label: 'Network Meter', key: 'network_meter' },
-    { visible: false, label: 'Network Opt Valve', key: 'network_opt_valve' },
-    { visible: false, label: 'Operational Site', key: 'operational_site' },
-    { visible: false, label: 'Pressure Control Valve', key: 'pressure_control_valve' },
-    { visible: false, label: 'Pressure Fitting', key: 'pressure_fitting' },
-    { visible: false, label: 'Trunk Main', key: 'trunkmain' },
+    { 
+        visible: false, 
+        label: 'Chambers', 
+        key: 'assets_chamber' 
+    },
+    {
+        visible: false,
+        label: 'Distribution Main',
+        key: 'assets_distributionmain',
+    },
+    { 
+        visible: false, 
+        label: 'Hydrants', 
+        key: 'assets_hydrant' 
+    },
+    { 
+        visible: false, 
+        label: 'Loggers', 
+        key: 'assets_logger' 
+    },
+    { 
+        visible: false, 
+        label: 'Network Meter', 
+        key: 'assets_networkmeter' 
+    },
+    {
+        visible: false,
+        label: 'Network Opt Valve',
+        key: 'assets_networkoptvalve',
+    },
+    {
+        visible: false,
+        label: 'Operational Site',
+        key: 'assets_operationalsite',
+    },
+    {
+        visible: false,
+        label: 'Pressure Control Valve',
+        key: 'assets_pressurecontrolvalve',
+    },
+    {
+        visible: false,
+        label: 'Pressure Fitting',
+        key: 'assets_pressurefitting',
+    },
+    { 
+        visible: false, 
+        label: 'Trunk Main', 
+        key: 'assets_trunkmain' 
+    },
 ];
 
 export const DEFAULT_BASEMAP_TOGGLE = [
@@ -61,25 +103,25 @@ export const DEFAULT_BASEMAP_TOGGLE = [
         visible: true,
         label: 'Open Street Map',
         map_url: 'mapbox://styles/mapbox/streets-v12',
-        key: 'open_street_map'
+        key: 'open_street_map',
     },
     {
         visible: false,
         label: 'Satellite Map',
         map_url: 'mapbox://styles/mapbox/satellite-v9',
-        key: 'satellite_map'
+        key: 'satellite_map',
     },
     {
         visible: false,
         label: 'Dark Map',
         map_url: 'mapbox://styles/mapbox/dark-v11',
-        key: 'dark_map'
+        key: 'dark_map',
     },
     {
         visible: false,
         label: 'Terrain',
         map_url: 'mapbox://styles/mapbox/outdoors-v12',
-        key: 'terrain_map'
+        key: 'terrain_map',
     },
 ];
 

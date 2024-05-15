@@ -1,3 +1,4 @@
+import { LayerKey } from "../../core";
 // Define the interface for each layer toggle
 export interface LayerToggle {
     visible: boolean;
@@ -22,7 +23,8 @@ export interface LayerToggleObject {
 export interface BasemapToggle {
     visible: boolean;
     label: string;
-    map_url: string;
+    map_url?: string;
+    key: string; 
 }
 
 export interface BasemapToggleObject {
