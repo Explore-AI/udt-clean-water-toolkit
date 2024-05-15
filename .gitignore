@@ -50,7 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-devops/scripts/geoserver/output
+geoserver/output
 # Translations
 *.mo
 *.pot
@@ -176,3 +176,4 @@ postgres-data
 .idea/
 *.DS_Store
 .vscode/
+*.geoserver_env

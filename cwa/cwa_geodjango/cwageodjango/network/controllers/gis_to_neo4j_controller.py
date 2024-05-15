@@ -1,5 +1,4 @@
 from django.db.models.query import QuerySet
-from cleanwater.controllers.network_controller import NetworkController
 from ..calculators import GisToNeo4jCalculator
 from ..models import initialise_node_labels
 from cwageodjango.assets.controllers import (
@@ -8,15 +7,14 @@ from cwageodjango.assets.controllers import (
 )
 
 
-class GisToNeo4jController(NetworkController, GisToNeo4jCalculator):
+class GisToNeo4jController(GisToNeo4jCalculator):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
     def __init__(self, config):
         self.config = config
         initialise_node_labels()
-        NetworkController.__init__(self, self.config.srid)
-        GisToNeo4jCalculator.__init__(self, self.config)
+        super().__init__(self.config)
 
     def create_network(self):
         from timeit import default_timer as timer

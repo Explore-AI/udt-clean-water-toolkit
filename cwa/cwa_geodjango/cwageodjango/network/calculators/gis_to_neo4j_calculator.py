@@ -3,10 +3,7 @@ from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
 from neomodel import db
 from neomodel.exceptions import UniqueProperty
-from cleanwater.exceptions import (
-    InvalidPipeException,
-)
-from cleanwater.calculators import GisToGraphCalculator
+from cleanwater.transform import GisToGraph
 from cwageodjango.core.constants import (
     PIPE_JUNCTION__NAME,
     PIPE_END__NAME,
@@ -21,7 +18,7 @@ MIXED_NODE_TYPES_SORTED = [
 ]
 
 
-class GisToNeo4jCalculator(GisToGraphCalculator):
+class GisToNeo4jCalculator(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
