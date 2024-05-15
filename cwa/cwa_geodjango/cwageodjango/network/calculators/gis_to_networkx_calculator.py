@@ -1,11 +1,9 @@
-import pdb
 import json
 from networkx import Graph
 import networkx as nx
 from cleanwater.calculators import GisToGraphCalculator
 from cwageodjango.config.settings import sqids
 from neomodel import db
-#from neo4j.types.graph import Node, Relationship
 import matplotlib.pyplot as plt
 import contextily as ctx
 import geopandas as gpd
@@ -56,7 +54,7 @@ class GisToNxCalculator(GisToGraphCalculator):
         # nx.write_graphml(self.G, "networkx_graph.graphml")
 
         dma_codes = self.config.dma_codes
-        #pdb.set_trace()
+
         for dma_code in dma_codes:
             query = f"""
             MATCH (n)-[r]-(m)
@@ -92,21 +90,17 @@ class GisToNxCalculator(GisToGraphCalculator):
                         print("Index out of range error occurred while extracting relationship.")
 
             # Remove duplicates from the lists
-            #pdb.set_trace()
             all_nodes = list(set(all_nodes))
             all_relationships = list(set(all_relationships))
-            #pdb.set_trace()
             nxgraph = nx.Graph()
             for node in all_nodes:
                 if isinstance(node, str):
                     print("Node is a string:", node)
-                #pdb.set_trace()
                 else:
                     nxgraph.add_node(node['node_key'],
                                      coords_27700=node['coords_27700'],
                                      node_labels=GisToNxCalculator.node_label(node),
                                      dmas=node['dmas'])
-            #pdb.set_trace()
             for edge in all_relationships:
                 if isinstance(edge, str):
                     print("Node is a string:", edge)
@@ -119,7 +113,6 @@ class GisToNxCalculator(GisToGraphCalculator):
                                      segment_wkt=edge['segment_wkt'],
                                      asset_label=edge.type,
                                      dmas=dmas)
-            #pdb.set_trace()
             self.plot_graph(nxgraph, [dma_code], 'neo4j')
             self.spatial_plot(nxgraph, [dma_code], 'neo4j')
 
@@ -210,7 +203,7 @@ class GisToNxCalculator(GisToGraphCalculator):
                 # Extracting node and edge labels from the graph
                 node_labels = nx.get_node_attributes(G, "node_labels").values()
                 edge_labels = nx.get_edge_attributes(G, "asset_name").values()
-                #pdb.set_trace()
+
                 # Define colour map based on node and edge labels
                 nodes_colour_map = ['red' if 'PipeEnd' in labels
                                     else 'blue' if 'Hydrant' in labels
@@ -252,7 +245,7 @@ class GisToNxCalculator(GisToGraphCalculator):
 
             edges_colour_map = ['black' if 'TrunkMain' in labels
                                 else 'orange' for labels in edge_labels]
-            #pdb.set_trace()
+
             # Draw the graph nodes and edges
             plt.figure(figsize=(30, 30))
             nx.draw(
@@ -281,7 +274,7 @@ class GisToNxCalculator(GisToGraphCalculator):
                 # if no dma codes, plot entire graph, otherwise filter by code, produce one map per code
                 nodes_gdf = GisToNxCalculator._create_nodes_gdf(G)
                 edges_gdf = GisToNxCalculator._create_edges_gdf(G)
-                #pdb.set_trace()
+
                 # Define colour mapping dictionaries
                 default_node_colour = 'gray'
                 default_edge_colour = 'gray'
