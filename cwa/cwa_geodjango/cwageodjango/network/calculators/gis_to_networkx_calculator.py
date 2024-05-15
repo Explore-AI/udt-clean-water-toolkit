@@ -4,11 +4,14 @@ from networkx import Graph
 import networkx as nx
 from cleanwater.calculators import GisToGraphCalculator
 from cwageodjango.config.settings import sqids
+from neomodel import db
+#from neo4j.types.graph import Node, Relationship
 import matplotlib.pyplot as plt
+import contextily as ctx
 import geopandas as gpd
 from shapely import wkt
 from shapely.geometry import Point
-
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 class GisToNxCalculator(GisToGraphCalculator):
     """Create a NetworkX graph of assets from a geospatial
@@ -39,16 +42,100 @@ class GisToNxCalculator(GisToGraphCalculator):
         Returns:
               None
         """
-        edges = self._gather_edges()
-        nodes = self._gather_nodes()
-        self.G = nx.Graph()
-        self._add_nodes_to_graph(nodes)
-        self._add_edges_to_graph(edges)
-        self._remove_unconnected_nodes()
-        self._connected_components()
-        G = self.G
-        self._plot_graph(G)
-        self._spatial_plot(G)
+        # edges = self._gather_edges()
+        # nodes = self._gather_nodes()
+        # self.G = nx.Graph()
+        # self._add_nodes_to_graph(nodes)
+        # self._add_edges_to_graph(edges)
+        # self._remove_unconnected_nodes()
+        # self._connected_components()
+        # G = self.G
+        # dma_codes = GisToNxCalculator.get_dma_codes_from_graph(G)
+        # self.plot_graph(G, dma_codes, 'networkx')
+        # self.spatial_plot(G, dma_codes, 'networkx')
+        # nx.write_graphml(self.G, "networkx_graph.graphml")
+
+        dma_codes = self.config.dma_codes
+        #pdb.set_trace()
+        for dma_code in dma_codes:
+            query = f"""
+            MATCH (n)-[r]-(m)
+            WHERE n.dmas contains '{dma_code}'
+            RETURN n, r, m
+            """
+            all_nodes = []
+            all_relationships = []
+            results = db.cypher_query(query)
+
+            for records in results:
+                for data in records:
+                    # Initialize variables for node and relationship data
+                    node_n = None
+                    node_m = None
+                    relationship_r = None
+
+                    # Extract node and relationship data from the record
+                    try:
+                        node_n = data[0]
+                        all_nodes.append(node_n)
+                    except IndexError:
+                        print("Index out of range error occurred while extracting nodes.")
+                    try:
+                        node_m = data[2]
+                        all_nodes.append(node_m)
+                    except IndexError:
+                        print("Index out of range error occurred while extracting nodes.")
+                    try:
+                        relationship_r = data[1]
+                        all_relationships.append(relationship_r)
+                    except IndexError:
+                        print("Index out of range error occurred while extracting relationship.")
+
+            # Remove duplicates from the lists
+            #pdb.set_trace()
+            all_nodes = list(set(all_nodes))
+            all_relationships = list(set(all_relationships))
+            #pdb.set_trace()
+            nxgraph = nx.Graph()
+            for node in all_nodes:
+                if isinstance(node, str):
+                    print("Node is a string:", node)
+                #pdb.set_trace()
+                else:
+                    nxgraph.add_node(node['node_key'],
+                                     coords_27700=node['coords_27700'],
+                                     node_labels=GisToNxCalculator.node_label(node),
+                                     dmas=node['dmas'])
+            #pdb.set_trace()
+            for edge in all_relationships:
+                if isinstance(edge, str):
+                    print("Node is a string:", edge)
+                else:
+                    dmas = edge.nodes[1]['dmas'] if edge.nodes[1]['dmas'] is not None \
+                        else edge.nodes[0]['dmas']
+                    nxgraph.add_edge(edge.nodes[0]['node_key'],
+                                     edge.nodes[1]['node_key'],
+                                     gid=edge['gid'],
+                                     segment_wkt=edge['segment_wkt'],
+                                     asset_label=edge.type,
+                                     dmas=dmas)
+            #pdb.set_trace()
+            self.plot_graph(nxgraph, [dma_code], 'neo4j')
+            self.spatial_plot(nxgraph, [dma_code], 'neo4j')
+
+    @staticmethod
+    def node_label(node):
+        label = None
+        labels = list(node.labels)
+        if 'PipeEnd' in labels:
+            label = ['PipeEnd']
+        elif 'Hydrant' in labels:
+            label = ['Hydrant']
+        elif 'NetworkOptValve' in labels:
+            label = ['NetworkOptValve']
+        else:
+            label = ['pipe_junction']
+        return label
 
     def _gather_edges(self):
         edges = []
@@ -107,11 +194,15 @@ class GisToNxCalculator(GisToGraphCalculator):
         print('Connected components:', connected)
 
     @staticmethod
-    def _plot_graph(G):
-        dma_codes = GisToNxCalculator._get_dma_codes_from_graph(G)
+    def plot_graph(G, dma_codes, source):
+        from datetime import datetime
+        # Get the current date and time
+        now = datetime.now()
+        # Format the datetime object as a string
+        formatted_date_time = now.strftime("%Y%m%d%H%M")
         if dma_codes:
             for dma in dma_codes:
-                filename = f"dma_{dma}_graph.svg"
+                filename = f"dma_{dma}_graph_from_{source}_{formatted_date_time}.svg"
 
                 # Define edge positions
                 pos = nx.spring_layout(G, scale=10)
@@ -119,11 +210,13 @@ class GisToNxCalculator(GisToGraphCalculator):
                 # Extracting node and edge labels from the graph
                 node_labels = nx.get_node_attributes(G, "node_labels").values()
                 edge_labels = nx.get_edge_attributes(G, "asset_name").values()
-
+                #pdb.set_trace()
                 # Define colour map based on node and edge labels
-                nodes_colour_map = ['blue' if 'Hydrant' in labels
+                nodes_colour_map = ['red' if 'PipeEnd' in labels
+                                    else 'blue' if 'Hydrant' in labels
                                     else 'yellow' if 'NetworkOptValve' in labels
-                                    else 'red' for labels in node_labels]
+                                    else 'green' if 'Pipe_Junction'
+                                    else 'green' for labels in node_labels]
 
                 edges_colour_map = ['black' if 'TrunkMain' in labels
                                     else 'orange' for labels in edge_labels]
@@ -136,13 +229,13 @@ class GisToNxCalculator(GisToGraphCalculator):
                 nx.draw_networkx_edges(G, pos, edge_color=edges_colour_map, width=1)
 
                 # Draw edge labels using the gid attribute
-                edge_labels = nx.get_edge_attributes(G, "gid")
-                nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+                #edge_labels = nx.get_edge_attributes(G, "gid")
+                #nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
                 plt.savefig(filename, format="svg")
                 plt.close()
                 print(f"file {filename} successfully saved")
         else:
-            filename = "dma_unknown_graph.svg"
+            filename = f"dma_unknown_graph_from_{source}_{formatted_date_time}.svg"
 
             # Define edge positions
             pos = nx.spring_layout(G, scale=10)
@@ -152,13 +245,14 @@ class GisToNxCalculator(GisToGraphCalculator):
             edge_labels = nx.get_edge_attributes(G, "asset_name").values()
 
             # Define colour map based on node and edge labels
-            nodes_colour_map = ['blue' if 'Hydrant' in labels
+            nodes_colour_map = ['red' if 'PipeEnd' in labels
+                                else 'blue' if 'Hydrant' in labels
                                 else 'yellow' if 'NetworkOptValve' in labels
-                                else 'red' for labels in node_labels]
+                                else 'green' for labels in node_labels]
 
             edges_colour_map = ['black' if 'TrunkMain' in labels
                                 else 'orange' for labels in edge_labels]
-
+            #pdb.set_trace()
             # Draw the graph nodes and edges
             plt.figure(figsize=(30, 30))
             nx.draw(
@@ -174,15 +268,20 @@ class GisToNxCalculator(GisToGraphCalculator):
             print(f"file {filename} successfully saved")
 
     @staticmethod
-    def _spatial_plot(G):
-        dma_codes = GisToNxCalculator._get_dma_codes_from_graph(G)
+    def spatial_plot(G, dma_codes, source):
+        from datetime import datetime
+        # Get the current date and time
+        now = datetime.now()
+        # Format the datetime object as a string
+        formatted_date_time = now.strftime("%Y%m%d%H%M")
+        icon_path = 'icons8-hydrant-60.png'
         if dma_codes:
             for dma in dma_codes:
-                filename = f'dma_{dma}_SpatialPlot.svg'
+                filename = f'dma_{dma}_SpatialPlot_from_{source}_{formatted_date_time}.svg'
                 # if no dma codes, plot entire graph, otherwise filter by code, produce one map per code
                 nodes_gdf = GisToNxCalculator._create_nodes_gdf(G)
                 edges_gdf = GisToNxCalculator._create_edges_gdf(G)
-
+                #pdb.set_trace()
                 # Define colour mapping dictionaries
                 default_node_colour = 'gray'
                 default_edge_colour = 'gray'
@@ -194,11 +293,33 @@ class GisToNxCalculator(GisToGraphCalculator):
 
                 # Plot GeoDataFrames
                 fig, ax = plt.subplots(figsize=(30, 30))
-                edges_gdf.plot(ax=ax, color=edges_gdf['edge_colour'], label='Pipe Features', legend=True)
-                nodes_gdf.plot(ax=ax, color=nodes_gdf['node_colour'], markersize=5, label='Point Assets', legend=True)
+                edges_gdf.plot(ax=ax,
+                               color=edges_gdf['edge_colour'],
+                               label='Pipe Features',
+                               legend=True,
+                               zorder=1)
+                nodes_gdf.plot(ax=ax,
+                               color=nodes_gdf['node_colour'],
+                               markersize=5,
+                               label='Point Assets',
+                               legend=True,
+                               zorder=2)
 
                 # Add OpenStreetMap basemap
-                #ctx.add_basemap(ax, crs=edges_gdf.crs.to_string(), source=ctx.providers.OpenStreetMap.Mapnik)
+                ctx.add_basemap(ax, crs=edges_gdf.crs.to_string(), source=ctx.providers.OpenStreetMap.Mapnik)
+
+                def add_icon(x, y, ax):
+                    img = plt.imread(icon_path)
+                    imagebox = OffsetImage(img, zoom=0.2)
+                    ab = AnnotationBbox(imagebox, (x, y), frameon=False, pad=0)
+                    ax.add_artist(ab)
+
+                hydrants_gdf = nodes_gdf[nodes_gdf['node_label'] == "Hydrant"]
+
+                # Plot the points and add the raster image as an icon
+                for x, y in zip(hydrants_gdf.geometry.x, hydrants_gdf.geometry.y):
+                    ax.plot(x, y, marker='None')
+                    add_icon(x, y, ax)
 
                 # Add labels for nodes and edges
                 # for idx, row in nodes_gdf.iterrows():
@@ -218,7 +339,7 @@ class GisToNxCalculator(GisToGraphCalculator):
                 plt.close()
                 print(f"file {filename} successfully saved")
         else:
-            filename = 'dma_unknown_SpatialPlot.svg'
+            filename = f'dma_unknown_SpatialPlot_from_{source}_{formatted_date_time}.svg'
             # if no dma codes, plot entire graph, otherwise filter by code, produce one map per code
             nodes_gdf = GisToNxCalculator._create_nodes_gdf(G)
             edges_gdf = GisToNxCalculator._create_edges_gdf(G)
@@ -240,7 +361,7 @@ class GisToNxCalculator(GisToGraphCalculator):
             nodes_gdf.plot(ax=ax, color=nodes_gdf['node_colour'], markersize=5, label='Point Assets', legend=True)
 
             # Add OpenStreetMap basemap
-            # ctx.add_basemap(ax, crs=edges_gdf.crs.to_string(), source=ctx.providers.OpenStreetMap.Mapnik)
+            ctx.add_basemap(ax, crs=edges_gdf.crs.to_string(), source=ctx.providers.OpenStreetMap.Mapnik)
 
             # Add labels for nodes and edges
             # for idx, row in nodes_gdf.iterrows():
@@ -305,7 +426,7 @@ class GisToNxCalculator(GisToGraphCalculator):
         return edges_gdf
 
     @staticmethod
-    def _get_dma_codes_from_graph(nxgraph):
+    def get_dma_codes_from_graph(nxgraph):
         # method for collecting list of DMA codes from graph
         dma_codes = []
         for _, attributes in nxgraph.nodes(data=True):
