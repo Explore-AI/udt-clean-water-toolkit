@@ -67,7 +67,7 @@ class Neo4j2Wntr:
             batch_result (list): List of results from Neo4j query.
 
         """
-        for attributes in graph
+        for attributes in graph:
             start = attributes[1]._start_node
             x, y = start['x_coord'], start['y_coord']
             start_id = start._id

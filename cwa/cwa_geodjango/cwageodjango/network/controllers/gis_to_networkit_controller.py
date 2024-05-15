@@ -48,7 +48,7 @@ class GisToNkController(GisToNkCalculator):
         end = timer()
         print(end - start)
 
-    def export_graphml(self):
+    def nk_to_graphml(self):
         """
         Export the network graph to a GraphML file.
 
@@ -71,11 +71,6 @@ class GisToNkController(GisToNkCalculator):
             tuple: A tuple containing the query offset and limit values.
 
         """
-
-        # print(end - start)
-
-    def export_graphml(self):
-        nk.writeGraph(self.G, self.config.outputfile, nk.Format.GML)
 
     def _get_query_offset_limit(self, pipes_qs):
 
@@ -107,13 +102,16 @@ class GisToNkController(GisToNkCalculator):
 
     # This fn is a candidate to be abstracted out into the NetworkController
     def _get_pipe_and_asset_data(self) -> QuerySet:
-        trunk_mains_qs: QuerySet = self.get_trunk_mains_data()
-        distribution_mains_qs: QuerySet = self.get_distribution_mains_data()
+
+        filters = {"dma_codes": self.config.dma_codes}
+
+        trunk_mains_qs: QuerySet = self.get_trunk_mains_data(filters)
+        distribution_mains_qs: QuerySet = self.get_distribution_mains_data(filters)
 
         pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
         return pipes_qs
 
-    def get_trunk_mains_data(self) -> QuerySet:
+    def get_trunk_mains_data(self, filters={}) -> QuerySet:
         """
         Retrieve trunk mains data from the database.
 
@@ -123,10 +121,11 @@ class GisToNkController(GisToNkCalculator):
             QuerySet: A QuerySet object containing trunk mains data.
 
         """
-        tm: TrunkMainsController = TrunkMainsController()
-        return tm.get_pipe_point_relation_queryset()
 
-    def get_distribution_mains_data(self) -> QuerySet:
+        tm: TrunkMainsController = TrunkMainsController()
+        return tm.get_pipe_point_relation_queryset(filters)
+
+    def get_distribution_mains_data(self, filters={}) -> QuerySet:
         """
         Retrieve distribution mains data from the database.
 
@@ -138,4 +137,4 @@ class GisToNkController(GisToNkCalculator):
 
         """
         dm: DistributionMainsController = DistributionMainsController()
-        return dm.get_pipe_point_relation_queryset()
+        return dm.get_pipe_point_relation_queryset(filters)
