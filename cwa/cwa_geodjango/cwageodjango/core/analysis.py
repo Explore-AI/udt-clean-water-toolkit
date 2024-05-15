@@ -6,6 +6,7 @@ from cwageodjango.network.controllers import (
     GisToNkController,
     Convert2Wntr,
     Neo4jToNkController,
+    AcousticLoggerCoverage
 )
 
 
@@ -85,8 +86,8 @@ class Analysis(AppConf):
 
 
     def calc_acoustic_coverage(self):
-        acoustic_coverage = AcousticLoggerCoverage()
-        acoustic_coverage.print_nodes()
+        acoustic_coverage = AcousticLoggerCoverage(self.validated_config)
+        acoustic_coverage.compute_cov()
 
     def _get_run_methods(self):
 
@@ -97,6 +98,7 @@ class Analysis(AppConf):
             "neo4j2wntrinp": self.neo4j_to_wntr_inp,
             "neo4j2wntrjson": self.neo4j_to_wntr_json,
             "neo4j2networkitgraphml": self.neo4j_to_networkit_graphml,
+            "networkcoverage" : self.calc_acoustic_coverage
         }
 
     @property
