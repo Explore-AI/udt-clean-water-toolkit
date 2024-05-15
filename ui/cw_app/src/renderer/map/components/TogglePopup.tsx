@@ -1,5 +1,5 @@
 import * as styles from '../css/TogglePopup.module.css';
-import { Stack, Checkbox, Radio, RadioGroup } from '@mantine/core';
+import { Checkbox, Radio, RadioGroup } from '@mantine/core';
 import {
     LayerToggle,
     BasemapToggle,
@@ -25,6 +25,8 @@ const generateCheckbox = (
                 key={toggle.key}
                 label={toggle.label}
                 checked={toggle.visible}
+                classNames={{root: styles.checkBoxItem,input:styles.checkBoxInput}}
+                // data-checked={toggle.visible}
                 onChange={(event) => {
                     const newToggleObject = [...toggleList];
                     newToggleObject[index] = {
@@ -61,6 +63,7 @@ const generateRadioButtons = (
                     key={toggle.key}
                     value={toggle.key}
                     label={toggle.label}
+                    classNames={{root: styles.radioGroupItem, radio: styles.radioInput}}
                 />
             ))}
         </RadioGroup>

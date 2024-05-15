@@ -1,4 +1,3 @@
-import { LayerKey } from "../../core";
 // Define the interface for each layer toggle
 export interface LayerToggle {
     visible: boolean;

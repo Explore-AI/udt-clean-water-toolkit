@@ -2,10 +2,7 @@
 import DeckGL from '@deck.gl/react';
 
 import SearchWidget from '../../core/components/SearchWidget';
-import BaseLayout from '../../core/components/BaseLayout';
-import { MapViewState } from '@deck.gl/core';
 import { Map } from 'react-map-gl';
-import { BASEMAP } from '@deck.gl/carto';
 import { MAPBOX_SECRET_TOKEN, MAPBOX_PUBLIC_TOKEN } from '../../config';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import {

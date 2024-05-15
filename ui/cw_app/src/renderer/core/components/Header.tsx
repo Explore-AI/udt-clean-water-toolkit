@@ -45,7 +45,7 @@ export default function Header() {
         </div>
         <div className={styles.links}>{linkButtons}</div>
         <div className={styles.menuBlock}>
-          <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" />
+          <Burger opened={opened} onClick={toggle} size="sm" />
         </div>
       </div>
     </>

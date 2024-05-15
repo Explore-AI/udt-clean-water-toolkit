@@ -12,23 +12,19 @@ export default function GeoSpatialControls({}) {
         setShowBaseMapToggle,
     } = useContext(MapContext);
     const handleLayerToggleClick = () => {
-        console.log('Toggle Layer clicked');
         setShowLayerToggle(!showLayerToggle);
         setShowBaseMapToggle(false);
     };
 
     const handleBasemapToggleClick = () => {
-        console.log('Toggle Basemap clicked');
         setShowBaseMapToggle(!showBaseMapToggle);
         setShowLayerToggle(false);
     };
-    // console.log('Show the Layer Toggle: ', showLayerToggle)
-    // console.log('Show the Base Map Toggle: ', showBaseMapToggle)
+    
     return (
         <>
             <Tooltip label="Toggle Layers">
                 <Button
-                    variant="primary"
                     onClick={handleLayerToggleClick}
                     className={styles.button}
                 >

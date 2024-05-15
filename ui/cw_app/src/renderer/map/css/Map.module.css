@@ -16,11 +16,10 @@
     z-index: 3;
     top: 90px;
     left: 20px;
-    border: 1px solid red;
 }
 .layerTogglePopup {
     position: absolute;
-    top: 120px;
+    top: 100px;
     left: 80px;
     z-index: 4;
     height: 300px;
@@ -29,7 +28,7 @@
 
 .basemapTogglePopup {
     position: absolute;
-    top: 150px;
+    top: 160px;
     left: 80px;
     z-index: 4;
     height: 300px;
