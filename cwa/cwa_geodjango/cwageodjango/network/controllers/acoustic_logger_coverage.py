@@ -1,5 +1,7 @@
 from cwageodjango.network.models import *
 from neomodel import db
+import csv
+import numpy as np
 
 class AcousticLoggerCoverage():
     def __init__(self, config):
@@ -32,12 +34,10 @@ class AcousticLoggerCoverage():
                   'alloyed_polyvinyl_chloride':70,
                   'biaxial_polyvinyl_chloride':70,
                   'galvanized_steel':150}
-
-    #def print_nodes(self):
-    #    all_nodes = PointNode.nodes.filter(acoustic_logger='True')
-    #    print(all_nodes)
-
-    
+    def initialize_csv(self):
+        with open(self.config.outputfile, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['logger_node_key', 'pipe_id', 'coverage_length'])
 
     def get_connected(self, node_key, max_level):
         cypher_query = f"""
@@ -69,11 +69,40 @@ class AcousticLoggerCoverage():
     
 
     def update_edge_attributes(self, start_node_key, end_node_key, logger, coverage_len):
+            query = f"""
+            MATCH (n {{node_key: '{start_node_key}'}})-[r]-(m {{node_key: '{end_node_key}'}})
+            WITH r, 
+                CASE WHEN r.coveredbyLogger IS NOT NULL THEN r.coveredbyLogger + '|' + '{logger}' ELSE '{logger}' END AS newCoveredByLogger,
+                CASE WHEN r.coverageLen IS NOT NULL THEN r.coverageLen + '|' + '{coverage_len}' ELSE '{coverage_len}' END AS newCoverageLen,
+                n.node_key AS startNodeKey,
+                m.node_key AS endNodeKey
+            SET r.coveredbyLogger = newCoveredByLogger,
+                r.coverageLen = newCoverageLen
+            RETURN id(r) AS pipe_id, '{coverage_len}' AS coverage_length, startNodeKey, endNodeKey
+            """
+            results, _ = db.cypher_query(query)
 
-        query = f"match (n {{node_key : '{start_node_key}'}})-[r]-(m {{node_key : '{end_node_key}'}}) set r.coveredbyLogger = '{logger}' , r.coverageLen = {coverage_len};"
-        db.cypher_query(query)
+            # Log to CSV
+            with open(self.config.outputfile, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                for result in results:
+                    pipe_id = result[0]
+                    coverage_length = result[1]
+                    start_node_key = result[2]
+                    end_node_key = result[3]
+                    writer.writerow([logger, pipe_id, coverage_length, start_node_key, end_node_key])
 
-    def process_connected_edges(self, node_key, original_remaining_distance, remaining_distance, processed_edges, logger_key):    
+    def check_for_pipe_end(self, node_key):
+        query = f"MATCH (n {{node_key : '{node_key}'}}) RETURN 'PipeEnd' IN labels(n) AS is_pipe_end"
+        results, _ = db.cypher_query(query)
+        is_pipe_end_str = results[0][0]  # This might be a string "True" or "False"
+        #is_pipe_end = is_pipe_end_str.lower() == "true"  # Convert to boolean
+        return is_pipe_end_str
+
+    def process_connected_edges(self, node_key, original_remaining_distance, remaining_distance, processed_edges, logger_key):
+        if self.check_for_pipe_end(node_key=node_key):
+            print("Node is labeled as PipeEnd. Skipping processing.")
+            return    
         while remaining_distance > 0:
             processed_nodes = set()
             processed_nodes.add(node_key)
@@ -99,18 +128,26 @@ class AcousticLoggerCoverage():
 
                     processed_edges.add(pipe_id)  # Add pipe_id to processed_edges
                     if remaining_distance > 0:
+
                         if start_node_key in processed_nodes:
                             node_key = end_node_key  # Update node_key for next iteration
                         else:
                             node_key = start_node_key
-                        break  # Exit the loop to get next connected edges
+                        # Check if the current node is a "PipeEnd" node before proceeding
+                        if not self.check_for_pipe_end(node_key=node_key):
+                            # Proceed with the next connected edges if the current node is not a "PipeEnd" node
+                            break
+                        else:
+                            print("Node is labeled as PipeEnd. Skipping processing.")
+                            continue  # Exit the loop and the function
+                        
                 elif pipe_length > remaining_distance:
                     covered_distance = pipe_length - remaining_distance
 
                     self.update_edge_attributes(start_node_key, 
                                                 end_node_key,
                                                 logger_key,
-                                                covered_distance)
+                                                remaining_distance)
                     
                     print(f'Whole next pipe {pipe_id} is not covered.', covered_distance, 'of', pipe_length, 
                         'is remaining.')
@@ -170,14 +207,14 @@ class AcousticLoggerCoverage():
                                                 pipe_length)
                     processed_edges.add(pipe_id)  # Add pipe_id to processed_edges
                     if remaining_distance > 0:
-                        self.process_connected_edges(end_node_key, remaining_distance, remaining_distance, processed_edges, key)
+                        self.process_connected_edges(end_node_key, remaining_distance, remaining_distance, processed_edges, logger_key=key)
                 elif pipe_length > travel_distance:
                     covered_distance = pipe_length - travel_distance
                     print(f'Whole pipe {pipe_id} is not covered.', covered_distance, 'of', pipe_length, 'is remaining.')
                     self.update_edge_attributes(start_node_key, 
                                                 end_node_key,
                                                 key,
-                                                covered_distance)
+                                                travel_distance)
                     continue
             print(f'........Finshed with Logger: {key}........')
 
