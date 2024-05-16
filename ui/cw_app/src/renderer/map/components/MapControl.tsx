@@ -1,17 +1,13 @@
 // create a widget that will be used to provide GeoSpatial Controls
-import { Button, Tooltip, ActionIcon, rem } from '@mantine/core';
+import { Tooltip, ActionIcon, rem } from '@mantine/core';
 import * as styles from '../css/MapControl.module.css';
-import { useContext } from 'react';
-import { MapContext } from '../context/MapContext';
+import { useLayerToggle, useBasemapToggle } from '../hooks/MapContextHooks';
 import { IconMap, IconStack2 } from '@tabler/icons-react';
 
 export default function GeoSpatialControls({}) {
-    const {
-        showLayerToggle,
-        setShowLayerToggle,
-        showBaseMapToggle,
-        setShowBaseMapToggle,
-    } = useContext(MapContext);
+    const [showLayerToggle, setShowLayerToggle] = useLayerToggle();
+    const [showBaseMapToggle, setShowBaseMapToggle] = useBasemapToggle();
+
     const handleLayerToggleClick = () => {
         setShowLayerToggle(!showLayerToggle);
         setShowBaseMapToggle(false);

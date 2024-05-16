@@ -12,8 +12,8 @@ import {
 } from '../../core';
 import GeoSpatialControls from './MapControl';
 import * as styles from '../css/Map.module.css';
-import { useState, useContext } from 'react';
-import { MapContext } from '../context/MapContext';
+import { useState } from 'react';
+import { useInitialView, useLayerToggle, useBasemapToggle } from '../hooks/MapContextHooks';
 import BasePopup from '../../core/components/BasePopup';
 import RadioButtonList from './RadioButtonList';
 import CheckboxList from './CheckBoxList';
@@ -45,8 +45,10 @@ const basemapUrl = (basemapList: BasemapToggle[]) => {
 };
 
 export default function MapView() {
-    const { initialView, showBaseMapToggle, showLayerToggle } =
-        useContext(MapContext);
+    const [initialView] = useInitialView();
+    const [showBaseMapToggle] = useBasemapToggle();
+    const [showLayerToggle] = useLayerToggle();
+
     const [toggleLayers, setToggleLayers] =
         useState<LayerToggle[]>(DEFAULT_LAYER_TOGGLE);
     const [toggleBaseMap, setToggleBaseMap] = useState<BasemapToggle[]>(

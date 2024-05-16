@@ -1,7 +1,7 @@
 import { createContext, Dispatch, SetStateAction } from 'react';
 import { MapViewState } from '@deck.gl/core';
 
-interface MapContextType {
+export type MapContextType = {
     initialView: MapViewState;
     setInitialView: Dispatch<SetStateAction<MapViewState>>;
     showLayerToggle: boolean;
