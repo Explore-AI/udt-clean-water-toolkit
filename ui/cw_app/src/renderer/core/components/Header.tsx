@@ -45,10 +45,14 @@ export default function Header() {
         </div>
         <div className={styles.links}>{linkButtons}</div>
         <div className={styles.menuBlock}>
-          <Burger opened={opened} onClick={toggle} size="sm" />
-          {opened && <div className={styles.burgerMenu}>
+            <Burger
+                opened={opened}
+                onClick={toggle}
+                size="sm" />
+            { opened &&
+             <div className={styles.burgerMenu}>
               <p>Close App Here</p>
-            </div>}
+            </div> }
         </div>
       </div>
     </>
