@@ -1,6 +1,5 @@
 // Our Map Page details exists here
 import DeckGL from '@deck.gl/react';
-
 import SearchWidget from '../../core/components/SearchWidget';
 import { Map } from 'react-map-gl';
 import { MAPBOX_SECRET_TOKEN, MAPBOX_PUBLIC_TOKEN } from '../../config';
@@ -15,7 +14,9 @@ import GeoSpatialControls from './MapControl';
 import * as styles from '../css/Map.module.css';
 import { useState, useContext } from 'react';
 import { MapContext } from '../context/MapContext';
-import ToggleViewPopup from './TogglePopup';
+import BasePopup from '../../core/components/BasePopup';
+import RadioButtonList from './RadioButtonList';
+import CheckboxList from './CheckBoxList';
 import { LayerToggle, BasemapToggle } from '../types/types';
 
 if (!MAPBOX_SECRET_TOKEN) {
@@ -65,21 +66,23 @@ export default function MapView() {
 
             {showLayerToggle && (
                 <div className={styles.layerTogglePopup}>
-                    <ToggleViewPopup
-                        toggleList={toggleLayers}
-                        setToggleList={setToggleLayers}
-                        isLayerToggle={true}
-                    />
+                    <BasePopup>
+                        <CheckboxList
+                            toggleList={toggleLayers}
+                            setToggleList={setToggleLayers}
+                        />
+                    </BasePopup>
                 </div>
             )}
 
             {showBaseMapToggle && (
                 <div className={styles.basemapTogglePopup}>
-                    <ToggleViewPopup
-                        toggleList={toggleBaseMap}
-                        setToggleList={setToggleBaseMap}
-                        isLayerToggle={false}
-                    />
+                    <BasePopup>
+                        <RadioButtonList
+                            toggleList={toggleBaseMap}
+                            setToggleList={setToggleBaseMap}
+                        />
+                    </BasePopup>
                 </div>
             )}
 
