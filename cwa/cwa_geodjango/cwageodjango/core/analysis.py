@@ -1,6 +1,13 @@
 import argparse
 from cwageodjango.core.conf import AppConf
-from cwageodjango.network.controllers import GisToNeo4jController, GisToNxController, GisToNkController, Convert2Wntr, Convert2Networkit
+from cwageodjango.network.controllers import (
+    GisToNeo4jController,
+    GisToNxController,
+    GisToNkController,
+    Convert2Wntr,
+    Neo4jToNkController,
+)
+
 
 class Analysis(AppConf):
     def __init__(self):
@@ -38,12 +45,10 @@ class Analysis(AppConf):
         else:
             gis_to_neo4j.create_network()
 
-
     def cleanwater_gis2networkit(self) -> None:
-            gis_to_nk = GisToNkController(self.validated_config)
-            gis_to_nk.create_network()
-            gis_to_nk.export_graphml()
-
+        gis_to_nk = GisToNkController(self.validated_config)
+        gis_to_nk.create_network()
+        gis_to_nk.nk_to_graphml()
 
     def neo4j_to_wntr_inp(self) -> None:
         """
@@ -57,8 +62,8 @@ class Analysis(AppConf):
         """
         convert2wntr = Convert2Wntr(self.validated_config)
         convert2wntr.convert()
-        convert2wntr.export_inp()
-        
+        convert2wntr.wntr_to_inp()
+
     def neo4j_to_wntr_json(self) -> None:
         """
         Converts data from Neo4j to Water Network Toolkit (WNTR) JSON format and exports it.
@@ -71,10 +76,10 @@ class Analysis(AppConf):
         """
         convert2wntr = Convert2Wntr(self.validated_config)
         convert2wntr.convert()
-        convert2wntr.export_json()
+        convert2wntr.wntr_to_json()
 
     def neo4j_to_networkit_graphml(self) -> None:
-        convert2networkit = Convert2Networkit(self.validated_config)
+        convert2networkit = Neo4jToNkController(self.validated_config)
         convert2networkit.convert()
         convert2networkit.export_graphml()
 
@@ -85,8 +90,8 @@ class Analysis(AppConf):
             "gis2neo4j": self.cleanwater_gis2neo4j,
             "gis2nk": self.cleanwater_gis2networkit,
             "neo4j2wntrinp": self.neo4j_to_wntr_inp,
-            "neo4j2wntrjson" : self.neo4j_to_wntr_json,
-            "neo4j2networkitgraphml" : self.neo4j_to_networkit_graphml
+            "neo4j2wntrjson": self.neo4j_to_wntr_json,
+            "neo4j2networkitgraphml": self.neo4j_to_networkit_graphml,
         }
 
     @property

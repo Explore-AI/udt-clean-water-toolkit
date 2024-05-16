@@ -1,8 +1,9 @@
 from os import makedirs
 from os.path import exists, join
 from random import randint
-from requests import get, put, exceptions
+from requests import get, put, exceptions, post
 from utils.utils import GeoServerConfig, DBConnection
+from sys import argv
 
 
 class Importer:
@@ -184,7 +185,39 @@ class Importer:
                     else:
                         print(f"Failed to create style. Status code: {response.status_code}")
 
-    # TODO Add function to update the layer based on new attributes
+    def update_layer_stores(self, geoserver_site_url, workspace_name, data_path):
+        """
+        Republish all vector layers in a PostgreSQL database.
+        Args:
+            geoserver_site_url:
+            workspace_name:
+            data_path:
+
+        Returns: GeoServer layers with some default styles assigned
+
+        """
+        geo = self.geoserver_auth.geo
+        auth = self.geoserver_auth.auth
+        db_conn = DBConnection()
+        pg_tables = db_conn.pg_spatial_tables()
+
+        if pg_tables:
+            for table, geom_type in pg_tables:
+                rest_url = '%s/rest/workspaces/%s/datastores/%s/featuretypes/%s.json' % (
+                    geoserver_site_url, workspace_name, workspace_name, table)
+                response = get(rest_url, auth=auth)
+                response.raise_for_status()
+                if response.status_code == 200:
+                    geo.delete_layer(layer_name='%s' % table, workspace='%s' % workspace_name)
+                    geo.publish_featurestore(workspace='%s'
+                                                       % workspace_name, store_name='%s' % workspace_name,
+                                             pg_table='%s' % table)
+                    geo.publish_style(layer_name='%s' % table, style_name='%s' % table,
+                                      workspace='%s' % workspace_name)
+
+                else:
+                    print(f"Failed to delete layers. Status code: {response.status_code}")
+
     # Function to update bounding box of layer
     def recalculate_bbox(self, geo_site_url, workspace_name):
         """
@@ -209,7 +242,54 @@ class Importer:
                 if response.status_code != 200:
                     return response.raise_for_status()
 
-    def geoserver_requests(self):
+    def seed_all_layers(self, geo_site_url, workspace_name, grid_srs, layer_list=None):
+        auth = self.geoserver_auth.auth
+        db_conn = DBConnection()
+        published_tables = db_conn.pg_spatial_tables()
+        layer_lists = published_tables if layer_list is None else layer_list
+        if layer_lists:
+            for table, geom_type in layer_lists:
+                url = "%s/gwc/rest/seed/%s:%s.xml" % (geo_site_url, workspace_name, table)
+                payload = '<seedRequest><name>%s:%s</name><srs><number>%s</number></srs><zoomStart>1</zoomStart><zoomStop>12</zoomStop><format>application/vnd.mapbox-vector-tile</format><type>truncate</type><threadCount>4</threadCount></seedRequest>' % (
+                    workspace_name, table, grid_srs)
+                headers = {'Content-Type': 'text/xml'}
+                response = post(url, headers=headers, data=payload, auth=auth)
+                if response.status_code != 200:
+                    return response.raise_for_status()
+
+    def truncate_all_layers(self, geo_site_url, workspace_name, grid_srs, layer_list=None):
+        auth = self.geoserver_auth.auth
+        db_conn = DBConnection()
+        db_tables = db_conn.pg_extent_details()
+        layer_lists = db_tables if layer_list is None else layer_list
+        if layer_lists:
+            for table_name, bbox in layer_lists:
+                url = "{}/gwc/rest/seed/{}:{}.json".format(geo_site_url, workspace_name, table_name)
+                name = "{}:{}".format(workspace_name, table_name)
+                coords = {"double": [str(coord) for coord in bbox]}
+                auth_name = "EPSG"
+                srs = "{}:{}".format(auth_name, grid_srs)
+
+                payload = {
+                    "seedRequest": {
+                        "name": name,
+                        "bounds": {
+                            "coords": coords
+                        },
+                        "srs": srs,
+                        "zoomStart": 1,
+                        "zoomStop": 12,
+                        "format": "application/vnd.mapbox-vector-tile",
+                        "type": "truncate",
+                        "threadCount": 4
+                    }
+                }
+
+                response = post(url, json=payload, auth=auth)
+                if response.status_code != 200:
+                    return response.raise_for_status()
+
+    def populate_geoserver(self):
         """
         Procedure to automate the geoserver requests so that we can be able to view the OGC services
         Returns:
@@ -233,6 +313,24 @@ class Importer:
                                   self.geoserver_config.default['GEO_WORKSPACE'],
                                   self.geoserver_config.default['GEOSERVER_DATA_DIR'])
 
+    # Cache all layers
+    def gwc_cache_all_layers(self):
+        self.seed_all_layers(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                             self.geoserver_config.default['GEO_WORKSPACE'], self.geoserver_config.default['GWC_GRID'])
+
+    # Cleanup layer stores
+    def gwc_cache_truncate_all_layers(self):
+        self.truncate_all_layers(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                                 self.geoserver_config.default['GEO_WORKSPACE'],
+                                 self.geoserver_config.default['GWC_GRID'])
+
+    # Republish layers from PostgreSQL as they have changed
+    def reload_geoserver_layers(self):
+        self.update_layer_stores(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                                 self.geoserver_config.default['GEO_WORKSPACE'],
+                                 self.geoserver_config.default['GEOSERVER_DATA_DIR'])
+
+    def recalculate_layer_bbox(self):
         # Recalculate layer bounds in GeoServer layers in case the data has changed
         self.recalculate_bbox(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
                               self.geoserver_config.default['GEO_WORKSPACE'])
@@ -240,4 +338,15 @@ class Importer:
 
 if __name__ == '__main__':
     importer = Importer()
-    importer.geoserver_requests()
+    # Pass command line args
+    if len(argv) > 1:
+        function_name = argv[1]
+        function = getattr(importer, function_name, None)
+        if function:
+            # If the function exists, call it
+            function()
+        else:
+            print(f"Function '{function_name}' not found.")
+    else:
+        # If no arguments are provided, default to running the populate_geoserver
+        importer.populate_geoserver()

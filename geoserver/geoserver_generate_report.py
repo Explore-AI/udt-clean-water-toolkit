@@ -1,10 +1,9 @@
 import time
 from os import makedirs
 from os.path import exists, join
-
 from requests import get, exceptions
-
 from utils.utils import GeoServerConfig, DBConnection
+from sys import argv
 
 
 class Downloader:
@@ -155,7 +154,14 @@ class Downloader:
 
 if __name__ == '__main__':
     importer = Downloader()
-    importer.geoserver_get_map()
-    importer.dma_get_map()
-    # TODO add option to run specific function
-
+    if len(argv) > 1:
+        function_name = argv[1]
+        function = getattr(importer, function_name, None)
+        if function:
+            # If the function exists, call it
+            function()
+        else:
+            print(f"Function '{function_name}' not found.")
+    else:
+        # If no arguments are provided, default to running the geoserver_get_map
+        importer.geoserver_get_map()
