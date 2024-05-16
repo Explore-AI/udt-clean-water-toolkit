@@ -14,14 +14,5 @@
     "postinstall": "npm run rebuild && npm run link-modules",
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "@mantine/hooks": "^7.9.1",
-    "css-loader": "^7.1.1",
-    "postcss": "^8.4.38",
-    "postcss-loader": "^8.1.1",
-    "postcss-preset-mantine": "^1.15.0",
-    "postcss-simple-vars": "^7.0.1",
-    "style-loader": "^4.0.0"
-  }
+  "dependencies": {}
 }

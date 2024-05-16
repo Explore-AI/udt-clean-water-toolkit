@@ -13,9 +13,9 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "outDir": ".erb/dll", 
-    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    // "plugins": [{ "name": "typescript-plugin-css-modules" }],
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"], 
-  "include": ["src/", "src/renderer/Globals.d.ts"]
+  // "include": ["src/", "src/renderer/Globals.d.ts"]
 
 }
