@@ -104,6 +104,7 @@ class AcousticLoggerCoverage():
             print("Node is labeled as PipeEnd. Skipping processing.")
             return    
         while remaining_distance > 0:
+            print(f'DISTANCE {remaining_distance}')
             processed_nodes = set()
             processed_nodes.add(node_key)
             next_edges = self.get_next_edges(node_key, processed_edges)
