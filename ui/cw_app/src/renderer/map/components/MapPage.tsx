@@ -1,5 +1,5 @@
 // Our Map Page details exists here
-import * as styles from '../css/MapPage.module.css';
+import styles from '../css/MapPage.module.css';
 import BaseLayout from '../../core/components/BaseLayout';
 import MapView from './Map';
 import MapContextProvider from '../context/MapContextProvider';

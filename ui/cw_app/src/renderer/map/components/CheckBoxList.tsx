@@ -1,6 +1,6 @@
 import React from 'react';
 import { Checkbox } from '@mantine/core';
-import * as styles from '../css/CheckBoxList.module.css';
+import styles from '../css/CheckBoxList.module.css';
 import { LayerToggle } from '../types/types';
 
 interface CheckboxListProps {

@@ -11,7 +11,7 @@ import {
     DEFAULT_BASEMAP_TOGGLE,
 } from '../../core';
 import GeoSpatialControls from './MapControl';
-import * as styles from '../css/Map.module.css';
+import styles from '../css/Map.module.css';
 import { useState } from 'react';
 import { useInitialView, useLayerToggle, useBasemapToggle } from '../hooks/useMapContext';
 import BasePopup from '../../core/components/BasePopup';

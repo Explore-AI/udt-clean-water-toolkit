@@ -1,8 +1,8 @@
 // this is our common search input that will be used in a lot of other components
 import React, { useState } from 'react';
 import { TextInput, CloseButton } from '@mantine/core';
-import * as styles from '../css/SearchWidget.module.css';
-//import { IconSearch } from '@tabler/icons-react';
+import styles from '../css/SearchWidget.module.css';
+import { IconSearch } from '@tabler/icons-react';
 
 export default function SearchWidget() {
     const [value, setValue] = useState<string>('');
@@ -14,10 +14,11 @@ export default function SearchWidget() {
     const onClear = () => {
         setValue('');
     };
-    //    const icon = <IconSearch className={styles.icon} />;
+       const icon = <IconSearch className={styles.icon} />;
     return (
         <TextInput
             placeholder="Search"
+            leftSection={icon}
             onChange={(e) => onChange(e)}
             value={value}
             classNames={{ input: styles.input }}

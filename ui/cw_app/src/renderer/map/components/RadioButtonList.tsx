@@ -1,6 +1,6 @@
 import React from 'react';
 import { Radio, RadioGroup } from '@mantine/core';
-import * as styles from '../css/RadioButtonList.module.css';
+import styles from '../css/RadioButtonList.module.css';
 import { BasemapToggle } from '../types/types';
 
 interface RadioButtonListProps {
