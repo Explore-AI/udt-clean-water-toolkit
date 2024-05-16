@@ -13,7 +13,7 @@ import {
 import GeoSpatialControls from './MapControl';
 import * as styles from '../css/Map.module.css';
 import { useState } from 'react';
-import { useInitialView, useLayerToggle, useBasemapToggle } from '../hooks/MapContextHooks';
+import { useInitialView, useLayerToggle, useBasemapToggle } from '../hooks/useMapContext';
 import BasePopup from '../../core/components/BasePopup';
 import RadioButtonList from './RadioButtonList';
 import CheckboxList from './CheckBoxList';
