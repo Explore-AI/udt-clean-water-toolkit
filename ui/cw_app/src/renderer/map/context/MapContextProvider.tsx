@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import { MapContext, MapContextType } from './MapContext';
 import { MapViewState } from 'deck.gl';
 import { INITIAL_VIEW_STATE } from '../../core';
@@ -8,13 +8,11 @@ type MapProviderProps = {
 }
 
 function MapContextProvider({children}:MapProviderProps) {
-    const [initialView, setInitialView] = useState<MapViewState>(INITIAL_VIEW_STATE); 
+    const [initialView, setInitialView] = useState<MapViewState>(INITIAL_VIEW_STATE);
     const [showLayerToggle, setShowLayerToggle] = useState(false);
     const [showBaseMapToggle, setShowBaseMapToggle] = useState(false);
-    
+
     const contextValues: MapContextType = {
-        initialView,
-        setInitialView,
         // gotoLocation,
         // setGotoLocation,
         showLayerToggle,
@@ -30,4 +28,4 @@ function MapContextProvider({children}:MapProviderProps) {
     );
 }
 
-export default MapContextProvider; 
+export default MapContextProvider;

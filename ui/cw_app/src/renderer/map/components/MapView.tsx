@@ -13,11 +13,16 @@ import {
 import GeoSpatialControls from './MapControl';
 import styles from '../css/Map.module.css';
 import { useState } from 'react';
-import { useInitialView, useLayerToggle, useBasemapToggle } from '../hooks/useMapContext';
+import { useLayerToggle, useBasemapToggle } from '../hooks/useMapContext';
 import BasePopup from '../../core/components/BasePopup';
 import RadioButtonList from './RadioButtonList';
 import CheckboxList from './CheckBoxList';
 import { LayerToggle, BasemapToggle } from '../types/types';
+import { INITIAL_VIEW_STATE } from '../../core';
+import { MapViewState } from 'deck.gl';
+import useMapUi from '../hooks/useMapUi'
+
+
 
 if (!MAPBOX_SECRET_TOKEN) {
     throw new Error('Missing Mapbox token');
@@ -45,15 +50,18 @@ const basemapUrl = (basemapList: BasemapToggle[]) => {
 };
 
 export default function MapView() {
-    const [initialView] = useInitialView();
-    const [showBaseMapToggle] = useBasemapToggle();
-    const [showLayerToggle] = useLayerToggle();
+
+    //const [initialView, setInitialView] = useState<MapViewState>(INITIAL_VIEW_STATE);
 
     const [toggleLayers, setToggleLayers] =
         useState<LayerToggle[]>(DEFAULT_LAYER_TOGGLE);
+
     const [toggleBaseMap, setToggleBaseMap] = useState<BasemapToggle[]>(
         DEFAULT_BASEMAP_TOGGLE,
     );
+
+    const { showLayerToggle, showBaseMapToggle } = useMapUi
+
     const currentBaseMapUrl = basemapUrl(toggleBaseMap);
     const layers = getLayers(toggleLayers);
 
@@ -89,12 +97,12 @@ export default function MapView() {
             )}
 
             <DeckGL
-                initialViewState={initialView}
+                initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}
                 layers={layers}
             >
                 <Map
-                    initialViewState={initialView}
+                    initialViewState={INITIAL_VIEW_STATE}
                     mapStyle={currentBaseMapUrl}
                     mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
                     style={{ width: '500px', height: '500px' }}

@@ -41,7 +41,7 @@ export default function Header() {
             className={styles.logo}
             width={30}
           />
-          <h3> Unlocking Digital Twin POC </h3>
+          <h3> Unlocking Digital Twins POC </h3>
         </div>
         <div className={styles.links}>{linkButtons}</div>
         <div className={styles.menuBlock}>
