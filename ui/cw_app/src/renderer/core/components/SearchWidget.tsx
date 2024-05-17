@@ -14,21 +14,33 @@ export default function SearchWidget() {
     const onClear = () => {
         setValue('');
     };
-       const icon = <IconSearch className={styles.icon} />;
+
+    const handleSubmission = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (value == '')
+            console.log('please enter a value');
+        console.log(value);
+    }
+
+    const icon = <IconSearch className={styles.icon} />;
     return (
-        <TextInput
-            placeholder="Search"
-            leftSection={icon}
-            onChange={(e) => onChange(e)}
-            value={value}
-            classNames={{ input: styles.input }}
-            rightSection={
-                <CloseButton
-                    aria-label="Clear Input"
-                    onClick={() => onClear()}
-                    style={{ display: value ? undefined : 'none' }}
+        <>
+            <form>
+                <TextInput
+                    placeholder="Search coordinates, address, or assets...."
+                    leftSection={icon}
+                    onChange={(e) => onChange(e)}
+                    value={value}
+                    classNames={{ input: styles.input }}
+                    rightSection={
+                        <CloseButton
+                            aria-label="Clear Input"
+                            onClick={() => onClear()}
+                            style={{ display: value ? undefined : 'none' }}
+                        />
+                    }
                 />
-            }
-        />
+            </form>
+        </>
     );
 }
