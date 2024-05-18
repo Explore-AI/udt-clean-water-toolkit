@@ -8,7 +8,10 @@ interface RadioButtonListProps {
     setToggleList: React.Dispatch<React.SetStateAction<BasemapToggle[]>>;
 }
 
-export default function RadioButtonList({toggleList, setToggleList}: RadioButtonListProps) {
+export default function RadioButtonList({
+    toggleList,
+    setToggleList,
+}: RadioButtonListProps) {
     return (
         <RadioGroup
             value={toggleList.find((toggle) => toggle.visible)?.key}

@@ -2,7 +2,7 @@
 export interface LayerToggle {
     visible: boolean;
     label: string;
-    key: string; 
+    key: string;
 }
 
 // Define the interface for the toggle object
@@ -23,7 +23,7 @@ export interface BasemapToggle {
     visible: boolean;
     label: string;
     map_url?: string;
-    key: string; 
+    key: string;
 }
 
 export interface BasemapToggleObject {
