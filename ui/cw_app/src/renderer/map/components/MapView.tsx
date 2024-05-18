@@ -1,25 +1,14 @@
 // Our Map Page details exists here
+import styles from '../css/Map.module.css';
 import DeckGL from '@deck.gl/react';
 import SearchWidget from '../../core/components/SearchWidget';
-import { Map } from 'react-map-gl';
-import { MAPBOX_SECRET_TOKEN, MAPBOX_PUBLIC_TOKEN } from '../../config';
-import { DEFAULT_BASEMAP_TOGGLE } from '../../core';
-import { MVTLayer } from '@deck.gl/geo-layers';
 import MapControls from './MapControls';
-import styles from '../css/Map.module.css';
-import { useState } from 'react';
-import { useLayerToggle, useBasemapToggle } from '../hooks/useMapContext';
-import BasePopup from '../../core/components/BasePopup';
-import RadioButtonList from './RadioButtonList';
-import CheckboxList from './CheckBoxList';
-import { LayerToggle, BasemapToggle } from '../types/types';
-import { MapViewState } from 'deck.gl';
 import useMapUi from '../hooks/useMapUi';
 import useMapLayers from '../hooks/useMapLayers';
-
-if (!MAPBOX_SECRET_TOKEN) {
-    throw new Error('Missing Mapbox token');
-}
+import { Map } from 'react-map-gl';
+import { MapViewState } from 'deck.gl';
+import { MAPBOX_PUBLIC_TOKEN } from '../../config';
+import { DEFAULT_BASEMAP_TOGGLE } from '../../core';
 
 export const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,
