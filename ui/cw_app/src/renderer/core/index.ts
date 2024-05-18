@@ -9,7 +9,7 @@ export type LayerColorCodes = {
     [key: string]: number[];
 };
 
-export const LAYER_NAMES = {
+export const MAP_LAYER_NAMES = {
     chambers: 'assets_chamber',
     distribution_main: 'assets_distributionmain',
     hydrants: 'assets_hydrant',
@@ -35,7 +35,7 @@ export const LAYER_NAME_COLOR_CODES = {
     assets_trunkmain: [33, 97, 140],
 };
 
-export type LayerKey = keyof typeof LAYER_NAME_COLOR_CODES; 
+export type LayerKey = keyof typeof LAYER_NAME_COLOR_CODES;
 
 export const MVT_LAYER_URL = (asset_name: string) => {
     return `${GEOSERVER_URL}/geoserver/gwc/service/tms/1.0.0/udt:${asset_name}@EPSG:900913@pbf/{z}/{x}/{-y}.pbf`;
@@ -46,30 +46,30 @@ export const MVT_LAYER_URL_TWO = (asset_name: string) => {
 };
 
 export const DEFAULT_LAYER_TOGGLE = [
-    { 
-        visible: false, 
-        label: 'Chambers', 
-        key: 'assets_chamber' 
+    {
+        visible: false,
+        label: 'Chambers',
+        key: 'assets_chamber',
     },
     {
         visible: false,
         label: 'Distribution Main',
         key: 'assets_distributionmain',
     },
-    { 
-        visible: false, 
-        label: 'Hydrants', 
-        key: 'assets_hydrant' 
+    {
+        visible: false,
+        label: 'Hydrants',
+        key: 'assets_hydrant',
     },
-    { 
-        visible: false, 
-        label: 'Loggers', 
-        key: 'assets_logger' 
+    {
+        visible: false,
+        label: 'Loggers',
+        key: 'assets_logger',
     },
-    { 
-        visible: false, 
-        label: 'Network Meter', 
-        key: 'assets_networkmeter' 
+    {
+        visible: false,
+        label: 'Network Meter',
+        key: 'assets_networkmeter',
     },
     {
         visible: false,
@@ -91,10 +91,10 @@ export const DEFAULT_LAYER_TOGGLE = [
         label: 'Pressure Fitting',
         key: 'assets_pressurefitting',
     },
-    { 
-        visible: false, 
-        label: 'Trunk Main', 
-        key: 'assets_trunkmain' 
+    {
+        visible: false,
+        label: 'Trunk Main',
+        key: 'assets_trunkmain',
     },
 ];
 

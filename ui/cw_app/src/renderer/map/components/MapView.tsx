@@ -10,7 +10,7 @@ import {
     DEFAULT_LAYER_TOGGLE,
     DEFAULT_BASEMAP_TOGGLE,
 } from '../../core';
-import GeoSpatialControls from './MapControl';
+import MapControls from './MapControls';
 import styles from '../css/Map.module.css';
 import { useState } from 'react';
 import { useLayerToggle, useBasemapToggle } from '../hooks/useMapContext';
@@ -20,9 +20,7 @@ import CheckboxList from './CheckBoxList';
 import { LayerToggle, BasemapToggle } from '../types/types';
 import { INITIAL_VIEW_STATE } from '../../core';
 import { MapViewState } from 'deck.gl';
-import useMapUi from '../hooks/useMapUi'
-
-
+import useMapUi from '../hooks/useMapUi';
 
 if (!MAPBOX_SECRET_TOKEN) {
     throw new Error('Missing Mapbox token');
@@ -50,7 +48,6 @@ const basemapUrl = (basemapList: BasemapToggle[]) => {
 };
 
 export default function MapView() {
-
     //const [initialView, setInitialView] = useState<MapViewState>(INITIAL_VIEW_STATE);
 
     const [toggleLayers, setToggleLayers] =
@@ -60,7 +57,7 @@ export default function MapView() {
         DEFAULT_BASEMAP_TOGGLE,
     );
 
-    const { showLayerToggle, showBaseMapToggle } = useMapUi
+    const { showLayerToggle, showBaseMapToggle } = useMapUi();
 
     const currentBaseMapUrl = basemapUrl(toggleBaseMap);
     const layers = getLayers(toggleLayers);
@@ -71,31 +68,8 @@ export default function MapView() {
                 <SearchWidget />
             </div>
             <div className={styles.control}>
-                <GeoSpatialControls />
+                <MapControls />
             </div>
-
-            {showLayerToggle && (
-                <div className={styles.layerTogglePopup}>
-                    <BasePopup>
-                        <CheckboxList
-                            toggleList={toggleLayers}
-                            setToggleList={setToggleLayers}
-                        />
-                    </BasePopup>
-                </div>
-            )}
-
-            {showBaseMapToggle && (
-                <div className={styles.basemapTogglePopup}>
-                    <BasePopup>
-                        <RadioButtonList
-                            toggleList={toggleBaseMap}
-                            setToggleList={setToggleBaseMap}
-                        />
-                    </BasePopup>
-                </div>
-            )}
-
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}
