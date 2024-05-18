@@ -3,16 +3,14 @@ import React, { useContext, useState } from 'react';
 export const MapUiContext = React.createContext();
 
 export default function useMapUi() {
-    const [showLayerToggle, setShowLayerToggle] = useState(false);
-    const [showBaseMapToggle, setShowBaseMapToggle] = useState(false);
+    const [uiParams, setMapUiParams] = useState({});
 
-    //const values = useContext(MapUiContext);
+    const handleMapUiParams = (newParams, options = {}) => {
+        if (isEmpty(newParams) || isNil(newParams)) {
+            return setMapUiParams({});
+        }
+        return setUiParams({ ...uiParams, ...newParams });
+    };
 
-    //    console.log(values, "aaa")
-
-    const values = { showLayerToggle, showBaseMapToggle };
-
-    console.log(values, 'aaa');
-
-    return values;
+    return { uiParams, setMapUiParams: handleMapUiParams };
 }

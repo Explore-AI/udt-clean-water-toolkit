@@ -18,7 +18,6 @@ import BasePopup from '../../core/components/BasePopup';
 import RadioButtonList from './RadioButtonList';
 import CheckboxList from './CheckBoxList';
 import { LayerToggle, BasemapToggle } from '../types/types';
-import { INITIAL_VIEW_STATE } from '../../core';
 import { MapViewState } from 'deck.gl';
 import useMapUi from '../hooks/useMapUi';
 
@@ -47,6 +46,14 @@ const basemapUrl = (basemapList: BasemapToggle[]) => {
     return basemapList.find((toggle: BasemapToggle) => toggle.visible)?.map_url;
 };
 
+export const INITIAL_VIEW_STATE: MapViewState = {
+    longitude: -0.118092,
+    latitude: 51.5074,
+    zoom: 10,
+    bearing: 0,
+    pitch: 30,
+};
+
 export default function MapView() {
     //const [initialView, setInitialView] = useState<MapViewState>(INITIAL_VIEW_STATE);
 
@@ -73,7 +80,7 @@ export default function MapView() {
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}
-                layers={layers}
+                layers={MVT_LAYERS}
             >
                 <Map
                     initialViewState={INITIAL_VIEW_STATE}
