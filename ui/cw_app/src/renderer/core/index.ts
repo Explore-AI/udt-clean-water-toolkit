@@ -19,7 +19,7 @@ export const MVT_LAYER_URL_TWO = (asset_name: string) => {
     return `${GEOSERVER_URL}/geoserver/udt/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:${asset_name}&STYLE=&TILEMATRIX=EPSG:900913:13&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}`;
 };
 
-export const MAP_LAYERS = [
+export const MAP_LAYERS_INFO = [
     {
         visible: false,
         label: 'Chambers',
@@ -81,7 +81,6 @@ export const MAP_LAYERS = [
         colorCode: [33, 97, 140],
     },
 ];
-
 
 export const DEFAULT_BASEMAP_TOGGLE = [
     {

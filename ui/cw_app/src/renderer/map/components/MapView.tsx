@@ -3,13 +3,8 @@ import DeckGL from '@deck.gl/react';
 import SearchWidget from '../../core/components/SearchWidget';
 import { Map } from 'react-map-gl';
 import { MAPBOX_SECRET_TOKEN, MAPBOX_PUBLIC_TOKEN } from '../../config';
+import { DEFAULT_BASEMAP_TOGGLE } from '../../core'
 import { MVTLayer } from '@deck.gl/geo-layers';
-import {
-    MVT_LAYER_URL,
-    LAYER_NAME_COLOR_CODES,
-    DEFAULT_LAYER_TOGGLE,
-    DEFAULT_BASEMAP_TOGGLE,
-} from '../../core';
 import MapControls from './MapControls';
 import styles from '../css/Map.module.css';
 import { useState } from 'react';
@@ -20,31 +15,11 @@ import CheckboxList from './CheckBoxList';
 import { LayerToggle, BasemapToggle } from '../types/types';
 import { MapViewState } from 'deck.gl';
 import useMapUi from '../hooks/useMapUi';
+import useMapLayers from '../hooks/useMapLayers';
 
 if (!MAPBOX_SECRET_TOKEN) {
     throw new Error('Missing Mapbox token');
 }
-
-const getLayers = (layerList: LayerToggle[]) => {
-    return layerList
-        .filter((layer: LayerToggle) => layer.visible)
-        .map((layer: LayerToggle) => {
-            return new MVTLayer({
-                id: layer.key,
-                data: [MVT_LAYER_URL(layer.key)],
-                pickable: true,
-                //@ts-ignore
-                getFillColor: LAYER_NAME_COLOR_CODES[layer.key],
-                getPointRadius: 10,
-                minZoom: 0,
-                maxZoom: 5,
-            });
-        });
-};
-
-const basemapUrl = (basemapList: BasemapToggle[]) => {
-    return basemapList.find((toggle: BasemapToggle) => toggle.visible)?.map_url;
-};
 
 export const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,
@@ -55,36 +30,26 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function MapView() {
-    //const [initialView, setInitialView] = useState<MapViewState>(INITIAL_VIEW_STATE);
 
-    const [toggleLayers, setToggleLayers] =
-        useState<LayerToggle[]>(DEFAULT_LAYER_TOGGLE);
-
-    const [toggleBaseMap, setToggleBaseMap] = useState<BasemapToggle[]>(
-        DEFAULT_BASEMAP_TOGGLE,
-    );
-
-    const { showLayerToggle, showBaseMapToggle } = useMapUi();
-
-    const currentBaseMapUrl = basemapUrl(toggleBaseMap);
-    const layers = getLayers(toggleLayers);
+    const { mapLayers }  = useMapLayers()
+    console.log(mapLayers, "eeeeeeeee")
 
     return (
         <>
-            <div className={styles.searchBox}>
+            {/* <div className={styles.searchBox}>
                 <SearchWidget />
-            </div>
-            <div className={styles.control}>
+                </div>
+                <div className={styles.control}>
                 <MapControls />
-            </div>
+                </div> */}
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}
-                layers={MVT_LAYERS}
+                layers={mapLayers}
             >
                 <Map
                     initialViewState={INITIAL_VIEW_STATE}
-                    mapStyle={currentBaseMapUrl}
+                    mapStyle={DEFAULT_BASEMAP_TOGGLE[0].map_url}
                     mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
                     style={{ width: '500px', height: '500px' }}
                     attributionControl={false}

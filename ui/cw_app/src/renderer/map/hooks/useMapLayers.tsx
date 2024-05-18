@@ -1,7 +1,9 @@
-import React, { useContext, useState } from 'react';
-import { MAP_LAYERS_INFO } from '../../core';
+import React, { useContext, useState, useEffect } from 'react';
+import { MAP_LAYERS_INFO, MVT_LAYER_URL } from '../../core';
+import { MVTLayer } from '@deck.gl/geo-layers';
 
-const MVT_LAYERS = map((layer: MAP_LAYERS_INFO) => {
+const MVT_LAYERS = MAP_LAYERS_INFO.map((layer: MAP_LAYERS_INFO) => {
+    console.log(layer)
     return new MVTLayer({
         id: layer.key,
         data: [MVT_LAYER_URL(layer.key)],
@@ -14,15 +16,20 @@ const MVT_LAYERS = map((layer: MAP_LAYERS_INFO) => {
     });
 });
 
-export default function useMapLayers() {
-    const [uiParams, setMapUiParams] = useState({});
+export default function useMapLayers(mapLayerVisibility = {}) {
+    //const [mapLayerVisibility, setMapLayerVisibility] = useState({});
+    const [mapLayers, setMapLayers] = useState(MVT_LAYERS);
+    console.log(mapLayers, "qqqqqqqq")
+    /* const handleMapLayerVisibility = (newParams, options = {}) => {
+     *     map();
+     *     return mapLayerVisibility;
+     * }; */
 
-    const handleMapUiParams = (newParams, options = {}) => {
-        if (isEmpty(newParams) || isNil(newParams)) {
-            return setMapUiParams({});
-        }
-        return setUiParams({ ...uiParams, ...newParams });
-    };
+    useEffect(() => {
+        const layers = mapLayers.map(() => null)
 
-    return { uiParams, setMapUiParams: handleMapUiParams };
+        return () => {};
+    }, []);
+
+    return { mapLayers: MVT_LAYERS };
 }
