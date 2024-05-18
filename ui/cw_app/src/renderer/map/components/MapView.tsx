@@ -3,7 +3,7 @@ import DeckGL from '@deck.gl/react';
 import SearchWidget from '../../core/components/SearchWidget';
 import { Map } from 'react-map-gl';
 import { MAPBOX_SECRET_TOKEN, MAPBOX_PUBLIC_TOKEN } from '../../config';
-import { DEFAULT_BASEMAP_TOGGLE } from '../../core'
+import { DEFAULT_BASEMAP_TOGGLE } from '../../core';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import MapControls from './MapControls';
 import styles from '../css/Map.module.css';
@@ -30,9 +30,8 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function MapView() {
-
-    const { mapLayers }  = useMapLayers()
-    console.log(mapLayers, "eeeeeeeee")
+    const { mapLayers } = useMapLayers();
+    console.log(mapLayers, 'eeeeeeeee');
 
     return (
         <>

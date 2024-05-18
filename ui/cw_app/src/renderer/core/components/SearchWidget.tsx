@@ -14,7 +14,7 @@ export default function SearchWidget() {
     const onClear = () => {
         setValue('');
     };
-       const icon = <IconSearch className={styles.icon} />;
+    const icon = <IconSearch className={styles.icon} />;
     return (
         <TextInput
             placeholder="Search"
