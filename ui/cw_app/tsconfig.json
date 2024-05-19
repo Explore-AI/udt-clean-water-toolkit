@@ -1,21 +1,15 @@
 {
-  "compilerOptions": {
-    "incremental": true,
-    "target": "es2022",
-    "module": "commonjs",
-    "lib": ["dom", "es2022"],
-    "jsx": "react-jsx",
-    "strict": true,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "outDir": ".erb/dll", 
-    // "plugins": [{ "name": "typescript-plugin-css-modules" }],
-  },
-  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"], 
-  // "include": ["src/", "src/renderer/Globals.d.ts"]
-
+    "compilerOptions": {
+        "target": "es2017",
+        "allowSyntheticDefaultImports": true,
+        "noEmit": true,
+        "checkJs": true,
+        "jsx": "react",
+        "moduleResolution": "Node",
+        "lib": [ "dom", "es2017" ]
+    },
+    "include": [
+        "./"
+    ],
+    "exclude": ["node_modules"]
 }
