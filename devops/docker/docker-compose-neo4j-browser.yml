@@ -1,14 +1,12 @@
 version: "3"
 
 services:
-  apidrf:
+  udtneo4jbrowser:
     container_name: udtneo4jbrowser
     image: neo4j_browser
     build:
-      context: ./
-      dockerfile: Dockerfile_neo4j_browser
-    volumes:
-      - ../../ui/neo4j-browser:/opt/udt/ui/neo4j-browser/
+      context: ../../
+      dockerfile: devops/docker/Dockerfile_neo4j_browser
     ports:
-      - "8080:8080"
+      - "7475:8080"
     restart: always

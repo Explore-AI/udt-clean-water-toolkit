@@ -20,7 +20,6 @@ release-notes.md
 signature.pem
 HEAD
 neo4j-enterprise-*/
-yarn.lock
 
 ./src/neo4j-arc/dist
 ./src/neo4j-arc/node_modules

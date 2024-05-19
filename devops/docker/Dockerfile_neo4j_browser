@@ -8,17 +8,21 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y \
         vim \
         python3.11 \
         python3-dev \
+        curl \
         python3-pip
+
+# https://github.com/neo4j/neo4j-browser/issues/1833
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+
+RUN apt-get install -y nodejs
 
 RUN mkdir -p /opt/udt/ui/neo4j-browser/
 
 WORKDIR /opt/udt/ui/neo4j-browser/
 
-RUN pip install nodeenv
+COPY ./ui/neo4j-browser/ .
 
-RUN nodeenv --node=16.10.0 env
-
-RUN . env/bin/activate
+RUN npm install -g yarn
 
 RUN yarn install
 
