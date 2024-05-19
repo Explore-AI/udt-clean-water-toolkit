@@ -3,7 +3,7 @@ import { Tooltip, ActionIcon, rem } from '@mantine/core';
 import styles from '../css/MapControl.module.css';
 import { IconStack2 } from '@tabler/icons-react';
 
-export default function AssetLayerSelect() {
+export default function MapLayerSelect() {
     return (
         <>
             <Tooltip label="Toggle Layers">

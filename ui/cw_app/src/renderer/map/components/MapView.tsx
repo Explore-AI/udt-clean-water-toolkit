@@ -24,10 +24,7 @@ export default function MapView() {
 
     return (
         <>
-            {/* <div className={styles.searchBox}>
-                <SearchWidget />
-                </div>
-                <div className={styles.control}>
+            {/* <div className={styles.control}>
                 <MapControls />
                 </div> */}
             <DeckGL
@@ -46,3 +43,7 @@ export default function MapView() {
         </>
     );
 }
+
+// <div className={styles.searchBox}>
+//         <SearchWidget />
+//         </div>
