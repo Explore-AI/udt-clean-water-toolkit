@@ -1,0 +1,25 @@
+FROM ubuntu:22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN DEBIAN_FRONTEND=noninteractive apt update
+
+RUN DEBIAN_FRONTEND=noninteractive apt install -y \
+        vim \
+        python3.11 \
+        python3-dev \
+        python3-pip
+
+RUN mkdir -p /opt/udt/ui/neo4j-browser/
+
+WORKDIR /opt/udt/ui/neo4j-browser/
+
+RUN pip install nodeenv
+
+RUN nodeenv --node=16.10.0 env
+
+RUN . env/bin/activate
+
+RUN yarn install
+
+CMD ["yarn", "start-prod"]
