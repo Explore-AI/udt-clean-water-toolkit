@@ -8,7 +8,7 @@ import useMapLayers from '../hooks/useMapLayers';
 import { Map } from 'react-map-gl';
 import { MapViewState } from 'deck.gl';
 import { MAPBOX_PUBLIC_TOKEN } from '../../config';
-import { DEFAULT_BASEMAP_TOGGLE } from '../../core';
+import { DEFAULT_BASEMAP_PROPS } from '../../core';
 
 export const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,
@@ -33,7 +33,7 @@ export default function MapView() {
             >
                 <Map
                     initialViewState={INITIAL_VIEW_STATE}
-                    mapStyle={DEFAULT_BASEMAP_TOGGLE[0].map_url}
+                    mapStyle={DEFAULT_BASEMAP_PROPS[0].map_url}
                     mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
                     style={{ width: '500px', height: '500px' }}
                     attributionControl={false}

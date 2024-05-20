@@ -4,9 +4,9 @@ import useMapLayers from '../hooks/useMapLayers';
 import useMapUi from '../hooks/useMapUi';
 import { map as _map } from 'lodash';
 import { Checkbox, Tooltip, ActionIcon, rem } from '@mantine/core';
-import { IconStack2 } from '@tabler/icons-react';
+import { IconMap } from '@tabler/icons-react';
 
-export default function MapLayerControl() {
+export default function MapBaseLayerControl() {
     const { uiParams, setMapUiParams } = useMapUi();
 
     const { mapLayerProps, setMapLayerProps } = useMapLayers();
@@ -19,19 +19,19 @@ export default function MapLayerControl() {
 
     return (
         <>
-            <Tooltip label="Toggle Layers">
+            <Tooltip label="Toggle Base Map">
                 <ActionIcon
                     className={styles.button}
                     onClick={onIconClick}
                     size={42}>
-                    <IconStack2
+                    <IconMap
                         style={{ width: rem(42), height: rem(42) }}
                         stroke={1.5}
                     />
                 </ActionIcon>
             </Tooltip>
 
-            {uiParams.showLayerControls && (
+            {uiParams.showBaseLayerControls && (
                 <div className={styles.control_box}>
                     {_map(mapLayerProps, (layerProps) => {
                         return (

@@ -82,7 +82,7 @@ export const MAP_LAYERS_PROPS = [
     },
 ];
 
-export const DEFAULT_BASEMAP_TOGGLE = [
+export const DEFAULT_BASEMAP_PROPS = [
     {
         visible: true,
         label: 'Open Street Map',
@@ -108,11 +108,3 @@ export const DEFAULT_BASEMAP_TOGGLE = [
         key: 'terrain_map',
     },
 ];
-
-export const INITIAL_VIEW_STATE: MapViewState = {
-    longitude: -0.118092,
-    latitude: 51.5074,
-    zoom: 10,
-    bearing: 0,
-    pitch: 30,
-};
