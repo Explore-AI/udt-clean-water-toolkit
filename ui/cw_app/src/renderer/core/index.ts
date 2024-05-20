@@ -124,11 +124,17 @@ export const DEFAULT_BASEMAP_TOGGLE = [
         key: 'terrain_map',
     },
 ];
-
-export const INITIAL_VIEW_STATE: MapViewState = {
+export const INITIAL_COORDS = {
     longitude: -0.118092,
     latitude: 51.5074,
+}
+export const INITIAL_VIEW_STATE: MapViewState = {
+    ...INITIAL_COORDS, 
     zoom: 10,
     bearing: 0,
     pitch: 30,
 };
+
+export const gpsRegex =/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d(\.\d+)?|180(\.0+)?)|(\d{1,2}(\.\d+)?))$/; 
+export const gisidRegex = /^\d{7}$/;
+
