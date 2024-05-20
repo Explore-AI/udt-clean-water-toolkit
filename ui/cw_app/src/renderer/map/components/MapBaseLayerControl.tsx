@@ -11,7 +11,7 @@ export default function MapBaseLayerControl() {
 
     const { uiParams, setMapUiParams } = useMapUi();
 
-    const { mapLayerProps, setMapLayerProps } = useMapLayers();
+    const { mapLayerProps, setMapLayerProps, setBaseMapUrl } = useMapLayers();
 
     const onIconClick = () => {
         setMapUiParams({
@@ -42,12 +42,7 @@ export default function MapBaseLayerControl() {
                                 key={layerProps.key}
                                 label={layerProps.label}
                                 defaultChecked={layerProps.visible}
-                                onChange={(e) => {
-                                    setMapLayerProps({
-                                        ...layerProps,
-                                        visible: e.currentTarget.checked,
-                                    });
-                                }}
+                                onChange={() => setBaseMapUrl(layerProps.map_url)}
                             />
                         );
                     })}

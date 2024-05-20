@@ -19,7 +19,9 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function MapView() {
-    const { mapLayers } = useMapLayers();
+    const { mapLayers, baseMapUrl } = useMapLayers();
+
+    console.log(baseMapUrl)
 
     return (
         <>
@@ -33,7 +35,7 @@ export default function MapView() {
             >
                 <Map
                     initialViewState={INITIAL_VIEW_STATE}
-                    mapStyle={DEFAULT_BASEMAP_PROPS[0].map_url}
+                    mapStyle={baseMapUrl}
                     mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
                     style={{ width: '500px', height: '500px' }}
                     attributionControl={false}
