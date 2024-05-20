@@ -1,5 +1,5 @@
-import MapLayerSelect from './MapLayerSelect';
+import MapLayerControl from './MapLayerControl';
 
 export default function MapControls({}) {
-    return <MapLayerSelect />;
+    return <MapLayerControl />;
 }

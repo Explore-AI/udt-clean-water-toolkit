@@ -1,35 +1,39 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { MAP_LAYERS_INFO, MVT_LAYER_URL } from '../../core';
+import { MAP_LAYERS_PROPS, MVT_LAYER_URL } from '../../core';
 import { MVTLayer } from '@deck.gl/geo-layers';
+import { map as _map, unionBy as _unionBy, isEqual as _isEqual } from 'lodash'
 
-const MVT_LAYERS = MAP_LAYERS_INFO.map((layer: MAP_LAYERS_INFO) => {
-    console.log(layer);
-    return new MVTLayer({
-        id: layer.key,
-        data: [MVT_LAYER_URL(layer.key)],
-        pickable: true,
-        getFillColor: layer.colorCode,
-        getPointRadius: 10,
-        visible: layer.visible,
-        minZoom: 0,
-        maxZoom: 5,
-    });
-});
+const createLayers = (newMapLayerProps = []) => {
 
-export default function useMapLayers(mapLayerVisibility = {}) {
-    //const [mapLayerVisibility, setMapLayerVisibility] = useState({});
-    const [mapLayers, setMapLayers] = useState(MVT_LAYERS);
-    console.log(mapLayers, 'qqqqqqqq');
-    /* const handleMapLayerVisibility = (newParams, options = {}) => {
-     *     map();
-     *     return mapLayerVisibility;
-     * }; */
+    const mapLayerProps = newMapLayerProps || MAP_LAYERS_PROPS
 
-    useEffect(() => {
-        const layers = mapLayers.map(() => null);
+    return _map(mapLayerProps, (layerProps) => {
 
-        return () => {};
-    }, []);
+        return new MVTLayer({
+            pickable: true,
+            getPointRadius: 10,
+            minZoom: 0,
+            maxZoom: 5,
+            id: layerProps.key,
+            visible: layerProps.visible,
+            getFillColor: layerProps.colorCode,
+            data: [MVT_LAYER_URL(layerProps.key)],
+        });
+    })
+}
 
-    return { mapLayers: MVT_LAYERS };
+export default function useMapLayers() {
+
+    const [mapLayerProps, setMapLayerProps] = useState(MAP_LAYERS_PROPS);
+    const [mapLayers, setMapLayers] = useState(createLayers());
+
+    const handleMapLayerProps = (newLayerProps) => {
+        const newMapLayerProps = _unionBy(mapLayerProps, [newLayerProps], "key")
+        setMapLayerProps(newMapLayerProps)
+        const layers = createLayers(newMapLayerProps)
+        setMapLayers(layers)
+        console.log(layers)
+    }
+
+    return { mapLayerProps, setMapLayerProps: handleMapLayerProps, mapLayers };
 }

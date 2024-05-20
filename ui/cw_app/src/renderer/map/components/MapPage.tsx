@@ -2,19 +2,22 @@
 import React, { useState } from 'react';
 import styles from '../css/MapPage.module.css';
 import MapView from './MapView';
-import MapLayout from '../../core/components/MapLayout';
+import BaseLayout from '../../core/components/BaseLayout';
 import useMapUi, { MapUiContext } from '../hooks/useMapUi';
 
-export default function MapPage() {
+function MapPage() {
     const { showLayerToggle, showBaseMapToggle } = useMapUi();
 
     return (
-        <MapLayout>
+        <BaseLayout>
             <MapUiContext.Provider value={(showLayerToggle, showBaseMapToggle)}>
                 <div className={styles.pageContainer}>
                     <MapView />
                 </div>
             </MapUiContext.Provider>
-        </MapLayout>
+        </BaseLayout>
     );
 }
+
+
+export default MapPage

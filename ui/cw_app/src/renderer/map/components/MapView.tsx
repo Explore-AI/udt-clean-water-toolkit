@@ -20,13 +20,12 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 
 export default function MapView() {
     const { mapLayers } = useMapLayers();
-    console.log(mapLayers, 'eeeeeeeee');
 
     return (
         <>
-            {/* <div className={styles.control}>
+            <div className={styles.control}>
                 <MapControls />
-                </div> */}
+            </div>
             <DeckGL
                 initialViewState={INITIAL_VIEW_STATE}
                 controller={{ scrollZoom: true }}
