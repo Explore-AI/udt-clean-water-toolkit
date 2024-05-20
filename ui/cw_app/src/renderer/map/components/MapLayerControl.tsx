@@ -7,13 +7,14 @@ import { Checkbox, Tooltip, ActionIcon, rem } from '@mantine/core';
 import { IconStack2 } from '@tabler/icons-react';
 
 export default function MapLayerControl() {
+
     const { uiParams, setMapUiParams } = useMapUi();
 
     const { mapLayerProps, setMapLayerProps } = useMapLayers();
 
     const onIconClick = () => {
         setMapUiParams({
-            showBaseLayerControls: !uiParams.showBaseLayerControls,
+            showLayerControls: !uiParams.showLayerControls,
         });
     };
 

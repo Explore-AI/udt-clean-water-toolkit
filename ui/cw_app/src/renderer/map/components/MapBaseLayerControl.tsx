@@ -5,8 +5,10 @@ import useMapUi from '../hooks/useMapUi';
 import { map as _map } from 'lodash';
 import { Checkbox, Tooltip, ActionIcon, rem } from '@mantine/core';
 import { IconMap } from '@tabler/icons-react';
+import { DEFAULT_BASEMAP_PROPS } from '../../core'
 
 export default function MapBaseLayerControl() {
+
     const { uiParams, setMapUiParams } = useMapUi();
 
     const { mapLayerProps, setMapLayerProps } = useMapLayers();
@@ -34,7 +36,7 @@ export default function MapBaseLayerControl() {
 
             {uiParams.showBaseLayerControls && (
                 <div className={styles.control_box}>
-                    {_map(mapLayerProps, (layerProps) => {
+                    {_map(DEFAULT_BASEMAP_PROPS, (layerProps) => {
                         return (
                             <Checkbox
                                 key={layerProps.key}
