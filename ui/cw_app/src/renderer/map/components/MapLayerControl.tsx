@@ -14,8 +14,8 @@ export default function MapLayerControl() {
     const onIconClick = () => {
         setMapUiParams({
             showBaseLayerControls: !uiParams.showBaseLayerControls,
-        })
-    }
+        });
+    };
 
     return (
         <>
@@ -23,7 +23,8 @@ export default function MapLayerControl() {
                 <ActionIcon
                     className={styles.button}
                     onClick={onIconClick}
-                    size={42}>
+                    size={42}
+                >
                     <IconStack2
                         style={{ width: rem(42), height: rem(42) }}
                         stroke={1.5}
