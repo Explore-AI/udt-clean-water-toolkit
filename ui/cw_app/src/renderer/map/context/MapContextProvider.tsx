@@ -1,22 +1,24 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import { MapContext, MapContextType } from './MapContext';
 import { MapViewState } from 'deck.gl';
-import { INITIAL_VIEW_STATE } from '../../core';
+import { INITIAL_VIEW_STATE, INITIAL_COORDS } from '../../core';
 
 type MapProviderProps = {
     children: React.ReactNode;
-}
+};
 
-function MapContextProvider({children}:MapProviderProps) {
-    const [initialView, setInitialView] = useState<MapViewState>(INITIAL_VIEW_STATE); 
+function MapContextProvider({ children }: MapProviderProps) {
+    const [initialView, setInitialView] =
+        useState<MapViewState>(INITIAL_VIEW_STATE);
+    const [gotoLocation, setGotoLocation] = useState(INITIAL_COORDS);
     const [showLayerToggle, setShowLayerToggle] = useState(false);
     const [showBaseMapToggle, setShowBaseMapToggle] = useState(false);
-    
+
     const contextValues: MapContextType = {
         initialView,
         setInitialView,
-        // gotoLocation,
-        // setGotoLocation,
+        gotoLocation,
+        setGotoLocation,
         showLayerToggle,
         setShowLayerToggle,
         showBaseMapToggle,
@@ -30,4 +32,4 @@ function MapContextProvider({children}:MapProviderProps) {
     );
 }
 
-export default MapContextProvider; 
+export default MapContextProvider;

@@ -12,12 +12,13 @@ import {
 } from '../../core';
 import GeoSpatialControls from './MapControl';
 import styles from '../css/Map.module.css';
-import { useState } from 'react';
-import { useInitialView, useLayerToggle, useBasemapToggle } from '../hooks/useMapContext';
+import { useState, useEffect } from 'react';
+import { useInitialView, useLayerToggle, useBasemapToggle, useGoToLocation } from '../hooks/useMapContext';
 import BasePopup from '../../core/components/BasePopup';
 import RadioButtonList from './RadioButtonList';
 import CheckboxList from './CheckBoxList';
 import { LayerToggle, BasemapToggle } from '../types/types';
+import { isValidCoordinate } from '../../core/utils/utils';
 
 if (!MAPBOX_SECRET_TOKEN) {
     throw new Error('Missing Mapbox token');
@@ -45,9 +46,10 @@ const basemapUrl = (basemapList: BasemapToggle[]) => {
 };
 
 export default function MapView() {
-    const [initialView] = useInitialView();
+    const [initialView, setInitialView ] = useInitialView();
     const [showBaseMapToggle] = useBasemapToggle();
     const [showLayerToggle] = useLayerToggle();
+    const [gotoLocation, setGotoLocation] = useGoToLocation();
 
     const [toggleLayers, setToggleLayers] =
         useState<LayerToggle[]>(DEFAULT_LAYER_TOGGLE);
@@ -57,10 +59,21 @@ export default function MapView() {
     const currentBaseMapUrl = basemapUrl(toggleBaseMap);
     const layers = getLayers(toggleLayers);
 
+    useEffect( () => {
+        if(gotoLocation && isValidCoordinate(gotoLocation.latitude, gotoLocation.longitude)){
+            let newMapView = {
+                ...initialView,
+                longitude: gotoLocation.longitude,
+                latitude: gotoLocation.latitude,
+            };
+            setInitialView(newMapView);
+        }
+    }, [gotoLocation])
+
     return (
         <>
             <div className={styles.searchBox}>
-                <SearchWidget />
+                <SearchWidget updateGoToCoords={setGotoLocation}/>
             </div>
             <div className={styles.control}>
                 <GeoSpatialControls />

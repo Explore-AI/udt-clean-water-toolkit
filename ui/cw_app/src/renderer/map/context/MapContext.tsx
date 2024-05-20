@@ -8,7 +8,14 @@ export type MapContextType = {
     setShowLayerToggle: Dispatch<SetStateAction<boolean>>;
     showBaseMapToggle: boolean;
     setShowBaseMapToggle: Dispatch<SetStateAction<boolean>>;
-}
+    gotoLocation: {
+        latitude: number;
+        longitude: number;
+    };
+    setGotoLocation: Dispatch<
+        SetStateAction<{ latitude: number; longitude: number }>
+    >;
+};
 
 export const MapContext = createContext<MapContextType>({
     initialView: {
@@ -19,8 +26,11 @@ export const MapContext = createContext<MapContextType>({
         pitch: 0,
     },
     setInitialView: () => {},
-    // gotoLocation: {},
-    // setGotoLocation: () => {},
+    gotoLocation: {
+        latitude: 0,
+        longitude: 0,
+    },
+    setGotoLocation: () => {},
     showLayerToggle: false,
     setShowLayerToggle: () => {},
     showBaseMapToggle: false,

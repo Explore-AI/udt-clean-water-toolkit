@@ -33,3 +33,13 @@ export const useBasemapToggle = (): [
     const { showBaseMapToggle, setShowBaseMapToggle } = useMapContext();
     return [showBaseMapToggle, setShowBaseMapToggle];
 };
+
+export const useGoToLocation = (): [
+    { latitude: number; longitude: number },
+    React.Dispatch<
+        React.SetStateAction<{ latitude: number; longitude: number }>
+    >,
+] => {
+    const { gotoLocation, setGotoLocation } = useMapContext();
+    return [gotoLocation, setGotoLocation];
+};
