@@ -14,15 +14,14 @@ export default function AssetLayerSelect() {
                     />
                 </ActionIcon>
             </Tooltip>
-
-                <div className={styles.layerTogglePopup}>
-                    <BasePopup>
-                        <CheckboxList
-                            toggleList={toggleLayers}
-                            setToggleList={setToggleLayers}
-                        />
-                    </BasePopup>
-                </div>
+            <div className={styles.layerTogglePopup}>
+                <BasePopup>
+                    <CheckboxList
+                        toggleList={toggleLayers}
+                        setToggleList={setToggleLayers}
+                    />
+                </BasePopup>
+            </div>
             )
         </>
     );

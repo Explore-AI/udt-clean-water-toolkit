@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { isEmpty as _isEmpty, isNil as _isNil } from 'lodash'
+import { isEmpty as _isEmpty, isNil as _isNil } from 'lodash';
 
 export const MapUiContext = React.createContext();
 
