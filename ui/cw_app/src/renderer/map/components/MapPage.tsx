@@ -1,23 +1,17 @@
 // Our Map Page details exists here
-import React, { useState } from 'react';
 import styles from '../css/MapPage.module.css';
+import withMap from '../hocs/withMap'
 import MapView from './MapView';
 import BaseLayout from '../../core/components/BaseLayout';
-import useMapUi, { MapUiContext } from '../hooks/useMapUi';
 
 function MapPage() {
-
-    const { uiParams, setMapUiParams } = useMapUi();
-
     return (
         <BaseLayout>
-            <MapUiContext.Provider value={{ uiParams, setMapUiParams }}>
-                <div className={styles.pageContainer}>
-                    <MapView />
-                </div>
-            </MapUiContext.Provider>
+            <div className={styles.pageContainer}>
+                <MapView />
+            </div>
         </BaseLayout>
     );
 }
 
-export default MapPage;
+export default withMap(MapPage);

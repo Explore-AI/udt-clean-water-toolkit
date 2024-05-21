@@ -1,19 +1,18 @@
 // create a widget that will be used to provide GeoSpatial Control
 import styles from '../css/MapLayerControl.module.css';
 import { useContext } from 'react';
-import useMapLayers from '../hooks/useMapLayers';
-import useMapUi from '../hooks/useMapUi';
 import { map as _map } from 'lodash';
-import { Checkbox, Tooltip, ActionIcon, rem } from '@mantine/core';
+import { Radio, Tooltip, ActionIcon, rem } from '@mantine/core';
 import { IconMap } from '@tabler/icons-react';
 import { DEFAULT_BASEMAP_PROPS } from '../../core'
+import { MapLayerContext }  from '../hooks/useMapLayers';
 import { MapUiContext } from '../hooks/useMapUi';
 
 export default function MapBaseLayerControl() {
 
     const { uiParams, setMapUiParams } = useContext(MapUiContext);
 
-    const { mapLayerProps, setMapLayerProps, setBaseMapUrl } = useMapLayers();
+    const { baseMap, setBaseMap } = useContext(MapLayerContext);
 
     const onIconClick = () => {
         setMapUiParams({
@@ -38,13 +37,13 @@ export default function MapBaseLayerControl() {
 
             {uiParams.showBaseLayerControls && (
                 <div className={styles.control_box}>
-                    {_map(DEFAULT_BASEMAP_PROPS, (layerProps) => {
+                    {_map(DEFAULT_BASEMAP_PROPS, (layer) => {
                         return (
-                            <Checkbox
-                                key={layerProps.key}
-                                label={layerProps.label}
-                                defaultChecked={layerProps.visible}
-                                onChange={() => setBaseMapUrl(layerProps.map_url)}
+                            <Radio
+                                key={layer.key}
+                                label={layer.label}
+                                checked={ layer.mapUrl === baseMap.mapUrl }
+                                onChange={ () => setBaseMap(layer) }
                             />
                         );
                     })}

@@ -1,5 +1,6 @@
 // Our Map Page details exists here
 import styles from '../css/Map.module.css';
+import { useContext } from 'react'
 import DeckGL from '@deck.gl/react';
 import SearchWidget from '../../core/components/SearchWidget';
 import MapControls from './MapControls';
@@ -9,6 +10,7 @@ import { Map } from 'react-map-gl';
 import { MapViewState } from 'deck.gl';
 import { MAPBOX_PUBLIC_TOKEN } from '../../config';
 import { DEFAULT_BASEMAP_PROPS } from '../../core';
+import { MapLayerContext }  from '../hooks/useMapLayers';
 
 export const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,
@@ -19,12 +21,13 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function MapView() {
-    const { mapLayers, baseMapUrl } = useMapLayers();
-
-    console.log(baseMapUrl)
+    const { mapLayers, baseMap } = useContext(MapLayerContext);
 
     return (
         <>
+            <div className={styles.searchBox}>
+                <SearchWidget />
+            </div>
             <div className={styles.control}>
                 <MapControls />
             </div>
@@ -35,7 +38,7 @@ export default function MapView() {
             >
                 <Map
                     initialViewState={INITIAL_VIEW_STATE}
-                    mapStyle={baseMapUrl}
+                    mapStyle={baseMap.mapUrl}
                     mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
                     style={{ width: '500px', height: '500px' }}
                     attributionControl={false}
@@ -44,7 +47,3 @@ export default function MapView() {
         </>
     );
 }
-
-// <div className={styles.searchBox}>
-//         <SearchWidget />
-//         </div>

@@ -86,25 +86,25 @@ export const DEFAULT_BASEMAP_PROPS = [
     {
         visible: true,
         label: 'Open Street Map',
-        map_url: 'mapbox://styles/mapbox/streets-v12',
+        mapUrl: 'mapbox://styles/mapbox/streets-v12',
         key: 'open_street_map',
     },
     {
         visible: false,
         label: 'Satellite Map',
-        map_url: 'mapbox://styles/mapbox/satellite-v9',
+        mapUrl: 'mapbox://styles/mapbox/satellite-v9',
         key: 'satellite_map',
     },
     {
         visible: false,
         label: 'Dark Map',
-        map_url: 'mapbox://styles/mapbox/dark-v11',
+        mapUrl: 'mapbox://styles/mapbox/dark-v11',
         key: 'dark_map',
     },
     {
         visible: false,
         label: 'Terrain',
-        map_url: 'mapbox://styles/mapbox/outdoors-v12',
+        mapUrl: 'mapbox://styles/mapbox/outdoors-v12',
         key: 'terrain_map',
     },
 ];
