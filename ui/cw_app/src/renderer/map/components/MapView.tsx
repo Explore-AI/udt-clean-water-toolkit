@@ -1,6 +1,6 @@
 // Our Map Page details exists here
 import styles from '../css/Map.module.css';
-import { useContext } from 'react'
+import { useContext } from 'react';
 import DeckGL from '@deck.gl/react';
 import SearchWidget from '../../core/components/SearchWidget';
 import MapControls from './MapControls';
@@ -10,7 +10,7 @@ import { Map } from 'react-map-gl';
 import { MapViewState } from 'deck.gl';
 import { MAPBOX_PUBLIC_TOKEN } from '../../config';
 import { DEFAULT_BASEMAP_PROPS } from '../../core';
-import { MapLayerContext }  from '../hooks/useMapLayers';
+import { MapLayerContext } from '../hooks/useMapLayers';
 
 export const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,

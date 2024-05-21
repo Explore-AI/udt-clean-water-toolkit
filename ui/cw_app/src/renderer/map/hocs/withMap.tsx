@@ -1,9 +1,8 @@
 import useMapUi, { MapUiContext } from '../hooks/useMapUi';
-import useMapLayers, { MapLayerContext }  from '../hooks/useMapLayers';
+import useMapLayers, { MapLayerContext } from '../hooks/useMapLayers';
 
 const withMap = (PageComponent) => {
     const HOC = (props) => {
-
         const mapLayerValues = useMapLayers();
         const { uiParams, setMapUiParams } = useMapUi();
 
@@ -13,7 +12,7 @@ const withMap = (PageComponent) => {
                     <PageComponent {...props} />
                 </MapUiContext.Provider>
             </MapLayerContext.Provider>
-        )
+        );
     };
 
     return HOC;

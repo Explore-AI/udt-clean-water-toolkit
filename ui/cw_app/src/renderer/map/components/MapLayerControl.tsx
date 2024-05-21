@@ -4,13 +4,12 @@ import { useContext } from 'react';
 import { map as _map } from 'lodash';
 import { Checkbox, Tooltip, ActionIcon, rem } from '@mantine/core';
 import { IconStack2 } from '@tabler/icons-react';
-import { MapLayerContext }  from '../hooks/useMapLayers';
+import { MapLayerContext } from '../hooks/useMapLayers';
 import { MapUiContext } from '../hooks/useMapUi';
 
 export default function MapLayerControl() {
 
     const { uiParams, setMapUiParams } = useContext(MapUiContext);
-
     const { mapLayerProps, setMapLayerProps } = useContext(MapLayerContext);
 
     const onIconClick = () => {

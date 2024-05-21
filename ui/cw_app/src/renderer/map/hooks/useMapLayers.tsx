@@ -1,9 +1,13 @@
 import { createContext, useState, useEffect } from 'react';
-import { MAP_LAYERS_PROPS, MVT_LAYER_URL, DEFAULT_BASEMAP_PROPS } from '../../core';
+import {
+    MAP_LAYERS_PROPS,
+    MVT_LAYER_URL,
+    DEFAULT_BASEMAP_PROPS,
+} from '../../core';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import { map as _map, unionBy as _unionBy, isEqual as _isEqual } from 'lodash';
 
-export const MapLayerContext = createContext()
+export const MapLayerContext = createContext();
 
 const createLayers = (newMapLayerProps = []) => {
     const mapLayerProps = newMapLayerProps || MAP_LAYERS_PROPS;
@@ -23,14 +27,12 @@ const createLayers = (newMapLayerProps = []) => {
 };
 
 export default function useMapLayers() {
-
     const [baseMap, setBaseMap] = useState(DEFAULT_BASEMAP_PROPS[0]);
 
     const [mapLayerProps, setMapLayerProps] = useState(MAP_LAYERS_PROPS);
     const [mapLayers, setMapLayers] = useState(createLayers());
 
     const handleMapLayerProps = (newLayerProps) => {
-
         const newMapLayerProps = _unionBy(
             mapLayerProps,
             [newLayerProps],
@@ -43,5 +45,11 @@ export default function useMapLayers() {
         setMapLayers(layers);
     };
 
-    return { mapLayerProps, setMapLayerProps: handleMapLayerProps, mapLayers, baseMap, setBaseMap };
+    return {
+        mapLayerProps,
+        setMapLayerProps: handleMapLayerProps,
+        mapLayers,
+        baseMap,
+        setBaseMap,
+    };
 }
