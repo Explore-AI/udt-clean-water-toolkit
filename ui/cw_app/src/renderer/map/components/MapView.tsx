@@ -6,11 +6,13 @@ import SearchWidget from '../../core/components/SearchWidget';
 import MapControls from './MapControls';
 import useMapUi from '../hooks/useMapUi';
 import useMapLayers from '../hooks/useMapLayers';
+import MapSearchBox from '../components/MapSearchBox'
 import { Map } from 'react-map-gl';
 import { MapViewState } from 'deck.gl';
 import { MAPBOX_PUBLIC_TOKEN } from '../../config';
 import { DEFAULT_BASEMAP_PROPS } from '../../core';
 import { MapLayerContext } from '../hooks/useMapLayers';
+
 
 export const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,
@@ -23,12 +25,10 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 export default function MapView() {
     const { mapLayers, baseMap } = useContext(MapLayerContext);
 
-    const [gotoLocation, setGotoLocation] = useGoToLocation();
-
     return (
         <>
             <div className={styles.searchBox}>
-                <SearchWidget updateGoToCoords={setGotoLocation} />
+                <MapSearchBox/>
             </div>
             <div className={styles.control}>
                 <MapControls />

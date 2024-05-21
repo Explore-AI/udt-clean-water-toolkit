@@ -1,0 +1,39 @@
+.icon {
+    width: calc(1rem * var(--mantine-scale));
+    height: calc(1rem * var(--mantine-scale));
+}
+
+.errorIcon {
+    color: #D62246
+}
+
+.input {
+    width: calc(20rem * var(--mantine-scale)) !important;
+    border: none !important;
+}
+
+
+.box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(23rem * var(--mantine-scale));
+    border: 1px solid rgba(0,0,0,0.5);
+    background-color: #fff;
+    border-radius: 5px;
+    &:focus{
+        border: 2px solid var(--accent);
+    }
+}
+
+.submitButton{
+    background-color: transparent;
+    border: none !important;
+    margin: 0px 6px;
+    padding: 5px 0px 0px 0px;
+    cursor: pointer;
+}
+
+.errorInput{
+    border: 3px solid  #D62246;
+}
