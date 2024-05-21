@@ -23,10 +23,12 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 export default function MapView() {
     const { mapLayers, baseMap } = useContext(MapLayerContext);
 
+    const [gotoLocation, setGotoLocation] = useGoToLocation();
+
     return (
         <>
             <div className={styles.searchBox}>
-                <SearchWidget />
+                <SearchWidget updateGoToCoords={setGotoLocation} />
             </div>
             <div className={styles.control}>
                 <MapControls />

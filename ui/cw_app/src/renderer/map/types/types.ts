@@ -32,3 +32,46 @@ export interface BasemapToggleObject {
     dark_map: BasemapToggle;
     terrain: BasemapToggle;
 }
+
+export interface NominatimRequestProps {
+    urlExtension: string; 
+    params: {
+        q: string; 
+        format: string; 
+        limit: number;
+        addressdetails: number;
+    }; 
+}
+
+interface NominatimAddressDetails {
+    borough?: string; 
+    'ISO3166-2-lvl4'?: string;
+    'ISO3166-2-lvl6'?: string;
+    city: string;
+    country:string;
+    country_code?: string;
+    man_made?: string;
+    postcode?: string;
+    quarter?: string;
+    road?: string;
+    state?: string;
+    state_district?: string;
+}
+
+export interface NominatimResponseData {
+    address: NominatimAddressDetails; 
+    addresstype: string; 
+    boundingbox: string[];
+    category: string; 
+    display_name: string;
+    importance: number; 
+    lat: string; 
+    licence: string; 
+    lon: string; 
+    name: string; 
+    osm_id: number; 
+    osm_type: string;
+    place_id: number; 
+    place_rank: number; 
+    type: string;
+}
