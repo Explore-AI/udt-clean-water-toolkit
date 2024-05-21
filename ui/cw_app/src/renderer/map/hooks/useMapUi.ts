@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react';
+import { useState, createContext } from 'react';
 import { isEmpty as _isEmpty, isNil as _isNil } from 'lodash';
 
-export const MapUiContext = React.createContext();
+export const MapUiContext = createContext();
 
 export default function useMapUi() {
     const [uiParams, setMapUiParams] = useState({});
@@ -10,7 +10,12 @@ export default function useMapUi() {
         if (_isEmpty(newParams) || _isNil(newParams)) {
             return setMapUiParams({});
         }
-        return setMapUiParams({ ...uiParams, ...newParams });
+
+        if (options.keepCurrent) {
+            return setMapUiParams({ ...uiParams, ...newParams });
+        }
+
+        return setMapUiParams(newParams);
     };
 
     return { uiParams, setMapUiParams: handleMapUiParams };

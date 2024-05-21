@@ -6,11 +6,12 @@ import BaseLayout from '../../core/components/BaseLayout';
 import useMapUi, { MapUiContext } from '../hooks/useMapUi';
 
 function MapPage() {
-    const { showLayerToggle, showBaseMapToggle } = useMapUi();
+
+    const { uiParams, setMapUiParams } = useMapUi();
 
     return (
         <BaseLayout>
-            <MapUiContext.Provider value={(showLayerToggle, showBaseMapToggle)}>
+            <MapUiContext.Provider value={{ uiParams, setMapUiParams }}>
                 <div className={styles.pageContainer}>
                     <MapView />
                 </div>
