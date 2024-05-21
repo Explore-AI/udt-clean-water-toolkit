@@ -1,6 +1,6 @@
 // this is our common search input that will be used in a lot of other components
 import React, { useState, SetStateAction } from 'react';
-import { TextInput, CloseButton, Tooltip, ActionIcon } from '@mantine/core';
+import { TextInput, CloseButton } from '@mantine/core';
 import styles from '../css/SearchWidget.module.css';
 import { IconSearch, IconAlertTriangle } from '@tabler/icons-react';
 import { validateInput, getNominatimData } from '../utils/utils';
