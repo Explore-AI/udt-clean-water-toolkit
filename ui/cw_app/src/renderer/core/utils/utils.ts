@@ -2,13 +2,14 @@
 import { gpsRegex } from '..';
 import axios from 'axios';
 import { NOMINATIM_URL } from '../../config';
-import {
-    NominatimRequestProps,
-} from '../../map/types/types';
+import { NominatimRequestProps } from '../../map/types/types';
 
 export const getNominatimData = async (
     props: NominatimRequestProps,
 ): Promise<{ lat: number; lon: number }> => {
+    /**
+     * Retrieves location data from our Nominatim API
+     */
     const params = { ...props.params };
     return axios
         .get(NOMINATIM_URL + props.urlExtension, { params })
@@ -21,16 +22,10 @@ export const getNominatimData = async (
         });
 };
 
-export const getCoordinateData = () => {};
-
-export const getAddressData = ({}) => {};
-
-export const getAssetData = () => {
-    // after receiving the asset id, whether it be gisid, dma, or fmz then make a request to the
-    // geoserver api to collect the data
-};
-
 export const validateInput = (inputString: string) => {
+    /**
+     * Validates our input string, and returns the location type we're searching for
+     */
     const searchString = inputString.trim();
     if (searchString == '') return { validated: false, type: '', payload: '' };
     // gps input type
@@ -44,10 +39,9 @@ export const validateInput = (inputString: string) => {
             payload: [parseFloat(coords[0]), parseFloat(coords[1])],
         };
     }
-    return { validated: true, type: 'generic', payload: searchString };
+    return { validated: true, type: 'address', payload: searchString };
 };
-
 
 export const isValidCoordinate = (lat: number, lon: number) => {
     return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
-  };
+};

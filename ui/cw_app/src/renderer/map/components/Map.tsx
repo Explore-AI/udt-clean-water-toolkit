@@ -13,7 +13,12 @@ import {
 import GeoSpatialControls from './MapControl';
 import styles from '../css/Map.module.css';
 import { useState, useEffect } from 'react';
-import { useInitialView, useLayerToggle, useBasemapToggle, useGoToLocation } from '../hooks/useMapContext';
+import {
+    useInitialView,
+    useLayerToggle,
+    useBasemapToggle,
+    useGoToLocation,
+} from '../hooks/useMapContext';
 import BasePopup from '../../core/components/BasePopup';
 import RadioButtonList from './RadioButtonList';
 import CheckboxList from './CheckBoxList';
@@ -46,7 +51,7 @@ const basemapUrl = (basemapList: BasemapToggle[]) => {
 };
 
 export default function MapView() {
-    const [initialView, setInitialView ] = useInitialView();
+    const [initialView, setInitialView] = useInitialView();
     const [showBaseMapToggle] = useBasemapToggle();
     const [showLayerToggle] = useLayerToggle();
     const [gotoLocation, setGotoLocation] = useGoToLocation();
@@ -59,8 +64,11 @@ export default function MapView() {
     const currentBaseMapUrl = basemapUrl(toggleBaseMap);
     const layers = getLayers(toggleLayers);
 
-    useEffect( () => {
-        if(gotoLocation && isValidCoordinate(gotoLocation.latitude, gotoLocation.longitude)){
+    useEffect(() => {
+        if (
+            gotoLocation &&
+            isValidCoordinate(gotoLocation.latitude, gotoLocation.longitude)
+        ) {
             let newMapView = {
                 ...initialView,
                 longitude: gotoLocation.longitude,
@@ -68,12 +76,12 @@ export default function MapView() {
             };
             setInitialView(newMapView);
         }
-    }, [gotoLocation])
+    }, [gotoLocation]);
 
     return (
         <>
             <div className={styles.searchBox}>
-                <SearchWidget updateGoToCoords={setGotoLocation}/>
+                <SearchWidget updateGoToCoords={setGotoLocation} />
             </div>
             <div className={styles.control}>
                 <GeoSpatialControls />

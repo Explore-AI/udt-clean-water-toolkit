@@ -19,14 +19,16 @@ type SearchProps = {
 
 export default function SearchWidget({ updateGoToCoords }: SearchProps) {
     const [value, setValue] = useState<string>('');
-    const [hasError, setHasError] = useState<true | false>(false);
+    const [hasError, setHasError] = useState<boolean>(false);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setValue(e.target.value);
+        setHasError(false);
     };
 
     const onClear = () => {
         setValue('');
+        setHasError(false); 
     };
 
     const handleSubmission = async (
