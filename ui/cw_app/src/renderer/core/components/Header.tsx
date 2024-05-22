@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { Container, Group, Burger, Box, rem } from '@mantine/core';
+import { Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
 import WaterLogo from '../images/water.svg';
 import styles from '../css/Header.module.css';
 
 const links = [
-    { link: '/', label: 'Home' },
-    { link: '/graph', label: 'Graph' },
-    { link: '/geo-graph', label: 'Geospatial Graph' },
-    { link: '/schematic', label: 'Schematic' },
-    { link: '/analysis', label: 'Analysis' },
+  { link: '/', label: 'Home' },
+  { link: '/graph', label: 'Graph' },
+  { link: '/geo-graph', label: 'Geospatial Graph' },
+  { link: '/schematic', label: 'Schematic' },
+  { link: '/analysis', label: 'Analysis' },
 ];
 
 export default function Header() {
-    const [opened, { toggle }] = useDisclosure(false);
+  const [opened, { toggle }] = useDisclosure(false);
   const [active, setActive] = useState(0);
 
   const linkButtons = links.map((link, index) => (
@@ -35,19 +35,24 @@ export default function Header() {
     <>
       <div className={styles.header}>
         <div className={styles.titleBlock}>
-          <img src={WaterLogo} alt="Water Logo" className={styles.logo} width={30} />
+          <img
+            src={WaterLogo}
+            alt="Water Logo"
+            className={styles.logo}
+            width={30}
+          />
           <h3> Unlocking Digital Twin POC </h3>
         </div>
-        <div className={styles.links}>
-            { linkButtons }
-        </div>
+        <div className={styles.links}>{linkButtons}</div>
         <div className={styles.menuBlock}>
-          <Burger
-            opened={opened}
-            onClick={toggle}
-            size="sm"
-            hiddenFrom="sm"
-          />
+            <Burger
+                opened={opened}
+                onClick={toggle}
+                size="sm" />
+            { opened &&
+             <div className={styles.burgerMenu}>
+              <p>Close App Here</p>
+            </div> }
         </div>
       </div>
     </>

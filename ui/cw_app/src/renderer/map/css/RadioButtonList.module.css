@@ -1,0 +1,16 @@
+.radioGroupItem {
+    margin: 3px 0px;
+    cursor: pointer;
+    &[data-checked]{
+        font-weight: 600; 
+    }
+}
+
+.radioInput{
+    background-color: #ccc !important;
+    cursor: pointer !important;
+    &:checked{
+        background-color: var(--secondary-color) !important;
+        border: transparent !important;
+    }
+}
