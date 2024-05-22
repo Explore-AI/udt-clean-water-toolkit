@@ -172,8 +172,6 @@ misc
 postgres-data
 
 .db_env
-
-
 #Pycharm
 .idea/
 *.DS_Store
