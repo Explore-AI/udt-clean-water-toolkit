@@ -26,8 +26,9 @@ class GeoServerConfig:
             'GEOSERVER_DATA_DIR': environ.get('GEOSERVER_DATA_DIR', '/opt/geoserver/data_dir'),
             'HEIGHT': 768,
             'WIDTH': 1024,
-            'FORMAT': 'image/svg',
-            'DMA_CODES': environ.get('DMA_CODES', ['ZWAL4801', 'ZCHESS12', 'ZCHIPO01'])
+            'FORMAT': environ.get('OUTPUT_FORMAT', 'image/svg'),
+            'DMA_CODES': environ.get('DMA_CODES', ['ZWAL4801', 'ZCHESS12', 'ZCHIPO01']),
+            'GWC_GRID': environ.get('GWC_GRID', '900913')
         }
         # Initialize GeoServerAuth instance
         self.geoserver_auth = GeoServerAuth(
@@ -76,7 +77,7 @@ class DBConnection:
                         min_x, min_y, max_x, max_y, srid = bbox_result
                         _tables_with_bbox.append((single_table, (min_x, min_y, max_x, max_y, srid)))
             cursor.close()
-            #self.conn.close()
+            # self.conn.close()
         except OperationalError:
             print("Could not connect to PostgreSQL")
             exit(1)
@@ -138,7 +139,7 @@ class DBConnection:
                             min_x, min_y, max_x, max_y, srid = bbox_result
                             _tables_with_bbox.append((dma_codes, (min_x, min_y, max_x, max_y, srid)))
             cursor.close()
-            #self.conn.close()
+            # self.conn.close()
 
         except OperationalError:
             print("Could not connect to PostgreSQL")
@@ -157,7 +158,7 @@ class DBConnection:
                 cursor.execute(check_table)
                 _tables = [row for row in cursor.fetchall()]
             cursor.close()
-            #self.conn.close()
+            # self.conn.close()
         except OperationalError:
             exit(1)
         return _tables
