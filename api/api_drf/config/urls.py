@@ -21,4 +21,5 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("cw_gis_assets/", include("cw_gis_assets.urls")),
+    path("cw_graph/", include("cw_graph.urls")),
 ]

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "cwageodjango.network",
     "cw_core",
     "cw_gis_assets",
+    "cw_graph",
 ]
 
 MIDDLEWARE = [
@@ -178,8 +179,8 @@ AUTH_USER_MODEL = "cw_core.User"
 
 if os.path.exists(os.path.join(BASE_DIR, ".env")):
     DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
-    # INSTALLED_APPS.append("corsheaders")
-    # MIDDLEWARE.append("corsheaders.middleware.CorsMiddleware")
+    INSTALLED_APPS.append("corsheaders")
+    MIDDLEWARE.append("corsheaders.middleware.CorsMiddleware")
     MIDDLEWARE.append("django.middleware.common.CommonMiddleware")
     CORS_ORIGIN_ALLOW_ALL = True
     ALLOWED_HOSTS = ["*"]
