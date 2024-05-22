@@ -172,8 +172,6 @@ misc
 postgres-data
 
 .db_env
-cwa_conf
-load.sh
 
 
 #Pycharm
