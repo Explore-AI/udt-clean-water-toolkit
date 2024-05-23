@@ -1,0 +1,1339 @@
+{
+  "Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 439,
+    "y": 80
+  },
+  "Default_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 489,
+    "y": 80
+  },
+  "Default_3": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 539,
+    "y": 80
+  },
+  "Default_4": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 589,
+    "y": 80
+  },
+  "Default_5": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 639,
+    "y": 80
+  },
+  "Default_6": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 689,
+    "y": 80
+  },
+  "Default_7": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 739,
+    "y": 80
+  },
+  "Property_1=Default": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 0,
+    "y": 80
+  },
+  "Property_1=alert": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 77,
+    "y": 80
+  },
+  "Property_1=healthy": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 100,
+    "y": 0
+  },
+  "Property_1=warning": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 0,
+    "y": 157
+  },
+  "State=Default": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 77,
+    "y": 157
+  },
+  "State=Default_2": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 0,
+    "y": 234
+  },
+  "State=Default_3": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 77,
+    "y": 234
+  },
+  "State=Default_4": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 154,
+    "y": 80
+  },
+  "State=Default_5": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 231,
+    "y": 80
+  },
+  "State=alert": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 308,
+    "y": 80
+  },
+  "State=alert_2": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 154,
+    "y": 157
+  },
+  "State=alert_3": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 231,
+    "y": 157
+  },
+  "State=alert_4": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 308,
+    "y": 157
+  },
+  "State=alert_5": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 154,
+    "y": 234
+  },
+  "State=healthy": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 231,
+    "y": 234
+  },
+  "State=healthy_2": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 308,
+    "y": 234
+  },
+  "State=healthy_3": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 177,
+    "y": 0
+  },
+  "State=healthy_4": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 254,
+    "y": 0
+  },
+  "State=healthy_5": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 0,
+    "y": 311
+  },
+  "State=healthy_6": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 77,
+    "y": 311
+  },
+  "State=no_Rag": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 154,
+    "y": 311
+  },
+  "State=warning": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 231,
+    "y": 311
+  },
+  "State=warning_2": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 308,
+    "y": 311
+  },
+  "State=warning_3": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 0,
+    "y": 388
+  },
+  "State=warning_4": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 77,
+    "y": 388
+  },
+  "State=warning_5": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 154,
+    "y": 388
+  },
+  "Type=Burst_or_leak,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 385,
+    "y": 157
+  },
+  "Type=Burst_or_leak,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 435,
+    "y": 157
+  },
+  "Type=Burst_or_leak,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 485,
+    "y": 157
+  },
+  "Type=Burst_or_leak,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 535,
+    "y": 157
+  },
+  "Type=Default,_State=Alert_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 585,
+    "y": 157
+  },
+  "Type=Default,_State=Default_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 635,
+    "y": 157
+  },
+  "Type=Default,_State=Default_3": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 685,
+    "y": 157
+  },
+  "Type=Default,_State=Healthy_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 735,
+    "y": 157
+  },
+  "Type=Default,_State=Offline_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 385,
+    "y": 234
+  },
+  "Type=Default,_State=Warning_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 435,
+    "y": 234
+  },
+  "Type=Default,_State=alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 485,
+    "y": 234
+  },
+  "Type=Default,_State=healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 535,
+    "y": 234
+  },
+  "Type=Default,_State=offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 585,
+    "y": 234
+  },
+  "Type=Default,_State=warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 635,
+    "y": 234
+  },
+  "Type=H1,_State=Default": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 150,
+    "y": 465
+  },
+  "Type=H1,_State=alert": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 204,
+    "y": 465
+  },
+  "Type=H1,_State=healthy": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 258,
+    "y": 465
+  },
+  "Type=H1,_State=warning": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 312,
+    "y": 465
+  },
+  "Type=Low_Pressure,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 685,
+    "y": 234
+  },
+  "Type=Low_Pressure,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 735,
+    "y": 234
+  },
+  "Type=Low_Pressure,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 385,
+    "y": 311
+  },
+  "Type=Low_Pressure,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 435,
+    "y": 311
+  },
+  "Type=Out_of_service,_State=Alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 485,
+    "y": 311
+  },
+  "Type=Out_of_service,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 535,
+    "y": 311
+  },
+  "Type=Out_of_service,_State=Healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 585,
+    "y": 311
+  },
+  "Type=Out_of_service,_State=Offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 635,
+    "y": 311
+  },
+  "Type=Out_of_service,_State=Warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 685,
+    "y": 311
+  },
+  "Type=Partial,_State=Alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 735,
+    "y": 311
+  },
+  "Type=Partial,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 385,
+    "y": 388
+  },
+  "Type=Partial,_State=Healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 435,
+    "y": 388
+  },
+  "Type=Partial,_State=Offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 485,
+    "y": 388
+  },
+  "Type=Partial,_State=Warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 535,
+    "y": 388
+  },
+  "Type=Trunk_Main_Monitor,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 585,
+    "y": 388
+  },
+  "Type=Trunk_Main_Monitor,_State=Default_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 635,
+    "y": 388
+  },
+  "Type=Unplanned_Maintenance,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 685,
+    "y": 388
+  },
+  "Type=Unplanned_Maintenance,_State=alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 735,
+    "y": 388
+  },
+  "Type=Unplanned_Maintenance,_State=healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 381,
+    "y": 0
+  },
+  "Type=Unplanned_Maintenance,_State=offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 431,
+    "y": 0
+  },
+  "Type=Unplanned_Maintenance,_State=warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 481,
+    "y": 0
+  },
+  "Type=active,_PTW=None": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 531,
+    "y": 0
+  },
+  "Type=active,_PTW=PTW": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 52,
+    "x": 581,
+    "y": 0
+  },
+  "Type=active,_PTW=emergency-PTW": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 52,
+    "x": 633,
+    "y": 0
+  },
+  "Type=decommissioned,_State=Closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 0,
+    "y": 540
+  },
+  "Type=decommissioned,_State=Default": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 54,
+    "y": 540
+  },
+  "Type=decommissioned,_State=Open": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 685,
+    "y": 0
+  },
+  "Type=decommissioned,_State=inoperable": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 735,
+    "y": 0
+  },
+  "Type=decommissioned,_State=inoperable-closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 108,
+    "y": 540
+  },
+  "Type=decommissioned,_Variation=double": {
+    "height": 75,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 331,
+    "y": 0
+  },
+  "Type=decommissioned,_Variation=single": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 594
+  },
+  "Type=default,_State=Default": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 162,
+    "y": 540
+  },
+  "Type=discolouration,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 594
+  },
+  "Type=discolouration,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 100,
+    "y": 594
+  },
+  "Type=discolouration,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 150,
+    "y": 594
+  },
+  "Type=discolouration,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 200,
+    "y": 594
+  },
+  "Type=distribution,_State=Closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 216,
+    "y": 540
+  },
+  "Type=distribution,_State=Open": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 250,
+    "y": 594
+  },
+  "Type=distribution,_State=inoperable": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 300,
+    "y": 594
+  },
+  "Type=distribution,_State=inoperable-closed": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 350,
+    "y": 594
+  },
+  "Type=distribution,_Variation=double": {
+    "height": 80,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 0
+  },
+  "Type=distribution,_Variation=single": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 400,
+    "y": 594
+  },
+  "Type=distribution-live,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 450,
+    "y": 594
+  },
+  "Type=distribution-live,_State=Default_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 500,
+    "y": 594
+  },
+  "Type=distribution-live,_State=alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 550,
+    "y": 594
+  },
+  "Type=distribution-live,_State=alert_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 600,
+    "y": 594
+  },
+  "Type=distribution-live,_State=healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 650,
+    "y": 594
+  },
+  "Type=distribution-live,_State=healthy_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 700,
+    "y": 594
+  },
+  "Type=distribution-live,_State=warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 750,
+    "y": 594
+  },
+  "Type=distribution-live,_State=warning_2": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 644
+  },
+  "Type=dumb-meter,_State=Default": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 270,
+    "y": 540
+  },
+  "Type=dumb-meter,_State=alert": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 324,
+    "y": 540
+  },
+  "Type=dumb-meter,_State=healthy": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 378,
+    "y": 540
+  },
+  "Type=dumb-meter,_State=warning": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 432,
+    "y": 540
+  },
+  "Type=historic,_PTW=None": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 644
+  },
+  "Type=historic,_PTW=PTW": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 100,
+    "y": 644
+  },
+  "Type=historic,_PTW=cancelled": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 150,
+    "y": 644
+  },
+  "Type=historic,_PTW=emergency-PTW": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 200,
+    "y": 644
+  },
+  "Type=household,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 250,
+    "y": 644
+  },
+  "Type=live,_State=Default": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 486,
+    "y": 540
+  },
+  "Type=live,_State=alert": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 540,
+    "y": 540
+  },
+  "Type=live,_State=healthy": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 594,
+    "y": 540
+  },
+  "Type=live,_State=warning": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 648,
+    "y": 540
+  },
+  "Type=milky_air,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 300,
+    "y": 644
+  },
+  "Type=milky_air,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 350,
+    "y": 644
+  },
+  "Type=milky_air,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 400,
+    "y": 644
+  },
+  "Type=milky_air,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 450,
+    "y": 644
+  },
+  "Type=no_water,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 500,
+    "y": 644
+  },
+  "Type=no_water,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 550,
+    "y": 644
+  },
+  "Type=no_water,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 600,
+    "y": 644
+  },
+  "Type=no_water,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 650,
+    "y": 644
+  },
+  "Type=non-household,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 700,
+    "y": 644
+  },
+  "Type=operational-site,_Variation=double": {
+    "height": 75,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 465
+  },
+  "Type=operational-site,_Variation=single": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 750,
+    "y": 644
+  },
+  "Type=operational-site-non-potable,_State=Closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 702,
+    "y": 540
+  },
+  "Type=operational-site-non-potable,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 694
+  },
+  "Type=operational-site-non-potable,_State=inoperable": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 694
+  },
+  "Type=operational-site-non-potable,_State=inoperable-closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 366,
+    "y": 465
+  },
+  "Type=other_contact,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 100,
+    "y": 694
+  },
+  "Type=other_contact,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 150,
+    "y": 694
+  },
+  "Type=other_contact,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 200,
+    "y": 694
+  },
+  "Type=other_contact,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 250,
+    "y": 694
+  },
+  "Type=other_water_quality,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 300,
+    "y": 694
+  },
+  "Type=other_water_quality,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 350,
+    "y": 694
+  },
+  "Type=other_water_quality,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 400,
+    "y": 694
+  },
+  "Type=other_water_quality,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 450,
+    "y": 694
+  },
+  "Type=planned_maintenance,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 500,
+    "y": 694
+  },
+  "Type=planned_maintenance,_State=alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 550,
+    "y": 694
+  },
+  "Type=planned_maintenance,_State=healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 600,
+    "y": 694
+  },
+  "Type=planned_maintenance,_State=offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 650,
+    "y": 694
+  },
+  "Type=planned_maintenance,_State=warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 700,
+    "y": 694
+  },
+  "Type=private,_State=Open": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 750,
+    "y": 694
+  },
+  "Type=private,_State=inoperable": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 744
+  },
+  "Type=private,_State=inoperable-closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 420,
+    "y": 465
+  },
+  "Type=private,_Variation=double": {
+    "height": 75,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 465
+  },
+  "Type=private,_Variation=single": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 744
+  },
+  "Type=proposed,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 100,
+    "y": 744
+  },
+  "Type=scheduled,_PTW=None": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 150,
+    "y": 744
+  },
+  "Type=scheduled,_PTW=PTW": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 52,
+    "x": 200,
+    "y": 744
+  },
+  "Type=scheduled,_PTW=emergency-PTW": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 52,
+    "x": 252,
+    "y": 744
+  },
+  "Type=smart_meter,_State=Default": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 474,
+    "y": 465
+  },
+  "Type=smart_meter,_State=alert": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 528,
+    "y": 465
+  },
+  "Type=smart_meter,_State=healthy": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 582,
+    "y": 465
+  },
+  "Type=smart_meter,_State=warning": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 636,
+    "y": 465
+  },
+  "Type=taste_and_odour,_Time_Variance=12-24_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 304,
+    "y": 744
+  },
+  "Type=taste_and_odour,_Time_Variance=3-6_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 354,
+    "y": 744
+  },
+  "Type=taste_and_odour,_Time_Variance=6-12_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 404,
+    "y": 744
+  },
+  "Type=taste_and_odour,_Time_Variance=less_than_3_hours": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 454,
+    "y": 744
+  },
+  "Type=transfer-principal,_State=Closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 690,
+    "y": 465
+  },
+  "Type=transfer-principal,_State=Open": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 504,
+    "y": 744
+  },
+  "Type=transfer-principal,_State=inoperable": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 554,
+    "y": 744
+  },
+  "Type=transfer-principal,_State=inoperable-closed": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 604,
+    "y": 744
+  },
+  "Type=transfer-principal,_Variation=double": {
+    "height": 80,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 0
+  },
+  "Type=transfer-principal,_Variation=single": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 654,
+    "y": 744
+  },
+  "Type=unknown,_State=Closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 744,
+    "y": 465
+  },
+  "Type=unknown,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 704,
+    "y": 744
+  },
+  "Type=unknown,_State=inoperable": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 794
+  },
+  "Type=unknown,_State=inoperable-closed": {
+    "height": 54,
+    "pixelRatio": 1,
+    "width": 54,
+    "x": 385,
+    "y": 80
+  },
+  "Type=unknown,_Variation=double": {
+    "height": 75,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 100,
+    "y": 465
+  },
+  "Type=unknown,_Variation=single": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 794
+  },
+  "Variation=Default,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 100,
+    "y": 794
+  },
+  "Variation=pressure_reducing,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 150,
+    "y": 794
+  },
+  "Variation=pressure_sustaining,_State=Default": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 200,
+    "y": 794
+  },
+  "default=Default,_State=alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 250,
+    "y": 794
+  },
+  "default=Default,_State=healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 300,
+    "y": 794
+  },
+  "default=Default,_State=offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 350,
+    "y": 794
+  },
+  "default=Default,_State=unragged": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 400,
+    "y": 794
+  },
+  "default=Default,_State=warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 450,
+    "y": 794
+  },
+  "default=Planned_Out_of_Service,_State=alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 500,
+    "y": 794
+  },
+  "default=Planned_Out_of_Service,_State=healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 550,
+    "y": 794
+  },
+  "default=Planned_Out_of_Service,_State=offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 600,
+    "y": 794
+  },
+  "default=Planned_Out_of_Service,_State=unragged": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 650,
+    "y": 794
+  },
+  "default=Planned_Out_of_Service,_State=warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 700,
+    "y": 794
+  },
+  "default=Unplanned_Out_of_Service,_State=alert": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 750,
+    "y": 794
+  },
+  "default=Unplanned_Out_of_Service,_State=healthy": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 0,
+    "y": 844
+  },
+  "default=Unplanned_Out_of_Service,_State=offline": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 50,
+    "y": 844
+  },
+  "default=Unplanned_Out_of_Service,_State=unragged": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 100,
+    "y": 844
+  },
+  "default=Unplanned_Out_of_Service,_State=warning": {
+    "height": 50,
+    "pixelRatio": 1,
+    "width": 50,
+    "x": 150,
+    "y": 844
+  },
+  "symbol-outline": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 231,
+    "y": 388
+  },
+  "symbol-outline-1": {
+    "height": 77,
+    "pixelRatio": 1,
+    "width": 77,
+    "x": 308,
+    "y": 388
+  }
+}
