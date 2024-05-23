@@ -1,17 +1,9 @@
 {
   "version": 8,
-  "name": "Empty Style",
+  "name": "assets_distributionmain",
   "metadata": {"maputnik:renderer": "mlgljs"},
   "sources": {
     "udtgeoserver": {
-      "type": "vector",
-      "tiles": [
-        "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_chamber&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
-      ],
-      "minzoom": 0,
-      "maxzoom": 18
-    },
-    "udtgeoserver_distribution_main": {
       "type": "vector",
       "tiles": [
         "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_distributionmain&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
@@ -26,7 +18,7 @@
     {
       "id": "assets_distributionmain",
       "type": "line",
-      "source": "udtgeoserver_distribution_main",
+      "source": "udtgeoserver",
       "source-layer": "assets_distributionmain",
       "layout": {"line-cap": "round"},
       "paint": {"line-color": "rgba(228, 135, 60, 1)"}
