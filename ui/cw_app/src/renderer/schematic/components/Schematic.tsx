@@ -5,7 +5,7 @@ import ReactFlow, {
     Background,
 } from 'reactflow';
 import CircleNode from './CircleNode';
-import ButtonEdge from './ButtonEdge';
+//import ButtonEdge from './ButtonEdge';
 
 import 'reactflow/dist/style.css';
 import './overview.css';
