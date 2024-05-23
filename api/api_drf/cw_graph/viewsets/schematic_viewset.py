@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from neomodel import db
 
 
-class Neo4jViewset(viewsets.ViewSet):
+class SchematicViewset(viewsets.ViewSet):
     http_method_names = ["get"]
 
     @staticmethod

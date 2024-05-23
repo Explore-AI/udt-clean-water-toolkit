@@ -1,7 +1,7 @@
 from rest_framework.routers import DefaultRouter
-from .viewsets import Neo4jViewset
+from .viewsets import SchematicViewset
 
 router = DefaultRouter()
-router.register(r"neo4j", Neo4jViewset, basename="neo4j")
+router.register(r"schematic", SchematicViewset, basename="schematic")
 
 urlpatterns = router.urls 
