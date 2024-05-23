@@ -10,7 +10,7 @@ class SchematicViewset(viewsets.ViewSet):
     def query_by_dma(request):
         dma_code = request.query_params.get("dma_code")
         if dma_code:
-            query = f"match (n)-[r]-(m) where n.dmas contains '{dma_code}' return ID(n), n, ID(r), r, ID(m), m limit 6"
+            query = f"match (n)-[r]-(m) where n.dmas contains '{dma_code}' return ID(n), n, ID(r), r, ID(m), m limit 10000"
             results, _ = db.cypher_query(query)
             return results
         else:

@@ -7,12 +7,12 @@ export default memo(({ id }) => {
         <>
             <div className="dot">
             </div>
-            <Handle type="source" position={Position.Left} id="a" style={{ display: 'none'}}/>
+            <Handle type="source" position={Position.Left} id="a" style={{ visibility: 'hidden',   height: '0px', width: '0px'}}/>
             <Handle
                 type="target"
                 position={Position.Right}
                 id="b"
-                style={{ display: 'none'}}
+                style={{ visibility: 'hidden',   height: '0px', width: '0px'}}
             />
         </>
     );
