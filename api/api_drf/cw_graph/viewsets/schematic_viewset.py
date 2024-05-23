@@ -33,8 +33,8 @@ class SchematicViewset(viewsets.ViewSet):
 
         return {
             "id": str(node_id),
-            #            "key": node_id,
-            # "type": "default",
+            "key": node_id,
+            "type": "circle",
             "position": {
                 "x": node_data["coords_27700"][0],
                 "y": node_data["coords_27700"][1],
