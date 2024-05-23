@@ -2,22 +2,17 @@ import React, { memo } from 'react';
 import { Handle, useStore, Position } from 'reactflow';
 
 export default memo(({ id }) => {
-  const label = useStore((s) => {
-    const node = s.nodeInternals.get(id);
 
-    if (!node) {
-      return null;
-    }
-
-    return `${node.id}`;
-  });
-    console.log(label)
-  return (
-    <>
-      <div className="wrapper gradient">
-        <div className="inner">{label || 'no node connected'}</div>
-      </div>
-      <Handle type="target" position={Position.Left} />
-    </>
-  );
+    return (
+        <>
+            <div className="dot">
+            </div>
+            <Handle type="source" position={Position.Left} id="a" />
+            <Handle
+                type="target"
+                position={Position.Right}
+                id="b"
+            />
+        </>
+    );
 });

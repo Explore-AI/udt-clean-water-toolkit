@@ -224,3 +224,12 @@
 .react-flow__minimap .annotation {
   display: none;
 }
+
+
+.dot {
+  height: 1px;
+  width: 1px;
+  background-color: blue;
+  border-radius: 100%;
+  display: inline-block;
+}

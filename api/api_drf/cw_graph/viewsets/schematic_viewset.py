@@ -22,10 +22,8 @@ class SchematicViewset(viewsets.ViewSet):
             "id": str(edge_id),
             "key": edge_id,
             "source": str(start_node_id),
-            "sourceHandle": "a",
             "target": str(end_node_id),
-            "type": "button",
-            "style": {"strokeWidth": 2},
+            #            "style": {"strokeWidth": 2},
         }
 
     @staticmethod
@@ -43,17 +41,29 @@ class SchematicViewset(viewsets.ViewSet):
         }
 
     def create_nodes_edges(self, data):
+
+        node_ids = []
+        edge_ids = []
         nodes = []
         edges = []
+
+        # TODO: cleanup as performing redundant operations
         for i in data:
             start_node = self.create_node(i[0], i[1])
             end_node = self.create_node(i[4], i[5])
-
             edge = self.create_edge(i[2], start_node["id"], end_node["id"])
 
-            nodes.append(start_node)
-            nodes.append(end_node)
-            edges.append(edge)
+            if i[0] not in node_ids:
+                node_ids.append(i[0])
+                nodes.append(start_node)
+
+            if i[4] not in node_ids:
+                node_ids.append(i[4])
+                nodes.append(end_node)
+
+            if i[2] not in edge_ids:
+                edge_ids.append(i[2])
+                edges.append(edge)
 
         return {"nodes": nodes, "edges": edges}
 

@@ -14,7 +14,7 @@ export default function SchematicPage() {
     const { isPending, error, data } = useQuery({
         queryKey: ['repoData'],
         queryFn: () =>
-            fetch('http://localhost:8000/cw_graph/neo4j?dma_code=ZCHIPO01').then((res) =>
+            fetch('http://localhost:8000/cw_graph/schematic/?dma_code=ZCHIPO01').then((res) =>
                 res.json(),
             ),
     })
