@@ -1,0 +1,356 @@
+{
+    "version": 8,
+    "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+    "name": "assets_operationalsite",
+    "sources": {
+        "udtgeoserver": {
+            "type": "vector",
+            "tiles": [
+                "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_operationalsite&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
+            ],
+            "minZoom": 0,
+            "maxZoom": 20
+        }
+    },
+    "layers": [
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#80e972",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "booster_station"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#0)booster_station:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#3dcaa4",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "borehole"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#1)borehole:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#d1d426",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "break_pressure_tank"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#2)break_pressure_tank:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#82de9d",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "other"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#3)other:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#aed67e",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "pumping_station"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#4)pumping_station:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#759dda",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "raw_water_storage_reservoir"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#5)raw_water_storage_reservoir:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#3bc3e1",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "reservoir_covered"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#6)reservoir_covered:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#ed2f5f",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "service_reservoir"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#7)service_reservoir:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#6c67e7",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "shaft_inspection"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#8)shaft_inspection:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#e8c288",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "shaft_pumping"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#9)shaft_pumping:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#ec2aae",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "treatment_works"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#10)treatment_works:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#c96dd5",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "unknown"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#11)unknown:0"
+        },
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#a260ed",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "subtype"
+                ],
+                "water_tower"
+            ],
+            "source": "udtgeoserver",
+            "source-layer": "assets_operationalsite",
+            "id": "assets_operationalsite:(rule#12)water_tower:0"
+        }
+    ],
+    "sprite": "spriteSheet"
+}

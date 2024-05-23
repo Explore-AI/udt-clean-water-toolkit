@@ -1,0 +1,36 @@
+{
+    "version": 8,
+    "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+    "name": "assets_logger",
+    "sources": {
+        "udtgeoserver": {
+            "type": "vector",
+            "tiles": [
+                "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_logger&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
+            ],
+            "minZoom": 0,
+            "maxZoom": 20
+        }
+    },
+    "layers": [
+        {
+            "type": "circle",
+            "paint": {
+                "circle-radius": [
+                    "/",
+                    7.142857142857142,
+                    2
+                ],
+                "circle-color": "#729b6f",
+                "circle-opacity": 1.0,
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "#232323"
+            },
+            "Z": 0,
+            "source": "udtgeoserver",
+            "source-layer": "assets_logger",
+            "id": "assets_logger:(rule#0):0"
+        }
+    ],
+    "sprite": "spriteSheet"
+}
