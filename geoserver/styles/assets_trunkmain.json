@@ -15,22 +15,15 @@
   "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
   "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
   "layers": [
-        {
-            "type": "line",
-            "paint": {
-                "line-width": 1.4,
-                "line-opacity": 1.0,
-                "line-color": "#232323"
-            },
-            "layout": {
-                "line-cap": "round",
-                "line-join": "round"
-            },
-            "Z": 0,
-            "source": "udtgeoserver",
-            "source-layer": "assets_trunkmain",
-            "id": "assets_trunkmain"
-        }
-    ],
+    {
+      "id": "assets_trunkmain",
+      "type": "line",
+      "source": "udtgeoserver",
+      "source-layer": "assets_trunkmain",
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {"line-width": 1.4, "line-opacity": 1, "line-color": "#232323"},
+      "Z": 0
+    }
+  ],
   "id": "ghcso0a"
 }
