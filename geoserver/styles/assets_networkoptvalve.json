@@ -1,5 +1,6 @@
 {
     "version": 8,
+    "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
     "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
     "name": "assets_networkoptvalve",
     "sources": {
@@ -31,6 +32,5 @@
             "source-layer": "assets_networkoptvalve",
             "id": "assets_networkoptvalve:(rule#0):0"
         }
-    ],
-    "sprite": "spriteSheet"
+    ]
 }

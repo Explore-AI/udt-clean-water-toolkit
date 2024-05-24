@@ -1,5 +1,6 @@
 {
     "version": 8,
+    "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
     "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
     "name": "assets_networkmeter",
     "sources": {
@@ -169,6 +170,5 @@
             "source-layer": "assets_networkmeter",
             "id": "assets_networkmeter:(rule#5)zonal_meter:0"
         }
-    ],
-    "sprite": "spriteSheet"
+    ]
 }

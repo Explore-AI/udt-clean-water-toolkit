@@ -1,5 +1,6 @@
 {
     "version": 8,
+    "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
     "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
     "name": "assets_pressurecontrolvalve",
     "sources": {
@@ -143,6 +144,5 @@
             "source-layer": "assets_pressurecontrolvalve",
             "id": "assets_pressurecontrolvalve:(rule#4)pressure_sustaining:0"
         }
-    ],
-    "sprite": "spriteSheet"
+    ]
 }
