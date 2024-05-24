@@ -20,10 +20,4 @@ services:
       depends_on:
         - udtpostgis
 
-   maputinik:
-     image: ghcr.io/maplibre/maputnik:main
-     container_name: udtmaputinik
-     ports:
-       - "8888:80"
-     depends_on:
-       - geoserver
+   

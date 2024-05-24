@@ -1,174 +1,83 @@
 {
-    "version": 8,
-    "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
-    "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
-    "name": "assets_networkmeter",
-    "sources": {
-        "udtgeoserver": {
-            "type": "vector",
-            "tiles": [
-                "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_networkmeter&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
-            ],
-            "minZoom": 0,
-            "maxZoom": 20
-        }
+  "version": 8,
+  "name": "assets_networkmeter",
+  "metadata": {"maputnik:renderer": "mlgljs"},
+  "sources": {
+    "udtgeoserver": {
+      "type": "vector",
+      "tiles": [
+        "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_networkmeter&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
+      ],
+      "minzoom": 0,
+      "maxzoom": 16
+    }
+  },
+  "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
+  "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "assets_networkmeter_distribution_input_meter",
+      "type": "symbol",
+      "source": "assets_networkmeter",
+      "source-layer": "assets_networkmeter",
+      "filter": ["all", ["==", "subtype", "distribution_input_meter"]],
+      "layout": {
+        "icon-optional": false,
+        "icon-image": "network-meter-distribution-input-meter"
+      }
     },
-    "layers": [
-        {
-            "type": "circle",
-            "paint": {
-                "circle-radius": [
-                    "/",
-                    7.142857142857142,
-                    2
-                ],
-                "circle-color": "#b147ef",
-                "circle-opacity": 1.0,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "#232323"
-            },
-            "Z": 0,
-            "filter": [
-                "==",
-                [
-                    "get",
-                    "subtype"
-                ],
-                "distribution_input_meter"
-            ],
-            "source": "udtgeoserver",
-            "source-layer": "assets_networkmeter",
-            "id": "assets_networkmeter:(rule#0)distribution_input_meter:0"
-        },
-        {
-            "type": "circle",
-            "paint": {
-                "circle-radius": [
-                    "/",
-                    7.142857142857142,
-                    2
-                ],
-                "circle-color": "#df6a26",
-                "circle-opacity": 1.0,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "#232323"
-            },
-            "Z": 0,
-            "filter": [
-                "==",
-                [
-                    "get",
-                    "subtype"
-                ],
-                "district_meter"
-            ],
-            "source": "udtgeoserver",
-            "source-layer": "assets_networkmeter",
-            "id": "assets_networkmeter:(rule#1)district_meter:0"
-        },
-        {
-            "type": "circle",
-            "paint": {
-                "circle-radius": [
-                    "/",
-                    7.142857142857142,
-                    2
-                ],
-                "circle-color": "#2cec39",
-                "circle-opacity": 1.0,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "#232323"
-            },
-            "Z": 0,
-            "filter": [
-                "==",
-                [
-                    "get",
-                    "subtype"
-                ],
-                "fire_meter"
-            ],
-            "source": "udtgeoserver",
-            "source-layer": "assets_networkmeter",
-            "id": "assets_networkmeter:(rule#2)fire_meter:0"
-        },
-        {
-            "type": "circle",
-            "paint": {
-                "circle-radius": [
-                    "/",
-                    7.142857142857142,
-                    2
-                ],
-                "circle-color": "#d0e586",
-                "circle-opacity": 1.0,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "#232323"
-            },
-            "Z": 0,
-            "filter": [
-                "==",
-                [
-                    "get",
-                    "subtype"
-                ],
-                "unknown"
-            ],
-            "source": "udtgeoserver",
-            "source-layer": "assets_networkmeter",
-            "id": "assets_networkmeter:(rule#3)unknown:0"
-        },
-        {
-            "type": "circle",
-            "paint": {
-                "circle-radius": [
-                    "/",
-                    7.142857142857142,
-                    2
-                ],
-                "circle-color": "#cb6096",
-                "circle-opacity": 1.0,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "#232323"
-            },
-            "Z": 0,
-            "filter": [
-                "==",
-                [
-                    "get",
-                    "subtype"
-                ],
-                "waste_meter"
-            ],
-            "source": "udtgeoserver",
-            "source-layer": "assets_networkmeter",
-            "id": "assets_networkmeter:(rule#4)waste_meter:0"
-        },
-        {
-            "type": "circle",
-            "paint": {
-                "circle-radius": [
-                    "/",
-                    7.142857142857142,
-                    2
-                ],
-                "circle-color": "#80e9e2",
-                "circle-opacity": 1.0,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "#232323"
-            },
-            "Z": 0,
-            "filter": [
-                "==",
-                [
-                    "get",
-                    "subtype"
-                ],
-                "zonal_meter"
-            ],
-            "source": "udtgeoserver",
-            "source-layer": "assets_networkmeter",
-            "id": "assets_networkmeter:(rule#5)zonal_meter:0"
-        }
-    ]
+    {
+      "id": "assets_networkmeter_district_meter",
+      "type": "symbol",
+      "source": "udtgeoserver",
+      "source-layer": "assets_networkmeter",
+      "filter": ["all", ["==", "subtype", "district_meter"]],
+      "layout": {
+        "icon-optional": false,
+        "icon-image": "network-meter-district-meter"
+      }
+    },
+    {
+      "id": "assets_networkmeter_fire",
+      "type": "symbol",
+      "source": "udtgeoserver",
+      "source-layer": "assets_networkmeter",
+      "filter": ["all", ["==", "subtype", "fire_meter"]],
+      "layout": {
+        "icon-optional": false,
+        "icon-image": "network-meter-fire"
+      }
+    },
+    {
+      "id": "assets_networkmeter_unknown",
+      "type": "symbol",
+      "source": "udtgeoserver",
+      "source-layer": "assets_networkmeter",
+      "filter": ["all", ["==", "subtype", "unknown"]],
+      "layout": {
+        "icon-optional": false,
+        "icon-image": "network-meter-unkown"
+      }
+    },
+    {
+      "id": "assets_networkmeter_waste",
+      "type": "symbol",
+      "source": "udtgeoserver",
+      "source-layer": "assets_networkmeter",
+      "filter": ["all", ["==", "subtype", "waste_meter"]],
+      "layout": {
+        "icon-optional": false,
+        "icon-image": "network-meter-waste"
+      }
+    },
+    {
+      "id": "district_meter_zonal",
+      "type": "symbol",
+      "source": "udtgeoserver",
+      "source-layer": "assets_networkmeter",
+      "filter": ["all", ["==", "subtype", "zonal_meter"]],
+      "layout": {"icon-image": "network-meter-zonal"}
+    }
+  ],
+  "id": "ghcso0a"
 }
