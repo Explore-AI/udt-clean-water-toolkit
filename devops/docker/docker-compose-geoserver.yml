@@ -10,7 +10,7 @@ services:
       container_name: udtgeoserver
       volumes:
         - geoserver-data:/opt/geoserver/data_dir
-        - ../../geoserver/styles:/settings/
+        - ../../geoserver/styles:/styles/
         - ../../geoserver/setup_styles.sh:/docker-entrypoint-geoserver.d/setup_styles.sh
       ports:
         - "8080:8080"
@@ -19,3 +19,11 @@ services:
         - ./env_files/.geoserver_env
       depends_on:
         - udtpostgis
+
+   maputinik:
+     image: ghcr.io/maplibre/maputnik:main
+     container_name: udtmaputinik
+     ports:
+       - "8888:80"
+     depends_on:
+       - geoserver

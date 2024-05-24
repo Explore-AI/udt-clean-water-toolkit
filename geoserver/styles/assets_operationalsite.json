@@ -1,5 +1,6 @@
 {
     "version": 8,
+    "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
     "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
     "name": "assets_operationalsite",
     "sources": {
@@ -351,6 +352,5 @@
             "source-layer": "assets_operationalsite",
             "id": "assets_operationalsite:(rule#12)water_tower:0"
         }
-    ],
-    "sprite": "spriteSheet"
+    ]
 }

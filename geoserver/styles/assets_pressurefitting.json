@@ -1,5 +1,6 @@
 {
     "version": 8,
+    "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
     "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
     "name": "assets_pressurefitting",
     "sources": {
@@ -92,6 +93,5 @@
             "source-layer": "assets_pressurefitting",
             "id": "assets_pressurefitting:(rule#2)transducer:0"
         }
-    ],
-    "sprite": "spriteSheet"
+    ]
 }

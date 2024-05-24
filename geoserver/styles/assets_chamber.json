@@ -12,7 +12,7 @@
       "maxzoom": 18
     }
   },
-  "sprite": "",
+  "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
   "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
   "layers": [
     {
