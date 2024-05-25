@@ -44,10 +44,11 @@ export default function MapSearchBox() {
     return (
         <div className={styles.box}>
             <TextInputSearchField
-                onEnter={onSearch}
+                placeholder="Search coordinates, addresses or assets ..."
+                onSearch={onSearch}
                 classNames={{ input: styles.input }}
                 showClearButton={true}
-                onClose={() => navigate(`/map`)}
+                onClear={() => navigate(`/map`)}
             />
         </div>
     );

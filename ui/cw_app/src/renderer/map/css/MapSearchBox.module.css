@@ -1,14 +1,5 @@
-.icon {
-    width: calc(1rem * var(--mantine-scale));
-    height: calc(1rem * var(--mantine-scale));
-}
-
-.errorIcon {
-    color: #D62246
-}
-
 .input {
-    width: calc(20rem * var(--mantine-scale)) !important;
+    width: calc(22.5rem * var(--mantine-scale)) !important;
     border: none !important;
 }
 
@@ -24,16 +15,4 @@
     &:focus{
         border: 2px solid var(--accent);
     }
-}
-
-.submitButton{
-    background-color: transparent;
-    border: none !important;
-    margin: 0px 6px;
-    padding: 5px 0px 0px 0px;
-    cursor: pointer;
-}
-
-.errorInput{
-    border: 3px solid  #D62246;
 }

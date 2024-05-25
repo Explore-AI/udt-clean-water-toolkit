@@ -1,15 +1,15 @@
 import styles from '../css/TextInputSearchField.module.css'
 import { useState } from 'react';
 import { TextInput, CloseButton } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { IconSearch, IconX } from '@tabler/icons-react';
 
 function TextInputSearchField(props) {
 
     const {
         defaultValue,
         onChange,
-        onClose,
-        onEnter,
+        onClear,
+        onSearch,
         placeholder,
         classNames,
         showClearButton,
@@ -23,15 +23,20 @@ function TextInputSearchField(props) {
         onChange && onChange(newValue);
     };
 
+    const handleSearch = () => {
+        onSearch && onSearch(value);
+
+    };
+
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            onEnter && onEnter(e.target.value);
+            handleSearch()
         }
     };
 
-    const handleClose = () => {
+    const handleClear = () => {
         setValue('');
-        onClose && onClose();
+        onClear && onClear();
     };
 
     return (
@@ -42,16 +47,20 @@ function TextInputSearchField(props) {
             classNames={classNames}
             value={value}
             rightSection={
-            value &&
-            showClearButton && (
                 <>
-                    <CloseButton
-                        aria-label="Clear Input"
-                        onClick={handleClose}
+            {value &&
+             showClearButton &&
+             <IconX
+                 className={styles.clear}
+                 onClick={handleClear}
+             />
+            }
+                    <IconSearch
+                        onClick={handleSearch}
+                        className={styles.icon}
                     />
-                    <IconSearch className={styles.icon} />
                 </>
-            )}
+            }
         />
     );
 }
