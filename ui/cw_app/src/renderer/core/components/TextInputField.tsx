@@ -28,6 +28,7 @@ function TextInputField(props) {
             onKeyDown={handleKeyDown}
             classNames={classNames}
             rightSection={
+            value &&
             showCloseButton &&
             <CloseButton
                 aria-label="Clear Input"
