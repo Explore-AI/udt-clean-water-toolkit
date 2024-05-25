@@ -24,7 +24,17 @@ export default function MapSearchBox() {
             if (validatedInput.type == 'gps') {
                 navigate(`/map/${validatedInput.payload[0]},${validatedInput.payload[1]}`)
             } else {
-                console.log(value)
+                const addressProps = {
+                    urlExtension: 'search',
+                    params: {
+                        q: validatedInput.payload as string,
+                        format: 'jsonv2',
+                        limit: 1,
+                        addressdetails: 1,
+                    },
+                };
+                const addressData = await getNominatimData(addressProps)
+                navigate(`/map/${addressData.lat},${addressData.lon}`)
             }
         } else {
             navigate(`/map`)
