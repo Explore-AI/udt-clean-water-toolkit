@@ -4,7 +4,7 @@ import { TextInput, CloseButton } from '@mantine/core';
 
 function TextInputField(props) {
 
-    const { defaultValue, onChange, onClose, onEnter, classNames, showCloseButton } = props
+    const { defaultValue, onChange, onClose, onEnter, placeholder, classNames, showCloseButton } = props
 
     const [ value, setValue ] = useState(defaultValue || '')
 
@@ -27,7 +27,7 @@ function TextInputField(props) {
 
     return (
         <TextInput
-            placeholder="Search coordinates, address, or assets...."
+            placeholder={placeholder}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             classNames={classNames}
