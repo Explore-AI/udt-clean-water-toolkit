@@ -73,10 +73,10 @@ export default function SearchWidget({ updateGoToCoords }: SearchProps) {
 
     const icon = <IconSearch className={styles.icon} />;
     const errorIcon = (
-            <IconAlertTriangle
-                stroke={1.5}
-                className={`${styles.icon} ${styles.errorIcon}`}
-            />
+        <IconAlertTriangle
+            stroke={1.5}
+            className={`${styles.icon} ${styles.errorIcon}`}
+        />
     );
 
     return (

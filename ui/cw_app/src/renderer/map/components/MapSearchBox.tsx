@@ -1,8 +1,8 @@
 // this is our common search input that will be used in a lot of other components
 import styles from '../css/MapSearchBox.module.css';
-import TextInputField from '../../core/components/TextInputField'
+import TextInputField from '../../core/components/TextInputField';
 import { IconSearch } from '@tabler/icons-react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { validateInput, getNominatimData } from '../../core/utils/utils';
 /* import { IconSearch, IconAlertTriangle } from '@tabler/icons-react';
  * import { validateInput, getNominatimData } from '../../core/utils/utils';
@@ -15,14 +15,15 @@ import { validateInput, getNominatimData } from '../../core/utils/utils';
  * import { isValidCoordinate } from '../../core/utils/utils'; */
 
 export default function MapSearchBox() {
-
     const navigate = useNavigate();
 
     const onSearch = async (value) => {
         if (value) {
             const validatedInput = validateInput(value);
             if (validatedInput.type == 'gps') {
-                navigate(`/map/${validatedInput.payload[0]},${validatedInput.payload[1]}`)
+                navigate(
+                    `/map/${validatedInput.payload[0]},${validatedInput.payload[1]}`,
+                );
             } else {
                 const addressProps = {
                     urlExtension: 'search',
@@ -33,13 +34,13 @@ export default function MapSearchBox() {
                         addressdetails: 1,
                     },
                 };
-                const addressData = await getNominatimData(addressProps)
-                navigate(`/map/${addressData.lat},${addressData.lon}`)
+                const addressData = await getNominatimData(addressProps);
+                navigate(`/map/${addressData.lat},${addressData.lon}`);
             }
         } else {
-            navigate(`/map`)
+            navigate(`/map`);
         }
-    }
+    };
 
     return (
         <div className={styles.box}>
@@ -53,5 +54,6 @@ export default function MapSearchBox() {
     );
 }
 
-
-{/* <IconSearch className={styles.icon} />; */}
+{
+    /* <IconSearch className={styles.icon} />; */
+}

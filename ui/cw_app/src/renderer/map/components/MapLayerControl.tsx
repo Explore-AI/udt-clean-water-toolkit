@@ -8,7 +8,6 @@ import { MapLayerContext } from '../hooks/useMapLayers';
 import { MapUiContext } from '../hooks/useMapUi';
 
 export default function MapLayerControl() {
-
     const { uiParams, setMapUiParams } = useContext(MapUiContext);
     const { mapLayerProps, setMapLayerProps } = useContext(MapLayerContext);
 

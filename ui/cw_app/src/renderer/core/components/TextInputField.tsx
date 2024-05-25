@@ -4,26 +4,34 @@ import { TextInput, CloseButton } from '@mantine/core';
 
 function TextInputField(props) {
 
-    const { defaultValue, onChange, onClose, onEnter, placeholder, classNames, showCloseButton } = props
+    const {
+        defaultValue,
+        onChange,
+        onClose,
+        onEnter,
+        placeholder,
+        classNames,
+        showCloseButton,
+    } = props;
 
-    const [ value, setValue ] = useState(defaultValue || '')
+    const [value, setValue] = useState(defaultValue || '');
 
     const handleChange = (e) => {
-        const newValue = e.target.value
-        setValue(newValue)
-        onChange && onChange(newValue)
-    }
+        const newValue = e.target.value;
+        setValue(newValue);
+        onChange && onChange(newValue);
+    };
 
     const handleKeyDown = (e) => {
-        if(e.key === 'Enter') {
+        if (e.key === 'Enter') {
             onEnter && onEnter(e.target.value);
         }
-    }
+    };
 
     const handleClose = () => {
-        setValue('')
-        onClose && onClose()
-    }
+        setValue('');
+        onClose && onClose();
+    };
 
     return (
         <TextInput
@@ -33,15 +41,16 @@ function TextInputField(props) {
             classNames={classNames}
             value={value}
             rightSection={
-            value &&
-            showCloseButton &&
-            <CloseButton
-                aria-label="Clear Input"
-                onClick={handleClose}
-            />
+                value &&
+                showCloseButton && (
+                    <CloseButton
+                        aria-label="Clear Input"
+                        onClick={handleClose}
+                    />
+                )
             }
         />
     );
 }
 
-export default TextInputField
+export default TextInputField;

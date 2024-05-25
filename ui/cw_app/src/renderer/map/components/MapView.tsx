@@ -6,7 +6,7 @@ import SearchWidget from '../../core/components/SearchWidget';
 import MapControls from './MapControls';
 import useMapUi from '../hooks/useMapUi';
 import useMapLayers from '../hooks/useMapLayers';
-import MapSearchBox from '../components/MapSearchBox'
+import MapSearchBox from '../components/MapSearchBox';
 import { Map } from 'react-map-gl';
 import { MapViewState } from 'deck.gl';
 import { MAPBOX_PUBLIC_TOKEN } from '../../config';
@@ -22,25 +22,28 @@ const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function MapView() {
-    const { latlong } = useParams()
+    const { latlong } = useParams();
     const { mapLayers, baseMap } = useContext(MapLayerContext);
 
-    console.log(latlong, "ssss333")
+    console.log(latlong, 'ssss333');
 
-    let viewState
+    let viewState;
     if (latlong) {
-        const latitude = latlong.split(",")[0]
-        const longitude = latlong.split(",")[1]
-        viewState = { ...INITIAL_VIEW_STATE,  latitude: latitude, longitude: longitude }
+        const latitude = latlong.split(',')[0];
+        const longitude = latlong.split(',')[1];
+        viewState = {
+            ...INITIAL_VIEW_STATE,
+            latitude: latitude,
+            longitude: longitude,
+        };
     } else {
-        viewState = INITIAL_VIEW_STATE
+        viewState = INITIAL_VIEW_STATE;
     }
-
 
     return (
         <>
             <div className={styles.searchBox}>
-                <MapSearchBox/>
+                <MapSearchBox />
             </div>
             <div className={styles.control}>
                 <MapControls />
