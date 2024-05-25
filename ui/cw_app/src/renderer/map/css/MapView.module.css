@@ -1,3 +1,4 @@
+
 .searchBox {
     height: calc(2rem * var(--mantine-scale));
     width: calc(25rem * var(--mantine-scale));
@@ -16,20 +17,4 @@
     z-index: 3;
     top: 50px;
     right: 20px;
-}
-.layerTogglePopup {
-    position: absolute;
-    top: 60px;
-    right: 80px;
-    z-index: 4;
-    height: 300px;
-    width: 220px;
-}
-
-.basemapTogglePopup {
-    position: absolute;
-    top: 120px;
-    right: 80px;
-    z-index: 4;
-    height: 300px;
 }

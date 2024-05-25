@@ -1,11 +1,8 @@
 // Our Map Page details exists here
-import styles from '../css/Map.module.css';
+import styles from '../css/MapView.module.css';
 import { useContext } from 'react';
 import DeckGL from '@deck.gl/react';
-import SearchWidget from '../../core/components/SearchWidget';
 import MapControls from './MapControls';
-import useMapUi from '../hooks/useMapUi';
-import useMapLayers from '../hooks/useMapLayers';
 import MapSearchBox from '../components/MapSearchBox';
 import { Map } from 'react-map-gl';
 import { MapViewState } from 'deck.gl';
