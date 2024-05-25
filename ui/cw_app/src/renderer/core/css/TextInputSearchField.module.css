@@ -1,0 +1,6 @@
+
+
+.icon {
+    width: calc(1rem * var(--mantine-scale));
+    height: calc(1rem * var(--mantine-scale));
+}

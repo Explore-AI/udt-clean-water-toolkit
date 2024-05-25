@@ -1,7 +1,6 @@
 // this is our common search input that will be used in a lot of other components
 import styles from '../css/MapSearchBox.module.css';
-import TextInputField from '../../core/components/TextInputField';
-import { IconSearch } from '@tabler/icons-react';
+import TextInputSearchField from '../../core/components/TextInputSearchField';
 import { useNavigate } from 'react-router-dom';
 import { validateInput, getNominatimData } from '../../core/utils/utils';
 /* import { IconSearch, IconAlertTriangle } from '@tabler/icons-react';
@@ -44,10 +43,10 @@ export default function MapSearchBox() {
 
     return (
         <div className={styles.box}>
-            <TextInputField
+            <TextInputSearchField
                 onEnter={onSearch}
                 classNames={{ input: styles.input }}
-                showCloseButton={true}
+                showClearButton={true}
                 onClose={() => navigate(`/map`)}
             />
         </div>

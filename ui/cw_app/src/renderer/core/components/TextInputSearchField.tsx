@@ -1,8 +1,9 @@
-// this is our common search input that will be used in a lot of other components
+import styles from '../css/TextInputSearchField.module.css'
 import { useState } from 'react';
 import { TextInput, CloseButton } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
 
-function TextInputField(props) {
+function TextInputSearchField(props) {
 
     const {
         defaultValue,
@@ -43,14 +44,16 @@ function TextInputField(props) {
             rightSection={
             value &&
             showClearButton && (
-                <CloseButton
-                    aria-label="Clear Input"
-                    onClick={handleClose}
-                />
-            )
-            }
+                <>
+                    <CloseButton
+                        aria-label="Clear Input"
+                        onClick={handleClose}
+                    />
+                    <IconSearch className={styles.icon} />
+                </>
+            )}
         />
     );
 }
 
-export default TextInputField;
+export default TextInputSearchField;
