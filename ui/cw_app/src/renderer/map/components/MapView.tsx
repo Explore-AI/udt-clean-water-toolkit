@@ -13,8 +13,7 @@ import { MAPBOX_PUBLIC_TOKEN } from '../../config';
 import { useParams } from 'react-router-dom';
 import { MapLayerContext } from '../hooks/useMapLayers';
 
-
-export const INITIAL_VIEW_STATE: MapViewState = {
+const INITIAL_VIEW_STATE: MapViewState = {
     longitude: -0.118092,
     latitude: 51.5074,
     zoom: 10,
@@ -26,8 +25,17 @@ export default function MapView() {
     const { latlong } = useParams()
     const { mapLayers, baseMap } = useContext(MapLayerContext);
 
-    console.log(window.location.href, "fff")
     console.log(latlong, "ssss333")
+
+    let viewState
+    if (latlong) {
+        const latitude = latlong.split(",")[0]
+        const longitude = latlong.split(",")[1]
+        viewState = { ...INITIAL_VIEW_STATE,  latitude: latitude, longitude: longitude }
+    } else {
+        viewState = INITIAL_VIEW_STATE
+    }
+
 
     return (
         <>
@@ -38,12 +46,12 @@ export default function MapView() {
                 <MapControls />
             </div>
             <DeckGL
-                initialViewState={INITIAL_VIEW_STATE}
+                initialViewState={viewState}
                 controller={{ scrollZoom: true }}
                 layers={mapLayers}
             >
                 <Map
-                    initialViewState={INITIAL_VIEW_STATE}
+                    initialViewState={viewState}
                     mapStyle={baseMap.mapUrl}
                     mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
                     style={{ width: '500px', height: '500px' }}

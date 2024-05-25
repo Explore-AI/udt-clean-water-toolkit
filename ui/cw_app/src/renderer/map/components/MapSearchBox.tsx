@@ -1,8 +1,9 @@
 // this is our common search input that will be used in a lot of other components
 import styles from '../css/MapSearchBox.module.css';
-//import { useState, useEffect } from 'react';
 import TextInputField from '../../core/components/TextInputField'
+import { IconSearch } from '@tabler/icons-react';
 import { useNavigate } from "react-router-dom";
+import { validateInput, getNominatimData } from '../../core/utils/utils';
 /* import { IconSearch, IconAlertTriangle } from '@tabler/icons-react';
  * import { validateInput, getNominatimData } from '../../core/utils/utils';
  * import {
@@ -19,7 +20,12 @@ export default function MapSearchBox() {
 
     const onSearch = async (value) => {
         if (value) {
-            navigate(`/map/${value}`)
+            const validatedInput = validateInput(value);
+            if (validatedInput.type == 'gps') {
+                navigate(`/map/${validatedInput.payload[0]},${validatedInput.payload[1]}`)
+            } else {
+                console.log(value)
+            }
         } else {
             navigate(`/map`)
         }
@@ -31,7 +37,11 @@ export default function MapSearchBox() {
                 onEnter={onSearch}
                 classNames={{ input: styles.input }}
                 showCloseButton={true}
+                onClose={() => navigate(`/map`)}
             />
         </div>
     );
 }
+
+
+{/* <IconSearch className={styles.icon} />; */}

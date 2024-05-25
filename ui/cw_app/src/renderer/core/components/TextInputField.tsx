@@ -4,12 +4,11 @@ import { TextInput, CloseButton } from '@mantine/core';
 
 function TextInputField(props) {
 
-    const { defaultValue, onChange, onEnter, classNames, showCloseButton } = props
+    const { defaultValue, onChange, onClose, onEnter, classNames, showCloseButton } = props
 
-    const [ value, setValue ] = useState(defaultValue)
+    const [ value, setValue ] = useState(defaultValue || '')
 
     const handleChange = (e) => {
-        console.log(e)
         const newValue = e.target.value
         setValue(newValue)
         onChange && onChange(newValue)
@@ -21,18 +20,24 @@ function TextInputField(props) {
         }
     }
 
+    const handleClose = () => {
+        setValue('')
+        onClose && onClose()
+    }
+
     return (
         <TextInput
             placeholder="Search coordinates, address, or assets...."
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             classNames={classNames}
+            value={value}
             rightSection={
             value &&
             showCloseButton &&
             <CloseButton
                 aria-label="Clear Input"
-                onClick={() => {}}
+                onClick={handleClose}
             />
             }
         />
