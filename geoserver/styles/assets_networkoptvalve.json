@@ -1,0 +1,32 @@
+{
+  "version": 8,
+  "name": "assets_networkoptvalve",
+  "metadata": {"maputnik:renderer": "mlgljs"},
+  "sources": {
+    "udtgeoserver": {
+      "type": "vector",
+      "tiles": [
+        "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_networkoptvalve&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
+      ],
+      "minzoom": 0,
+      "maxzoom": 18
+    }
+  },
+  "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
+  "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "hydrant",
+      "type": "symbol",
+      "source": "assets_networkoptvalve",
+      "source-layer": "assets_networkoptvalve",
+      "layout": {
+        "icon-image": "assets_networkoptvalve",
+        "icon-size": {
+          "stops": [[6, 1], [10, 0.5]]
+        }
+      }
+    }
+  ],
+  "id": "ghcso0a"
+}

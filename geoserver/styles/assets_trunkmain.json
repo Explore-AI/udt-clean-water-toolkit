@@ -1,0 +1,29 @@
+{
+  "version": 8,
+  "name": "assets_trunkmain",
+  "metadata": {"maputnik:renderer": "mlgljs"},
+  "sources": {
+    "udtgeoserver": {
+      "type": "vector",
+      "tiles": [
+        "http://localhost:8080/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:assets_trunkmain&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}"
+      ],
+      "minzoom": 0,
+      "maxzoom": 18
+    }
+  },
+  "sprite": "http://localhost:8080/geoserver/styles/sprites/makisprite",
+  "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "assets_trunkmain",
+      "type": "line",
+      "source": "udtgeoserver",
+      "source-layer": "assets_trunkmain",
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {"line-width": 1.4, "line-opacity": 1, "line-color": "#232323"},
+      "Z": 0
+    }
+  ],
+  "id": "ghcso0a"
+}

@@ -1,0 +1,107 @@
+{
+  "hydrant": {
+    "height": 240,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 0,
+    "y": 0
+  },
+  "logger": {
+    "height": 231,
+    "pixelRatio": 3,
+    "width": 231,
+    "x": 0,
+    "y": 240
+  },
+  "network-meter-distribution-input-meter": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 0,
+    "y": 471
+  },
+  "network-meter-district-meter": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 150,
+    "y": 471
+  },
+  "network-meter-fire": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 300,
+    "y": 471
+  },
+  "network-meter-unkown": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 450,
+    "y": 471
+  },
+  "network-meter-waste": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 0,
+    "y": 621
+  },
+  "network-meter-zonal": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 150,
+    "y": 621
+  },
+  "network-opt-valve": {
+    "height": 162,
+    "pixelRatio": 3,
+    "width": 162,
+    "x": 231,
+    "y": 240
+  },
+  "operational_site_non-potable_state_closed": {
+    "height": 162,
+    "pixelRatio": 3,
+    "width": 162,
+    "x": 393,
+    "y": 240
+  },
+  "operational_site_non_potable_state_default": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 300,
+    "y": 621
+  },
+  "operational_site_non_potable_state_inoperable": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 450,
+    "y": 621
+  },
+  "operational_site_non_potable_state_inoperable_closed": {
+    "height": 162,
+    "pixelRatio": 3,
+    "width": 162,
+    "x": 300,
+    "y": 0
+  },
+  "operational_site_variation_double": {
+    "height": 225,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 150,
+    "y": 0
+  },
+  "operational_site_variation_single": {
+    "height": 150,
+    "pixelRatio": 3,
+    "width": 150,
+    "x": 0,
+    "y": 771
+  }
+}
