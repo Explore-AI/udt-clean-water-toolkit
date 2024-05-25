@@ -5,6 +5,7 @@ import MapView from './MapView';
 import BaseLayout from '../../core/components/BaseLayout';
 
 function MapPage() {
+
     return (
         <BaseLayout>
             <div className={styles.pageContainer}>

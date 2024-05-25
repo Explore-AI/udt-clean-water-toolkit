@@ -6,7 +6,7 @@ import WaterLogo from '../images/water.svg';
 import styles from '../css/Header.module.css';
 
 const links = [
-    { link: '/', label: 'Home' },
+    { link: '/', label: 'Map' },
     { link: '/graph', label: 'Graph' },
     { link: '/geo-graph', label: 'Geospatial Graph' },
     { link: '/schematic', label: 'Schematic' },

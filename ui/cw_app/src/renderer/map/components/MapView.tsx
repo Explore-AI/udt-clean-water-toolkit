@@ -10,7 +10,7 @@ import MapSearchBox from '../components/MapSearchBox'
 import { Map } from 'react-map-gl';
 import { MapViewState } from 'deck.gl';
 import { MAPBOX_PUBLIC_TOKEN } from '../../config';
-import { DEFAULT_BASEMAP_PROPS } from '../../core';
+import { useParams } from 'react-router-dom';
 import { MapLayerContext } from '../hooks/useMapLayers';
 
 
@@ -23,7 +23,11 @@ export const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function MapView() {
+    const { latlong } = useParams()
     const { mapLayers, baseMap } = useContext(MapLayerContext);
+
+    console.log(window.location.href, "fff")
+    console.log(latlong, "ssss333")
 
     return (
         <>
