@@ -18,7 +18,7 @@ class SchematicViewset(viewsets.ViewSet):
             match (n)-[r]->(m) where n.dmas
             contains '{dma_code}' return
             ID(n), n, ID(r), r, ID(m), m
-            limit 10000
+            limit 5
             """
             results, _ = db.cypher_query(query)
 
@@ -33,8 +33,8 @@ class SchematicViewset(viewsets.ViewSet):
             "key": node_id,
             "type": node_type,
             "position": {
-                "x": position[0],
-                "y": position[1],
+                "x": position[0],#*10,
+                "y": position[1],#*10,
             },
             "data": {"label": node_id},
         }

@@ -1,6 +1,6 @@
 import Header from './Header';
 import React from 'react';
-import styles from '../css/base_layout.module.css';
+import styles from '../css/BaseLayout.module.css';
 
 type childrenProps = {
     children: React.ReactNode;

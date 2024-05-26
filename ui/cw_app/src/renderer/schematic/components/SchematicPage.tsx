@@ -1,3 +1,4 @@
+import styles from '../css/SchematicPage.module.css';
 import BaseLayout from '../../core/components/BaseLayout';
 import Schematic from './Schematic'
 import {
@@ -25,7 +26,7 @@ export default function SchematicPage() {
 
     return (
         <BaseLayout>
-            <div style={{overflow:'hidden', height:'100vh', width:'100%'}}>
+            <div className={styles.pageContainer}>
                 <Schematic nodes={data.nodes} edges={data.edges} />
             </div>
         </BaseLayout>
