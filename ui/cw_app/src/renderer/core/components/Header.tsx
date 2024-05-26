@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom'
+import { map as _map } from 'lodash'
 import { Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
@@ -6,7 +8,7 @@ import WaterLogo from '../images/water.svg';
 import styles from '../css/Header.module.css';
 
 const links = [
-    { link: '/', label: 'Map' },
+    { link: '/map', label: 'Map' },
     { link: '/graph', label: 'Graph' },
     { link: '/geo-graph', label: 'Geospatial Graph' },
     { link: '/schematic', label: 'Schematic' },
@@ -15,18 +17,17 @@ const links = [
 
 export default function Header() {
     const [opened, { toggle }] = useDisclosure(false);
-    const [active, setActive] = useState(0);
 
-    const linkButtons = links.map((link, index) => (
+    const { pathname } = useLocation()
+
+    console.log(pathname, "A")
+
+    const linkButtons = _map(links, (link) => (
         <Link
             key={link.label}
             to={link.link}
             className={styles.mainLink}
-            data-active={index === active || undefined}
-            onClick={() => {
-                setActive(index);
-            }}
-        >
+            data-active={ pathname === link.link || undefined }>
             {link.label}
         </Link>
     ));

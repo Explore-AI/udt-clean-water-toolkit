@@ -20,30 +20,17 @@ const edgeTypes = {
 };
 
 
-const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges();
-
-
 const Schematic = (props) => {
-
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-
-    const onConnect = useCallback(
-        (params) =>
-            setEdges((eds) =>
-                addEdge({ ...params, type: 'floating', markerEnd: { type: MarkerType.Arrow } }, eds)
-            ),
-        [setEdges]
-    );
+    console.log(props.nodes)
+    console.log(props.edges)
 
     return (
         <ReactFlow
-            nodes={props.nodes}
-            edges={props.edges}
+            defaultNodes={props.nodes}
+            defaultEdges={props.edges}
             nodeTypes={nodeTypes}
-            onConnect={onConnect}
-            connectionMode="loose"
             connectionRadius={1}
+            connectionMode="loose"
             minZoom={0}
             maxZoom={50}
             fitView

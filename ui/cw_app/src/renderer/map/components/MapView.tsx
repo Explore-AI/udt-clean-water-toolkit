@@ -22,8 +22,6 @@ export default function MapView() {
     const { latlong } = useParams();
     const { mapLayers, baseMap } = useContext(MapLayerContext);
 
-    console.log(latlong, 'ssss333');
-
     let viewState;
     if (latlong) {
         const latitude = latlong.split(',')[0];
