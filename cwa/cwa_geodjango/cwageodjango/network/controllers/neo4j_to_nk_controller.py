@@ -1,4 +1,3 @@
-import networkit as nk
 from neomodel import db
 from cleanwater.transform import Neo4jToNk
 from cleanwater.data_managers import NetworkDataManager
