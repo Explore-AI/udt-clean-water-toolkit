@@ -8,11 +8,11 @@ import WaterLogo from '../images/water.svg';
 import styles from '../css/Header.module.css';
 
 const links = [
-    { link: '/map', label: 'Map' },
-    { link: '/graph', label: 'Graph' },
-    { link: '/geo-graph', label: 'Geospatial Graph' },
-    { link: '/schematic', label: 'Schematic' },
-    { link: '/analysis', label: 'Analysis' },
+    { path: '/map', label: 'Map' },
+    { path: '/graph', label: 'Graph' },
+    { path: '/geo-graph', label: 'Geospatial Graph' },
+    { path: '/schematic', label: 'Schematic' },
+    { path: '/analysis', label: 'Analysis' },
 ];
 
 export default function Header() {
@@ -20,14 +20,12 @@ export default function Header() {
 
     const { pathname } = useLocation()
 
-    console.log(pathname, "A")
-
     const linkButtons = _map(links, (link) => (
         <Link
             key={link.label}
-            to={link.link}
+            to={link.path}
             className={styles.mainLink}
-            data-active={ pathname === link.link || undefined }>
+            data-active={ pathname === link.path || undefined }>
             {link.label}
         </Link>
     ));
