@@ -22,13 +22,13 @@ function AnalysisTable() {
 
     return (
         <div>
-            <Table>
+            <Table className={}>
                 <Table.Thead>
                     <Table.Tr>
-                        <Table.Th>Element position</Table.Th>
-                        <Table.Th>Element name</Table.Th>
-                        <Table.Th>Symbol</Table.Th>
-                        <Table.Th>Atomic mass</Table.Th>
+                        <Table.Th>#</Table.Th>
+                        <Table.Th>Method</Table.Th>
+                        <Table.Th>Start time</Table.Th>
+                        <Table.Th>End time</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>{rows}</Table.Tbody>
