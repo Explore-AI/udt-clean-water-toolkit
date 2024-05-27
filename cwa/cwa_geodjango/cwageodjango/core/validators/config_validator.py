@@ -35,8 +35,8 @@ class ConfigValidator(forms.Form):
 
         """
         parallel = cleaned_data.get("parallel")
-        thread_count = cleaned_data.get("thread_count")
-        processor_count = cleaned_data.get("thread_count")
+        thread_count = cleaned_data.get("processor_count")
+        processor_count = cleaned_data.get("processor_count")
 
         if parallel and not (thread_count or processor_count):
             raise ValidationError(
