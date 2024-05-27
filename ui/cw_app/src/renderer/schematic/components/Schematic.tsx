@@ -5,6 +5,7 @@ import ReactFlow, {
 } from 'reactflow';
 import CircleNode from './CircleNode';
 import FloatingEdge from './FloatingEdge'
+import EdgeNode from './EdgeNode'
 import { createNodesAndEdges } from './utils.js';
 //import ButtonEdge from './ButtonEdge';
 
@@ -12,7 +13,7 @@ import 'reactflow/dist/style.css';
 
 const nodeTypes = {
     circle: CircleNode,
-    edge_node: CircleNode,
+    edge_node: EdgeNode,
 };
 
 const edgeTypes = {

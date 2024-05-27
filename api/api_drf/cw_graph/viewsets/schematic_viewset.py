@@ -2,6 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from neomodel import db
 
+# from django.contrib.gis.geos import Point
+
 
 class SchematicViewset(viewsets.ViewSet):
     http_method_names = ["get"]
@@ -18,7 +20,6 @@ class SchematicViewset(viewsets.ViewSet):
             match (n)-[r]->(m) where n.dmas
             contains '{dma_code}' return
             ID(n), n, ID(r), r, ID(m), m
-            limit 5
             """
             results, _ = db.cypher_query(query)
 
@@ -28,13 +29,17 @@ class SchematicViewset(viewsets.ViewSet):
 
     def create_node(self, node_id, position, node_type="default"):
 
+        # point = Point(position[0], position[1], srid=27700)
+
+        # point_4326 = point.transform(4326, clone=True)
+
         return {
             "id": node_id,
             "key": node_id,
             "type": node_type,
             "position": {
-                "x": position[0],#*10,
-                "y": position[1],#*10,
+                "x": position[0],
+                "y": position[1],
             },
             "data": {"label": node_id},
         }
@@ -127,7 +132,6 @@ class SchematicViewset(viewsets.ViewSet):
     def create_nodes_and_edges(self, item):
 
         new_nodes, all_nodes = self.create_nodes(item)
-
         edges = self.create_edges(all_nodes)
 
         self.nodes.extend(new_nodes)
@@ -144,4 +148,15 @@ class SchematicViewset(viewsets.ViewSet):
     def list(self, request):
         data = self.query_by_dma(request)
         n_e = self.get_nodes_edges(data)
+        # print(len(self.nodes))
+        # print(len(self.edges))
+        # import pandas as pd
+
+        # nodes = pd.DataFrame(self.nodes)
+        # edges = pd.DataFrame(self.edges)
+        # print(nodes)
+        # print(edges)
+        # print(self.nodes)
+        # print(self.edges)
+
         return Response(n_e, status=status.HTTP_200_OK)
