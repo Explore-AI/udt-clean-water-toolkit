@@ -178,3 +178,4 @@ postgres-data
 .vscode/
 *.geoserver_env
 devops/scripts/geoserver/output
+*.django_env
