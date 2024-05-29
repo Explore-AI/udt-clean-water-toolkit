@@ -1,13 +1,8 @@
-import { useCallback } from 'react'
 import ReactFlow, {
-    Controls,
-    useEdgesState
+    Controls
 } from 'reactflow';
 import CircleNode from './CircleNode';
-import FloatingEdge from './FloatingEdge'
 import EdgeNode from './EdgeNode'
-import { createNodesAndEdges } from './utils.js';
-//import ButtonEdge from './ButtonEdge';
 
 import 'reactflow/dist/style.css';
 
@@ -16,26 +11,17 @@ const nodeTypes = {
     edge_node: EdgeNode,
 };
 
-const edgeTypes = {
-    floating: FloatingEdge,
-};
-
-
 const Schematic = (props) => {
-    console.log(props.nodes)
-    console.log(props.edges)
+    const { nodes, edges } = props
 
     return (
         <ReactFlow
-            defaultNodes={props.nodes}
-            defaultEdges={props.edges}
+            defaultNodes={nodes}
+            defaultEdges={edges}
             nodeTypes={nodeTypes}
-            connectionRadius={1}
-            connectionMode="loose"
             minZoom={0}
             maxZoom={50}
-            fitView
-        >
+            fitView={true}        >
             <Controls />
         </ReactFlow>
     );

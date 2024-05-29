@@ -6,14 +6,16 @@ export default memo(({ id }) => {
 
     return (
         <>
-            <div className={styles.node}>
+            <div className={styles.node} style={{ visibility: 'hidden'}}>
             </div>
-            <Handle type="source" position={Position.Left} id="a" style={{ visibility: 'hidden', height: '0px', width: '0px'}}/>
+            <Handle type="source"
+                position={Position.Top}
+                style={{ visibility: 'hidden', top: '14px', bottom: '0px', left: '1px', right: '0px', width: '1px', height: '1px', border: '0px', maxHeight:'1px', minHeight:'1px', maxWidth:'1px', minWidth:'1px'}}
+            />
             <Handle
                 type="target"
-                position={Position.Right}
-                id="b"
-                style={{ visibility: 'hidden', height: '0px', width: '0px'}}
+                position={Position.Top}
+                style={{ visibility: 'hidden', top: '14px', bottom: '0px', left: '1px', right: '0px', width: '1px', height: '1px', border: '0px', maxHeight:'1px', minHeight:'1px', maxWidth:'1px', minWidth:'1px'}}
             />
         </>
     );

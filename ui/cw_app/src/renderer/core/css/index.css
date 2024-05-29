@@ -1,7 +1,13 @@
 :root{
-    --primary-color: #35c3da; 
-    --background-color: #fffef6; 
+    --primary-color: #35c3da;
+    --background-color: #fffef6;
     --secondary-color: #33658a;
-    --text-color: #090707; 
-    --accent: #203536; 
+    --text-color: #090707;
+    --accent: #203536;
+}
+
+.react-flow__edges{
+    height: 100vh;
+    pointer-events: none;
+    overflow: visible;
 }

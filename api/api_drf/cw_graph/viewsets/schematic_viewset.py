@@ -1,16 +1,13 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from neomodel import db
+import pandas as pd
 
-# from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point
 
 
 class SchematicViewset(viewsets.ViewSet):
     http_method_names = ["get"]
-    node_ids = []
-    edge_ids = []
-    nodes = []
-    edges = []
 
     @staticmethod
     def query_by_dma(request):
@@ -20,7 +17,9 @@ class SchematicViewset(viewsets.ViewSet):
             match (n)-[r]->(m) where n.dmas
             contains '{dma_code}' return
             ID(n), n, ID(r), r, ID(m), m
+            limit 10
             """
+
             results, _ = db.cypher_query(query)
 
             return results
@@ -38,6 +37,8 @@ class SchematicViewset(viewsets.ViewSet):
             "key": node_id,
             "type": node_type,
             "position": {
+                # "x": point_4326.x,
+                # "y": point_4326.y,
                 "x": position[0],
                 "y": position[1],
             },
@@ -52,10 +53,10 @@ class SchematicViewset(viewsets.ViewSet):
             "source": str(from_node_id),
             "target": str(to_node_id),
             "type": "straight",
-            #            "style": {"strokeWidth": 2},
+            "style": {"strokeWidth": 1},
         }
 
-    def create_nodes(self, item):
+    def create_nodes(self, item, node_ids):
 
         start_node_id = str(item[0])
         start_node_data = item[1]
@@ -79,8 +80,8 @@ class SchematicViewset(viewsets.ViewSet):
 
         new_nodes = []
 
-        if start_node_id not in self.node_ids:
-            self.node_ids.append(start_node_id)
+        if start_node_id not in node_ids:
+            node_ids.append(start_node_id)
             new_nodes.append(start_node)
 
         all_nodes = [start_node]
@@ -95,68 +96,86 @@ class SchematicViewset(viewsets.ViewSet):
 
             all_nodes.append(edge_node)
 
-            if node_id not in self.node_ids:
-                self.node_ids.append(node_id)
+            if node_id not in node_ids:
+                node_ids.append(node_id)
                 new_nodes.append(edge_node)
 
         all_nodes.append(end_node)
 
-        if end_node_id not in self.node_ids:
-            self.node_ids.append(end_node_id)
+        if end_node_id not in node_ids:
+            node_ids.append(end_node_id)
             new_nodes.append(end_node)
 
-        return new_nodes, all_nodes
+        return new_nodes, all_nodes, node_ids
 
-    def create_edges(self, nodes):
+    def create_edges(self, nodes, edge_ids):
         edges = []
 
         from_node = nodes[0]
+        # print()
+        # print(pd.DataFrame(nodes))
+        # print()
+        # import pdb
+
+        # pdb.set_trace()
         for to_node in nodes[1:]:
             from_node_id = from_node["id"]
             to_node_id = to_node["id"]
 
             edge_id = f"{from_node_id}_{to_node_id}"
 
-            if edge_id in self.edge_ids:
+            if edge_id in edge_ids:
                 continue
 
             edge = self.create_edge(edge_id, from_node_id, to_node_id)
 
             edges.append(edge)
-            self.edge_ids.append(edge_id)
+            edge_ids.append(edge_id)
 
             from_node = to_node
 
-        return edges
+        # print()
+        # print(pd.DataFrame(edges))
+        # print()
+        # import pdb
 
-    def create_nodes_and_edges(self, item):
+        # pdb.set_trace()
 
-        new_nodes, all_nodes = self.create_nodes(item)
-        edges = self.create_edges(all_nodes)
+        return edges, edge_ids
 
-        self.nodes.extend(new_nodes)
-        self.edges.extend(edges)
+    def create_nodes_and_edges(self, item, node_ids, edge_ids):
+
+        new_nodes, all_nodes, node_ids = self.create_nodes(item, node_ids)
+        edges, edge_ids = self.create_edges(all_nodes, edge_ids)
+
+        return new_nodes, edges, node_ids, edge_ids
 
     def get_nodes_edges(self, graph_data):
 
         # TODO: cleanup as performing redundant operations
-        for item in graph_data:
-            self.create_nodes_and_edges(item)
+        node_ids = []
+        edge_ids = []
+        all_nodes = []
+        all_edges = []
 
-        return {"nodes": self.nodes, "edges": self.edges}
+        for item in graph_data:
+            nodes, edges, node_ids, edge_ids = self.create_nodes_and_edges(
+                item, node_ids, edge_ids
+            )
+            all_nodes.extend(nodes)
+            all_edges.extend(edges)
+
+        return {"nodes": all_nodes, "edges": all_edges}
 
     def list(self, request):
         data = self.query_by_dma(request)
         n_e = self.get_nodes_edges(data)
-        # print(len(self.nodes))
-        # print(len(self.edges))
-        # import pandas as pd
 
-        # nodes = pd.DataFrame(self.nodes)
-        # edges = pd.DataFrame(self.edges)
+        # nodes = pd.DataFrame(n_e["nodes"])
+        # edges = pd.DataFrame(n_e["edges"])
         # print(nodes)
         # print(edges)
-        # print(self.nodes)
-        # print(self.edges)
+        # print(len(nodes))
+        # print(len(edges))
 
         return Response(n_e, status=status.HTTP_200_OK)

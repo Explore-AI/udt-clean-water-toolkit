@@ -8,13 +8,20 @@ export default memo(({ id }) => {
         <>
             <div className={styles.node}>
             </div>
-            <Handle type="source" position={Position.Left} id="a" style={{ visibility: 'hidden', height: '0px', width: '0px'}}/>
+            <Handle type="source"
+                position={Position.Top}
+                style={{ visibility: 'hidden', top: '14px', bottom: '0px', left: '1px', right: '0px', width: '1px', height: '1px', border: '0px', maxHeight:'1px', minHeight:'1px', maxWidth:'1px', minWidth:'1px'}}
+            />
             <Handle
                 type="target"
-                position={Position.Right}
-                id="b"
-                style={{ visibility: 'hidden', height: '0px', width: '0px'}}
+                position={Position.Top}
+                style={{ visibility: 'hidden', top: '15px', bottom: '0px', left: '0px', right: '0px', width: '1px', height: '1px', border: '0px', maxHeight:'1px', minHeight:'1px', maxWidth:'1px', minWidth:'1px'}}
             />
         </>
     );
 });
+//style={{ visibility: 'hidden', top: '7px', bottom: '0px', left: '10px', right: '0px'}}
+
+//style={{ visibility: 'hidden', width: '1px', height: '1px'}}
+
+//style={{ visibility: 'hidden', top: '10px', bottom: '0px', left: '5px', right: '0px', width: '1px', height: '1px'}}
