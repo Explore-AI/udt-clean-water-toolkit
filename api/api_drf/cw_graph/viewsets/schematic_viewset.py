@@ -17,7 +17,6 @@ class SchematicViewset(viewsets.ViewSet):
             match (n)-[r]->(m) where n.dmas
             contains '{dma_code}' return
             ID(n), n, ID(r), r, ID(m), m
-            limit 10
             """
 
             results, _ = db.cypher_query(query)
@@ -39,8 +38,8 @@ class SchematicViewset(viewsets.ViewSet):
             "position": {
                 # "x": point_4326.x,
                 # "y": point_4326.y,
-                "x": position[0],
-                "y": position[1],
+                "x": position[0] * 10,
+                "y": position[1] * 10,
             },
             "data": {"label": node_id},
         }
@@ -53,7 +52,7 @@ class SchematicViewset(viewsets.ViewSet):
             "source": str(from_node_id),
             "target": str(to_node_id),
             "type": "straight",
-            "style": {"strokeWidth": 1},
+            "style": {"strokeWidth": "1px"},
         }
 
     def create_nodes(self, item, node_ids):
@@ -71,6 +70,32 @@ class SchematicViewset(viewsets.ViewSet):
         line_coords_str = segment_wkt.split("(")[1][:-1]
         line_coords = [coord.strip() for coord in line_coords_str.split(",")]
 
+        ### We need to check if the line terminal points are the same as the
+        ### node points to get them in the correct order
+        ### We don't want to compare the coordinates directly becuase of roundlng errors
+        ### We therefore check if the points are the same.
+
+        point1 = Point(
+            start_node_data["coords_27700"][0],
+            start_node_data["coords_27700"][1],
+            srid=27700,
+        )
+
+        position = [
+            float(line_coords[0].split(" ")[0]),
+            float(line_coords[0].split(" ")[1]),
+        ]
+
+        point2 = Point(
+            position[0],
+            position[1],
+            srid=27700,
+        )
+
+        print(point1.coords)
+        print(point2.coords)
+        print(point1 == point2)
+
         start_node = self.create_node(
             start_node_id, start_node_data["coords_27700"], node_type="circle"
         )
@@ -78,10 +103,13 @@ class SchematicViewset(viewsets.ViewSet):
             end_node_id, end_node_data["coords_27700"], node_type="circle"
         )
 
+        if point1 != point2:
+            end_node, start_node = start_node, end_node
+
         new_nodes = []
 
-        if start_node_id not in node_ids:
-            node_ids.append(start_node_id)
+        if start_node["id"] not in node_ids:
+            node_ids.append(start_node["id"])
             new_nodes.append(start_node)
 
         all_nodes = [start_node]
@@ -102,8 +130,8 @@ class SchematicViewset(viewsets.ViewSet):
 
         all_nodes.append(end_node)
 
-        if end_node_id not in node_ids:
-            node_ids.append(end_node_id)
+        if end_node["id"] not in node_ids:
+            node_ids.append(end_node["id"])
             new_nodes.append(end_node)
 
         return new_nodes, all_nodes, node_ids

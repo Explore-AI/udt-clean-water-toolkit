@@ -25,8 +25,6 @@ export default function CustomEdge({
         targetY,
     });
 
-    console.log(sourceX, sourceY)
-
     return (
         <BaseEdge path={edgePath} style={style} />
     );
