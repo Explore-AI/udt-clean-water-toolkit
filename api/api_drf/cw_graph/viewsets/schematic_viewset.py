@@ -16,7 +16,7 @@ class SchematicViewset(viewsets.ViewSet):
             match (n)-[r]->(m) where n.dmas
             contains '{dma_code}' return
             ID(n), n, ID(r), r, ID(m), m
-            limit 1
+            limit 1000
             """
 
             results, _ = db.cypher_query(query)
@@ -52,7 +52,7 @@ class SchematicViewset(viewsets.ViewSet):
             "source": str(from_node_id),
             "target": str(to_node_id),
             "type": "straight",
-            "style": {"strokeWidth": "1px"},
+            "style": {"strokeWidth": "2px", "color": "black"},
         }
 
     def find_start_end_node_on_edge(

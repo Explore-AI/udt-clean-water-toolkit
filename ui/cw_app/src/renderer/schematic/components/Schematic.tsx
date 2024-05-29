@@ -21,7 +21,9 @@ const Schematic = (props) => {
             nodeTypes={nodeTypes}
             minZoom={0}
             maxZoom={50}
-            fitView={true}        >
+            fitView={true}
+            nodesDraggable={false}
+        >
             <Controls />
         </ReactFlow>
     );
