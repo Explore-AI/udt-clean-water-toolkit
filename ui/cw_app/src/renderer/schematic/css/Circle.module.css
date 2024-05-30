@@ -1,9 +1,10 @@
 .node {
-    height: 6px;
-    width: 6px;
-    background-color: blue;
+    height: 10px;
+    width: 10px;
+    background-color: #35c3da;
     border-radius: 100%;
     display: inline-block;
+    border: 1px solid #203536;
 }
 
 .label {
