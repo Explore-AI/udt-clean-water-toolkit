@@ -2,7 +2,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import MapPage from '../../map/components/MapPage'
 import Graph from '../../graph/components/GraphPage'
 import AnalysisPage from '../../analysis/components/AnalysisPage'
-import SchematicPage from '../../schematic/components/SchematicPage'
+import SchematicPage from '../../geospatial_graph/components/SchematicPage'
 
 function BaseRouter() {
     return (
@@ -11,7 +11,7 @@ function BaseRouter() {
             <Route path="/map/:latlong?" element={<MapPage />} />
             <Route path="/graph" element={<Graph/>} />
             <Route path="/analysis" element={<AnalysisPage/>} />
-            <Route path="/schematic" element={<SchematicPage/>} />
+            <Route path="/geo-graph" element={<SchematicPage/>} />
         </Routes>
     );
 }
