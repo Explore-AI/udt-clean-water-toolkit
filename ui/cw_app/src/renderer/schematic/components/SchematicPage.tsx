@@ -4,6 +4,7 @@ import Schematic from './Schematic'
 import {
     useQuery,
 } from '@tanstack/react-query'
+import { DRF_API_URL } from '../../config';
 
 /* const neo4jNodes = async() => {
  *     const res = await axios.get('http://localhost:8000/cw_graph/neo4j?dma_code=ZCHIPO01')
@@ -15,7 +16,7 @@ export default function SchematicPage() {
     const { isPending, error, data } = useQuery({
         queryKey: ['repoData'],
         queryFn: () =>
-            fetch('http://localhost:8000/cw_graph/schematic/?dma_code=ZCHIPO01').then((res) =>
+            fetch(`${DRF_API_URL}cw_graph/schematic/?dma_code=ZCHIPO01`).then((res) =>
                 res.json(),
             ),
     })
