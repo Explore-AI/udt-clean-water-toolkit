@@ -2,8 +2,8 @@
 
 version: "3"
 volumes:
-   neo4j-data:
-   neo4j-backups:
+    neo4j-data:
+    neo4j-backups:
 
 services:
     udtneo4j:
