@@ -2,15 +2,17 @@
 import styles from '../css/MapPage.module.css';
 import withMap from '../hocs/withMap';
 import MapView from './MapView';
-import BaseLayout from '../../core/components/BaseLayout';
 
-function MapPage() {
+
+const MapPage = (props) => {
+
+    const { pageVisibility } = props
+
     return (
-        <BaseLayout>
-            <div className={styles.pageContainer}>
-                <MapView />
-            </div>
-        </BaseLayout>
+        <div className={styles.pageContainer}
+            style={{ display: pageVisibility }}>
+            <MapView />
+        </div>
     );
 }
 

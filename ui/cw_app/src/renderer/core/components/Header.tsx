@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useLocation } from 'react-router-dom'
 import { map as _map } from 'lodash'
 import { Burger } from '@mantine/core';
@@ -10,7 +9,7 @@ import styles from '../css/Header.module.css';
 const links = [
     { path: '/map', label: 'Map' },
     { path: '/graph', label: 'Graph' },
-    { path: '/geo-graph', label: 'Geospatial Graph' },
+    { path: '/geo-graph', label: 'Spatial Graph' },
     { path: '/schematic', label: 'Schematic' },
     { path: '/analysis', label: 'Analysis' },
 ];
