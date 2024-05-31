@@ -16,10 +16,12 @@ WORKDIR /opt/udt/api/api_drf/
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libpq-dev && \
+    apt-get install -y --no-install-recommends gcc libpq-dev libgdal-dev gdal-bin && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --upgrade pip
 
-EXPOSE 8080
+ENTRYPOINT ["tail"]
+
+CMD ["-f","/dev/null"]
