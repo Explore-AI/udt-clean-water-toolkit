@@ -1,8 +1,7 @@
-import json
-import logging
 from multiprocessing.pool import ThreadPool
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
+import json
 from neomodel import db
 from neomodel.exceptions import UniqueProperty
 from cleanwater.transform import GisToGraph
@@ -13,16 +12,15 @@ from cwageodjango.core.constants import (
 )
 from cwageodjango.config.settings import sqids
 
-logging.basicConfig(level=logging.DEBUG)
 
 MIXED_NODE_TYPES_SORTED = [
     sorted([PIPE_JUNCTION__NAME, POINT_ASSET__NAME]),
     sorted([PIPE_END__NAME, POINT_ASSET__NAME]),
 ]
 
+
 class GisToNeo4jCalculator(GisToGraph):
-    """Create a Neo4J graph of assets from a geospatial
-    network of assets"""
+    """Create a Neo4J graph of assets from a geospatial network of assets"""
 
     def __init__(self, config):
         self.config = config
@@ -41,15 +39,15 @@ class GisToNeo4jCalculator(GisToGraph):
     def _connect_nodes(self, edge_by_pipe, start_node, end_node):
         asset_label = edge_by_pipe["asset_label"]
 
-        match_query = f"""MATCH (n:PointNode {{node_key:'{start_node['node_key']}'}})-
+        match_query = f"""match (n:PointNode {{node_key:'{start_node['node_key']}'}})-
         [r:{asset_label}]-
-        (m:PointNode {{node_key:'{end_node['node_key']}'}}) RETURN count(r)
+        (m:PointNode {{node_key:'{end_node['node_key']}'}}) return count(r)
         """
 
         if db.cypher_query(match_query)[0][0][0] == 0:
-            query = f"""MATCH (n:PointNode {{node_key:'{start_node['node_key']}'}}),
+            query = f"""match (n:PointNode {{node_key:'{start_node['node_key']}'}}),
             (m:PointNode {{node_key:'{end_node['node_key']}'}})
-            CREATE (n)-[:{asset_label} {{
+            create (n)-[:{asset_label} {{
             gid: {edge_by_pipe["gid"]},
             material: '{edge_by_pipe["material"]}',
             segment_wkt: '{edge_by_pipe["segment_wkt"]}',
@@ -61,8 +59,8 @@ class GisToNeo4jCalculator(GisToGraph):
     @staticmethod
     def _get_node_by_key(node_key):
         point_node = db.cypher_query(
-            f"""MATCH (n:PointNode {{node_key:'{node_key}'}})
-        RETURN n"""
+            f"""match (n:PointNode {{node_key:'{node_key}'}})
+        return n"""
         )[0]
 
         if point_node:
@@ -73,7 +71,6 @@ class GisToNeo4jCalculator(GisToGraph):
     @staticmethod
     def create_node_asset_query(node_properties):
         props = f"""
-        utility:'{node_properties['utility']}',
         coords_27700: {node_properties['coords_27700']},
         node_key:'{node_properties['node_key']}',
         node_types: {node_properties['node_types']},
@@ -100,7 +97,7 @@ class GisToNeo4jCalculator(GisToGraph):
         if subtype:
             query += f", subtype: '{subtype}'"
 
-        query += f"}}) RETURN n"
+        query += f"}}) return n"
 
         return query
 
@@ -111,7 +108,7 @@ class GisToNeo4jCalculator(GisToGraph):
         {{utility:'{node_properties['utility']}',
         coords_27700: {node_properties['coords_27700']},
         node_key:'{node_properties['node_key']}'
-        }}) RETURN n
+        }}) return n
         """
         return query
 
@@ -127,10 +124,19 @@ class GisToNeo4jCalculator(GisToGraph):
         result = db.cypher_query(query)
         return result[0][0][0]
 
+    def _get_or_create_utility_node(self, utility_name):
+        """Create or get a Utility node."""
+        query = f"""MERGE (u:Utility {{name: '{utility_name}'}})
+                    RETURN u"""
+
+        result = db.cypher_query(query)
+        return result[0][0][0]
+
     def _get_or_create_pipe_and_asset_node(self, node_properties):
         try:
             query = self.create_node_asset_query(node_properties)
             return db.cypher_query(query)[0][0][0]
+
         except UniqueProperty:
             return self._get_node_by_key(node_properties["node_key"])
 
@@ -138,6 +144,7 @@ class GisToNeo4jCalculator(GisToGraph):
         try:
             query = self.create_node_asset_query(node_properties)
             return db.cypher_query(query)[0][0][0]
+
         except UniqueProperty:
             return self._get_node_by_key(node_properties["node_key"])
 
@@ -145,6 +152,7 @@ class GisToNeo4jCalculator(GisToGraph):
         try:
             query = self.create_pipe_node_query(node_properties)
             return db.cypher_query(query)[0][0][0]
+
         except UniqueProperty:
             return self._get_node_by_key(node_properties["node_key"])
 
@@ -152,7 +160,6 @@ class GisToNeo4jCalculator(GisToGraph):
         all_nodes = []
         for node_properties in all_node_properties:
             node_key = node_properties.get("node_key")
-            logging.debug(f"Processing node with key: {node_key}")
             point_node = self._get_node_by_key(node_key)
 
             if point_node:
@@ -163,30 +170,36 @@ class GisToNeo4jCalculator(GisToGraph):
 
             if node_types == [PIPE_JUNCTION__NAME] or node_types == [PIPE_END__NAME]:
                 node = self._create_pipe_junction_or_end_node(node_properties)
-                all_nodes.append(node)
-                self._dma_relationships(node_properties, node)
             elif node_types == [POINT_ASSET__NAME]:
                 node = self._get_or_create_point_asset_node(node_properties)
-                all_nodes.append(node)
-                self._dma_relationships(node_properties, node)
             elif node_types in MIXED_NODE_TYPES_SORTED:
                 node = self._get_or_create_pipe_and_asset_node(node_properties)
-                all_nodes.append(node)
-                self._dma_relationships(node_properties, node)
 
-        return all_nodes
+            all_nodes.append(node)
 
-    def _dma_relationships(self, node_properties, node):
-        dmas = node_properties.get('dmas')
-        node_key = node_properties.get("node_key")
-        if dmas:
-            try:
+            # Handle DMA relationship
+            dmas = node_properties.get('dmas')
+            if dmas:
                 dmas_dict = json.loads(dmas)[0]
                 dma_properties = {'code': dmas_dict['code'], 'name': dmas_dict['name']}
                 dma_node = self._get_or_create_dma_node(dma_properties)
                 self._create_dma_relationship(node, dma_node)
-            except (json.JSONDecodeError, KeyError) as e:
-                logging.error(f"Failed to parse dmas property for node {node_key}: {e}")
+
+            # Handle Utility relationship
+            utility_name = node_properties.get('utility')
+            if utility_name:
+                utility_node = self._get_or_create_utility_node(utility_name)
+                self._create_utility_relationship(node, utility_node)
+
+                # Remove utility property from the node
+                self._remove_utility_property(node)
+
+        return all_nodes
+
+    def _remove_utility_property(self, node):
+        query = f"""MATCH (n {{node_key: '{node["node_key"]}'}})
+                    REMOVE n.utility"""
+        db.cypher_query(query)
 
     def _create_relations(self, edges_by_pipe, all_nodes):
         current_node = all_nodes[0]
@@ -204,6 +217,11 @@ class GisToNeo4jCalculator(GisToGraph):
                     CREATE (n)-[:HAS_DMA]->(d)"""
         db.cypher_query(query)
 
+    def _create_utility_relationship(self, node, utility_node):
+        query = f"""MATCH (n {{node_key: '{node["node_key"]}'}}), (u:Utility {{name: '{utility_node["name"]}'}})
+                    CREATE (n)-[:HAS_UTILITY]->(u)"""
+        db.cypher_query(query)
+
     def _map_pipe_connected_asset_relations(self, edges_by_pipe: dict, all_node_properties: list):
         all_nodes = self._create_nodes(all_node_properties)
         self._create_relations(edges_by_pipe, all_nodes)
@@ -213,21 +231,10 @@ class GisToNeo4jCalculator(GisToGraph):
         self.all_nodes_by_pipe = []
 
     def create_neo4j_graph(self) -> None:
-        list(
-            map(
-                self._map_pipe_connected_asset_relations,
-                self.all_edges_by_pipe,
-                self.all_nodes_by_pipe,
-            )
-        )
-
+        list(map(self._map_pipe_connected_asset_relations, self.all_edges_by_pipe, self.all_nodes_by_pipe))
         self._reset_pipe_asset_data()
 
     def _create_neo4j_graph_parallel(self) -> None:
         with ThreadPool(self.config.thread_count) as p:
-            p.starmap(
-                self._map_pipe_connected_asset_relations,
-                zip(self.all_edges_by_pipe, self.all_nodes_by_pipe),
-            )
-
+            p.starmap(self._map_pipe_connected_asset_relations, zip(self.all_edges_by_pipe, self.all_nodes_by_pipe))
         self._reset_pipe_asset_data()
