@@ -1,1 +1,2 @@
 from .schematic_viewset import SchematicViewset
+from .trunkmain_schematic_viewset import SchematicTrunkMainViewset
