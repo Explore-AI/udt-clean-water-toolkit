@@ -1,8 +1,10 @@
+import 'reactflow/dist/style.css';
 import ReactFlow, { Controls } from 'reactflow';
 import CircleNode from './CircleNode';
 import EdgeNode from './EdgeNode';
+import useGetData from '../../core/hooks/useGetData'
 
-import 'reactflow/dist/style.css';
+const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
 
 const nodeTypes = {
     circle: CircleNode,
@@ -25,18 +27,15 @@ type Edge = {
     style: { strokeWidth: string; color: string };
 };
 
-type Props = {
-    nodes: Node[];
-    edges: Edge[];
-};
 
-const Schematic = (props: Props) => {
-    const { nodes, edges } = props;
+const SpatialGraph = () => {
+
+    const { data } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
 
     return (
         <ReactFlow
-            defaultNodes={nodes}
-            defaultEdges={edges}
+            defaultNodes={data.nodes}
+            defaultEdges={data.edges}
             nodeTypes={nodeTypes}
             minZoom={0}
             maxZoom={50}
@@ -48,4 +47,4 @@ const Schematic = (props: Props) => {
     );
 };
 
-export default Schematic;
+export default SpatialGraph;

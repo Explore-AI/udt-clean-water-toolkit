@@ -1,18 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as http from '../utils'
 
 const useFetchJson = (queryKey, options={}) => {
-    console.log(queryKey)
+
     const url = http.getBaseUrl(queryKey, options.params)
-    console.log(url, "oooooo")
-    const { isPending, error, data } = useQuery({
+
+    const queryClient = useQueryClient()
+
+    useEffect(() => {
+        queryClient.setQueryDefaults([queryKey],  { staleTime: 1000 * 180 })
+    }, [])
+
+    const queryValues = useQuery({
         queryKey: [queryKey],
-        queryFn: async ({ signal }) =>  {
+        queryFn: async ({ signal }) => {
             const res = await fetch(url, { signal }) //TODO: replace with axios
             return await res.json();
-    }})
+        }
+    })
 
-    return { isPending, error, data }
+return queryValues
 }
 
 export default useFetchJson

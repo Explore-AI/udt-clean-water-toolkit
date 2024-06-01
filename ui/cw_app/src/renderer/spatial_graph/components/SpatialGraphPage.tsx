@@ -1,5 +1,5 @@
 import styles from '../css/SchematicPage.module.css';
-import Schematic from './Schematic';
+import SpatialGraph from  './SpatialGraph';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useFetchJson from '../../core/hooks/useFetchJson';
 import { isEmpty } from 'lodash';
@@ -17,7 +17,7 @@ const SpatialGraphPage = (props) => {
 
     return (
         <div className={styles.pageContainer} style={{ display: pageVisibility }}>
-            <Schematic nodes={data.nodes} edges={data.edges}/>
+            <SpatialGraph />
         </div>
     );
 }
