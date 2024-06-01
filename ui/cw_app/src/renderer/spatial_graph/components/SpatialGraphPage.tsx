@@ -1,55 +1,29 @@
 import styles from '../css/SchematicPage.module.css';
 import Schematic from './Schematic';
-import { useQuery } from '@tanstack/react-query';
-import { DRF_API_URL } from '../../config';
-import { Loader } from '@mantine/core';
+import LoadingSpinner from '../../core/components/LoadingSpinner';
+import useFetchJson from '../../core/hooks/useFetchJson';
+import { isEmpty } from 'lodash';
 
-/* *
- *     const neo4jNodes = async() => {
- *     const res = await axios.get('http://localhost:8000/cw_graph/neo4j?dma_code=ZCHIPO01')
- *     return [res.data.nodes, res.data.edges]
- * }
- * */
+const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
 
 const SpatialGraphPage = (props) => {
     const { pageVisibility } = props
 
-    return null // temporarily included
+    const { isPending, data } = useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_code': 'ZCHIPO01' }})
 
-    const { isPending, error, data } = useQuery({
-        queryKey: ['repoData'],
-        queryFn: () =>
-            fetch(`${DRF_API_URL}/cw_graph/schematic/?dma_code=ZCHIPO01`).then(
-                (res) => res.json(),
-            ),
-    });
-
-
-    let content;
-    if (isPending)
-        content = (
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyItems: 'center',
-                    padding: '5px',
-                    marginTop: '5px',
-                }}
-            >
-                <Loader color="#35c3da" />
-                <p>Loading...</p>
-            </div>
-        );
-
-    if (error) content = <div>{'An error has occurred: ' + error.message}</div>;
-
-    if (data) content = <Schematic nodes={data.nodes} edges={data.edges} />;
+    if (isEmpty(data) && isPending)  {
+        return <LoadingSpinner/>
+    }
 
     return (
-        <div className={styles.pageContainer} style={{ display: pageVisibility }}>{content}</div>
+        <div className={styles.pageContainer} style={{ display: pageVisibility }}>
+            <Schematic nodes={data.nodes} edges={data.edges}/>
+        </div>
     );
 }
 
 export default SpatialGraphPage
+
+
+
+//if (error) content = <div>{'An error has occurred: ' + error.message}</div>;

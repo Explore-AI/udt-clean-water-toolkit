@@ -1,0 +1,8 @@
+.spinner {
+    display: flex;
+    flexDirection: column;
+    alignItems: center;
+    justifyItems: center;
+    padding: 5px;
+    marginTop: 5px;
+}
