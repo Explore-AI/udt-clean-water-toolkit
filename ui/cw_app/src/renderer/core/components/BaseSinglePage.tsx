@@ -11,7 +11,7 @@ const  BaseSinglePage = () => {
     const pageVisibility = {
         map: pathname === '/map'? 'inherit': 'none',
         graph: pathname === '/graph'? 'inherit': 'none',
-        ['geo-graph']: pathname === '/geo-graph'? 'inherit': 'none',
+        ['geo-graph']: pathname === '/geo-graph'? 'visible': 'hidden',
         schematic: pathname === '/schematic'? 'inherit': 'none',
         analysis: pathname === '/analysis'? 'inherit': 'none',
     }

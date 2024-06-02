@@ -1,22 +1,18 @@
-import styles from '../css/SchematicPage.module.css';
+import styles from '../css/spatial-graph-page.module.css';
 import SpatialGraph from  './SpatialGraph';
-import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useFetchJson from '../../core/hooks/useFetchJson';
-import { isEmpty } from 'lodash';
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
 
 const SpatialGraphPage = (props) => {
     const { pageVisibility } = props
 
-    const { isPending, data } = useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_code': 'ZCHIPO01' }})
+    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_code': 'ZCHIPO01' }})
 
-    if (isEmpty(data) && isPending)  {
-        return <LoadingSpinner/>
-    }
+    const mainCss = `${styles.pageContainer} ${pageVisibility}`
 
     return (
-        <div className={styles.pageContainer} style={{ display: pageVisibility }}>
+        <div className={mainCss}>
             <SpatialGraph />
         </div>
     );

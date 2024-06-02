@@ -2,7 +2,9 @@ import 'reactflow/dist/style.css';
 import ReactFlow, { Controls } from 'reactflow';
 import CircleNode from './CircleNode';
 import EdgeNode from './EdgeNode';
+import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
+import { isEmpty as _isEmpty } from 'lodash';
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
 
@@ -30,7 +32,11 @@ type Edge = {
 
 const SpatialGraph = () => {
 
-    const { data } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+
+    if (_isEmpty(data) && isPending)  {
+        return <LoadingSpinner/>
+    }
 
     return (
         <ReactFlow
