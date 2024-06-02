@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 const useGetData = (queryKey) => {
 
     const queryValues = useQuery({
-        queryKey: [queryKey]
+        queryKey: [queryKey],
+        enabled: false
     })
 
     return queryValues
