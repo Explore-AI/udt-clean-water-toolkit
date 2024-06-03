@@ -2,6 +2,8 @@ from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
 from cleanwater.data_managers import NetworkDataManager
 from cwageodjango.config.settings import sqids
+import wntr
+from wntr import network
 
 class Convert2Wntr(Neo4j2Wntr):
     """
@@ -51,4 +53,22 @@ class Convert2Wntr(Neo4j2Wntr):
         """
         for sub_graph in self.query_graph(self.config.batch_size):
             self.create_graph(sub_graph)
+
+    def wntr_to_inp(self):
+        """
+        Exports the WNTR model to an INP (EPANET input file) format.
+
+        """
+        wntr.network.write_inpfile(self.wn, filename=self.config.outputfile)
+
+    def wntr_to_json(self, filename):
+        """
+        Exports the WNTR model to a JSON format.
+
+        Parameters:
+            filename (str): Name of the JSON file to export.
+
+        """
+        wntr.network.write_json(self.wn, filename=self.config.outputfile)
+    
 
