@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "cw_core",
     "cw_gis_assets",
     "cw_graph",
+    "cw_utilities",
 ]
 
 MIDDLEWARE = [

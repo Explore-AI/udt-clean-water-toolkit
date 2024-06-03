@@ -1,12 +1,16 @@
 import 'reactflow/dist/style.css';
+import styles from '../css/spatial-graph.module.css'
 import ReactFlow, { Controls } from 'reactflow';
 import CircleNode from './CircleNode';
 import EdgeNode from './EdgeNode';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
+import useGetItems from '../../core/hooks/useGetItems'
+import MultiSelectField from '../../core/components/MultiSelectField'
 import { isEmpty as _isEmpty } from 'lodash';
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
+const DMA__QUERY_KEY = 'cw_utilities/dma'
 
 const nodeTypes = {
     circle: CircleNode,
@@ -33,23 +37,31 @@ type Edge = {
 const SpatialGraph = () => {
 
     const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { items } = useGetItems(DMA__QUERY_KEY)
 
     if (_isEmpty(data) && isPending)  {
         return <LoadingSpinner/>
     }
 
     return (
-        <ReactFlow
-            defaultNodes={data.nodes}
-            defaultEdges={data.edges}
-            nodeTypes={nodeTypes}
-            minZoom={0}
-            maxZoom={50}
-            fitView={true}
-            nodesDraggable={false}
-        >
-            <Controls />
-        </ReactFlow>
+        <>
+            <div className={styles['search_box']}>
+                <MultiSelectField
+                    labelName="code"
+                    data={items} />
+            </div>
+            <ReactFlow
+                defaultNodes={[]}
+                defaultEdges={[]}
+                nodeTypes={nodeTypes}
+                minZoom={0}
+                maxZoom={50}
+                fitView={true}
+                nodesDraggable={false}
+            >
+                <Controls />
+            </ReactFlow>
+        </>
     );
 };
 
