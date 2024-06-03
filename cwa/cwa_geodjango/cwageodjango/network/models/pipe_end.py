@@ -1,4 +1,4 @@
-from . import NetworkNode
+from .network_node import NetworkNode
 from cwageodjango.core.constants import PIPE_END__NAME
 
 
