@@ -148,7 +148,7 @@ class GisToGraph:
                     ),
                     "dmas": nodes[0]["dmas"],
                     "node_types": [],
-                    "node_labels": ["PointNode"],
+                    "node_labels": ["NetworkNode"],
                 }
             )
 

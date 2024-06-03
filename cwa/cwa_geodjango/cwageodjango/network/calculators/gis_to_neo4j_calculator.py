@@ -39,14 +39,14 @@ class GisToNeo4jCalculator(GisToGraph):
     def _connect_nodes(self, edge_by_pipe, start_node, end_node):
         asset_label = edge_by_pipe["asset_label"]
 
-        match_query = f"""match (n:PointNode {{node_key:'{start_node['node_key']}'}})-
+        match_query = f"""match (n:NetworkNode {{node_key:'{start_node['node_key']}'}})-
         [r:{asset_label}]-
-        (m:PointNode {{node_key:'{end_node['node_key']}'}}) return count(r)
+        (m:NetworkNode {{node_key:'{end_node['node_key']}'}}) return count(r)
         """
 
         if db.cypher_query(match_query)[0][0][0] == 0:
-            query = f"""match (n:PointNode {{node_key:'{start_node['node_key']}'}}),
-            (m:PointNode {{node_key:'{end_node['node_key']}'}})
+            query = f"""match (n:NetworkNode {{node_key:'{start_node['node_key']}'}}),
+            (m:NetworkNode {{node_key:'{end_node['node_key']}'}})
             create (n)-[:{asset_label} {{
             gid: {edge_by_pipe["gid"]},
             material: '{edge_by_pipe["material"]}',
@@ -58,13 +58,13 @@ class GisToNeo4jCalculator(GisToGraph):
 
     @staticmethod
     def _get_node_by_key(node_key):
-        point_node = db.cypher_query(
-            f"""match (n:PointNode {{node_key:'{node_key}'}})
+        network_node = db.cypher_query(
+            f"""match (n:NetworkNode {{node_key:'{node_key}'}})
         return n"""
         )[0]
 
-        if point_node:
-            return point_node[0][0]
+        if network_node:
+            return network_node[0][0]
 
         return None
 
@@ -160,10 +160,10 @@ class GisToNeo4jCalculator(GisToGraph):
         all_nodes = []
         for node_properties in all_node_properties:
             node_key = node_properties.get("node_key")
-            point_node = self._get_node_by_key(node_key)
+            network_node = self._get_node_by_key(node_key)
 
-            if point_node:
-                all_nodes.append(point_node)
+            if network_node:
+                all_nodes.append(network_node)
                 continue
 
             node_types = sorted(node_properties.get("node_types"))

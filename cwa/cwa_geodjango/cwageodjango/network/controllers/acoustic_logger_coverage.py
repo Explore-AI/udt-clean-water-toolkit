@@ -45,7 +45,7 @@ class AcousticLoggerCoverage():
 
     def get_connected(self, node_key, max_level):
         cypher_query = f"""
-        MATCH (logger:PointNode{{node_key:'{node_key}'}})
+        MATCH (logger:NetworkNode{{node_key:'{node_key}'}})
         CALL apoc.path.subgraphAll(logger, {{
         relationshipFilter : "TrunkMain|DistributionMain",
         minLevel: 0,

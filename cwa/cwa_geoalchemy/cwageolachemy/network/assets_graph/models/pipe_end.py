@@ -1,9 +1,9 @@
 from neomodel import IntegerProperty
-from .point_node import PointNode
+from .network_node import NetworkNode
 
 PIPE_END__NAME = "pipe_end"
 
-class PipeEnd(PointNode):
+class PipeEnd(NetworkNode):
     gid = IntegerProperty(index=True, required=True)
 
     class AssetMeta:

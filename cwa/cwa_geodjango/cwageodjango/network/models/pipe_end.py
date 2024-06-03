@@ -1,7 +1,7 @@
-from .point_node import PointNode
+from . import NetworkNode
 from cwageodjango.core.constants import PIPE_END__NAME
 
 
-class PipeEnd(PointNode):
+class PipeEnd(NetworkNode):
     class AssetMeta:
         node_type = PIPE_END__NAME
