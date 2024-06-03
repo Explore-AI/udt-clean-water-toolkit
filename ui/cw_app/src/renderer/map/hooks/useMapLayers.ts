@@ -16,13 +16,11 @@ const createLayers = (newMapLayerProps = []) => {
     return _map(mapLayerProps, (layerProps) => {
         return new MVTLayer({
             pickable: true,
-            getPointRadius: 10,
-            minZoom: 0,
-            maxZoom: 5,
+            // scheme: 'tms',
             id: layerProps.key,
             visible: layerProps.visible,
             getFillColor: layerProps.colorCode,
-            data: [MVT_LAYER_URL_TWO(layerProps.key)],
+            data: [MVT_LAYER_URL(layerProps.key)],
         });
     });
 };
