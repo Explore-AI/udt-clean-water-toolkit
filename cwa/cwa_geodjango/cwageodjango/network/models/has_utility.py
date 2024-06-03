@@ -2,4 +2,4 @@ from neomodel import StructuredRel, StringProperty
 
 
 class HasUtility(StructuredRel):
-    name = StringProperty(index=True, required=True)
+    name = StringProperty(unique=True, index=True, required=True)
