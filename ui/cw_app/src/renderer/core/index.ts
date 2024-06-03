@@ -75,9 +75,15 @@ export const MAP_LAYERS_PROPS = [
         colorCode: [74, 35, 90],
     },
     {
-        visible: false,
+        visible: true,
         label: 'Trunk Main',
         key: 'assets_trunkmain',
+        colorCode: [33, 97, 140],
+    },
+    {
+        visible: true,
+        label: 'DMA',
+        key: 'utilities_dma',
         colorCode: [33, 97, 140],
     },
 ];
