@@ -8,6 +8,7 @@ from neomodel import (
 from neomodel.contrib.spatial_properties import PointProperty
 from .pipe_main import PipeMain
 from .has_dma import HasDma
+from .has_utility import HasUtility
 from cwageodjango.core.constants import UTILITIES
 
 
@@ -35,3 +36,4 @@ class NetworkNode(StructuredNode):
     location = PointProperty(crs="wgs-84", require=True)
     pipe_main = Relationship("PipeMain", "pipe_main", model=PipeMain)
     has_dma = Relationship("HAS_DMA", "has_dma", model=HasDma)
+    has_utility = Relationship("HAS_UTILITY", "has_utility", model=HasUtility)

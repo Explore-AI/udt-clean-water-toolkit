@@ -184,14 +184,13 @@ class GisToNeo4jCalculator(GisToGraph):
 
             # Handle Utility relationship
             utility_name = node_properties.get("utility")
-            if utility_name:
-                utility_node = self._get_or_create_utility_node(utility_name)
-                self._create_utility_relationship(node, utility_node)
-
-                # Remove utility property from the node
-                self._remove_utility_property(node)
+            self._get_or_create_utility_node_rel(node, utility_name)
 
         return all_nodes
+
+    def _get_or_create_utility_node_rel(self, node, utility_name):
+        utility_node = self._get_or_create_utility_node(utility_name)
+        self._create_utility_relationship(node, utility_node)
 
     def _get_or_create_dma_node_rel(self, node, dma_codes, dma_names):
 
@@ -199,11 +198,6 @@ class GisToNeo4jCalculator(GisToGraph):
             dma_properties = {"code": dma_code, "name": dma_name}
             dma_node = self._get_or_create_dma_node(dma_properties)
             self._create_dma_relationship(node, dma_node)
-
-    def _remove_utility_property(self, node):
-        query = f"""MATCH (n {{node_key: '{node["node_key"]}'}})
-                    REMOVE n.utility"""
-        db.cypher_query(query)
 
     def _create_relations(self, edges_by_pipe, all_nodes):
         current_node = all_nodes[0]

@@ -3,6 +3,7 @@ from .pipe_end import PipeEnd
 from .point_asset import PointAsset
 from .pipe_main import PipeMain
 from .has_dma import HasDma
+from .has_utility import HasUtility
 from .network_node import NetworkNode
 from .pipe_junction import PipeJunction
 
@@ -19,3 +20,4 @@ def initialise_node_labels():
         install_labels(NetworkNode, quiet=False)
         install_labels(PipeMain, quiet=False)
         install_labels(HasDma, quiet=False)
+        install_labels(HasUtility, quiet=False)
