@@ -2,16 +2,7 @@
 import styles from '../css/MapSearchBox.module.css';
 import TextInputSearchField from '../../core/components/TextInputSearchField';
 import { useNavigate } from 'react-router-dom';
-import { validateInput, getNominatimData } from '../../core/utils/utils';
-/* import { IconSearch, IconAlertTriangle } from '@tabler/icons-react';
- * import { validateInput, getNominatimData } from '../../core/utils/utils';
- * import {
- *     useInitialView,
- *     useLayerToggle,
- *     useBasemapToggle,
- *     useGoToLocation,
- * } from '../hooks/useMapContext';
- * import { isValidCoordinate } from '../../core/utils/utils'; */
+import { validateInput, getNominatimData } from '../../core/utils/lib';
 
 export default function MapSearchBox() {
     const navigate = useNavigate();

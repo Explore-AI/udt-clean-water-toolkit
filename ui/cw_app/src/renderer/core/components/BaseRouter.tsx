@@ -1,23 +1,20 @@
 import { Route, Routes, Navigate } from 'react-router-dom';
-import MapPage from '../../map/components/MapPage'
-import Graph from '../../graph/components/GraphPage'
-import AnalysisPage from '../../analysis/components/AnalysisPage'
-import SchematicPage from '../../schematic/components/SchematicPage'
+import BaseLayout from '../../core/components/BaseLayout';
+import BaseSinglePage from './BaseSinglePage'
 
-function BaseRouter() {
+const BaseRouter = () => {
+
     return (
-        <Routes>
-            <Route path="/" element={<Navigate to="/map" replace={true} />} />
-            <Route path="/map/:latlong?" element={<MapPage />} />
-            <Route path="/graph" element={<Graph/>} />
-            <Route path="/analysis" element={<AnalysisPage/>} />
-            <Route path="/schematic" element={<SchematicPage/>} />
-        </Routes>
+        <BaseLayout>
+            <Routes>
+                <Route path="/" element={<Navigate to="/map" replace={true} />} />
+                <Route path="/map/:latlong?" element={<BaseSinglePage />} />
+                <Route path="/graph" element={<BaseSinglePage/>} />
+                <Route path="/analysis" element={<BaseSinglePage/>} />
+                <Route path="/geo-graph" element={<BaseSinglePage/>} />
+            </Routes>
+        </BaseLayout>
     );
 }
 
 export default BaseRouter;
-
-/* <Route path="map">
- * <Route path=":latlong" element={<MapPage />} />
- * </Route> */

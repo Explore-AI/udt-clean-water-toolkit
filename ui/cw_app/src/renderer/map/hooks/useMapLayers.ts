@@ -2,22 +2,21 @@ import { createContext, useState, useEffect } from 'react';
 import {
     MAP_LAYERS_PROPS,
     MVT_LAYER_URL,
+    MVT_LAYER_URL_TWO,
     DEFAULT_BASEMAP_PROPS,
 } from '../../core';
 import { MVTLayer } from '@deck.gl/geo-layers';
-import { map as _map, unionBy as _unionBy, isEqual as _isEqual } from 'lodash';
+import { map as _map, unionBy as _unionBy, isEqual as _isEqual, isEmpty as _isEmpty } from 'lodash';
 
 export const MapLayerContext = createContext();
 
 const createLayers = (newMapLayerProps = []) => {
-    const mapLayerProps = newMapLayerProps || MAP_LAYERS_PROPS;
+    const mapLayerProps = !_isEmpty(newMapLayerProps)? newMapLayerProps: MAP_LAYERS_PROPS;
 
     return _map(mapLayerProps, (layerProps) => {
         return new MVTLayer({
             pickable: true,
-            getPointRadius: 10,
-            minZoom: 0,
-            maxZoom: 5,
+            // scheme: 'tms',
             id: layerProps.key,
             visible: layerProps.visible,
             getFillColor: layerProps.colorCode,

@@ -1,16 +1,19 @@
 // Our Map Page details exists here
-import styles from '../css/MapPage.module.css';
+import styles from '../css/map-page.module.css';
 import withMap from '../hocs/withMap';
 import MapView from './MapView';
-import BaseLayout from '../../core/components/BaseLayout';
 
-function MapPage() {
+
+const MapPage = (props) => {
+
+    const { pageVisibility } = props
+
+    const mainCss = `${styles.pageContainer} ${styles[pageVisibility]}`
+
     return (
-        <BaseLayout>
-            <div className={styles.pageContainer}>
-                <MapView />
-            </div>
-        </BaseLayout>
+        <div className={mainCss}>
+            <MapView />
+        </div>
     );
 }
 

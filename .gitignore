@@ -178,3 +178,5 @@ postgres-data
 .vscode/
 *.geoserver_env
 devops/scripts/geoserver/output
+*.django_env
+cwa/cwa_geodjango/cwageodjango/network/calculators/gis_to_neo4j_calculator_backup.py

@@ -43,7 +43,7 @@ export default function MapLayerControl() {
                                 onChange={(e) => {
                                     setMapLayerProps({
                                         ...layerProps,
-                                        visible: e.currentTarget.checked,
+                                        visible: !layerProps.visible,
                                     });
                                 }}
                             />

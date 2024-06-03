@@ -11,7 +11,7 @@ from .pipe_main import PipeMain
 from cwageodjango.core.constants import UTILITIES
 
 
-class PointNode(StructuredNode):
+class NetworkNode(StructuredNode):
     __abstract__ = True
     __optional_labels__ = [
         "NetworkOptValve",

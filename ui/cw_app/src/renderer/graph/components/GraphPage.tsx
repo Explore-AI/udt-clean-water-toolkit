@@ -1,14 +1,20 @@
-import BaseLayout from '../../core/components/BaseLayout';
+import styles from '../css/graph-page.module.css'
+import { NEO4J_BROWSER_CONFIG } from '../../config'
 
-export default function GraphPage() {
+const GraphPage = (props) => {
+
+    const { pageVisibility } = props
+
     return (
-        <BaseLayout>
+        <div className={styles[pageVisibility]}>
             <iframe
-                src="http://localhost:7475/"
+                src={NEO4J_BROWSER_CONFIG}
                 title="neo4j browser"
                 frameBorder="0"
-                style={{ overflow: 'hidden', height: '100vh', width: '100%' }}
-            ></iframe>
-        </BaseLayout>
+                style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
+            </iframe>
+        </div>
     );
 }
+
+export default GraphPage

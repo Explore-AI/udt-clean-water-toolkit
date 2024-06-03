@@ -14,7 +14,7 @@ UTILITIES = [
     ("severn_trent_water", "Severn Trent Water"),
 ]
 
-class PointNode(StructuredNode):
+class NetworkNode(StructuredNode):
     __abstract__ = True
     dmas = JSONProperty(required=True)
     coords_27700 = ArrayProperty(required=True)
