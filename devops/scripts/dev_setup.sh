@@ -35,4 +35,5 @@ docker exec -it ${API_DRF_CONTAINER_ID} pip3 install -r requirements.txt -r dev-
 echo
 echo "cwa_geodjango app dev setup complete."
 echo "cwa_geoalchemy app dev setup complete."
+echo "api_drf app dev setup complete."
 echo "GeoServer app setup complete."
