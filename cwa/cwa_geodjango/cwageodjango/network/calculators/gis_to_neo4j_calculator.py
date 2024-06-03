@@ -114,8 +114,8 @@ class GisToNeo4jCalculator(GisToGraph):
 
     def _get_or_create_dma_node(self, dma_properties):
         """Create or get a DMA node."""
-        code = dma_properties['code']
-        name = dma_properties['name']
+        code = dma_properties["code"]
+        name = dma_properties["name"]
 
         query = f"""MERGE (d:DMA {{code: '{code}'}})
                     ON CREATE SET d.name = '{name}'
@@ -178,15 +178,12 @@ class GisToNeo4jCalculator(GisToGraph):
             all_nodes.append(node)
 
             # Handle DMA relationship
-            dmas = node_properties.get('dmas')
-            if dmas:
-                dmas_dict = json.loads(dmas)[0]
-                dma_properties = {'code': dmas_dict['code'], 'name': dmas_dict['name']}
-                dma_node = self._get_or_create_dma_node(dma_properties)
-                self._create_dma_relationship(node, dma_node)
+            dma_codes = node_properties.get("dma_codes")
+            dma_names = node_properties.get("dma_names")
+            self._get_or_create_dma_node_rel(node, dma_codes, dma_names)
 
             # Handle Utility relationship
-            utility_name = node_properties.get('utility')
+            utility_name = node_properties.get("utility")
             if utility_name:
                 utility_node = self._get_or_create_utility_node(utility_name)
                 self._create_utility_relationship(node, utility_node)
@@ -195,6 +192,13 @@ class GisToNeo4jCalculator(GisToGraph):
                 self._remove_utility_property(node)
 
         return all_nodes
+
+    def _get_or_create_dma_node_rel(self, node, dma_codes, dma_names):
+
+        for dma_code, dma_name in zip(dma_codes, dma_names):
+            dma_properties = {"code": dma_code, "name": dma_name}
+            dma_node = self._get_or_create_dma_node(dma_properties)
+            self._create_dma_relationship(node, dma_node)
 
     def _remove_utility_property(self, node):
         query = f"""MATCH (n {{node_key: '{node["node_key"]}'}})
@@ -222,7 +226,9 @@ class GisToNeo4jCalculator(GisToGraph):
                     CREATE (n)-[:HAS_UTILITY]->(u)"""
         db.cypher_query(query)
 
-    def _map_pipe_connected_asset_relations(self, edges_by_pipe: dict, all_node_properties: list):
+    def _map_pipe_connected_asset_relations(
+        self, edges_by_pipe: dict, all_node_properties: list
+    ):
         all_nodes = self._create_nodes(all_node_properties)
         self._create_relations(edges_by_pipe, all_nodes)
 
@@ -231,10 +237,19 @@ class GisToNeo4jCalculator(GisToGraph):
         self.all_nodes_by_pipe = []
 
     def create_neo4j_graph(self) -> None:
-        list(map(self._map_pipe_connected_asset_relations, self.all_edges_by_pipe, self.all_nodes_by_pipe))
+        list(
+            map(
+                self._map_pipe_connected_asset_relations,
+                self.all_edges_by_pipe,
+                self.all_nodes_by_pipe,
+            )
+        )
         self._reset_pipe_asset_data()
 
     def _create_neo4j_graph_parallel(self) -> None:
         with ThreadPool(self.config.thread_count) as p:
-            p.starmap(self._map_pipe_connected_asset_relations, zip(self.all_edges_by_pipe, self.all_nodes_by_pipe))
+            p.starmap(
+                self._map_pipe_connected_asset_relations,
+                zip(self.all_edges_by_pipe, self.all_nodes_by_pipe),
+            )
         self._reset_pipe_asset_data()
