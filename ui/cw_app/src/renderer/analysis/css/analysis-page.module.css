@@ -15,3 +15,11 @@
     padding-right: 30px;
     width: 40vw;
 }
+
+.visible {
+    display: inherit
+}
+
+.hidden {
+    display: none
+}

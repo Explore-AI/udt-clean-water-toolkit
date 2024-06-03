@@ -110,11 +110,6 @@ export const DEFAULT_BASEMAP_PROPS = [
     },
     {
         visible: false,
-        label: 'Empty Basemap',
-        key: 'empty',
-    },
-    {
-        visible: false,
         label: 'Terrain',
         mapUrl: 'mapbox://styles/mapbox/outdoors-v12',
         key: 'terrain_map',

@@ -1,4 +1,4 @@
-.pageContainer {
+.main {
     width: 100vw;
     height: calc(100vh - 60px);
     position: relative;
@@ -9,9 +9,9 @@
 }
 
 .visible {
-    display: 'inherit'
+    display: inherit
 }
 
 .hidden {
-    display: 'none'
+    display: none
 }

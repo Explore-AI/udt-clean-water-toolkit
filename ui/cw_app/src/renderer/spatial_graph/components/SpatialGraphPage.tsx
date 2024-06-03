@@ -9,7 +9,7 @@ const SpatialGraphPage = (props) => {
 
     useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_code': 'ZCHIPO01' }})
 
-    const mainCss = `${styles.pageContainer} ${pageVisibility}`
+    const mainCss = `${styles.main} ${styles[pageVisibility]}`
 
     return (
         <div className={mainCss}>

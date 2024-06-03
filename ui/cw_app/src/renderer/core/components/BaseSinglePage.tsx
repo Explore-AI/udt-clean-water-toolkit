@@ -9,11 +9,11 @@ const  BaseSinglePage = () => {
     const { pathname } = useLocation()
 
     const pageVisibility = {
-        map: pathname === '/map'? 'inherit': 'none',
-        graph: pathname === '/graph'? 'inherit': 'none',
+        map: pathname === '/map'? 'visible': 'hidden',
+        graph: pathname === '/graph'? 'visible': 'hidden',
         ['geo-graph']: pathname === '/geo-graph'? 'visible': 'hidden',
-        schematic: pathname === '/schematic'? 'inherit': 'none',
-        analysis: pathname === '/analysis'? 'inherit': 'none',
+        schematic: pathname === '/schematic'? 'visible': 'hidden',
+        analysis: pathname === '/analysis'? 'visible': 'hidden',
     }
 
     return (

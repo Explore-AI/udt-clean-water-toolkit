@@ -50,7 +50,6 @@ export default function MapView() {
                     initialViewState={viewState}
                     mapStyle={baseMap.mapUrl}
                     mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
-                    style={{ width: '500px', height: '500px' }}
                     attributionControl={false}
                 />
             </DeckGL>

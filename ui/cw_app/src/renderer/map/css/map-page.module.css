@@ -5,3 +5,11 @@
     z-index: 1;
     overflow: hidden;
 }
+
+.visible {
+    display: inherit
+}
+
+.hidden {
+    display: none
+}
