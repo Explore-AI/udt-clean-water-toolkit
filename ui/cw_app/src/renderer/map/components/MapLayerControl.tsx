@@ -35,7 +35,6 @@ export default function MapLayerControl() {
             {uiParams.showLayerControls && (
                 <div className={styles.control_box}>
                     {_map(mapLayerProps, (layerProps) => {
-                        console.log(layerProps.visible, layerProps.label)
                         return (
                             <Checkbox
                                 key={layerProps.key}
