@@ -2,7 +2,9 @@ from neomodel import db, install_labels, remove_all_labels
 from .pipe_end import PipeEnd
 from .point_asset import PointAsset
 from .pipe_main import PipeMain
-from .point_node import PointNode
+from .has_dma import HasDma
+from .has_utility import HasUtility
+from .network_node import NetworkNode
 from .pipe_junction import PipeJunction
 
 
@@ -15,4 +17,7 @@ def initialise_node_labels():
 
     if node_count == 0:
         remove_all_labels()
-        install_labels(PointNode, quiet=False)
+        install_labels(NetworkNode, quiet=False)
+        install_labels(PipeMain, quiet=False)
+        install_labels(HasDma, quiet=False)
+        install_labels(HasUtility, quiet=False)

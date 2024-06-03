@@ -1,0 +1,13 @@
+.node {
+    height: 3px;
+    width: 3px;
+    background-color: grey;
+    border-radius: 100%;
+    display: inline-block;
+}
+
+.label {
+    font-size: 4px;
+    width: 70px;
+    padding-left: 6px;
+}

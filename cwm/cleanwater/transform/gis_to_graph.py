@@ -110,6 +110,8 @@ class GisToGraph:
                     "material": base_pipe["material"],
                     "asset_name": base_pipe["asset_name"],
                     "asset_label": base_pipe["asset_label"],
+                    "dma_codes": base_pipe["dma_codes"],
+                    "dma_names": base_pipe["dma_names"],
                     "dmas": base_pipe["dmas"],
                     "segment_length": round(line_segment.length, 5),
                     "segment_wkt": line_segment.wkt,
@@ -146,9 +148,11 @@ class GisToGraph:
                     "node_key": self._encode_node_key(
                         nodes[0]["intersection_point_geometry"]
                     ),
+                    "dma_codes": nodes[0]["dma_codes"],
+                    "dma_names": nodes[0]["dma_names"],
                     "dmas": nodes[0]["dmas"],
                     "node_types": [],
-                    "node_labels": ["PointNode"],
+                    "node_labels": ["NetworkNode"],
                 }
             )
 
@@ -442,6 +446,8 @@ class GisToGraph:
                 "pipe_gids": start_node_gids,
                 "node_type": start_node_type,
                 "distance_from_pipe_start_cm": start_node_distance_cm,
+                "dma_codes": base_pipe["dma_codes"],
+                "dma_names": base_pipe["dma_names"],
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["start_point_geom"],
                 "utility_name": self._get_utility(base_pipe),
@@ -451,6 +457,8 @@ class GisToGraph:
                 "pipe_gids": end_node_gids,
                 "node_type": end_node_type,
                 "distance_from_pipe_start_cm": end_node_distance_cm,
+                "dma_codes": base_pipe["dma_codes"],
+                "dma_names": base_pipe["dma_names"],
                 "dmas": base_pipe["dma_codes"],
                 "intersection_point_geometry": base_pipe["end_point_geom"],
                 "utility_name": self._get_utility(base_pipe),
@@ -488,6 +496,8 @@ class GisToGraph:
                         "node_type": PIPE_JUNCTION__NAME,
                         "utility_name": self._get_utility(base_pipe),
                         "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
+                        "dma_codes": base_pipe["dma_codes"],
+                        "dma_names": base_pipe["dma_names"],
                         "dmas": base_pipe["dmas"],
                         "intersection_point_geometry": pipe[
                             "intersection_point_geometry"
@@ -517,6 +527,8 @@ class GisToGraph:
                 {
                     "distance_from_pipe_start_cm": asset["distance_from_pipe_start_cm"],
                     "node_type": POINT_ASSET__NAME,
+                    "dma_codes": base_pipe["dma_codes"],
+                    "dma_names": base_pipe["dma_names"],
                     "dmas": base_pipe["dmas"],
                     "utility_name": self._get_utility(base_pipe),
                     **asset,

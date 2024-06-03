@@ -2,7 +2,7 @@
 export interface LayerToggle {
     visible: boolean;
     label: string;
-    key: string; 
+    key: string;
 }
 
 // Define the interface for the toggle object
@@ -23,7 +23,7 @@ export interface BasemapToggle {
     visible: boolean;
     label: string;
     map_url?: string;
-    key: string; 
+    key: string;
 }
 
 export interface BasemapToggleObject {
@@ -34,21 +34,21 @@ export interface BasemapToggleObject {
 }
 
 export interface NominatimRequestProps {
-    urlExtension: string; 
+    urlExtension: string;
     params: {
-        q: string; 
-        format: string; 
+        q: string;
+        format: string;
         limit: number;
         addressdetails: number;
-    }; 
+    };
 }
 
 interface NominatimAddressDetails {
-    borough?: string; 
+    borough?: string;
     'ISO3166-2-lvl4'?: string;
     'ISO3166-2-lvl6'?: string;
     city: string;
-    country:string;
+    country: string;
     country_code?: string;
     man_made?: string;
     postcode?: string;
@@ -59,19 +59,19 @@ interface NominatimAddressDetails {
 }
 
 export interface NominatimResponseData {
-    address: NominatimAddressDetails; 
-    addresstype: string; 
+    address: NominatimAddressDetails;
+    addresstype: string;
     boundingbox: string[];
-    category: string; 
+    category: string;
     display_name: string;
-    importance: number; 
-    lat: string; 
-    licence: string; 
-    lon: string; 
-    name: string; 
-    osm_id: number; 
+    importance: number;
+    lat: string;
+    licence: string;
+    lon: string;
+    name: string;
+    osm_id: number;
     osm_type: string;
-    place_id: number; 
-    place_rank: number; 
+    place_id: number;
+    place_rank: number;
     type: string;
 }

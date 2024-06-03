@@ -1,20 +1,27 @@
-import BaseLayout from '../../core/components/BaseLayout';
-import AnalysisForm from './AnalysisForm'
-import { SubmitHandler } from "react-hook-form"
-import styles from '../css/analysis_page.module.css'
+import styles from '../css/analysis-page.module.css';
+import AnalysisForm from './AnalysisForm';
+import AnalysisTable from './AnalysisTable'
+import { SubmitHandler } from 'react-hook-form';
 
-export default function AnalysisPage() {
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => (
-    console.log(data)
+const AnalysisPage = (props) => {
 
-  )
+    const { pageVisibility } = props
 
-  return (
-    <BaseLayout>
-      <div className={styles['main']}>
-        <AnalysisForm onSubmit={onSubmit} />
-      </div>
-    </BaseLayout>
-  );
+    const mainCss = `${styles.main} ${styles[pageVisibility]}`
+
+    const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+
+    return (
+        <div className={mainCss}>
+            <div className={styles.table}>
+                <AnalysisTable/>
+            </div>
+            <div className={styles.form}>
+                <AnalysisForm onSubmit={onSubmit} />
+            </div>
+        </div>
+    );
 }
+
+export default AnalysisPage

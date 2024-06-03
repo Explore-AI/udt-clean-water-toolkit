@@ -105,16 +105,19 @@
     "@deck.gl/react": "9.0.14",
     "@mantine/core": "7.9.1",
     "@mantine/hooks": "7.9.1",
+    "axios": "1.7.1",
     "deck.gl": "9.0.14",
     "electron-debug": "3.2.0",
     "electron-log": "4.4.8",
     "electron-updater": "6.1.4",
+    "lodash": "4.17.21",
     "mapbox-gl": "3.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "7.51.4",
     "react-map-gl": "7.1.7",
-    "react-router-dom": "6.16.0"
+    "react-router-dom": "6.16.0",
+    "reactflow": "11.11.3"
   },
   "devDependencies": {
     "@electron/notarize": "^2.1.0",
@@ -135,7 +138,6 @@
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
-    "axios": "^1.7.1",
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^4.1.2",
     "concurrently": "^8.2.1",

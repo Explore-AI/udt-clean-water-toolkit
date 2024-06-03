@@ -1,9 +1,9 @@
-from neomodel import IntegerProperty, StringProperty
-from .point_node import PointNode
+from neomodel import IntegerProperty
+from . import NetworkNode
 
 POINT_ASSET__NAME = "point_asset"
 
-class PointAsset(PointNode):
+class PointAsset(NetworkNode):
     gid = IntegerProperty(unique_index=True, unique=True, required=True)
 
     class AssetMeta:

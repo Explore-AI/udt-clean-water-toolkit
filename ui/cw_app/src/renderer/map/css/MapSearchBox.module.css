@@ -1,0 +1,18 @@
+.input {
+    width: calc(22.5rem * var(--mantine-scale)) !important;
+    border: none !important;
+}
+
+
+.box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(23rem * var(--mantine-scale));
+    border: 1px solid rgba(0,0,0,0.5);
+    background-color: #fff;
+    border-radius: 5px;
+    &:focus{
+        border: 2px solid var(--accent);
+    }
+}

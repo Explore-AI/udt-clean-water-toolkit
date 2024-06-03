@@ -1,0 +1,15 @@
+.pageContainer {
+    width: 100vw;
+    height: calc(100vh - 60px);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.visible {
+    display: inherit
+}
+
+.hidden {
+    display: none
+}

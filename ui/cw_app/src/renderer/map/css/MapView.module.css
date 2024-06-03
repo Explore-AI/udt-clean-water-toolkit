@@ -1,0 +1,20 @@
+
+.searchBox {
+    height: calc(2rem * var(--mantine-scale));
+    width: calc(25rem * var(--mantine-scale));
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 3;
+}
+
+.control {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: 50px;
+    z-index: 3;
+    top: 50px;
+    right: 20px;
+}

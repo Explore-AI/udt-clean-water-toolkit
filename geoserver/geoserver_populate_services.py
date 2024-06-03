@@ -49,8 +49,10 @@ class Importer:
         """
         geo = self.geoserver_auth.geo
         auth = self.geoserver_auth.auth
+
         try:
             rest_url = '%s/rest/workspaces/%s/datastores/%s.json' % (geoserver_site_url, workspace_name, workspace_name)
+            print(rest_url, "aaa")
             response = get(rest_url, auth=auth)
             response.raise_for_status()
         except exceptions.HTTPError:
