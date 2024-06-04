@@ -51,8 +51,8 @@ const SpatialGraph = () => {
                     data={items} />
             </div>
             <ReactFlow
-                defaultNodes={[]}
-                defaultEdges={[]}
+                defaultNodes={data?.nodes}
+                defaultEdges={data?.edges}
                 nodeTypes={nodeTypes}
                 minZoom={0}
                 maxZoom={50}
