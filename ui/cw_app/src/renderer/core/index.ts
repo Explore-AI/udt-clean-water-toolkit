@@ -10,7 +10,6 @@ export type LayerColorCodes = {
     [key: string]: number[];
 };
 
-export type LayerKey = keyof typeof LAYER_NAME_COLOR_CODES;
 
 export const MVT_LAYER_URL = (asset_name: string) => {
     return `${GEOSERVER_URL}/geoserver/gwc/service/tms/1.0.0/udt:${asset_name}@EPSG:3857@pbf/{z}/{x}/{-y}.pbf`;

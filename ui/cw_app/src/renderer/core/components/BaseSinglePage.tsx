@@ -2,6 +2,7 @@ import MapPage from '../../map/components/MapPage'
 import GraphPage from '../../graph/components/GraphPage'
 import AnalysisPage from '../../analysis/components/AnalysisPage'
 import SpatialGraphPage from '../../spatial_graph/components/SpatialGraphPage'
+import SchematicPage from '../../schematic/components/SchematicPage'
 import { useLocation } from 'react-router-dom'
 
 const  BaseSinglePage = () => {
@@ -18,10 +19,11 @@ const  BaseSinglePage = () => {
 
     return (
         <>
-            <MapPage pageVisibility={pageVisibility.map} />
-            <GraphPage pageVisibility={pageVisibility.graph} />
+             <MapPage pageVisibility={pageVisibility.map} />
+            {/*<GraphPage pageVisibility={pageVisibility.graph} />
             <SpatialGraphPage pageVisibility={pageVisibility['geo-graph']} />
-            <AnalysisPage pageVisibility={pageVisibility.analysis} />
+            <AnalysisPage pageVisibility={pageVisibility.analysis} /> */}
+            <SchematicPage pageVisibility={pageVisibility.schematic} /> 
         </>
     );
 }

@@ -15,7 +15,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
         query = f"""
         match (n)-[r:TrunkMain]-(m)
         return ID(n), n, ID(r), r, ID(m), m
-        limit 5000
+        limit 50
         """
 
         results, _ = db.cypher_query(query)
