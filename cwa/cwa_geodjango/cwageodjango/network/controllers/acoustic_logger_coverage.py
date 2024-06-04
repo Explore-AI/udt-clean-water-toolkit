@@ -125,10 +125,7 @@ class AcousticLoggerCoverage():
             processed_nodes.add(node_key)
             next_edges = self.get_next_edges(node_key, processed_edges)
 
-            if not is_initial and len(next_edges) > 1:
-                per_edge_distance = remaining_distance / len(next_edges)
-            else:
-                per_edge_distance = remaining_distance
+            per_edge_distance = remaining_distance
 
             for edge in next_edges:
                 if 'edge_distance' not in locals() or edge_distance == 0:
