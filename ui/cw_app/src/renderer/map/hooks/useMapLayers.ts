@@ -19,8 +19,12 @@ const createLayers = (newMapLayerProps = []) => {
             // scheme: 'tms',
             id: layerProps.key,
             visible: layerProps.visible,
-            getFillColor: layerProps.colorCode,
+            lineWidthMinPixels: 1,
+            getLineColor: layerProps.colorCode,
+            getLineCap: 'round',
             data: [MVT_LAYER_URL(layerProps.key)],
+            getFillColor: layerProps.colorCode,
+            opacity: layerProps.opacity
         });
     });
 };
