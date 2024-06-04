@@ -51,7 +51,6 @@ export default function AnalysisForm(props: childrenProps) {
                     label="Method"
                     placeholder="Select method"
                     data={METHODS}
-                    {...register('method')}
                 />
             </div>
 
@@ -92,6 +91,14 @@ export default function AnalysisForm(props: childrenProps) {
             </div>
 
             <div className={styles.field}>
+                <NumberInput
+                    label="Batch size"
+                    placeholder="Select batch size"
+                    {...register('batch_size')}
+                />
+            </div>
+
+            <div className={styles.field}>
                 <Checkbox
                     defaultChecked={false}
                     label="Multiprocessing enabled"
@@ -110,10 +117,10 @@ export default function AnalysisForm(props: childrenProps) {
 
             <div className={styles.field}>
                 <NumberInput
-                    label="Batch size"
+                    label="Chunk size"
                     description="Only valid for methods that use multiprocessing"
                     placeholder="Select batch size"
-                    {...register('batch_size')}
+                    {...register('chunk_size')}
                 />
             </div>
 
