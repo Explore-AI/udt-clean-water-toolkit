@@ -7,7 +7,6 @@ import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
 import useGetItems from '../../core/hooks/useGetItems'
 import MultiSelectField from '../../core/components/MultiSelectField'
-import { isEmpty as _isEmpty } from 'lodash';
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
 const DMA__QUERY_KEY = 'cw_utilities/dma'
@@ -39,7 +38,7 @@ const SpatialGraph = () => {
     const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
     const { items } = useGetItems(DMA__QUERY_KEY)
 
-    if (_isEmpty(data) && isPending)  {
+    if (isPending)  {
         return <LoadingSpinner/>
     }
 
