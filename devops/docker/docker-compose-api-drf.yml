@@ -7,11 +7,14 @@ services:
     build: 
       context: ./
       dockerfile: Dockerfile_api_drf
-    links: 
-      - udtpostgis
-      - udtcwageodjangodev
+    # links: 
+    #   - udtpostgis
+    #   - udtcwageodjangodev
+    #   - udtneo4j
     volumes: 
       - ../../api/api_drf:/opt/udt/api/api_drf/
       - ../../cwa/cwa_geodjango:/opt/udt/cwa/cwa_geodjango/
-      - ../../cwm:/opt/udt/cwm/
+      # - ../../cwm:/opt/udt/cwm/ 
+    ports: 
+      - "8001:8000"
     restart: always

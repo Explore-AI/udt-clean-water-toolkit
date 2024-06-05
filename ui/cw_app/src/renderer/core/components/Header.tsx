@@ -5,11 +5,12 @@ import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
 import WaterLogo from '../images/water.svg';
 import styles from '../css/Header.module.css';
+import { startsWith as _startsWith } from 'lodash'
 
 const links = [
     { path: '/map', label: 'Map' },
     { path: '/graph', label: 'Graph' },
-    { path: '/geo-graph', label: 'Spatial Graph' },
+    { path: '/spatial-graph', label: 'Spatial Graph' },
     { path: '/schematic', label: 'Schematic' },
     { path: '/analysis', label: 'Analysis' },
 ];
@@ -24,7 +25,7 @@ export default function Header() {
             key={link.label}
             to={link.path}
             className={styles.mainLink}
-            data-active={ pathname === link.path || undefined }>
+            data-active={ _startsWith(pathname, link.path) || undefined }>
             {link.label}
         </Link>
     ));

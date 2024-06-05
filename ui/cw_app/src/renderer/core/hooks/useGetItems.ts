@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import useFilterParams from './useFilterParams'
 
-const useGetData = (queryKey) => {
+const useGetItems = (queryKey) => {
 
     const { filterParams, setFilterParams } = useFilterParams(queryKey)
 
@@ -10,7 +10,7 @@ const useGetData = (queryKey) => {
         enabled: false
     })
 
-    return { queryValues, setFilterParams }
+    return { items: queryValues.data?.items, pagination: queryValues.data?.pagination, setFilterParams }
 }
 
-export default useGetData
+export default useGetItems

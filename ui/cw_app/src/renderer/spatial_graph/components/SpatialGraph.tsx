@@ -1,12 +1,17 @@
 import 'reactflow/dist/style.css';
+import styles from '../css/spatial-graph.module.css'
 import ReactFlow, { Controls } from 'reactflow';
 import CircleNode from './CircleNode';
 import EdgeNode from './EdgeNode';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
-import { isEmpty as _isEmpty } from 'lodash';
+import useGetItems from '../../core/hooks/useGetItems'
+import MultiSelectField from '../../core/components/MultiSelectField'
+import { useNavigate } from 'react-router-dom';
+//import useFilterParams from '../../core/hooks/useFilterParams'
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
+const DMA__QUERY_KEY = 'cw_utilities/dma'
 
 const nodeTypes = {
     circle: CircleNode,
@@ -29,27 +34,48 @@ type Edge = {
     style: { strokeWidth: string; color: string };
 };
 
-
 const SpatialGraph = () => {
 
-    const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const navigate = useNavigate();
 
-    if (_isEmpty(data) && isPending)  {
+    const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
+
+    if (isPending)  {
         return <LoadingSpinner/>
     }
 
+    const onSearchChange = (value) => {
+        setFilterParams(DMA__QUERY_KEY, { search: value })
+    }
+
+    const onFilterByDmas = (options) => {
+        navigate(`/spatial-graph/${options.join("-")}`);
+    }
+
     return (
-        <ReactFlow
-            defaultNodes={data.nodes}
-            defaultEdges={data.edges}
-            nodeTypes={nodeTypes}
-            minZoom={0}
-            maxZoom={50}
-            fitView={true}
-            nodesDraggable={false}
-        >
-            <Controls />
-        </ReactFlow>
+        <>
+            <div className={styles['search_box']}>
+                <MultiSelectField
+                    labelName="code"
+                    clearable={true}
+                    onEnter={onFilterByDmas}
+                    onSearchChange={onSearchChange}
+                    searchable={true}
+                    data={items} />
+            </div>
+            <ReactFlow
+                defaultNodes={data?.nodes}
+                defaultEdges={data?.edges}
+                nodeTypes={nodeTypes}
+                minZoom={0}
+                maxZoom={50}
+                fitView={true}
+                nodesDraggable={false}
+            >
+                <Controls />
+            </ReactFlow>
+        </>
     );
 };
 

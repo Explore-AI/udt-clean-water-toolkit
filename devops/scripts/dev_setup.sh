@@ -10,11 +10,12 @@ echo "pip packages will be installed for the cwm in dev mode."
 echo
 
 
-docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-neo4j.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml -f ../docker/docker-compose-cwa-geoalchemy-dev.yml -f ../docker/docker-compose-geoserver.yml -f ../docker/docker-compose-neo4j-browser.yml up -d --build
+docker compose -f ../docker/docker-compose-postgis.yml -f ../docker/docker-compose-neo4j.yml -f ../docker/docker-compose-cwa-geodjango-dev.yml -f ../docker/docker-compose-cwa-geoalchemy-dev.yml -f ../docker/docker-compose-geoserver.yml -f ../docker/docker-compose-neo4j-browser.yml -f ../docker/docker-compose-api-drf.yml up -d --build
 
 
 CWA_GEODORM_CONTAINER_ID=`docker ps | grep udtcwageodjangodev | grep cwa_geodjango_dev | awk '{ print $1 }'`
 CWA_GEOALCHEMY_CONTAINER_ID=`docker ps | grep udtcwageoalchemydev | grep cwa_geoalchemy_dev | awk '{ print $1 }'`
+API_DRF_CONTAINER_ID=`docker ps | grep udtapidrf | grep api_drf | awk '{ print $1 }'`
 
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -r requirements.txt -r dev-requirements.txt
@@ -27,9 +28,12 @@ docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash -c "cd /opt/udt/api/api_drf/ &&
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash ln -s /opt/cwa/cwa_geodjango/cwa_geod/ /opt/api/api_drf/
 
+docker exec -it ${API_DRF_CONTAINER_ID} pip3 install -r requirements.txt -r dev-requirements.txt
+
 ./postgis/postgis_db_init.sh
 
 echo
 echo "cwa_geodjango app dev setup complete."
 echo "cwa_geoalchemy app dev setup complete."
+echo "api_drf app dev setup complete."
 echo "GeoServer app setup complete."

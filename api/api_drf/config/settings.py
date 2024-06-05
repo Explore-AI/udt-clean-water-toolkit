@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.gis",
     "rest_framework",
+    "django_filters",
     "cwageodjango.core",
     "cwageodjango.assets",
     "cwageodjango.utilities",
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     "cw_core",
     "cw_gis_assets",
     "cw_graph",
+    "cw_utilities",
 ]
 
 MIDDLEWARE = [
@@ -159,6 +161,7 @@ MAX_PAGE_SIZE = 1000
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "config.pagination.base_pagination.BasePagination",
     "PAGE_SIZE": DEFAULT_PAGE_SIZE,
+    #    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend"),
 }
 
 LOGGING = {

@@ -12,7 +12,7 @@ export default function MapSearchBox() {
             const validatedInput = validateInput(value);
             if (validatedInput.type == 'gps') {
                 navigate(
-                    `/map/${validatedInput.payload[0]},${validatedInput.payload[1]}`,
+                    `/map/${validatedInput.payload[0]},${validatedInput.payload[1]}`
                 );
             } else {
                 const addressProps = {

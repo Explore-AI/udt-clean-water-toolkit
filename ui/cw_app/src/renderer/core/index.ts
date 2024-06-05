@@ -28,7 +28,7 @@ export const MAP_LAYERS_PROPS = [
         colorCode: [245, 183, 177],
     },
     {
-        visible: true,
+        visible: false,
         label: 'Distribution Main',
         key: 'assets_distributionmain',
         colorCode: [162, 217, 206],
@@ -76,7 +76,7 @@ export const MAP_LAYERS_PROPS = [
         colorCode: [74, 35, 90],
     },
     {
-        visible: true,
+        visible: false,
         label: 'Trunk Main',
         key: 'assets_trunkmain',
         colorCode: [33, 97, 140],
@@ -85,7 +85,8 @@ export const MAP_LAYERS_PROPS = [
         visible: true,
         label: 'DMA',
         key: 'utilities_dma',
-        colorCode: [33, 97, 140],
+        colorCode: [8, 48, 107],//'#08306b',
+        opacity: 0.1
     },
 ];
 

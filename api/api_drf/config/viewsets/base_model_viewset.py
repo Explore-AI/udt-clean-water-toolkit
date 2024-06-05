@@ -1,17 +1,16 @@
 from rest_framework import viewsets
+from django_filters import rest_framework as filters
 from config.filters.base_filter import BaseFilter
 from django.contrib.gis.db import models
 from django.db.models.functions import JSONObject
 from django.db.models import JSONField
 from django.db.models.expressions import Value
 from django.contrib.gis.db.models.functions import AsGeoJSON, Cast
-
-# from config.filters.base_filter_backend import BaseFilterBackend
 from rest_framework import renderers
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
-    #    filter_backends = (BaseFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = BaseFilter
     renderer_classes = [renderers.JSONRenderer]
     handler500 = "rest_framework.exceptions.server_error"
