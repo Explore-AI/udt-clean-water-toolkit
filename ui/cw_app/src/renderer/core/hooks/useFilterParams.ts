@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { get as _get, isEmpty as _isEmpty, isEqual as _isEqual } from 'lodash'
 
@@ -16,7 +15,6 @@ const useFilterParams = (queryKey, params={}) => {
     const setFilterParams = (queryKey, newParams) => {
         const updatedParams = { ...currentParams, ...newParams }
         queryClient.setQueryData(['filterParams', queryKey], updatedParams)
-        //        setStateParams(updatedParams)
         return updatedParams
     }
 

@@ -1,12 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import useFilterParams from './useFilterParams'
-import { getBaseUrl } from '../utils'
+import { getApiUrl } from '../utils/http'
 
 const useFetchJson = (queryKey, options={}) => {
 
     const { filterParams, setFilterParams } = useFilterParams(queryKey, options.params)
 
-    const url = getBaseUrl(queryKey, filterParams)
+    const url = getApiUrl(queryKey, filterParams)
 
     const queryValues = useQuery({
         queryKey: [queryKey, filterParams],
