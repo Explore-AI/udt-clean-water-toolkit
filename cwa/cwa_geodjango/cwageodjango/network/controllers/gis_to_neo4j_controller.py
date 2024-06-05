@@ -49,6 +49,8 @@ class GisToNeo4jController(GisToNeo4jCalculator):
     def create_network_parallel(self):
         from timeit import default_timer as timer
 
+        print(f"Start parallel run with {self.config.processor_count} cores.")
+
         start = timer()
 
         pipes_qs = self._get_pipe_and_asset_data()

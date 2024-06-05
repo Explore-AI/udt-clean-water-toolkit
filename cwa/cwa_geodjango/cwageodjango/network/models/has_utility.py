@@ -1,5 +1,5 @@
-from neomodel import StructuredRel, StringProperty
+from neomodel import StructuredRel
 
 
 class HasUtility(StructuredRel):
-    name = StringProperty(unique=True, index=True, required=True)
+    pass
