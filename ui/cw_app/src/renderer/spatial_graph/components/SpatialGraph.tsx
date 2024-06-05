@@ -7,6 +7,7 @@ import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
 import useGetItems from '../../core/hooks/useGetItems'
 import MultiSelectField from '../../core/components/MultiSelectField'
+import { useNavigate } from 'react-router-dom';
 //import useFilterParams from '../../core/hooks/useFilterParams'
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
@@ -35,6 +36,8 @@ type Edge = {
 
 const SpatialGraph = () => {
 
+    const navigate = useNavigate();
+
     const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
     const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
@@ -45,14 +48,18 @@ const SpatialGraph = () => {
     const onSearchChange = (value) => {
         setFilterParams(DMA__QUERY_KEY, { search: value })
     }
-    //console.log(items)
+
+    const onFilterByDmas = (options) => {
+        navigate(`/spatial-graph/${options.join("-")}`);
+    }
+
     return (
         <>
             <div className={styles['search_box']}>
                 <MultiSelectField
                     labelName="code"
                     clearable={true}
-                    onEnter={ (options) => setFilterParams(SPATIAL_GRAPH__QUERY_KEY, { dmas: options }) }
+                    onEnter={onFilterByDmas}
                     onSearchChange={onSearchChange}
                     searchable={true}
                     data={items} />

@@ -11,7 +11,7 @@ const BaseRouter = () => {
                 <Route path="/map/:latlong?" element={<BaseSinglePage />} />
                 <Route path="/graph" element={<BaseSinglePage/>} />
                 <Route path="/analysis" element={<BaseSinglePage/>} />
-                <Route path="/geo-graph" element={<BaseSinglePage/>} />
+                <Route path="/spatial-graph/:dmas?" element={<BaseSinglePage/>} />
             </Routes>
         </BaseLayout>
     );

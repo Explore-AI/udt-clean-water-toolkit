@@ -3,17 +3,18 @@ import GraphPage from '../../graph/components/GraphPage'
 import AnalysisPage from '../../analysis/components/AnalysisPage'
 import SpatialGraphPage from '../../spatial_graph/components/SpatialGraphPage'
 import { useLocation } from 'react-router-dom'
+import { startsWith as _startsWith } from 'lodash'
 
 const  BaseSinglePage = () => {
 
     const { pathname } = useLocation()
 
     const pageVisibility = {
-        map: pathname === '/map'? 'visible': 'hidden',
-        graph: pathname === '/graph'? 'visible': 'hidden',
-        ['geo-graph']: pathname === '/geo-graph'? 'visible': 'hidden',
-        schematic: pathname === '/schematic'? 'visible': 'hidden',
-        analysis: pathname === '/analysis'? 'visible': 'hidden',
+        map: _startsWith(pathname,'/map') ? 'visible': 'hidden',
+        graph: _startsWith(pathname,'/graph') ? 'visible': 'hidden',
+        ['geo-graph']: _startsWith(pathname, '/spatial-graph') ? 'visible': 'hidden',
+        schematic: _startsWith(pathname, '/schematic') ? 'visible': 'hidden',
+        analysis: _startsWith(pathname, '/analysis') ? 'visible': 'hidden',
     }
 
     return (

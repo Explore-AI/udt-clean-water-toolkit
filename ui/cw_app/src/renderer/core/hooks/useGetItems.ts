@@ -4,7 +4,7 @@ import useFilterParams from './useFilterParams'
 const useGetItems = (queryKey) => {
 
     const { filterParams, setFilterParams } = useFilterParams(queryKey)
-    console.log(filterParams, "uuuuu")
+
     const queryValues = useQuery({
         queryKey: [queryKey, filterParams],
         enabled: false
