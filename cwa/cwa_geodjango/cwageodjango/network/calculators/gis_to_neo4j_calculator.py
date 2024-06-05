@@ -112,37 +112,6 @@ class GisToNeo4jCalculator(GisToGraph):
         """
         return query
 
-    @staticmethod
-    def _get_dma_by_code(dma_code):
-        dma_node = db.cypher_query(
-            f"""match (n:DMA {{code:'{dma_code}'}})
-            return n"""
-        )[0]
-
-        if dma_node:
-            return dma_node[0][0]
-
-        import pdb
-
-        pdb.set_trace()
-        return None
-
-    # def _get_or_create_dma_node(self, dma_code, dma_name):
-    #     """Create or get a DMA node."""
-
-    #     try:
-    #         query = f"""CREATE (
-    #         d:DMA {{code: '{dma_code}',
-    #         name: '{dma_name}'
-    #         }}) RETURN d
-    #         """
-
-    #         result = db.cypher_query(query)
-    #         return result[0][0][0]
-
-    #     except UniqueProperty:
-    #         return self._get_dma_by_code(dma_code)
-
     def _get_or_create_dma_node(self, dma_code, dma_name):
         """Create or get a DMA node."""
 
