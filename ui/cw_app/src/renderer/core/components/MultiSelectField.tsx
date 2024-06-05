@@ -1,13 +1,31 @@
+import { useState } from 'react'
 import { MultiSelect } from '@mantine/core';
 
 const MultiSelectField = (props) => {
 
-    const { label, placeholder, data, labelName } = props
+    const { label, placeholder, data, labelName, searchable, clearable, onSearchChange, onEnter } = props
+
+    const [ options, setOptions ] = useState([])
+
+    const handleChange = (values) => {
+        setOptions(values)
+    }
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            onEnter && onEnter(options)
+        }
+    };
 
     return (
         <MultiSelect
             label={label}
+            clearable={clearable}
             placeholder={placeholder}
+            onSearchChange={onSearchChange}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            searchable={searchable}
             renderOption={ (item) => item.option[labelName] || item.option['value'] }
             data={data}
         />

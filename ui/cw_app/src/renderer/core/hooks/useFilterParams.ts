@@ -1,22 +1,41 @@
-import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { get as _get, isEmpty as _isEmpty } from 'lodash'
 
-const useSetFilterParams = (queryKey, params={}) => {
+const useFilterParams = (queryKey, params={}) => {
 
+    const allParams = useQuery({
+        queryKey: 'filterParams',
+        enabled: false
+    })
+
+    const currentParams = _get(allParams, `data.${queryKey}`, {})
+    console.log(queryKey, currentParams, "aaaa")
+
+    //console.log(allParams.data)
+
+    const [ stateParams, setStateParams ] = useState({})
+    console.log(stateParams, "rrrrr")
     const queryClient = useQueryClient()
 
-    const allParams = queryClient.getQueryData('filterParams')
-    const currentParams = _get(allParams, `${queryKey}`, {})
+    //const allParams = queryClient.getQueryData('filterParams')
 
-    let newParams
-    if (!_isEmpty(params)) {
-        newParams = { ...currentParams, ...params }
-        queryClient.setQueryData('filterParams', { [queryKey]: newParams })
-        return newParams
+    //const currentParams = _get(allParams, `${queryKey}`, {})
+
+    const setFilterParams = (queryKey, newParams) => {
+        const updatedParams = { ...currentParams, ...newParams }
+        queryClient.setQueryData('filterParams', { [queryKey]: updatedParams })
+        setStateParams(updatedParams)
+        return updatedParams
     }
 
-    return currentParams
+    if (!_isEmpty(params)) {
+        const filterParams = setFilterParams(queryKey, params)
+        console.log(queryKey, filterParams, "eeeeeee")
+        return { filterParams, setFilterParams }
+    }
+    console.log(queryKey, currentParams, "ssssss")
+    return { filterParams: currentParams, setFilterParams }
 }
 
-export default useSetFilterParams
+export default useFilterParams

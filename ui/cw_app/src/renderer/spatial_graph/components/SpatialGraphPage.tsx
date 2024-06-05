@@ -9,7 +9,7 @@ const DMA__QUERY_KEY = 'cw_utilities/dma'
 const SpatialGraphPage = (props) => {
     const { pageVisibility } = props
 
-    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_code': 'ZCHIPO01' }})
+    //useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_code': 'ZCHIPO01' }})
 
     useFetchItems(DMA__QUERY_KEY)
 

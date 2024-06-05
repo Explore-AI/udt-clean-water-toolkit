@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import useSetFilterParams from './useSetFilterParams'
+import useFilterParams from './useFilterParams'
 import { getBaseUrl } from '../utils'
 
 const useFetchJson = (queryKey, options={}) => {
 
-    const filterParams = useSetFilterParams(queryKey, options.params)
+    const { filterParams } = useFilterParams(queryKey, options.params)
 
     const url = getBaseUrl(queryKey, options.params)
 

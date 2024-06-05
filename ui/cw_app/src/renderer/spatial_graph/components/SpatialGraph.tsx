@@ -7,6 +7,7 @@ import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
 import useGetItems from '../../core/hooks/useGetItems'
 import MultiSelectField from '../../core/components/MultiSelectField'
+import useFilterParams from '../../core/hooks/useFilterParams'
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
 const DMA__QUERY_KEY = 'cw_utilities/dma'
@@ -32,21 +33,30 @@ type Edge = {
     style: { strokeWidth: string; color: string };
 };
 
-
 const SpatialGraph = () => {
 
-    const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    //const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
     const { items } = useGetItems(DMA__QUERY_KEY)
 
-    if (isPending)  {
-        return <LoadingSpinner/>
-    }
+    const { setFilterParams } = useFilterParams(DMA__QUERY_KEY)
 
+    /* if (isPending)  {
+     *     return <LoadingSpinner/>
+     * } */
+    const data = {}
+    const onSearchChange = (value) => {
+        setFilterParams(DMA__QUERY_KEY, { search: value })
+    }
+    console.log(items)
     return (
         <>
             <div className={styles['search_box']}>
                 <MultiSelectField
                     labelName="code"
+                    clearable={true}
+                    onEnter={ (options) => setFilterParams(SPATIAL_GRAPH__QUERY_KEY, { dmas: options }) }
+                    onSearchChange={onSearchChange}
+                    searchable={true}
                     data={items} />
             </div>
             <ReactFlow

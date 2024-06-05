@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import useGetFilterParams from './useGetFilterParams'
+import useFilterParams from './useFilterParams'
 
 const useGetItems = (queryKey) => {
 
-    const filterParams = useGetFilterParams(queryKey)
-
+    const { filterParams } = useFilterParams(queryKey)
+    console.log(filterParams, "uuuuu")
     const queryValues = useQuery({
         queryKey: [queryKey, filterParams],
         enabled: false
