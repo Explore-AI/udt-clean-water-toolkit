@@ -29,10 +29,9 @@ Large numbers of features will take a long time to save."""
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
-            subtype = feature.get("SUBTYPE")
 
             new_connection_meter = ConnectionMeter(
-                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326, subtype=subtype
+                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326
             )
             new_connection_meters.append(new_connection_meter)
 

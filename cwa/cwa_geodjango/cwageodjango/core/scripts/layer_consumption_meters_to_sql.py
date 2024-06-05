@@ -29,11 +29,10 @@ Large numbers of features will take a long time to save."""
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
-            subtype = feature.get("SUBTYPE")
 
 
             new_consumption_meter = ConsumptionMeter(
-                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326, subtype=subtype
+                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326
             )
             new_consumption_meters.append(new_consumption_meter)
 
