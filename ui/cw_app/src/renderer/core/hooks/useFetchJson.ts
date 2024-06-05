@@ -4,7 +4,7 @@ import { getBaseUrl } from '../utils'
 
 const useFetchJson = (queryKey, options={}) => {
 
-    const { filterParams } = useFilterParams(queryKey, options.params)
+    const { filterParams, setFilterParams } = useFilterParams(queryKey, options.params)
 
     const url = getBaseUrl(queryKey, options.params)
 
@@ -17,7 +17,7 @@ const useFetchJson = (queryKey, options={}) => {
         }
     })
 
-    return queryValues
+    return { queryValues, setFilterParams }
 }
 
 export default useFetchJson

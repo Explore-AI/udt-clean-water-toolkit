@@ -3,14 +3,14 @@ import useFilterParams from './useFilterParams'
 
 const useGetData = (queryKey) => {
 
-    const { filterParams } = useFilterParams(queryKey)
+    const { filterParams, setFilterParams } = useFilterParams(queryKey)
 
     const queryValues = useQuery({
         queryKey: [queryKey, filterParams],
         enabled: false
     })
 
-    return queryValues
+    return { queryValues, setFilterParams }
 }
 
 export default useGetData

@@ -4,7 +4,7 @@ import { getBaseUrl } from '../utils'
 
 const useFetchItems = (queryKey, options={}) => {
 
-    const { filterParams } = useFilterParams(queryKey, options.params)
+    const { filterParams, setFilterParams } = useFilterParams(queryKey, options.params)
 
     const url = getBaseUrl(queryKey, filterParams)
 
@@ -18,7 +18,7 @@ const useFetchItems = (queryKey, options={}) => {
         }
     })
 
-    return queryValues
+    return { queryValues, setFilterParams }
 }
 
 export default useFetchItems
