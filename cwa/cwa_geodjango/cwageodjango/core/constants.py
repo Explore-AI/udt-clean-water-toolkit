@@ -7,6 +7,8 @@ TRUNK_MAIN__NAME = "trunk_main"
 
 DISTRIBUTION_MAIN__NAME = "distribution_main"
 
+CONNECTION_MAIN__NAME = "connection_main"
+
 CHAMBER__NAME = "chamber"
 
 HYDRANT__NAME = "hydrant"
@@ -14,6 +16,10 @@ HYDRANT__NAME = "hydrant"
 LOGGER__NAME = "logger"
 
 NETWORK_METER__NAME = "network_meter"
+
+CONNECTION_METER__NAME = "connection_meter"
+
+CONSUMPTION_METER__NAME = "consumption_meter"
 
 NETWORK_OPT_VALVE__NAME = "network_opt_valve"
 
