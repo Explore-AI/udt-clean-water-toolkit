@@ -35,17 +35,17 @@ type Edge = {
 
 const SpatialGraph = () => {
 
-    //const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
     const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
-    /* if (isPending)  {
-     *     return <LoadingSpinner/>
-     * } */
-    const data = {}
+    if (isPending)  {
+        return <LoadingSpinner/>
+    }
+
     const onSearchChange = (value) => {
         setFilterParams(DMA__QUERY_KEY, { search: value })
     }
-    console.log(items)
+    //console.log(items)
     return (
         <>
             <div className={styles['search_box']}>

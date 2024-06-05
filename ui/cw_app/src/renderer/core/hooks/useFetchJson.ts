@@ -6,7 +6,7 @@ const useFetchJson = (queryKey, options={}) => {
 
     const { filterParams, setFilterParams } = useFilterParams(queryKey, options.params)
 
-    const url = getBaseUrl(queryKey, options.params)
+    const url = getBaseUrl(queryKey, filterParams)
 
     const queryValues = useQuery({
         queryKey: [queryKey, filterParams],
