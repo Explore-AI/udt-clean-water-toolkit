@@ -243,12 +243,10 @@ class MainsController(ABC, GeoDjangoDataManager):
         subquery11 = self.generate_dwithin_subquery(
             ConnectionMeter.objects.all(),
             json_fields,
-            extra_json_fields={"subtype": "subtype"},
         )
         subquery12 = self.generate_dwithin_subquery(
             ConsumptionMeter.objects.all(),
             json_fields,
-            extra_json_fields={"subtype": "subtype"},
         )
         subqueries = {
             "logger_data": ArraySubquery(subquery3),
