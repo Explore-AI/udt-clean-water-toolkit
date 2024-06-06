@@ -104,7 +104,8 @@ class GisToNeo4jController(GisToNeo4jCalculator):
         distribution_mains_qs: QuerySet = self.get_distribution_mains_data(filters)
         connection_mains_qs: QuerySet = self.get_connection_mains_data(filters)
 
-        pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
+        pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True).union(
+            connection_mains_qs, all=True)
         return pipes_qs
 
     def get_trunk_mains_data(self, filters={}) -> QuerySet:
