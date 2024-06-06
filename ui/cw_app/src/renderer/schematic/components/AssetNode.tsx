@@ -1,17 +1,44 @@
 import { Position, Handle } from 'reactflow';
+import { useMemo, memo } from 'react';
 
-const AssetNode = () => {
-    return (
-        <>
-            <Handle type="target" position={Position.Top}>
-                {' '}
-            </Handle>
-            <Handle type="source" position={Position.Top}>
-                {' '}
-            </Handle>
-        </>
-    );
+const handleStyle = {
+    top: '13px',
+    bottom: '0px',
+    left: '3px',
+    right: '0px',
+    width: '1px',
+    height: '1px',
+    border: '0px',
+    maxHeight: '1px',
+    minHeight: '1px',
+    maxWidth: '1px',
+    minWidth: '1px',
+};
+const nodeStyle = {
+    backgroundColor: '#35c3da',
+    width: '100px',
+    height: '50px',
+    borderRadius: '20%',
+    border: '1px solid #203536',
+    display: 'inline-block',
 };
 
-export default AssetNode; 
+const AssetNode = memo(() => {
+    return (
+        <>
+            <div style={nodeStyle}></div>
+            <Handle
+                type="target"
+                position={Position.Top}
+                style={{ visibility: 'hidden', ...handleStyle }}
+            ></Handle>
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                style={{ visibility: 'hidden', ...handleStyle }}
+            ></Handle>
+        </>
+    );
+});
 
+export { AssetNode };

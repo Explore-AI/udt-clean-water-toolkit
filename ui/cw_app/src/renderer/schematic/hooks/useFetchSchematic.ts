@@ -1,8 +1,9 @@
 import { getBaseUrl } from '../../core/utils';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { SchematicProps } from '../types/types';
 
-const requestData = async (url: string) => {
+const requestData = async (url: string): Promise<SchematicProps> => {
     try {
         const response = await axios.get(url);
         return response.data;
@@ -22,7 +23,6 @@ const useFetchSchematicData = (queryKey: string[], options = {}) => {
         retry: 0,
         queryFn: async () => {
             let response = await requestData(url);
-            console.log('response from useFetchSchematic: ', response)
             return response;
         },
     });
