@@ -23,7 +23,7 @@ class ConnectionMainsController(MainsController):
 
         subquery_dm_junctions = self.generate_touches_subquery(dm_qs, json_fields)
 
-        termini_subqueries = self.generate_termini_subqueries([tm_qs, dm_qs])
+        termini_subqueries = self.generate_termini_subqueries([tm_qs, dm_qs, cm_qs])
 
         subqueries = {
             "connmain_junctions": ArraySubquery(subquery_cm_junctions),

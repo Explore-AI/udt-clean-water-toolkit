@@ -343,7 +343,7 @@ class MainsController(ABC):
         }
 
     def get_pipe_point_relation_queryset(
-        self, model: Union[DistributionMain, TrunkMain], main_dmas: Table
+        self, model: Union[DistributionMain, TrunkMain, ConnectionMain], main_dmas: Table
     ) -> Select:
 
         uu_alias = aliased(Utility)  # utilities utility
@@ -379,6 +379,9 @@ class MainsController(ABC):
                 array_agg(mains_intersection_stmt["distmain_junctions"]).label(
                     "distmain_junctions"
                 ),
+                array_agg(mains_intersection_stmt["connmain_junctions"]).label(
+                    "connmain_junctions"
+                ),
                 array_agg(
                     mains_intersection_stmt["line_start_intersection_gids"].c.json
                 ).label("line_start_intersections"),
@@ -402,6 +405,12 @@ class MainsController(ABC):
                 ),
                 array_agg(select(asset_stmt["network_opt_valve"].c.json).as_scalar()).label(
                     "network_opt_valve_data"
+                ),
+                array_agg(select(asset_stmt["connection_meter"].c.json).as_scalar()).label(
+                    "connection_meter_data"
+                ),
+                array_agg(select(asset_stmt["consumption_meter"].c.json).as_scalar()).label(
+                    "consumption_meter_data"
                 ),
             )
             .options(joinedload(model.dmas))

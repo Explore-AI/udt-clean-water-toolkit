@@ -10,3 +10,6 @@ from .operational_site import OperationalSite, operationalsite_dmas
 from .pressure_control_valve import PressureControlValve, pressurecontrolvalve_dmas
 from .pressure_fitting import PressureFitting, pressurefitting_dmas
 from .chamber import Chamber, chamber_dmas
+from .connection_main import ConnectionMain, connection_main_dmas
+from .connection_meter import ConnectionMeter, connectionmeter_dmas
+from. consumption_meter import ConsumptionMeter, consumptionmeter_dmas
