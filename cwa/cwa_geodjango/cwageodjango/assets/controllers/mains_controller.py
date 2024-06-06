@@ -183,6 +183,7 @@ class MainsController(ABC, GeoDjangoDataManager):
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "material": "material",
+            "diameter": "diameter",
             "start_point_geom": LineStartPoint("geometry"),
             "end_point_geom": LineEndPoint("geometry"),
             "dma_ids": ArrayAgg("dmas"),

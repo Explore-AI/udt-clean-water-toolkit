@@ -38,7 +38,7 @@ class AcousticLoggerCoverage():
     def initialise_csv(self):
         with open(self.config.outputfile, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['logger_node_key','pipe_id','pipe_material',
+            writer.writerow(['logger_node_key','pipe_id','pipe_material', 'pipe_diameter',
                              'pipe_length', 'coverage_length','pipe_wkt',
                              'start_node_key','start_node_coords','end_node_key', 
                              'end_node_coords'])

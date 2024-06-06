@@ -50,6 +50,7 @@ class GisToNeo4jCalculator(GisToGraph):
             create (n)-[:{asset_label} {{
             gid: {edge_by_pipe["gid"]},
             material: '{edge_by_pipe["material"]}',
+            diameter: '{edge_by_pipe["diameter"]}',
             segment_wkt: '{edge_by_pipe["segment_wkt"]}',
             segment_length: {edge_by_pipe["segment_length"]}
             }}]->(m)"""
