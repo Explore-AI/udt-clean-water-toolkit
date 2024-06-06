@@ -6,6 +6,8 @@ from .has_dma import HasDma
 from .has_utility import HasUtility
 from .network_node import NetworkNode
 from .pipe_junction import PipeJunction
+from .dma import DMA
+from .utility import Utility
 
 
 def initialise_node_labels():
@@ -18,6 +20,8 @@ def initialise_node_labels():
     if node_count == 0:
         remove_all_labels()
         install_labels(NetworkNode, quiet=False)
+        install_labels(DMA, quiet=False)
+        install_labels(Utility, quiet=False)
         install_labels(PipeMain, quiet=False)
         install_labels(HasDma, quiet=False)
         install_labels(HasUtility, quiet=False)

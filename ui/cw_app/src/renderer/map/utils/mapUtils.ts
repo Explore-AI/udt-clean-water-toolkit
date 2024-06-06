@@ -1,6 +1,8 @@
-import { GEOSERVER_URL } from '../config';
+import { GEOSERVER_URL } from '../../config';
 import { MapViewState } from '@deck.gl/core';
-import { QueryClient } from '@tanstack/react-query'
+import { MVTLayer } from '@deck.gl/geo-layers';
+import {colorCategories, colorContinuous} from '@deck.gl/carto';
+import { map as _map, isEmpty as _isEmpty } from 'lodash';
 
 export type LayerNames = {
     [key: string]: string;
@@ -15,76 +17,72 @@ export const MVT_LAYER_URL = (asset_name: string) => {
     return `${GEOSERVER_URL}/geoserver/gwc/service/tms/1.0.0/udt:${asset_name}@EPSG:3857@pbf/{z}/{x}/{-y}.pbf`;
 };
 
-export const MVT_LAYER_URL_TWO = (asset_name: string) => {
-    return `${GEOSERVER_URL}/geoserver/udt/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=udt:${asset_name}&STYLE=&TILEMATRIX=EPSG:3857:13&TILEMATRIXSET=EPSG:3857&FORMAT=application/vnd.mapbox-vector-tile&TILECOL={x}&TILEROW={y}`;
-};
-
 export const MAP_LAYERS_PROPS = [
     {
         visible: true,
         label: 'Chambers',
         key: 'assets_chamber',
-        colorCode: [245, 183, 177],
+        assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Distribution Main',
         key: 'assets_distributionmain',
-        colorCode: [162, 217, 206],
+        assetType: 'line',
     },
     {
         visible: true,
         label: 'Hydrants',
         key: 'assets_hydrant',
-        colorCode: [0, 158, 222],
+        assetType: 'point',
     },
     {
         visible: true,
         label: 'Loggers',
         key: 'assets_logger',
-        colorCode: [249, 231, 159],
+        assetType: 'point',
     },
     {
         visible: true,
         label: 'Network Meter',
         key: 'assets_networkmeter',
-        colorCode: [88, 214, 141],
+        assetType: 'point',
     },
     {
         visible: true,
         label: 'Network Opt Valve',
         key: 'assets_networkoptvalve',
-        colorCode: [165, 105, 189],
+        assetType: 'point',
     },
     {
         visible: true,
         label: 'Operational Site',
         key: 'assets_operationalsite',
-        colorCode: [165, 105, 189],
+        assetType: 'point',
     },
     {
         visible: true,
         label: 'Pressure Control Valve',
         key: 'assets_pressurecontrolvalve',
-        colorCode: [211, 84, 0],
+        assetType: 'point',
     },
     {
         visible: true,
         label: 'Pressure Fitting',
         key: 'assets_pressurefitting',
-        colorCode: [74, 35, 90],
+        assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Trunk Main',
         key: 'assets_trunkmain',
-        colorCode: [33, 97, 140],
+        assetType: 'line',
     },
     {
         visible: true,
         label: 'DMA',
         key: 'utilities_dma',
-        colorCode: [33, 97, 140],
+        assetType: 'polygon',
     },
 ];
 
@@ -119,4 +117,50 @@ export const gpsRegex =
     /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d(\.\d+)?|180(\.0+)?)|(\d{1,2}(\.\d+)?))$/;
 export const gisidRegex = /^\d{7}$/;
 
-export const queryClient = new QueryClient()
+export const COMMON_STYLING = {
+    opacity: 0.1
+}
+
+export const POINT_STYLING = {
+    ...COMMON_STYLING,
+    getFillColor: [1,1,1],
+}
+
+export const LINE_STYLING = {
+    ...COMMON_STYLING,
+    getFillColor: [1,1,1],
+}
+
+export const POLYGON_STYLING = {
+    ...COMMON_STYLING,
+    getFillColor: colorCategories({
+        attr: 'code',
+        domain: ['ZABINB01', 'ZABIND03', 'ZCHIPO01', 'mid and military', 'ZABIND08'],// TODO: get dmas from from geoserverb
+        colors: 'BluYl'
+    }),
+}
+
+
+export const createLayers = (newMapLayerProps = []) => {
+    const mapLayerProps = !_isEmpty(newMapLayerProps)? newMapLayerProps: MAP_LAYERS_PROPS;
+
+    return _map(mapLayerProps, (layerProps) => {
+
+        let layerStyle = COMMON_STYLING
+        if (layerProps.assetType === 'point') {
+            layerStyle = POINT_STYLING
+        } else if (layerProps.assetType === 'line') {
+            layerStyle = LINE_STYLING
+        } else if (layerProps.assetType === 'polygon') {
+            layerStyle = POLYGON_STYLING
+        }
+
+        return new MVTLayer({
+            pickable: true,
+            id: layerProps.key,
+            data: [MVT_LAYER_URL(layerProps.key)],
+            visible: layerProps.visible,
+            ...layerStyle
+        });
+    });
+};

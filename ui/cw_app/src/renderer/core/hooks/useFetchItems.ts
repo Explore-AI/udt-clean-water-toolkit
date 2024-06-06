@@ -1,13 +1,15 @@
-import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getBaseUrl } from '../utils'
+import useFilterParams from './useFilterParams'
+import { getApiUrl } from '../utils/http'
 
 const useFetchItems = (queryKey, options={}) => {
 
-    const url = getBaseUrl(queryKey, options.params)
+    const { filterParams, setFilterParams } = useFilterParams(queryKey, options.params)
+
+    const url = getApiUrl(queryKey, filterParams)
 
     const queryValues = useQuery({
-        queryKey: [queryKey],
+        queryKey: [queryKey, filterParams],
         retry: 0,
         queryFn: async ({ signal }) => {
             let res = await fetch(url, { signal }) //TODO: replace with axios
@@ -16,7 +18,7 @@ const useFetchItems = (queryKey, options={}) => {
         }
     })
 
-    return queryValues
+    return { queryValues, setFilterParams }
 }
 
 export default useFetchItems

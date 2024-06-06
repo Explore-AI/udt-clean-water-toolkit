@@ -28,9 +28,10 @@ class Command(BaseCommand):
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
             material = feature.get("MATERIAL") or "unknown"
+            diameter = feature.get("DIAMETER_mm")
 
             new_distribution_main = DistributionMain(
-                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326, material=material
+                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326, material=material, diameter=diameter
             )
             new_distribution_mains.append(new_distribution_main)
 

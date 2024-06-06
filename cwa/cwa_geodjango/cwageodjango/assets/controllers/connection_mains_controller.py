@@ -1,20 +1,20 @@
 from django.contrib.postgres.expressions import ArraySubquery
-from cwageodjango.assets.models import TrunkMain, DistributionMain, ConnectionMain
+from cwageodjango.assets.models import ConnectionMain, DistributionMain, TrunkMain
 from .mains_controller import MainsController
 
 
-class DistributionMainsController(MainsController):
-    """Convert distribution mains data to a Queryset or GeoJSON."""
+class ConnectionMainsController(MainsController):
+    """Convert trunk_mains data to Queryset or GeoJSON."""
 
-    model = DistributionMain
+    model = ConnectionMain
 
     def __init__(self):
         super().__init__(self.model)
 
     def _generate_mains_subqueries(self):
-        cm_qs = ConnectionMain.objects.all().order_by("pk")
+        cm_qs = self.model.objects.all().order_by("pk")
         tm_qs = TrunkMain.objects.all().order_by("pk")
-        dm_qs = self.model.objects.all().order_by("pk")
+        dm_qs = DistributionMain.objects.all().order_by("pk")
         json_fields = self.get_pipe_json_fields()
 
         subquery_cm_junctions = self.generate_touches_subquery(cm_qs, json_fields)
@@ -35,7 +35,7 @@ class DistributionMainsController(MainsController):
 
         return subqueries
 
-    def _generate_dwithin_subquery(
+    def generate_dwithin_subquery(
         self,
         qs,
         json_fields,
@@ -43,9 +43,9 @@ class DistributionMainsController(MainsController):
         inner_subqueries={},
         extra_json_fields={},
     ):
-        cm_qs = ConnectionMain.objects.all()
+        cm_qs = self.model.objects.all()
         tm_qs = TrunkMain.objects.all()
-        dm_qs = self.model.objects.all()
+        dm_qs = DistributionMain.objects.all()
 
         tm_inner_subquery = self._generate_dwithin_inner_subquery(
             tm_qs, "gid", geometry_field=geometry_field
@@ -63,7 +63,7 @@ class DistributionMainsController(MainsController):
             "cm_touches_ids": cm_inner_subquery
         }
 
-        subquery = super()._generate_dwithin_subquery(
+        subquery = super().generate_dwithin_subquery(
             qs,
             json_fields,
             geometry_field="geometry",
@@ -73,11 +73,11 @@ class DistributionMainsController(MainsController):
 
         return subquery
 
-    def distribution_mains_to_geojson(self, properties=None):
+    def connection_mains_to_geojson(self, properties=None):
         return self.mains_to_geojson(properties)
 
-    def distribution_mains_to_geojson2(self, properties=None):
+    def connection_mains_to_geojson2(self, properties=None):
         return self.mains_to_geojson2(properties)
 
-    def distribution_mains_to_geodataframe(self, properties=None):
+    def connection_mains_to_geodataframe(self, properties=None):
         return self.mains_to_geodataframe(properties)

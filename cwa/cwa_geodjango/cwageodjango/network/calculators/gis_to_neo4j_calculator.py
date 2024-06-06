@@ -50,6 +50,7 @@ class GisToNeo4jCalculator(GisToGraph):
             create (n)-[:{asset_label} {{
             gid: {edge_by_pipe["gid"]},
             material: '{edge_by_pipe["material"]}',
+            diameter: '{edge_by_pipe["diameter"]}',
             segment_wkt: '{edge_by_pipe["segment_wkt"]}',
             segment_length: {edge_by_pipe["segment_length"]}
             }}]->(m)"""
@@ -112,13 +113,11 @@ class GisToNeo4jCalculator(GisToGraph):
         """
         return query
 
-    def _get_or_create_dma_node(self, dma_properties):
+    def _get_or_create_dma_node(self, dma_code, dma_name):
         """Create or get a DMA node."""
-        code = dma_properties["code"]
-        name = dma_properties["name"]
 
-        query = f"""MERGE (d:DMA {{code: '{code}'}})
-                    ON CREATE SET d.name = '{name}'
+        query = f"""MERGE (d:DMA {{code: '{dma_code}'}})
+                    ON CREATE SET d.name = '{dma_name}'
                     RETURN d"""
 
         result = db.cypher_query(query)
@@ -182,7 +181,7 @@ class GisToNeo4jCalculator(GisToGraph):
             dma_names = node_properties.get("dma_names")
             self._get_or_create_dma_node_rel(node, dma_codes, dma_names)
 
-            # Handle Utility relationship
+            # # Handle Utility relationship
             utility_name = node_properties.get("utility")
             self._get_or_create_utility_node_rel(node, utility_name)
 
@@ -195,8 +194,7 @@ class GisToNeo4jCalculator(GisToGraph):
     def _get_or_create_dma_node_rel(self, node, dma_codes, dma_names):
 
         for dma_code, dma_name in zip(dma_codes, dma_names):
-            dma_properties = {"code": dma_code, "name": dma_name}
-            dma_node = self._get_or_create_dma_node(dma_properties)
+            dma_node = self._get_or_create_dma_node(dma_code, dma_name)
             self._create_dma_relationship(node, dma_node)
 
     def _create_relations(self, edges_by_pipe, all_nodes):
@@ -211,12 +209,12 @@ class GisToNeo4jCalculator(GisToGraph):
             current_node = next_node
 
     def _create_dma_relationship(self, node, dma_node):
-        query = f"""MATCH (n {{node_key: '{node["node_key"]}'}}), (d:DMA {{code: '{dma_node["code"]}'}})
+        query = f"""MATCH (n:NetworkNode {{node_key: '{node["node_key"]}'}}), (d:DMA {{code: '{dma_node["code"]}'}})
                     CREATE (n)-[:HAS_DMA]->(d)"""
         db.cypher_query(query)
 
     def _create_utility_relationship(self, node, utility_node):
-        query = f"""MATCH (n {{node_key: '{node["node_key"]}'}}), (u:Utility {{name: '{utility_node["name"]}'}})
+        query = f"""MATCH (n:NetworkNode {{node_key: '{node["node_key"]}'}}), (u:Utility {{name: '{utility_node["name"]}'}})
                     CREATE (n)-[:HAS_UTILITY]->(u)"""
         db.cypher_query(query)
 

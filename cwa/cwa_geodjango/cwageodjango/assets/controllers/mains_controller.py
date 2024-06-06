@@ -183,6 +183,7 @@ class MainsController(ABC, GeoDjangoDataManager):
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "material": "material",
+            "diameter": "diameter",
             "start_point_geom": LineStartPoint("geometry"),
             "end_point_geom": LineEndPoint("geometry"),
             "dma_ids": ArrayAgg("dmas"),
@@ -239,7 +240,14 @@ class MainsController(ABC, GeoDjangoDataManager):
             json_fields,
             extra_json_fields={"acoustic_logger": "acoustic_logger"},
         )
-
+        subquery11 = self.generate_dwithin_subquery(
+            ConnectionMeter.objects.all(),
+            json_fields,
+        )
+        subquery12 = self.generate_dwithin_subquery(
+            ConsumptionMeter.objects.all(),
+            json_fields,
+        )
         subqueries = {
             "logger_data": ArraySubquery(subquery3),
             "hydrant_data": ArraySubquery(subquery4),
@@ -249,6 +257,8 @@ class MainsController(ABC, GeoDjangoDataManager):
             "chamber_data": ArraySubquery(subquery8),
             "operational_site_data": ArraySubquery(subquery9),
             "network_opt_valve": ArraySubquery(subquery10),
+            "connection_meter_data": ArraySubquery(subquery11),
+            "consumption_meter_data": ArraySubquery(subquery12)
         }
         return subqueries
 

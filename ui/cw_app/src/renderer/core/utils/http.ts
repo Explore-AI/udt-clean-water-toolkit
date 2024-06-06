@@ -1,7 +1,7 @@
 import { DRF_API_URL } from '../../config';
 import { isEmpty as _isEmpty, keys as _keys, reduce as _reduce, } from "lodash";
 
-export const getBaseUrl = (queryKey, params={}) => {
+export const getApiUrl = (queryKey, params={}) => {
 
     if (!_isEmpty(params)) {
         const queryParams = serialize(params)

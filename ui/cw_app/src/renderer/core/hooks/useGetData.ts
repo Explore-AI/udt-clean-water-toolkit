@@ -1,14 +1,16 @@
-import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query';
+import useFilterParams from './useFilterParams'
 
 const useGetData = (queryKey) => {
 
+    const { filterParams, setFilterParams } = useFilterParams(queryKey)
+
     const queryValues = useQuery({
-        queryKey: [queryKey],
+        queryKey: [queryKey, filterParams],
         enabled: false
     })
 
-    return queryValues
+    return { queryValues, setFilterParams }
 }
 
 export default useGetData
