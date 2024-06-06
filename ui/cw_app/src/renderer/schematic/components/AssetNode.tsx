@@ -1,6 +1,6 @@
-import { Position, Handle } from 'reactflow';
-import { useMemo, memo } from 'react';
-
+import { Position, Handle, NodeProps } from 'reactflow';
+import { memo } from 'react';
+import { Node } from '../types/types';
 const handleStyle = {
     top: '13px',
     bottom: '0px',
@@ -15,11 +15,11 @@ const handleStyle = {
     minWidth: '1px',
 };
 const nodeStyle = {
-    backgroundColor: '#35c3da',
+    backgroundColor: '#cfeef4',
     width: '100px',
     height: '50px',
     borderRadius: '20%',
-    border: '1px solid #203536',
+    border: '2px solid #393939',
     display: 'inline-block',
 };
 
