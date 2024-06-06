@@ -1,7 +1,7 @@
-// https://reactflow.dev/examples/layout/elkjs-multiple-handles
-import { useEffect } from 'react';
+// base implementation taken from: https://reactflow.dev/examples/layout/elkjs-multiple-handles
+// modified to fit use case 
 import ELK from 'elkjs/lib/elk.bundled';
-import { Node, Edge as PipeEdge, SchematicProps } from '../types/types';
+import { SchematicProps } from '../types/types';
 import { useQuery } from '@tanstack/react-query';
 
 const layoutOptions = {
@@ -21,8 +21,8 @@ const getNodesLayout = async ({ nodes, edges }: SchematicProps) => {
         layoutOptions,
         children: nodes.map((node) => ({
             id: node.id,
-            width: 150, // You can adjust width based on your node size
-            height: 50, // You can adjust height based on your node size
+            width: 150, 
+            height: 50, 
             properties: {
                 label: node.key,
                 'org.eclipse.elk.portConstraints': 'FIXED_POS',
@@ -52,14 +52,15 @@ const getNodesLayout = async ({ nodes, edges }: SchematicProps) => {
 };
 
 export default function useElkLayout(data: SchematicProps) {
-    // console.log('Hit the Elk Layout hook')
     const layoutData =  useQuery({
         queryKey: ['nodesLayout', data],
         queryFn: async () => {
             let layoutData = await getNodesLayout(data);
-            // console.log('Layout Data returned in the hook: ', layoutData)
             return layoutData;
         },
+        // function will only render if nodes, and edges data is available
+        // for more on dependent queries: 
+        // https://tanstack.com/query/latest/docs/framework/react/guides/dependent-queries
         enabled: !!data.nodes.length && !!data.edges.length,
     });
     return layoutData;

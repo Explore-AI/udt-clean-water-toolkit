@@ -8,7 +8,7 @@ import { AssetNode } from './AssetNode';
 import { PipeEdgeNode } from './PipeNode';
 import ReactFlow, { Controls, Background } from 'reactflow';
 import 'reactflow/dist/base.css';
-import useElkLayout  from '../hooks/useElkLayout';
+import useElkLayout from '../hooks/useElkLayout';
 
 const nodeTypes = {
     assetNode: AssetNode,
@@ -19,22 +19,22 @@ function Schematic() {
     const { data, isPending, isSuccess } = useFetchSchematicData([
         TRUNKMAIN_QUERY_KEY,
     ]);
-    const {data: layoutData, isPending: isLayoutPending } = useElkLayout(
+    const { data: layoutData, isPending: isLayoutPending } = useElkLayout(
         data || { nodes: [], edges: [] },
     );
 
-    if (isPending){ 
+    if (isPending) {
         return <LoadingSpinner />;
     }
 
-    if ((_isEmpty(data) && isSuccess)) {
+    if (_isEmpty(data) && isSuccess) {
         return (
             <div>
                 <h1>No data found</h1>
             </div>
         );
     }
-    console.log(layoutData);
+
     return (
         <>
             <ReactFlow
