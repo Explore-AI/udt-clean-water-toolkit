@@ -1,8 +1,21 @@
-import BaseLayout from "../../core/components/BaseLayout";
-import SchematicView from "./Schematic";
-import React from "react";
+import Schematic from "./Schematic";
+import { PageProps } from "../types/types";
+import useFetchSchematicData from "../hooks/useFetchSchematic";
+import { TRUNKMAIN_QUERY_KEY } from "../queries";
+import styles from '../css/SchematicPage.module.css'; 
 
+export default function SchematicPage(props: PageProps){
+    const { pageVisibility } = props; 
 
-export default function NodeSchematicPage(){
-    
+    useFetchSchematicData([TRUNKMAIN_QUERY_KEY])
+
+    const mainCss = `${styles.main} ${styles[pageVisibility]}`
+
+    return(
+        <> 
+            <div className={mainCss}>
+                <Schematic />
+            </div>
+        </>
+    )
 }

@@ -15,7 +15,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
         query = f"""
         match (n)-[r:TrunkMain]-(m)
         return ID(n), n, ID(r), r, ID(m), m
-        limit 5000
+        limit 100
         """
 
         results, _ = db.cypher_query(query)
@@ -25,17 +25,18 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
     
     def create_node(self, node_id, position, node_type="default", properties={}):
 
-        # point = Point(position[0], position[1], srid=XXXXX)
+        point_bng = Point(position[0], position[1], srid=27700)
+        point_4326 = point_bng.transform(4326, clone=True)
 
         return {
             "id": node_id,
             "key": node_id,
             "type": node_type,
             "position": {
-                # "x": point_4326.x,
-                # "y": point_4326.y,
-                "x": position[0],
-                "y": position[1],
+                "x": point_4326.x * 100.0,
+                "y": point_4326.y * 100.0,
+                # "x": position[0],
+                # "y": position[1],
             },
             "properties": properties
         }
@@ -79,13 +80,13 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
         start_node = self.create_node(
             start_node_id,
             start_node_data["coords_27700"],
-            node_type="circle",
+            node_type="assetNode",
             properties=start_node_data._properties,
         )
         end_node = self.create_node(
             end_node_id,
             end_node_data["coords_27700"],
-            node_type="circle",
+            node_type="assetNode",
             properties=end_node_data._properties,
         )
 
@@ -125,7 +126,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
                 float(coord.split(" ")[0]),
                 float(coord.split(" ")[1]),
             ]
-            edge_node = self.create_node(node_id, position, node_type="edge_node")
+            edge_node = self.create_node(node_id, position, node_type="pipeNode")
 
             all_nodes.append(edge_node)
 

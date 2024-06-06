@@ -2,12 +2,12 @@ import MapPage from '../../map/components/MapPage'
 import GraphPage from '../../graph/components/GraphPage'
 import AnalysisPage from '../../analysis/components/AnalysisPage'
 import SpatialGraphPage from '../../spatial_graph/components/SpatialGraphPage'
+import SchematicPage from '../../schematic/components/SchematicPage';
 import { useLocation } from 'react-router-dom'
 import { startsWith as _startsWith } from 'lodash'
 
-const  BaseSinglePage = () => {
-
-    const { pathname } = useLocation()
+const BaseSinglePage = () => {
+    const { pathname } = useLocation();
 
     const pageVisibility = {
         map: _startsWith(pathname,'/map') ? 'visible': 'hidden',
@@ -23,8 +23,9 @@ const  BaseSinglePage = () => {
             <GraphPage pageVisibility={pageVisibility.graph} />
             <SpatialGraphPage pageVisibility={pageVisibility.spatialGraph} />
             <AnalysisPage pageVisibility={pageVisibility.analysis} />
+            <SchematicPage pageVisibility={pageVisibility.schematic} />
         </>
     );
-}
+};
 
 export default BaseSinglePage;

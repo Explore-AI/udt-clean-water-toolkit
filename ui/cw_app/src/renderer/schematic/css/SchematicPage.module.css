@@ -1,0 +1,15 @@
+.main {
+    width: 100vw;
+    height: calc(100vh - 60px);
+    position: relative;
+    z-index: 1;
+    border: 2px solid navy; 
+}
+
+.visible {
+    display: inherit
+}
+
+.hidden {
+    display: none
+}
