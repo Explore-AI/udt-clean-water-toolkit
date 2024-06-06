@@ -1,5 +1,5 @@
 from django.contrib.postgres.expressions import ArraySubquery
-from cwageodjango.assets.models import TrunkMain, DistributionMain
+from cwageodjango.assets.models import TrunkMain, DistributionMain, ConnectionMain
 from .mains_controller import MainsController
 
 
@@ -12,9 +12,12 @@ class TrunkMainsController(MainsController):
         super().__init__(self.model)
 
     def _generate_mains_subqueries(self):
+        cm_qs = ConnectionMain.objects.all().order_by("pk")
         tm_qs = self.model.objects.all().order_by("pk")
         dm_qs = DistributionMain.objects.all().order_by("pk")
         json_fields = self.get_pipe_json_fields()
+
+        subquery_cm_junctions = self.generate_touches_subquery(cm_qs, json_fields)
 
         subquery_tm_junctions = self.generate_touches_subquery(tm_qs, json_fields)
 
@@ -23,6 +26,7 @@ class TrunkMainsController(MainsController):
         termini_subqueries = self.generate_termini_subqueries([tm_qs, dm_qs])
 
         subqueries = {
+            "connmain_junctions": ArraySubquery(subquery_cm_junctions),
             "trunkmain_junctions": ArraySubquery(subquery_tm_junctions),
             "distmain_junctions": ArraySubquery(subquery_dm_junctions),
             "line_start_intersections": ArraySubquery(termini_subqueries[0]),
