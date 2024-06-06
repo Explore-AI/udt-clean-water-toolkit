@@ -43,7 +43,7 @@ class DistributionMainsController(MainsController):
         inner_subqueries={},
         extra_json_fields={},
     ):
-
+        cm_qs = ConnectionMain.objects.all()
         tm_qs = TrunkMain.objects.all()
         dm_qs = self.model.objects.all()
 
@@ -53,10 +53,14 @@ class DistributionMainsController(MainsController):
         dm_inner_subquery = self._generate_dwithin_inner_subquery(
             dm_qs, "gid", geometry_field=geometry_field
         )
+        cm_inner_subquery = self._generate_dwithin_inner_subquery(
+            cm_qs, "gid", geometry_field=geometry_field
+        )
 
         inner_subqueries = {
             "tm_touches_ids": tm_inner_subquery,
             "dm_touches_ids": dm_inner_subquery,
+            "cm_touches_ids": cm_inner_subquery
         }
 
         subquery = super()._generate_dwithin_subquery(

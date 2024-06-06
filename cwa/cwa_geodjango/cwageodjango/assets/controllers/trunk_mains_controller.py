@@ -44,19 +44,24 @@ class TrunkMainsController(MainsController):
         extra_json_fields={},
     ):
 
+        cm_qs = ConnectionMain.objects.all()
         tm_qs = self.model.objects.all()
         dm_qs = DistributionMain.objects.all()
 
         tm_inner_subquery = self._generate_dwithin_inner_subquery(
-            tm_qs, "id", geometry_field=geometry_field
+            tm_qs, "gid", geometry_field=geometry_field
         )
         dm_inner_subquery = self._generate_dwithin_inner_subquery(
-            dm_qs, "id", geometry_field=geometry_field
+            dm_qs, "gid", geometry_field=geometry_field
+        )
+        cm_inner_subquery = self._generate_dwithin_inner_subquery(
+            cm_qs, "gid", geometry_field=geometry_field
         )
 
         inner_subqueries = {
             "tm_touches_ids": tm_inner_subquery,
             "dm_touches_ids": dm_inner_subquery,
+            "cm_touches_ids": cm_inner_subquery
         }
 
         subquery = super().generate_dwithin_subquery(
