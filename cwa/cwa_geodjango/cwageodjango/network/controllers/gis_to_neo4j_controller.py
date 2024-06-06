@@ -2,9 +2,9 @@ from django.db.models.query import QuerySet
 from ..calculators import GisToNeo4jCalculator
 from ..models import initialise_node_labels
 from cwageodjango.assets.controllers import (
-    ConnectionMainsController
+    ConnectionMainsController,
     TrunkMainsController,
-    DistributionMainsController,
+    DistributionMainsController
 )
 
 
@@ -102,6 +102,7 @@ class GisToNeo4jController(GisToNeo4jCalculator):
 
         trunk_mains_qs: QuerySet = self.get_trunk_mains_data(filters)
         distribution_mains_qs: QuerySet = self.get_distribution_mains_data(filters)
+        connection_mains_qs: QuerySet = self.get_connection_mains_data(filters)
 
         pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
         return pipes_qs
@@ -113,3 +114,7 @@ class GisToNeo4jController(GisToNeo4jCalculator):
     def get_distribution_mains_data(self, filters={}) -> QuerySet:
         dm: DistributionMainsController = DistributionMainsController()
         return dm.get_pipe_point_relation_queryset(filters)
+
+    def get_connection_mains_data(self, filters={}) -> QuerySet:
+        cm: ConnectionMainsController = ConnectionMainsController()
+        return cm.get_pipe_point_relation_queryset(filters)
