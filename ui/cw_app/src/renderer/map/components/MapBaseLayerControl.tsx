@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { map as _map } from 'lodash';
 import { Radio, Tooltip, ActionIcon, rem } from '@mantine/core';
 import { IconMap } from '@tabler/icons-react';
-import { DEFAULT_BASEMAP_PROPS } from '../../core';
+import { DEFAULT_BASEMAP_PROPS } from '../utils/mapUtils';
 import { MapLayerContext } from '../hooks/useMapLayers';
 import { MapUiContext } from '../hooks/useMapUi';
 
