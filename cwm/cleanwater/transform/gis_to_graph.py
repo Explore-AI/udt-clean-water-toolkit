@@ -108,6 +108,7 @@ class GisToGraph:
                     "to_node_key": to_node["node_key"],
                     "gid": base_pipe["gid"],
                     "material": base_pipe["material"],
+                    "diameter": base_pipe["diameter"],
                     "asset_name": base_pipe["asset_name"],
                     "asset_label": base_pipe["asset_label"],
                     "dma_codes": base_pipe["dma_codes"],
@@ -269,6 +270,8 @@ class GisToGraph:
             + pipe_qs_object.pressure_fitting_data
             + pipe_qs_object.pressure_valve_data
             + pipe_qs_object.network_opt_valve
+            + pipe_qs_object.connection_meter_data
+            + pipe_qs_object.consumption_meter_data
         )
 
     @staticmethod
