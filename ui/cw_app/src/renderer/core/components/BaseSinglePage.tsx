@@ -12,7 +12,7 @@ const  BaseSinglePage = () => {
     const pageVisibility = {
         map: _startsWith(pathname,'/map') ? 'visible': 'hidden',
         graph: _startsWith(pathname,'/graph') ? 'visible': 'hidden',
-        ['geo-graph']: _startsWith(pathname, '/spatial-graph') ? 'visible': 'hidden',
+        spatialGraph: _startsWith(pathname, '/spatial-graph') ? 'visible': 'hidden',
         schematic: _startsWith(pathname, '/schematic') ? 'visible': 'hidden',
         analysis: _startsWith(pathname, '/analysis') ? 'visible': 'hidden',
     }
@@ -21,7 +21,7 @@ const  BaseSinglePage = () => {
         <>
             <MapPage pageVisibility={pageVisibility.map} />
             <GraphPage pageVisibility={pageVisibility.graph} />
-            <SpatialGraphPage pageVisibility={pageVisibility['geo-graph']} />
+            <SpatialGraphPage pageVisibility={pageVisibility.spatialGraph} />
             <AnalysisPage pageVisibility={pageVisibility.analysis} />
         </>
     );

@@ -1,8 +1,9 @@
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
 import BaseRouter from './BaseRouter'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '../'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+export const queryClient = new QueryClient()
 
 function BasePage() {
 
