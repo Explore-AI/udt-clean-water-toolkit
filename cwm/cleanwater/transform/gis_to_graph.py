@@ -258,7 +258,11 @@ class GisToGraph:
         return base_pipe
 
     def _combine_all_pipe_junctions(self, pipe_qs_object) -> list:
-        return pipe_qs_object.trunkmain_junctions + pipe_qs_object.distmain_junctions
+        return (
+            pipe_qs_object.trunkmain_junctions
+            + pipe_qs_object.distmain_junctions
+            + pipe_qs_object.connmain_junctions
+        )
 
     def _combine_all_point_assets(self, pipe_qs_object) -> list:
         return (
