@@ -1,6 +1,8 @@
 import { Position, Handle, NodeProps } from 'reactflow';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Node } from '../types/types';
+import styles from '../css/AssetNode.module.css';  
+
 const handleStyle = {
     top: '13px',
     bottom: '0px',
@@ -23,10 +25,25 @@ const nodeStyle = {
     display: 'inline-block',
 };
 
-const AssetNode = memo(() => {
+const splitAssetName = (name: string) => {
+    return name.replace(/_/g, ' '); 
+}
+
+
+const AssetNode = (props: NodeProps<Node>) => {
+    const { data } = props; 
+    const { properties: nodeProperties } = data; 
+
     return (
         <>
-            <div style={nodeStyle}></div>
+            <div className={styles.nodeContainer}> 
+                <div className={styles.containerTitle}> 
+                    <div> {nodeProperties?.asset_names ? splitAssetName(nodeProperties?.asset_names[0]): 'Point Asset'} </div>
+                    <p> - </p>
+                    <p> { nodeProperties?.asset_gids ?  nodeProperties?.asset_gids[0]: data.key }</p>
+                </div>
+                {/* <p> {data?.key}</p> */}
+            </div>
             <Handle
                 type="target"
                 position={Position.Top}
@@ -39,6 +56,6 @@ const AssetNode = memo(() => {
             ></Handle>
         </>
     );
-});
+};
 
 export { AssetNode };

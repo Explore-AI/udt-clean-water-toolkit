@@ -5,10 +5,10 @@ import { SchematicProps } from '../types/types';
 import { useQuery } from '@tanstack/react-query';
 
 const layoutOptions = {
-    'elk.algorithm': 'layered',
+    'elk.algorithm': 'mrtree',
     'elk.direction': 'RIGHT',
-    'elk.layered.spacing.edgeNodeBetweenLayers': '40',
-    'elk.spacing.nodeNode': '40',
+    'elk.layered.spacing.edgeNodeBetweenLayers': '60',
+    'elk.spacing.nodeNode': '80',
     'elk.layered.nodePlacement.strategy': 'SIMPLE',
 };
 
@@ -21,8 +21,8 @@ const getNodesLayout = async ({ nodes, edges }: SchematicProps) => {
         layoutOptions,
         children: nodes.map((node) => ({
             id: node.id,
-            width: 150, 
-            height: 50, 
+            width: 200, 
+            height: 70, 
             properties: {
                 label: node.key,
                 'org.eclipse.elk.portConstraints': 'FIXED_POS',
@@ -44,10 +44,11 @@ const getNodesLayout = async ({ nodes, edges }: SchematicProps) => {
         );
         return {
             ...node,
+            data: {...node},
             position: { x: nodeLayout?.x ?? 0, y: nodeLayout?.y ?? 0 },
+
         };
     });
-
     return {nodes: nodesLayout, edges: edges};
 };
 
@@ -61,7 +62,7 @@ export default function useElkLayout(data: SchematicProps) {
         // function will only render if nodes, and edges data is available
         // for more on dependent queries: 
         // https://tanstack.com/query/latest/docs/framework/react/guides/dependent-queries
-        enabled: !!data.nodes.length && !!data.edges.length,
+        enabled: (data.nodes.length > 0 && data.edges.length > 0),
     });
     return layoutData;
 }

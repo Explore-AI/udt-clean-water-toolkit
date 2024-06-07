@@ -9,17 +9,19 @@ import { PipeEdgeNode } from './PipeNode';
 import ReactFlow, { Controls, Background } from 'reactflow';
 import 'reactflow/dist/base.css';
 import useElkLayout from '../hooks/useElkLayout';
+import { useMemo } from 'react';
 
 const nodeTypes = {
     assetNode: AssetNode,
     pipeNode: PipeEdgeNode,
 };
 
+
 function Schematic() {
     const { data, isPending, isSuccess } = useFetchSchematicData([
         TRUNKMAIN_QUERY_KEY,
     ]);
-    const { data: layoutData, isPending: isLayoutPending } = useElkLayout(
+    const { data: layoutData } = useElkLayout(
         data || { nodes: [], edges: [] },
     );
 
@@ -34,6 +36,7 @@ function Schematic() {
             </div>
         );
     }
+    console.log(layoutData);
 
     return (
         <>
