@@ -18,7 +18,14 @@ MIXED_NODE_TYPES_SORTED = [
 ]
 
 
-class GisToNeo4jCalculator(GisToGraph):
+def flatten_concatenation(matrix):
+    flat_list = []
+    for row in matrix:
+        flat_list += row
+    return flat_list
+
+
+class GisToNeo4jCalculator2(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial network of assets"""
 
     def __init__(self, config):
@@ -154,37 +161,55 @@ class GisToNeo4jCalculator(GisToGraph):
         except UniqueProperty:
             return self._get_node_by_key(node_properties["node_key"])
 
-    def _create_nodes(self, all_node_properties):
-        all_nodes = []
-        for node_properties in all_node_properties:
-            node_key = node_properties.get("node_key")
-            network_node = self._get_node_by_key(node_key)
+    def set_dynamic_node_properties(self):
 
-            if network_node:
-                all_nodes.append(network_node)
-                continue
+        subquery = """
+        n.node_types = CASE WHEN node.node_types IS NOT NULL THEN node.node_types ELSE NULL END,
+        n.asset_names = CASE WHEN node.point_asset_names IS NOT NULL THEN node.point_asset_names ELSE NULL END,
+        n.asset_gids = CASE WHEN node.point_asset_gids IS NOT NULL THEN node.point_asset_gids ELSE NULL END,
+        """
+        for point_asset in self.point_asset_gid_names:
+            subquery += f"""n.{point_asset} = CASE WHEN node.{point_asset}
+            IS NOT NULL THEN node.{point_asset}
+            ELSE NULL END,\n"""
 
-            node_types = sorted(node_properties.get("node_types"))
+        # TODO: Fix this string slice. Highly likely this could cause a bug
+        return subquery[:-2]
 
-            if node_types == [PIPE_JUNCTION__NAME] or node_types == [PIPE_END__NAME]:
-                node = self._create_pipe_junction_or_end_node(node_properties)
-            elif node_types == [POINT_ASSET__NAME]:
-                node = self._get_or_create_point_asset_node(node_properties)
-            elif node_types in MIXED_NODE_TYPES_SORTED:
-                node = self._get_or_create_pipe_and_asset_node(node_properties)
+    @staticmethod
+    def set_static_node_properties():
+        return """
+        n.node_key = node.node_key,
+        n.coords_27700 = node.coords_27700,
+        """
 
-            all_nodes.append(node)
+    def set_node_labels(self):
 
-            # Handle DMA relationship
-            dma_codes = node_properties.get("dma_codes")
-            dma_names = node_properties.get("dma_names")
-            self._get_or_create_dma_node_rel(node, dma_codes, dma_names)
+        subquery = ""
+        for node_label in self.network_node_labels:
+            subquery += f"""FOREACH (ignoreMe IN CASE
+            WHEN '{node_label}' IN node.node_labels
+            THEN [1] ELSE [] END |
+            SET n:{node_label})\n"""
 
-            # # Handle Utility relationship
-            utility_name = node_properties.get("utility")
-            self._get_or_create_utility_node_rel(node, utility_name)
+        return subquery
 
-        return all_nodes
+    def _create_nodes(self, all_unique_nodes):
+
+        query = f"""UNWIND $all_unique_nodes AS node
+         MERGE (n:NetworkNode {{node_key: node.node_key}})
+         ON CREATE
+             SET n.createdAt = timestamp()
+             {self.set_node_labels()}
+         SET
+         {self.set_static_node_properties()}
+         {self.set_dynamic_node_properties()}
+         RETURN n
+         """
+
+        db.cypher_query(query, {"all_unique_nodes": all_unique_nodes})
+
+        return
 
     def _get_or_create_utility_node_rel(self, node, utility_name):
         utility_node = self._get_or_create_utility_node(utility_name)
@@ -218,22 +243,44 @@ class GisToNeo4jCalculator(GisToGraph):
         db.cypher_query(query)
 
     def _map_pipe_connected_asset_relations(
-        self, edges_by_pipe: dict, all_node_properties: list
+        self, all_unique_nodes: list, all_unique_edges: list
     ):
-        all_nodes = self._create_nodes(all_node_properties)
+        all_nodes = self._create_nodes(all_unique_nodes)
         self._create_relations(edges_by_pipe, all_nodes)
+
+    def _get_unique_nodes_and_edges(self):
+        all_nodes = flatten_concatenation(self.all_nodes_by_pipe)
+        all_edges = flatten_concatenation(self.all_edges_by_pipe)
+
+        unique_node_keys = []
+        all_unique_nodes = []
+        for node in all_nodes:
+            node_key = node["node_key"]
+            if node_key not in unique_node_keys:
+                all_unique_nodes.append(node)
+                unique_node_keys.append(node)
+
+        unique_edge_keys = []
+        all_unique_edges = []
+        for edge in all_edges:
+            edge_key = edge["edge_key"]
+            if edge_key not in unique_edge_keys:
+                all_unique_edges.append(edge)
+                unique_edge_keys.append(edge_key)
+
+        return all_unique_nodes, all_unique_edges
 
     def _reset_pipe_asset_data(self):
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
 
     def create_neo4j_graph(self) -> None:
-        list(
-            map(
-                self._map_pipe_connected_asset_relations,
-                self.all_edges_by_pipe,
-                self.all_nodes_by_pipe,
-            )
+
+        all_unique_nodes, all_unique_edges = self._get_unique_nodes_and_edges()
+
+        self._map_pipe_connected_asset_relations(
+            all_unique_nodes,
+            all_unique_edges,
         )
         self._reset_pipe_asset_data()
 

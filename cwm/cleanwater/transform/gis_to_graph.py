@@ -27,6 +27,13 @@ class GisToGraph:
 
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
+        self.dma_codes = []  # List of dma_codes with no duplicates
+        self.network_node_labels = [
+            "NetworkNode",
+            "PipeJunction",
+            "PipeEnd",
+        ]  # List of node labels with no duplicates
+        self.point_asset_gid_names = []  # List node assets with no duplicates
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         self.all_nodes_by_pipe, self.all_edges_by_pipe = list(
@@ -106,6 +113,7 @@ class GisToGraph:
                 {
                     "from_node_key": from_node["node_key"],
                     "to_node_key": to_node["node_key"],
+                    "edge_key": f"{from_node['node_key']}-{to_node['node_key']}",
                     "gid": base_pipe["gid"],
                     "material": base_pipe["material"],
                     "diameter": base_pipe["diameter"],
@@ -187,24 +195,37 @@ class GisToGraph:
                         merged_nodes[-1]["node_labels"].append("PointAsset")
                     merged_nodes[-1]["node_labels"].append(node["asset_label"])
 
+                    if node["asset_label"] not in self.network_node_labels:
+                        self.network_node_labels.append(node["asset_label"])
+
+                    node_asset_gid_name = f"{node['asset_name']}_gid"
+
+                    if node_asset_gid_name not in self.point_asset_gid_names:
+                        self.point_asset_gid_names.append(node_asset_gid_name)
+
+                    merged_nodes[-1][node_asset_gid_name] = node["gid"]
+
                     try:
                         merged_nodes[-1]["point_asset_names"].append(node["asset_name"])
                         merged_nodes[-1]["point_asset_gids"].append(node["gid"])
                         merged_nodes[-1]["point_assets_with_gids"][
-                            f"{node['asset_name']}_gid"
+                            node_asset_gid_name
                         ] = node["gid"]
 
                     except KeyError:
                         merged_nodes[-1]["point_asset_names"] = [node["asset_name"]]
                         merged_nodes[-1]["point_asset_gids"] = [node["gid"]]
                         merged_nodes[-1]["point_assets_with_gids"] = {
-                            f"{node['asset_name']}_gid": node["gid"]
+                            node_asset_gid_name: node["gid"]
                         }
 
                 # remove duplicates and sort node_types
                 merged_nodes[-1]["node_types"] = sorted(
                     list(set((merged_nodes[-1]["node_types"])))
                 )
+
+                self.dma_codes.extend(node["dma_codes"])
+                self.dma_codes = list(set(self.dma_codes))
 
         return merged_nodes
 
