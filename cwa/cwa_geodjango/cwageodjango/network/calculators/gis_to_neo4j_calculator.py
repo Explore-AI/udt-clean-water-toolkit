@@ -1,7 +1,6 @@
 from multiprocessing.pool import ThreadPool
 from django.contrib.gis.geos import Point
 from neomodel.contrib.spatial_properties import NeomodelPoint
-import json
 from neomodel import db
 from neomodel.exceptions import UniqueProperty
 from cleanwater.transform import GisToGraph

@@ -2,11 +2,12 @@ import argparse
 from cwageodjango.core.conf import AppConf
 from cwageodjango.network.controllers import (
     GisToNeo4jController,
+    GisToNeo4jController2,
     GisToNxController,
     GisToNkController,
     Convert2Wntr,
     Neo4jToNkController,
-    AcousticLoggerCoverage
+    AcousticLoggerCoverage,
 )
 
 
@@ -46,6 +47,14 @@ class Analysis(AppConf):
         else:
             gis_to_neo4j.create_network()
 
+    def cleanwater_gis2neo4j2(self) -> None:
+        gis_to_neo4j2 = GisToNeo4jController2(self.validated_config)
+
+        if self.validated_config.parallel:
+            gis_to_neo4j2.create_network_parallel()
+        else:
+            gis_to_neo4j2.create_network()
+
     def cleanwater_gis2networkit(self) -> None:
         gis_to_nk = GisToNkController(self.validated_config)
         gis_to_nk.create_network()
@@ -84,7 +93,6 @@ class Analysis(AppConf):
         convert2networkit.convert()
         convert2networkit.export_graphml()
 
-
     def calc_acoustic_coverage(self):
         acoustic_coverage = AcousticLoggerCoverage(self.validated_config)
         acoustic_coverage.compute_cov()
@@ -94,11 +102,12 @@ class Analysis(AppConf):
         return {
             "gis2nx": self.cleanwater_gis2nx,
             "gis2neo4j": self.cleanwater_gis2neo4j,
+            "gis2neo4j2": self.cleanwater_gis2neo4j2,
             "gis2nk": self.cleanwater_gis2networkit,
             "neo4j2wntrinp": self.neo4j_to_wntr_inp,
             "neo4j2wntrjson": self.neo4j_to_wntr_json,
             "neo4j2networkitgraphml": self.neo4j_to_networkit_graphml,
-            "networkcoverage" : self.calc_acoustic_coverage
+            "networkcoverage": self.calc_acoustic_coverage,
         }
 
     @property
