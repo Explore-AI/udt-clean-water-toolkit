@@ -4,12 +4,11 @@ import { TRUNKMAIN_QUERY_KEY } from '../queries';
 import { isEmpty as _isEmpty } from 'lodash';
 import styles from '../css/Schematic.module.css';
 import useFetchSchematicData from '../hooks/useFetchSchematic';
-import { AssetNode } from './AssetNode';
-import { PipeEdgeNode } from './PipeNode';
-import ReactFlow, { Controls, Background } from 'reactflow';
+import AssetNode from './AssetNode';
+import PipeEdgeNode from './PipeNode';
+import ReactFlow, { Controls } from 'reactflow';
 import 'reactflow/dist/base.css';
 import useElkLayout from '../hooks/useElkLayout';
-import { useMemo } from 'react';
 
 const nodeTypes = {
     assetNode: AssetNode,

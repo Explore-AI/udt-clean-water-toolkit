@@ -49,7 +49,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
             "key": edge_id,
             "source": str(from_node_id),
             "target": str(to_node_id),
-            "type": "smooth_step",
+            "type": "straight",
             "style": {"strokeWidth": "5px", "color": "black"},
             "properties": edge_properties,
         }

@@ -17,11 +17,15 @@
     font-family: Tahoma, sans-serif; 
     font-weight: 500;
     font-size: 0.75rem; 
-    border: 1px solid salmon; 
+    /* border: 1px solid salmon;  */
 }
 
 .containerTitle p {
     font-family: 'Courier New', Courier, monospace; 
     font-weight: 300; 
     font-size: 0.75rem; 
+}
+
+.icon {
+    margin-right: 8px;
 }

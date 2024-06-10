@@ -1,7 +1,8 @@
 import { Position, Handle, NodeProps } from 'reactflow';
 import { memo, useState } from 'react';
 import { Node } from '../types/types';
-import styles from '../css/AssetNode.module.css';  
+import styles from '../css/AssetNode.module.css';
+import { DefaultNetworkMeterIcon } from './IconComponents/NetworkMeter';
 
 const handleStyle = {
     top: '13px',
@@ -16,6 +17,7 @@ const handleStyle = {
     maxWidth: '1px',
     minWidth: '1px',
 };
+
 const nodeStyle = {
     backgroundColor: '#cfeef4',
     width: '100px',
@@ -26,23 +28,34 @@ const nodeStyle = {
 };
 
 const splitAssetName = (name: string) => {
-    return name.replace(/_/g, ' '); 
-}
+    return name.replace(/_/g, ' ');
+};
 
-
-const AssetNode = (props: NodeProps<Node>) => {
-    const { data } = props; 
-    const { properties: nodeProperties } = data; 
+export default memo((props: NodeProps<Node>) => {
+    const { data } = props;
+    const { properties: nodeProperties } = data;
 
     return (
         <>
-            <div className={styles.nodeContainer}> 
-                <div className={styles.containerTitle}> 
-                    <div> {nodeProperties?.asset_names ? splitAssetName(nodeProperties?.asset_names[0]): 'Point Asset'} </div>
+            <div className={styles.nodeContainer}>
+                <div className={styles.containerTitle}>
+                    {nodeProperties?.asset_names && (
+                        <div className={styles.icon}>
+                            <DefaultNetworkMeterIcon />
+                        </div>
+                    )}
+                    <div>
+                        {nodeProperties?.asset_names
+                            ? splitAssetName(nodeProperties?.asset_names[0])
+                            : 'Point Asset'}
+                    </div>
                     <p> - </p>
-                    <p> { nodeProperties?.asset_gids ?  nodeProperties?.asset_gids[0]: data.key }</p>
+                    <p>
+                        {nodeProperties?.asset_gids
+                            ? nodeProperties?.asset_gids[0]
+                            : data.key}
+                    </p>
                 </div>
-                {/* <p> {data?.key}</p> */}
             </div>
             <Handle
                 type="target"
@@ -56,6 +69,4 @@ const AssetNode = (props: NodeProps<Node>) => {
             ></Handle>
         </>
     );
-};
-
-export { AssetNode };
+});
