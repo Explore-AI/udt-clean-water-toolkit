@@ -1,3 +1,4 @@
+import React from "react";
 export type PageProps = {
     pageVisibility: string;
 };
@@ -38,4 +39,13 @@ export type AssetNode = {
     id: string; 
     type: string; 
     data: Node; 
+}
+
+
+export type IconKeys = 'network_opt_valve' | 'network_meter' | 'hydrant' | 'pressure_control_valve' | 'sres' | 'logger' | 'default' | 'chambers' | string;
+
+type IconValues = React.JSX.Element; 
+
+export type Icons = {
+    [key: string]: IconValues;
 }

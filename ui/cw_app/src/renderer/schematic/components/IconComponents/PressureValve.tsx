@@ -1,9 +1,9 @@
-export const DefaultPressureValve = () => {
+export const Default = () => {
     // default pressure valve
     return (
         <svg
-            width="50"
-            height="50"
+            width="20"
+            height="20"
             viewBox="0 0 50 50"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -14,12 +14,12 @@ export const DefaultPressureValve = () => {
                 width="8"
                 height="42"
                 stroke="white"
-                stroke-width="2"
+                strokeWidth="2"
             />
             <path
                 d="M5.5547 4.16795L4 3.13148V5V45V46.8685L5.5547 45.8321L35.5547 25.8321L36.8028 25L35.5547 24.1679L5.5547 4.16795Z"
                 stroke="white"
-                stroke-width="2"
+                strokeWidth="2"
             />
             <rect
                 x="36"
@@ -28,13 +28,13 @@ export const DefaultPressureValve = () => {
                 height="38"
                 fill="#009EDE"
                 stroke="#009EDE"
-                stroke-width="2"
+                strokeWidth="2"
             />
             <path
                 d="M6 6.86852L33.1972 25L6 43.1315V6.86852Z"
                 fill="#009EDE"
                 stroke="#009EDE"
-                stroke-width="2"
+                strokeWidth="2"
             />
         </svg>
     );

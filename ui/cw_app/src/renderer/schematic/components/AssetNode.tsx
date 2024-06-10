@@ -2,7 +2,8 @@ import { Position, Handle, NodeProps } from 'reactflow';
 import { memo, useState } from 'react';
 import { Node } from '../types/types';
 import styles from '../css/AssetNode.module.css';
-import { DefaultNetworkMeterIcon } from './IconComponents/NetworkMeter';
+// import { Default } from './IconComponents/NetworkMeter';
+import { getIcons } from './IconComponents';
 
 const handleStyle = {
     top: '13px',
@@ -34,22 +35,22 @@ const splitAssetName = (name: string) => {
 export default memo((props: NodeProps<Node>) => {
     const { data } = props;
     const { properties: nodeProperties } = data;
+    
+    const assetIcon = nodeProperties?.asset_names
+        ? getIcons(nodeProperties?.asset_names[0])
+        : getIcons('default');
 
     return (
         <>
             <div className={styles.nodeContainer}>
                 <div className={styles.containerTitle}>
-                    {nodeProperties?.asset_names && (
-                        <div className={styles.icon}>
-                            <DefaultNetworkMeterIcon />
-                        </div>
-                    )}
-                    <div>
+                    <div className={styles.icon}>{assetIcon}</div>
+                    <p>
                         {nodeProperties?.asset_names
                             ? splitAssetName(nodeProperties?.asset_names[0])
-                            : 'Point Asset'}
-                    </div>
-                    <p> - </p>
+                            : 'Point Asset '}
+                    </p>
+                    <p>  -  </p>
                     <p>
                         {nodeProperties?.asset_gids
                             ? nodeProperties?.asset_gids[0]

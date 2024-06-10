@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 const layoutOptions = {
     'elk.algorithm': 'layered',
     'elk.direction': 'RIGHT',
-    'elk.layered.spacing.edgeNodeBetweenLayers': '60',
+    'elk.layered.spacing.edgeNodeBetweenLayers': '80',
     'elk.spacing.nodeNode': '80',
     'elk.layered.nodePlacement.strategy': 'SIMPLE',
 };
@@ -21,8 +21,8 @@ const getNodesLayout = async ({ nodes, edges }: SchematicProps) => {
         layoutOptions,
         children: nodes.map((node) => ({
             id: node.id,
-            width: 200, 
-            height: 70, 
+            width: 250, 
+            height: 90, 
             properties: {
                 label: node.key,
                 'org.eclipse.elk.portConstraints': 'FIXED_POS',

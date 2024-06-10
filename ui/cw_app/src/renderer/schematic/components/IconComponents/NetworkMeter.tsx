@@ -1,28 +1,6 @@
 import React from 'react';
 
-export const DistributionNetworkMeterIcon = () => {
-    return (
-        <svg
-            width="20"
-            height="20"
-            viewBox="0 0 50 50"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <rect
-                x="4"
-                y="4"
-                width="42"
-                height="42"
-                stroke="white"
-                strokeWidth="2"
-            />
-            <rect x="5" y="5" width="40" height="40" fill="#009EDE" />
-        </svg>
-    );
-};
-
-export const DefaultNetworkMeterIcon = () => {
+export const Default = () => {
     // unknown network meter
     return (
         <svg
@@ -51,11 +29,34 @@ export const DefaultNetworkMeterIcon = () => {
     );
 };
 
-export const FireNetworkMeterIcon = () => {
+export const Distribution = () => {
     return (
         <svg
-            width="50"
-            height="50"
+            width="20"
+            height="20"
+            viewBox="0 0 50 50"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <rect
+                x="4"
+                y="4"
+                width="42"
+                height="42"
+                stroke="white"
+                strokeWidth="2"
+            />
+            <rect x="5" y="5" width="40" height="40" fill="#009EDE" />
+        </svg>
+    );
+};
+
+
+export const Fire = () => {
+    return (
+        <svg
+            width="20"
+            height="20"
             viewBox="0 0 50 50"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -67,13 +68,13 @@ export const FireNetworkMeterIcon = () => {
                 width="42"
                 height="42"
                 stroke="white"
-                stroke-width="2"
+                strokeWidth="2"
             />
         </svg>
     );
 };
 
-export const InputNetworkMeterIcon = () => {
+export const Input = () => {
     return (
         <svg
             width="50"
@@ -90,13 +91,13 @@ export const InputNetworkMeterIcon = () => {
                 width="42"
                 height="42"
                 stroke="white"
-                stroke-width="2"
+                strokeWidth="2"
             />
         </svg>
     );
 };
 
-export const WasteNetworkMeterIcon = () => {
+export const Waste = () => {
     return (
         <svg
             width="50"
@@ -113,13 +114,13 @@ export const WasteNetworkMeterIcon = () => {
                 width="42"
                 height="42"
                 stroke="white"
-                stroke-width="2"
+                strokeWidth="2"
             />
         </svg>
     );
 };
 
-export const ZonalNetworkMeterIcon = () => {
+export const Zonal = () => {
     return (
         <svg
             width="50"
@@ -135,7 +136,7 @@ export const ZonalNetworkMeterIcon = () => {
                 width="42"
                 height="42"
                 stroke="white"
-                stroke-width="2"
+                strokeWidth="2"
             />
         </svg>
     );

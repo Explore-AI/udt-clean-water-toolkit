@@ -16,7 +16,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
         query = f"""
         match (n)-[r:TrunkMain]-(m)
         return ID(n), n, ID(r), r, ID(m), m
-        limit 10
+        limit 50
 
         """
 
