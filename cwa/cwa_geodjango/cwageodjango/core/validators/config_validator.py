@@ -15,6 +15,7 @@ class ConfigValidator(forms.Form):
     processor_count = forms.IntegerField(required=False)
     outputfile = forms.CharField(max_length=256, required=False)
     dma_codes = forms.CharField(max_length=256, required=False)
+    utilities = forms.CharField(max_length=256, required=False)
 
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
@@ -77,3 +78,19 @@ class ConfigValidator(forms.Form):
             raise ValidationError("Incorrect format for dma_codes")
 
         return dma_codes
+    
+    def clean_utilities(self):
+
+        data = self.cleaned_data.get("utilities")
+
+        if not data:
+            return None
+
+        # TODO: add explicit exception handles
+        try:
+            utilities = data.split(",")
+            utilities = [code.strip() for code in utilities]
+        except:
+            raise ValidationError("Incorrect format for utilities")
+
+        return utilities
