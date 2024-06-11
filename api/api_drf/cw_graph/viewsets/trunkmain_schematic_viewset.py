@@ -11,13 +11,13 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
     # match (n)-[r:TrunkMain]-(m) return n, r, m limit 500
 
     @staticmethod
-    def query_trunkmain_network():
+    def query_trunkmain_network(request):
         # get all assets connected to the trunkmains, as well as the trunkmain relationships
+        limit = request.query_params.get("limit", 10)
         query = f"""
         match (n)-[r:TrunkMain]-(m)
         return ID(n), n, ID(r), r, ID(m), m
-        limit 50
-
+        limit {limit}
         """
 
         results, _ = db.cypher_query(query)
@@ -203,7 +203,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
         return {"nodes": all_nodes, "edges": all_edges}
 
     def list(self, request):
-        results = self.query_trunkmain_network()
+        results = self.query_trunkmain_network(request)
         nodes_edges = self.get_nodes_edges(results)
 
         return Response(nodes_edges, status=status.HTTP_200_OK)
