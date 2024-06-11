@@ -4,9 +4,9 @@ import { TRUNKMAIN_QUERY_KEY } from '../queries';
 import { isEmpty as _isEmpty } from 'lodash';
 import styles from '../css/Schematic.module.css';
 import useFetchSchematicData from '../hooks/useFetchSchematic';
-import { AssetNode } from './AssetNode';
-import { PipeEdgeNode } from './PipeNode';
-import ReactFlow, { Controls, Background } from 'reactflow';
+import AssetNode from './AssetNode';
+import PipeEdgeNode from './PipeNode';
+import ReactFlow, { Controls } from 'reactflow';
 import 'reactflow/dist/base.css';
 import useElkLayout from '../hooks/useElkLayout';
 
@@ -15,11 +15,12 @@ const nodeTypes = {
     pipeNode: PipeEdgeNode,
 };
 
+
 function Schematic() {
     const { data, isPending, isSuccess } = useFetchSchematicData([
         TRUNKMAIN_QUERY_KEY,
     ]);
-    const { data: layoutData, isPending: isLayoutPending } = useElkLayout(
+    const { data: layoutData } = useElkLayout(
         data || { nodes: [], edges: [] },
     );
 
@@ -34,6 +35,7 @@ function Schematic() {
             </div>
         );
     }
+    console.log(layoutData);
 
     return (
         <>
