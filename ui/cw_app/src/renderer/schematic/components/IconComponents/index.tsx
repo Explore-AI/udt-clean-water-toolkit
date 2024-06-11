@@ -5,7 +5,7 @@ import * as NetworkMeterIcon from './NetworkMeter';
 import * as NetworkValveIcon from './NetworkValve';
 import { Default as PressureValveIcon } from './PressureValve';
 import { Default as SresIcon } from './ServiceReservoir';
-import { Icons, IconKeys } from '../../types/types';
+import { Icons } from '../../types/types';
 
 const icons:Icons = {
     'network_opt_valve': <NetworkValveIcon.Default />,
@@ -18,6 +18,6 @@ const icons:Icons = {
     'default': <DefaultIcon />,
 };
 
-export const getIcons = (key: IconKeys | string) => {
+export const getIcons = (key: string) => {
     return icons[key] || icons['default'];
 };
