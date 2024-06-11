@@ -32,8 +32,6 @@ class GisToNeo4jCalculator2(GisToGraph):
         self.config = config
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
-        self.utility_nodes = set()
-        self.dma_relationships = []
         self.utility_relationships = []
 
         super().__init__(
@@ -67,21 +65,15 @@ class GisToNeo4jCalculator2(GisToGraph):
         return all_unique_nodes, all_unique_edges
 
     def set_dynamic_node_properties(self):
-        subquery = """
-        n.node_types = CASE WHEN node.node_types IS NOT NULL THEN node.node_types ELSE NULL END,
+        subquery = """n.node_types = CASE WHEN node.node_types IS NOT NULL THEN node.node_types ELSE NULL END,
         n.asset_names = CASE WHEN node.point_asset_names IS NOT NULL THEN node.point_asset_names ELSE NULL END,
-        n.asset_gids = CASE WHEN node.point_asset_gids IS NOT NULL THEN node.point_asset_gids ELSE NULL END,
-        """
+        n.asset_gids = CASE WHEN node.point_asset_gids IS NOT NULL THEN node.point_asset_gids ELSE NULL END,\n"""
         for point_asset in self.point_asset_gid_names:
             subquery += f"""n.{point_asset} = CASE WHEN node.{point_asset}
             IS NOT NULL THEN node.{point_asset}
-            ELSE NULL END,\n"""
+            ELSE NULL END,"""
 
-        # Check if the subquery string is empty
-        if subquery.strip():
-            return subquery[:-2]  # Remove trailing comma and newline
-        else:
-            return subquery  # Return the original subquery if it's empty
+        return subquery[:-2]  # Remove trailing comma and newline
 
     @staticmethod
     def set_static_node_properties():
@@ -111,9 +103,12 @@ class GisToNeo4jCalculator2(GisToGraph):
          {self.set_dynamic_node_properties()}
          RETURN n
          """
-        db.cypher_query(query, {"all_unique_nodes": all_unique_nodes})
-        # Collect DMA and Utility nodes and relationships after creating network nodes
-        self._collect_dma_and_utility_data(all_unique_nodes)
+        try:
+            db.cypher_query(query, {"all_unique_nodes": all_unique_nodes})
+        except:
+            import pdb
+
+            pdb.set_trace()
 
     def _batch_create_pipe_relations(self, all_unique_edges):
         grouped_edges = defaultdict(list)
@@ -138,21 +133,6 @@ class GisToNeo4jCalculator2(GisToGraph):
             """
             db.cypher_query(query, {"edges": edges})
 
-    def _collect_dma_and_utility_data(self, all_unique_nodes):
-        """Collects unique DMA and Utility nodes and relationships for batching."""
-        for node in all_unique_nodes:
-            # Collect DMA nodes and relationships
-            if "dma_codes" in node and "dma_names" in node:
-                for dma_code, dma_name in zip(node["dma_codes"], node["dma_names"]):
-                    self.dma_relationships.append((node["node_key"], dma_code))
-
-            # Collect Utility nodes and relationships
-            if "utility_name" in node:
-                self.utility_nodes.add(node["utility_name"])
-                self.utility_relationships.append(
-                    (node["node_key"], node["utility_name"])
-                )
-
     def _batch_create_dma_nodes(self):
         """Batch creates DMA nodes."""
         query = f"""
@@ -166,45 +146,29 @@ class GisToNeo4jCalculator2(GisToGraph):
     def _batch_create_utility_nodes(self):
         """Batch creates Utility nodes."""
         query = f"""
-        UNWIND $utility_nodes AS utility
-        MERGE (u:Utility {{name: utility}})
+        UNWIND $utility_data AS utility
+        MERGE (u:Utility {{name: utility.name}})
         RETURN u
         """
-        db.cypher_query(query, {"utility_nodes": list(self.utility_nodes)})
+        db.cypher_query(query, {"utility_data": self.utility_data})
 
     def _batch_create_dma_relationships(self):
         """Batch creates relationships between NetworkNodes and DMA nodes."""
         query = f"""
-        UNWIND $dma_rels AS rel
-        MATCH (n:NetworkNode {{node_key: rel.node_key}}), (d:DMA {{code: rel.dma_code}})
+        UNWIND $dma_data AS dma
+        MATCH (n:NetworkNode {{node_key: dma.from_node_key}}), (d:DMA {{code: dma.code}})
         MERGE (n)-[:HAS_DMA]->(d)
         """
-        db.cypher_query(
-            query,
-            {
-                "dma_rels": [
-                    {"node_key": node_key, "dma_code": dma_code}
-                    for node_key, dma_code in self.dma_relationships
-                ]
-            },
-        )
+        db.cypher_query(query, {"dma_data": self.dma_data})
 
     def _batch_create_utility_relationships(self):
         """Batch creates relationships between NetworkNodes and Utility nodes."""
         query = f"""
-        UNWIND $utility_rels AS rel
-        MATCH (n:NetworkNode {{node_key: rel.node_key}}), (u:Utility {{name: rel.utility_name}})
+        UNWIND $utility_data AS utility
+        MATCH (n:NetworkNode {{node_key: utility.node_key}}), (u:Utility {{name: utility.name}})
         MERGE (n)-[:HAS_UTILITY]->(u)
         """
-        db.cypher_query(
-            query,
-            {
-                "utility_rels": [
-                    {"node_key": node_key, "utility_name": utility_name}
-                    for node_key, utility_name in self.utility_relationships
-                ]
-            },
-        )
+        db.cypher_query(query, {"utility_data": self.utility_data})
 
     def _map_pipe_connected_asset_relations(self, all_unique_nodes, all_unique_edges):
         self._batch_create_network_nodes(all_unique_nodes)

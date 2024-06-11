@@ -73,7 +73,7 @@ class GisToNeo4jController2(GisToNeo4jCalculator2):
             t2 = timer()
             print("calc", t2 - t1)
 
-            self._create_neo4j_graph_parallel()
+            self.create_neo4j_graph()
             t3 = timer()
             print("create", t3 - t2)
 

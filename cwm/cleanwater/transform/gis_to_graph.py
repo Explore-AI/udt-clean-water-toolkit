@@ -29,6 +29,8 @@ class GisToGraph:
         self.all_nodes_by_pipe = []
         self.dma_data = []
         self.dma_codes = []  # List of dma_codes with no duplicates
+        self.utility_data = []
+        self.utility_names = []  # List of utility names with no duplicates
         self.network_node_labels = [
             "NetworkNode",
             "PipeJunction",
@@ -131,6 +133,29 @@ class GisToGraph:
 
         return edges_by_pipe
 
+    def create_dma_data(self, node, node_key):
+
+        for dma_code, dma_name in zip(node["dma_codes"], node["dma_names"]):
+            if dma_code not in self.dma_codes:
+                self.dma_codes.extend(node["dma_codes"])
+                self.dma_data.append(
+                    {
+                        "code": dma_code,
+                        "name": dma_name,
+                        "from_node_key": node_key,
+                    }
+                )
+
+    def create_utility_data(self, utility_name, node_key):
+        if utility_name not in self.utility_names:
+            self.utility_names.extend(utility_name)
+            self.utility_data.append(
+                {
+                    "name": utility_name,
+                    "from_node_key": node_key,
+                }
+            )
+
     def _merge_nodes_on_position(self, nodes_ordered):
         consolidated_nodes = [[nodes_ordered[0]]]
 
@@ -148,16 +173,17 @@ class GisToGraph:
         merged_nodes = []
         for nodes in consolidated_nodes:
 
+            node_key = self._encode_node_key(nodes[0]["intersection_point_geometry"])
+            utility_name = nodes[0]["utility_name"]
+
             merged_nodes.append(
                 {
-                    "utility": nodes[0]["utility_name"],
+                    "utility": utility_name,
                     "coords_27700": [
                         float(nodes[0]["intersection_point_geometry"].x),
                         float(nodes[0]["intersection_point_geometry"].y),
                     ],
-                    "node_key": self._encode_node_key(
-                        nodes[0]["intersection_point_geometry"]
-                    ),
+                    "node_key": node_key,
                     "dma_codes": nodes[0]["dma_codes"],
                     "dma_names": nodes[0]["dma_names"],
                     "dmas": nodes[0]["dmas"],
@@ -167,6 +193,9 @@ class GisToGraph:
             )
 
             for node in nodes:
+
+                self.create_dma_data(node, node_key)
+
                 if node["node_type"] == PIPE_JUNCTION__NAME:
                     merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
                     merged_nodes[-1]["node_labels"].append("PipeJunction")
@@ -224,11 +253,6 @@ class GisToGraph:
                 merged_nodes[-1]["node_types"] = sorted(
                     list(set((merged_nodes[-1]["node_types"])))
                 )
-
-                for dma_code, dma_name in zip(node["dma_codes"], node["dma_names"]):
-                    if dma_code not in self.dma_codes:
-                        self.dma_codes.extend(node["dma_codes"])
-                        self.dma_data.append({"code": dma_code, "name": dma_name})
 
         return merged_nodes
 
