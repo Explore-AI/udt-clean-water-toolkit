@@ -1,4 +1,4 @@
-import { getBaseUrl } from '../../core/utils';
+import { getApiUrl } from '../../core/utils/http';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { SchematicProps } from '../types/types';
@@ -17,7 +17,7 @@ const useFetchSchematicData = (queryKey: string[], options = {}) => {
      * Custom Hook for fetching the trunk main schematic data from our API
      */
 
-    const url = getBaseUrl(queryKey);
+    const url = getApiUrl(queryKey);
     const schematicData = useQuery({
         queryKey: queryKey,
         retry: 0,

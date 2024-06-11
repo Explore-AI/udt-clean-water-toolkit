@@ -1,0 +1,28 @@
+.nodeContainer {
+    background-color: #FFFEF6;
+    border-radius: 5px; 
+    border: 2px solid #33658A; 
+    width: 250px; 
+    height: 90px; 
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    padding: 5px; 
+}
+
+.containerTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+}
+
+.containerTitle p {
+    font-family: Tahoma, sans-serif; 
+    font-weight: 500;
+    font-size: 0.85rem; 
+}
+
+.icon {
+    margin-right: 8px;
+}
