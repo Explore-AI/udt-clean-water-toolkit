@@ -27,6 +27,7 @@ class GisToGraph:
 
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
+        self.dma_data = []
         self.dma_codes = []  # List of dma_codes with no duplicates
         self.network_node_labels = [
             "NetworkNode",
@@ -224,8 +225,10 @@ class GisToGraph:
                     list(set((merged_nodes[-1]["node_types"])))
                 )
 
-                self.dma_codes.extend(node["dma_codes"])
-                self.dma_codes = list(set(self.dma_codes))
+                for dma_code, dma_name in zip(node["dma_codes"], node["dma_names"]):
+                    if dma_code not in self.dma_codes:
+                        self.dma_codes.extend(node["dma_codes"])
+                        self.dma_data.append({"code": dma_code, "name": dma_name})
 
         return merged_nodes
 

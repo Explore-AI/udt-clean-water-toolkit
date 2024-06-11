@@ -17,6 +17,7 @@ MIXED_NODE_TYPES_SORTED = [
     sorted([PIPE_END__NAME, POINT_ASSET__NAME]),
 ]
 
+
 def flatten_concatenation(matrix):
     flat_list = []
     for row in matrix:
@@ -31,7 +32,6 @@ class GisToNeo4jCalculator2(GisToGraph):
         self.config = config
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
-        self.dma_nodes = set()
         self.utility_nodes = set()
         self.dma_relationships = []
         self.utility_relationships = []
@@ -118,7 +118,7 @@ class GisToNeo4jCalculator2(GisToGraph):
     def _batch_create_pipe_relations(self, all_unique_edges):
         grouped_edges = defaultdict(list)
         for edge in all_unique_edges:
-            grouped_edges[edge['asset_label']].append(edge)
+            grouped_edges[edge["asset_label"]].append(edge)
 
         for asset_label, edges in grouped_edges.items():
             query = f"""
@@ -142,15 +142,16 @@ class GisToNeo4jCalculator2(GisToGraph):
         """Collects unique DMA and Utility nodes and relationships for batching."""
         for node in all_unique_nodes:
             # Collect DMA nodes and relationships
-            if 'dma_codes' in node and 'dma_names' in node:
-                for dma_code, dma_name in zip(node['dma_codes'], node['dma_names']):
-                    self.dma_nodes.add((dma_code, dma_name))
-                    self.dma_relationships.append((node['node_key'], dma_code))
+            if "dma_codes" in node and "dma_names" in node:
+                for dma_code, dma_name in zip(node["dma_codes"], node["dma_names"]):
+                    self.dma_relationships.append((node["node_key"], dma_code))
 
             # Collect Utility nodes and relationships
-            if 'utility_name' in node:
-                self.utility_nodes.add(node['utility_name'])
-                self.utility_relationships.append((node['node_key'], node['utility_name']))
+            if "utility_name" in node:
+                self.utility_nodes.add(node["utility_name"])
+                self.utility_relationships.append(
+                    (node["node_key"], node["utility_name"])
+                )
 
     def _batch_create_dma_nodes(self):
         """Batch creates DMA nodes."""
@@ -160,7 +161,7 @@ class GisToNeo4jCalculator2(GisToGraph):
         ON CREATE SET d.name = dma.name
         RETURN d
         """
-        db.cypher_query(query, {"dma_nodes": [{"code": code, "name": name} for code, name in self.dma_nodes]})
+        db.cypher_query(query, {"dma_nodes": self.dma_data})
 
     def _batch_create_utility_nodes(self):
         """Batch creates Utility nodes."""
@@ -178,7 +179,15 @@ class GisToNeo4jCalculator2(GisToGraph):
         MATCH (n:NetworkNode {{node_key: rel.node_key}}), (d:DMA {{code: rel.dma_code}})
         MERGE (n)-[:HAS_DMA]->(d)
         """
-        db.cypher_query(query, {"dma_rels": [{"node_key": node_key, "dma_code": dma_code} for node_key, dma_code in self.dma_relationships]})
+        db.cypher_query(
+            query,
+            {
+                "dma_rels": [
+                    {"node_key": node_key, "dma_code": dma_code}
+                    for node_key, dma_code in self.dma_relationships
+                ]
+            },
+        )
 
     def _batch_create_utility_relationships(self):
         """Batch creates relationships between NetworkNodes and Utility nodes."""
@@ -187,7 +196,15 @@ class GisToNeo4jCalculator2(GisToGraph):
         MATCH (n:NetworkNode {{node_key: rel.node_key}}), (u:Utility {{name: rel.utility_name}})
         MERGE (n)-[:HAS_UTILITY]->(u)
         """
-        db.cypher_query(query, {"utility_rels": [{"node_key": node_key, "utility_name": utility_name} for node_key, utility_name in self.utility_relationships]})
+        db.cypher_query(
+            query,
+            {
+                "utility_rels": [
+                    {"node_key": node_key, "utility_name": utility_name}
+                    for node_key, utility_name in self.utility_relationships
+                ]
+            },
+        )
 
     def _map_pipe_connected_asset_relations(self, all_unique_nodes, all_unique_edges):
         self._batch_create_network_nodes(all_unique_nodes)
