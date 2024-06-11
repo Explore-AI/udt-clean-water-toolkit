@@ -38,34 +38,17 @@ class AcousticLoggerCoverage():
     def initialise_csv(self):
         with open(self.config.outputfile, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['logger_node_key','pipe_id','pipe_material', 'pipe_diameter',
+            writer.writerow(['utility','dma','logger_node_key','pipe_id','pipe_material',
                              'pipe_length', 'coverage_length','pipe_wkt',
                              'start_node_key','start_node_coords','end_node_key', 
                              'end_node_coords'])
-
-    def get_connected(self, node_key, max_level):
-        cypher_query = f"""
-        MATCH (logger:NetworkNode{{node_key:'{node_key}'}})
-        CALL apoc.path.subgraphAll(logger, {{
-        relationshipFilter : "TrunkMain|DistributionMain",
-        minLevel: 0,
-        maxLevel: {max_level}
-        }})
-        YIELD nodes, relationships
-        RETURN nodes, relationships
-        """
-        results, meta = db.cypher_query(cypher_query)
-        return results
 
     def get_next_edges(self, node_key, processed_edges):
         processed_nodes_condition = ""
         if processed_edges:
             processed_nodes_condition = "AND NOT m.node_key IN " + str(list(processed_edges))
 
-        cypher_query = f"""
-        MATCH (n {{node_key: '{node_key}'}})-[r]-(m)
-        WHERE NOT id(r) IN {list(processed_edges)}
-        {processed_nodes_condition}
+        cypher_query = f"""MATCH (n {{node_key: '{node_key}'}})-[r]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} AND type(r) IN ['DistributionMain', 'TrunkMain']
         RETURN n, r, m
         """
         results, _ = db.cypher_query(cypher_query)
@@ -73,36 +56,47 @@ class AcousticLoggerCoverage():
     
     def update_edge_attributes(self, start_node_key, end_node_key, logger, coverage_len):
             query = f"""
-            MATCH (n {{node_key: '{start_node_key}'}})-[r]-(m {{node_key: '{end_node_key}'}})
-            WITH r, 
-                CASE WHEN r.coveredbyLogger IS NOT NULL THEN r.coveredbyLogger + '|' + '{logger}' ELSE '{logger}' END AS newCoveredByLogger,
-                CASE WHEN r.coverageLen IS NOT NULL THEN r.coverageLen + '|' + '{coverage_len}' ELSE '{coverage_len}' END AS newCoverageLen,
-                n.node_key AS startNodeKey,
-                n.coords_27700 AS startNodeCoords,
-                m.node_key AS endNodeKey,
-                m.coords_27700 as endNodeCoords, 
-                r.material AS PipeMaterial,
-                r.segment_length AS PipeLength,
-                r.segment_wkt AS PipeWkt
-            SET r.coveredbyLogger = newCoveredByLogger,
-                r.coverageLen = newCoverageLen
-            RETURN id(r) AS pipe_id, '{coverage_len}' AS coverage_length, startNodeKey, startNodeCoords, endNodeKey, endNodeCoords, PipeMaterial, PipeLength, PipeWkt 
-            """
+                    MATCH (n {{node_key: '{start_node_key}'}})-[:HAS_UTILITY]->(u:Utility), 
+                        (n {{node_key: '{start_node_key}'}})-[:HAS_DMA]->(d:DMA), 
+                        (n {{node_key: '{start_node_key}'}})-[r]-(m {{node_key: '{end_node_key}'}})
+                    WHERE type(r) IN ['DistributionMain', 'TrunkMain']
+                    WITH r, 
+                        CASE WHEN r.coveredbyLogger IS NOT NULL THEN r.coveredbyLogger + '|' + '{logger}' ELSE '{logger}' END AS newCoveredByLogger,
+                        CASE WHEN r.coverageLen IS NOT NULL THEN r.coverageLen + '|' + '{coverage_len}' ELSE '{coverage_len}' END AS newCoverageLen,
+                        n.node_key AS startNodeKey,
+                        n.coords_27700 AS startNodeCoords,
+                        m.node_key AS endNodeKey,
+                        m.coords_27700 AS endNodeCoords, 
+                        r.material AS PipeMaterial,
+                        r.segment_length AS PipeLength,
+                        r.segment_wkt AS PipeWkt,
+                        u.name AS utility,
+                        d.code AS dma
+                    SET r.coveredbyLogger = newCoveredByLogger,
+                        r.coverageLen = newCoverageLen
+                    RETURN utility, dma, id(r) AS pipe_id, 
+                        '{coverage_len}' AS coverage_length, 
+                        startNodeKey, startNodeCoords, 
+                        endNodeKey, endNodeCoords, 
+                        PipeMaterial, PipeLength, PipeWkt
+                    """
             results, _ = db.cypher_query(query)
 
             with open(self.config.outputfile, mode='a', newline='') as file:
                 writer = csv.writer(file)
                 for result in results:
-                    pipe_id = result[0]
-                    coverage_length = result[1]
-                    start_node_key = result[2]
-                    start_node_coords = result[3]
-                    end_node_key = result[4]
-                    end_node_coords = result[5]
-                    pipe_material = result[6]
-                    pipe_length = result[7]
-                    pipe_wkt = result[8]
-                    writer.writerow([logger, pipe_id, pipe_material, pipe_length, coverage_length, pipe_wkt, start_node_key, start_node_coords,
+                    utility = result[0]
+                    dma = result[1]
+                    pipe_id = result[2]
+                    coverage_length = result[3]
+                    start_node_key = result[4]
+                    start_node_coords = result[5]
+                    end_node_key = result[6]
+                    end_node_coords = result[7]
+                    pipe_material = result[8]
+                    pipe_length = result[9]
+                    pipe_wkt = result[10]
+                    writer.writerow([utility, dma, logger, pipe_id, pipe_material, pipe_length, coverage_length, pipe_wkt, start_node_key, start_node_coords,
                                      end_node_key, end_node_coords])
 
     def check_for_pipe_end(self, node_key):
@@ -181,7 +175,7 @@ class AcousticLoggerCoverage():
             else:
                 break
 
-    def query_graph_dma(self, dma):
+    def query_graph_dma(self, dmas, utilities):
         """
         Generator function to query the graph database for loggers within a specific DMA.
 
@@ -192,7 +186,7 @@ class AcousticLoggerCoverage():
             results: Result object containing query results.
 
         """    
-        results, m = db.cypher_query(f"MATCH (n) WHERE n.acoustic_logger IS NOT NULL and n.dmas contains '{dma[-1]}' RETURN n")
+        results, m = db.cypher_query(f"MATCH (n)-[:HAS_UTILITY]->(u:Utility),(n)-[:HAS_DMA]->(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} AND n.acoustic_logger IS NOT NULL RETURN n;")
         return results
 
     def process_logger(self, loggers):
@@ -233,14 +227,18 @@ class AcousticLoggerCoverage():
                     self.update_edge_attributes(start_node_key, end_node_key, key, travel_distance)
                     continue
 
-    def query_total_pipe_lengths_dma(self, dma):
-        results, m = db.cypher_query(f"MATCH (n)-[r]-(m) WHERE n.dmas contains '{dma[-1]}' RETURN sum(r.segment_length);")
+    def query_total_pipe_lengths_dma(self, dmas, utilities):
+        results, m = db.cypher_query(f"""MATCH (n)-[:HAS_UTILITY]->(u:Utility),(n)-[:HAS_DMA]->(d:DMA)
+                                        WHERE u.name IN {utilities} AND d.code IN {dmas}
+                                        WITH n
+                                        MATCH (n)-[r]-(m) WHERE type(r) IN ['DistributionMain', 'TrunkMain']
+                                        RETURN sum(r.segment_length);""")
         return results
 
     def summary_statistics(self, outputfile):
         df = pd.read_csv(outputfile, header=[0])
         dma = self.config.dma_codes[-1]
-        total_pipe_lengths = self.query_total_pipe_lengths_dma(self.config.dma_codes)[0][0]
+        total_pipe_lengths = self.query_total_pipe_lengths_dma(self.config.dma_codes, self.config.utilities)[0][0]
         total_pipe_lengths_covered = 0
         for pipe in df.pipe_id.unique():
             dftmp = df.loc[df['pipe_id'] == pipe]
@@ -289,7 +287,7 @@ class AcousticLoggerCoverage():
         Compute coverage.
 
         """
-        sub_graph = self.query_graph_dma(self.config.dma_codes)
+        sub_graph = self.query_graph_dma(self.config.dma_codes, self.config.utilities)
 
         self.initialise_csv()
         
@@ -298,7 +296,6 @@ class AcousticLoggerCoverage():
         self.update_edge_coverage_fraction(self.config.outputfile)
 
         self.summary_statistics(self.config.outputfile)
-
         
 
 
