@@ -1,4 +1,6 @@
 import React from "react";
+import { Node as FlowNode } from "reactflow";
+
 export type PageProps = {
     pageVisibility: string;
 };
@@ -48,4 +50,8 @@ type IconValues = React.JSX.Element;
 
 export type Icons = {
     [key: string]: IconValues;
+}
+
+export type AssetPopupProps = {
+    nodeProps: FlowNode<Node>; 
 }

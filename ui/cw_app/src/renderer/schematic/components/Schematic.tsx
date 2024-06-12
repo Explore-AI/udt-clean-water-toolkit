@@ -6,24 +6,35 @@ import styles from '../css/Schematic.module.css';
 import useFetchSchematicData from '../hooks/useFetchSchematic';
 import AssetNode from './AssetNode';
 import PipeEdgeNode from './PipeNode';
-import ReactFlow, { Controls } from 'reactflow';
+import ReactFlow, { Controls, Node } from 'reactflow';
 import 'reactflow/dist/base.css';
 import useElkLayout from '../hooks/useElkLayout';
+import { useState } from 'react';
+import { AssetPopup } from './AssetPopup';
+import useAssetNodePopups from '../hooks/useSchematicPopups';
 
 const nodeTypes = {
     assetNode: AssetNode,
     pipeNode: PipeEdgeNode,
 };
 
+const onNodeClick = (event: React.MouseEvent, node: Node, openPopup: any) => {
+    console.log(node);
+    // toggle popup display
+    openPopup(node);
+}
 
 function Schematic() {
     const { data, isPending, isSuccess } = useFetchSchematicData([
         TRUNKMAIN_QUERY_KEY,
-    ]);
+    ], { limit: 20 });
+
+
     const { data: layoutData } = useElkLayout(
         data || { nodes: [], edges: [] },
     );
 
+    const { popups, openPopup, closePopup} = useAssetNodePopups(); 
     if (isPending) {
         return <LoadingSpinner />;
     }
@@ -35,7 +46,7 @@ function Schematic() {
             </div>
         );
     }
-    console.log(layoutData);
+    console.log('List of popups: \n', popups); 
 
     return (
         <>
@@ -49,7 +60,11 @@ function Schematic() {
                 fitView={true}
                 nodesDraggable={true}
                 className={styles.rfContainer}
+                onNodeClick={(event, node) => onNodeClick(event, node, openPopup)}
             >
+                { popups.map((nodePopup)=> (
+                    <AssetPopup key={nodePopup.id} nodeProps={nodePopup}/>
+                ))}
                 {/* <Background /> */}
                 <Controls />
             </ReactFlow>
