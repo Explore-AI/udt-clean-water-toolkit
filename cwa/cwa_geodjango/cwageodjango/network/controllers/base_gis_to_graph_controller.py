@@ -15,7 +15,9 @@ class BaseGisToGraphController:
     def run_calc(self):
 
         pipes_filtered_qs, pipes_filterd_pks = self._get_pipe_and_asset_data()
+        from timeit import default_timer as timer
 
+        t0 = timer()
         for pipe_qs, pipe_pks in zip(pipes_filtered_qs, pipes_filterd_pks):
             from timeit import default_timer as timer
 
@@ -27,7 +29,6 @@ class BaseGisToGraphController:
                 ),
                 start=1,
             ):
-                t0 = timer()
 
                 start_pk = pipe_pks[start_index]
 
@@ -58,8 +59,8 @@ class BaseGisToGraphController:
                 t3 = timer()
                 print("create", t3 - t2)
 
-                end = timer()
-                print(end - t0)
+            end = timer()
+            print(end - t0)
 
     # This fn is a candidate to be abstracted out into the NetworkController
     def _get_pipe_and_asset_data(self) -> QuerySet:
