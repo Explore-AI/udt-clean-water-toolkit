@@ -258,7 +258,7 @@ class MainsController(ABC, GeoDjangoDataManager):
             "operational_site_data": ArraySubquery(subquery9),
             "network_opt_valve": ArraySubquery(subquery10),
             "connection_meter_data": ArraySubquery(subquery11),
-            "consumption_meter_data": ArraySubquery(subquery12)
+            "consumption_meter_data": ArraySubquery(subquery12),
         }
         return subqueries
 
@@ -298,6 +298,19 @@ class MainsController(ABC, GeoDjangoDataManager):
         )
 
         return qs
+
+    def get_mains_count(self, filters):
+
+        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
+
+        qs = self._filter_by_dma(qs, filters)
+        return qs.count()
+
+    def get_mains_pks(self, filters):
+        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
+
+        qs = self._filter_by_dma(qs, filters)
+        return list(qs.values_list("pk", flat=True).order_by("pk"))
 
     # Refs on how the GeoJSON is constructed.
     # AsGeoJson query combined with json to build object

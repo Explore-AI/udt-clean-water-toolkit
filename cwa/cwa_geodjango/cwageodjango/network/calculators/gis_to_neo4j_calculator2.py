@@ -71,7 +71,7 @@ class GisToNeo4jCalculator2(GisToGraph):
         for point_asset in self.point_asset_gid_names:
             subquery += f"""n.{point_asset} = CASE WHEN node.{point_asset}
             IS NOT NULL THEN node.{point_asset}
-            ELSE NULL END,"""
+            ELSE NULL END,\n"""
 
         return subquery[:-2]  # Remove trailing comma and newline
 
@@ -103,12 +103,7 @@ class GisToNeo4jCalculator2(GisToGraph):
          {self.set_dynamic_node_properties()}
          RETURN n
          """
-        try:
-            db.cypher_query(query, {"all_unique_nodes": all_unique_nodes})
-        except:
-            import pdb
-
-            pdb.set_trace()
+        db.cypher_query(query, {"all_unique_nodes": all_unique_nodes})
 
     def _batch_create_pipe_relations(self, all_unique_edges):
         grouped_edges = defaultdict(list)
@@ -157,7 +152,7 @@ class GisToNeo4jCalculator2(GisToGraph):
         query = f"""
         UNWIND $dma_data AS dma
         MATCH (n:NetworkNode {{node_key: dma.from_node_key}}), (d:DMA {{code: dma.code}})
-        MERGE (n)-[:HAS_DMA]->(d)
+        MERGE (n)-[:IN_DMA]->(d)
         """
         db.cypher_query(query, {"dma_data": self.dma_data})
 
@@ -166,7 +161,7 @@ class GisToNeo4jCalculator2(GisToGraph):
         query = f"""
         UNWIND $utility_data AS utility
         MATCH (n:NetworkNode {{node_key: utility.node_key}}), (u:Utility {{name: utility.name}})
-        MERGE (n)-[:HAS_UTILITY]->(u)
+        MERGE (n)-[:IN_UTILITY]->(u)
         """
         db.cypher_query(query, {"utility_data": self.utility_data})
 

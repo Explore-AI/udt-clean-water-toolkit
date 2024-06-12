@@ -1,6 +1,4 @@
 from django.db.models.query import QuerySet
-from ..calculators import GisToNeo4jCalculator2
-from ..models import initialise_node_labels
 from cwageodjango.assets.controllers import (
     ConnectionMainsController,
     TrunkMainsController,
@@ -8,14 +6,12 @@ from cwageodjango.assets.controllers import (
 )
 
 
-class GisToNeo4jController2(GisToNeo4jCalculator2):
+class BaseGisToGraphController:
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
     def __init__(self, config):
         self.config = config
-        initialise_node_labels()
-        super().__init__(self.config)
 
     def create_network(self):
         from timeit import default_timer as timer
@@ -48,7 +44,11 @@ class GisToNeo4jController2(GisToNeo4jCalculator2):
                 t1 = timer()
                 print("qs", t1 - t0)
 
-                self.calc_pipe_point_relative_positions(sliced_qs)
+                if self.config.parallel:
+                    self.calc_pipe_point_relative_positions_parallel(sliced_qs)
+                else:
+                    self.calc_pipe_point_relative_positions(sliced_qs)
+
                 sliced_qs = []
                 t2 = timer()
                 print("calc", t2 - t1)
@@ -61,37 +61,10 @@ class GisToNeo4jController2(GisToNeo4jCalculator2):
                 print(end - start)
 
     def create_network_parallel(self):
-        from timeit import default_timer as timer
 
         print(f"Start parallel run with {self.config.processor_count} cores.")
 
-        start = timer()
-
-        pipes_qs = self._get_pipe_and_asset_data()
-
-        query_offset, query_limit = self._get_query_offset_limit(pipes_qs)
-
-        for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
-            print(offset, limit)
-
-            t0 = timer()
-
-            sliced_qs = list(pipes_qs[offset:limit])
-            t1 = timer()
-            print("qs", t1 - t0)
-
-            self.calc_pipe_point_relative_positions_parallel(sliced_qs)
-            sliced_qs = []
-            t2 = timer()
-            print("calc", t2 - t1)
-
-            self.create_neo4j_graph()
-            t3 = timer()
-            print("create", t3 - t2)
-
-        end = timer()
-        print(end - start)
+        super().create_network()
 
     def _get_query_offset_limit(self, pipes_qs):
         pipe_count = self.get_pipe_count(pipes_qs)
