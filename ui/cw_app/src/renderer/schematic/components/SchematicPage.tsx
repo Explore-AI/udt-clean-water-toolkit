@@ -3,8 +3,9 @@ import { PageProps } from "../types/types";
 import useFetchSchematicData from "../hooks/useFetchSchematic";
 import { TRUNKMAIN_QUERY_KEY } from "../queries";
 import styles from '../css/SchematicPage.module.css'; 
+import withSchematic from "../hoc/withSchematic";
 
-export default function SchematicPage(props: PageProps){
+function SchematicPage(props: PageProps){
     const { pageVisibility } = props; 
 
     useFetchSchematicData([TRUNKMAIN_QUERY_KEY])
@@ -19,3 +20,6 @@ export default function SchematicPage(props: PageProps){
         </>
     )
 }
+
+export default withSchematic(SchematicPage);
+// export default SchematicPage;

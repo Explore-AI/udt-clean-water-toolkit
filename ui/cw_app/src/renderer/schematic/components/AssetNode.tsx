@@ -19,15 +19,6 @@ const handleStyle = {
     minWidth: '1px',
 };
 
-const nodeStyle = {
-    backgroundColor: '#cfeef4',
-    width: '100px',
-    height: '50px',
-    borderRadius: '20%',
-    border: '2px solid #393939',
-    display: 'inline-block',
-};
-
 const splitAssetName = (name: string) => {
     return name.replace(/_/g, ' ');
 };
