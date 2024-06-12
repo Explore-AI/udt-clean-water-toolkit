@@ -1,6 +1,6 @@
 from ..models import NetworkNode
 
-class GisToNeo4jCalculator: 
+class GisToNeo4jCalculator3:
     
     def __init__(self): 
         pass 

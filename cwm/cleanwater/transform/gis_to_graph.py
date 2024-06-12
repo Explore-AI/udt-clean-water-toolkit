@@ -33,6 +33,17 @@ class GisToGraph:
             "PipeJunction",
             "PipeEnd",
         ]  # List of node labels with no duplicates
+        self.network_node_asset_labels = [
+            "Chamber",
+            "ConnectionMeter",
+            "ConsumptionMeter",
+            "Hydrant",
+            "NetworkMeter",
+            "NetworkOptValve",
+            "OperationalSite",
+            "PressureControlValve",
+            "PressureFitting"
+        ]
         self.point_asset_gid_names = []  # List node assets with no duplicates
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
@@ -629,7 +640,7 @@ class GisToGraph:
     def _encode_node_key(self, point):
         """
         Round and cast Point geometry coordinates to str to remove '.'
-        then return back to int to make make coords sqid compatible.
+        then return back to int to make coords sqid compatible.
 
         Note these are not coordinates but int representations of the
         coordinates to ensure a unique node_key.

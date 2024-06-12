@@ -10,14 +10,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from cwageolachemy.config.db_config import engine
 import json
-from ..calculators.gis_to_neo4j_calculator import GisToNeo4jCalculator
+from ..calculators.gis_to_neo4j_calculator3 import GisToNeo4jCalculator3
 from cwageolachemy.config.neo4j_config import DATABASE_URL
 from neomodel import config, db 
 from ..models import initialise_node_labels
 
 class GisToNeo4jController:
     def __init__(self) -> None:
-        self.gis_to_neo4j_calculator = GisToNeo4jCalculator()
+        self.gis_to_neo4j_calculator = GisToNeo4jCalculator3()
         initialise_node_labels()
 
     def create_network(self):
