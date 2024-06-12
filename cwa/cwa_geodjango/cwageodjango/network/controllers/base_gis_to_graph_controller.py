@@ -7,20 +7,17 @@ from cwageodjango.assets.controllers import (
 
 
 class BaseGisToGraphController:
-    """Create a Neo4J graph of assets from a geospatial
-    network of assets"""
+    """This is an Abstract Base Class"""
 
     def __init__(self, config):
         self.config = config
 
-    def create_network(self):
-        from timeit import default_timer as timer
-
-        start = timer()
+    def run_calc(self):
 
         pipes_filtered_qs, pipes_filterd_pks = self._get_pipe_and_asset_data()
 
         for pipe_qs, pipe_pks in zip(pipes_filtered_qs, pipes_filterd_pks):
+            from timeit import default_timer as timer
 
             for i, start_index in enumerate(
                 range(
@@ -40,16 +37,20 @@ class BaseGisToGraphController:
                     end_pk = pipe_pks[-1]
 
                 print(start_pk, end_pk)
-                sliced_qs = list(pipe_qs.filter(pk__gte=start_pk, pk__lt=end_pk))
+
+                qs = list(pipe_qs.filter(pk__gte=start_pk, pk__lt=end_pk))
+
                 t1 = timer()
                 print("qs", t1 - t0)
 
                 if self.config.parallel:
-                    self.calc_pipe_point_relative_positions_parallel(sliced_qs)
+                    # defined in child class
+                    self.calc_pipe_point_relative_positions_parallel(qs)
                 else:
-                    self.calc_pipe_point_relative_positions(sliced_qs)
+                    # defined in child class
+                    self.calc_pipe_point_relative_positions(qs)
 
-                sliced_qs = []
+                qs = []
                 t2 = timer()
                 print("calc", t2 - t1)
 
@@ -58,28 +59,7 @@ class BaseGisToGraphController:
                 print("create", t3 - t2)
 
                 end = timer()
-                print(end - start)
-
-    def create_network_parallel(self):
-
-        print(f"Start parallel run with {self.config.processor_count} cores.")
-
-        super().create_network()
-
-    def _get_query_offset_limit(self, pipes_qs):
-        pipe_count = self.get_pipe_count(pipes_qs)
-
-        if not self.config.query_limit or self.config.query_limit == pipe_count:
-            query_limit = pipe_count
-        else:
-            query_limit = self.config.query_limit
-
-        if not self.config.query_offset:
-            query_offset = 0
-        else:
-            query_offset = self.config.query_offset
-
-        return query_offset, query_limit
+                print(end - t0)
 
     # This fn is a candidate to be abstracted out into the NetworkController
     def _get_pipe_and_asset_data(self) -> QuerySet:
