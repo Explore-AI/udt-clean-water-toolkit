@@ -2,8 +2,8 @@ export const Default = () => {
     // unknown default
     return (
         <svg
-            width="20"
-            height="20"
+            width="40"
+            height="40"
             viewBox="0 0 50 50"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -25,8 +25,8 @@ export const Distribution = () => {
     // distribution network valve, open
     return (
         <svg
-            width="20"
-            height="20"
+            width="40"
+            height="40"
             viewBox="0 0 50 50"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -47,8 +47,8 @@ export const OptSiteDefault = () => {
     // operational site non potable, default
     return (
         <svg
-            width="20"
-            height="20"
+            width="40"
+            height="40"
             viewBox="0 0 50 50"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -70,8 +70,8 @@ export const OptSiteClosed = () => {
     // operational site, closed
     return (
         <svg
-            width="24"
-            height="24"
+            width="44"
+            height="44"
             viewBox="0 0 54 54"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

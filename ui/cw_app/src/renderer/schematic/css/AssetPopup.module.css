@@ -1,0 +1,59 @@
+.popupContainer {
+    position: absolute; 
+    background-color: #fffef6;
+    border: 2px solid #33658a;
+    display: flex;
+    flex-direction: column;
+    width: 400px; 
+    height: auto;
+    z-index: 5;
+    border-radius: 5px; 
+}
+
+.title {
+    display: flex; 
+    align-items: center;
+    justify-content: space-around;
+}
+
+.title p {
+    font-family: Tahoma, sans-serif; 
+    font-size: 0.85rem; 
+}
+
+.icon {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    width: 40px; 
+    height: 40px; 
+}
+
+.closeButton {
+    display: flex; 
+    flex-direction: row-reverse;
+    height: auto; 
+    & :hover{
+        background-color: transparent;
+    }
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 0 .5em;
+    padding: 0;
+}
+
+
+.details { 
+    margin: 5px 5px;
+}
+
+.details p {
+    font-family: Tahoma, sans-serif; 
+    font-size: 0.85rem;
+    margin: 5px 0;
+}

@@ -4,6 +4,7 @@ import { Node } from '../types/types';
 import styles from '../css/AssetNode.module.css';
 // import { Default } from './IconComponents/NetworkMeter';
 import { getIcons } from './IconComponents';
+import { splitAssetName } from '../utils/schematicUtils';
 
 const handleStyle = {
     top: '13px',
@@ -17,10 +18,6 @@ const handleStyle = {
     minHeight: '1px',
     maxWidth: '1px',
     minWidth: '1px',
-};
-
-const splitAssetName = (name: string) => {
-    return name.replace(/_/g, ' ');
 };
 
 export default memo((props: NodeProps<Node>) => {

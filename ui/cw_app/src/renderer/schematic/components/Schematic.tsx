@@ -9,7 +9,6 @@ import PipeEdgeNode from './PipeNode';
 import ReactFlow, { Controls, Node } from 'reactflow';
 import 'reactflow/dist/base.css';
 import useElkLayout from '../hooks/useElkLayout';
-import { useState } from 'react';
 import { AssetPopup } from './AssetPopup';
 import useAssetNodePopups from '../hooks/useSchematicPopups';
 
@@ -18,23 +17,24 @@ const nodeTypes = {
     pipeNode: PipeEdgeNode,
 };
 
-const onNodeClick = (event: React.MouseEvent, node: Node, openPopup: any) => {
-    console.log(node);
-    // toggle popup display
+const handleNodeClick = (
+    event: React.MouseEvent,
+    node: Node,
+    openPopup: any,
+) => {
     openPopup(node);
-}
+};
 
 function Schematic() {
-    const { data, isPending, isSuccess } = useFetchSchematicData([
-        TRUNKMAIN_QUERY_KEY,
-    ], { limit: 20 });
-
-
-    const { data: layoutData } = useElkLayout(
-        data || { nodes: [], edges: [] },
+    const { data, isPending, isSuccess } = useFetchSchematicData(
+        [TRUNKMAIN_QUERY_KEY],
+        { limit: 20 },
     );
 
-    const { popups, openPopup, closePopup} = useAssetNodePopups(); 
+    const { data: layoutData } = useElkLayout(data || { nodes: [], edges: [] });
+
+    const { popups, openPopup, closePopup } = useAssetNodePopups();
+
     if (isPending) {
         return <LoadingSpinner />;
     }
@@ -46,7 +46,6 @@ function Schematic() {
             </div>
         );
     }
-    console.log('List of popups: \n', popups); 
 
     return (
         <>
@@ -60,14 +59,20 @@ function Schematic() {
                 fitView={true}
                 nodesDraggable={true}
                 className={styles.rfContainer}
-                onNodeClick={(event, node) => onNodeClick(event, node, openPopup)}
+                onNodeClick={(event, node) =>
+                    handleNodeClick(event, node, openPopup)
+                }
             >
-                { popups.map((nodePopup)=> (
-                    <AssetPopup key={nodePopup.id} nodeProps={nodePopup}/>
-                ))}
-                {/* <Background /> */}
+                
                 <Controls />
             </ReactFlow>
+            {popups.map((nodePopup) => (
+                    <AssetPopup
+                        key={nodePopup.id}
+                        nodeProps={nodePopup}
+                        onClose={() => closePopup(nodePopup.id)}
+                    />
+                ))}
         </>
     );
 }

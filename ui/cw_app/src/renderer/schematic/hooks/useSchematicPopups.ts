@@ -2,13 +2,13 @@
 import { createContext, useState } from 'react';
 import { Node } from 'reactflow';
 import { Node as AssetNode } from '../types/types';
-
+// @ts-ignore
 export const NodePopupContext = createContext();
 
 export default function useAssetNodePopups() {
     const [popups, setPopups] = useState<Node<AssetNode>[]>([]);
 
-    const openPopup = (node: Node) => {
+    const openPopup = (node: Node<AssetNode>) => {
         setPopups([...popups, node]);
     };
 

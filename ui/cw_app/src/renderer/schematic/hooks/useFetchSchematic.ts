@@ -16,7 +16,6 @@ const useFetchSchematicData = (queryKey: string[], options = {}) => {
     /**
      * Custom Hook for fetching the trunk main schematic data from our API
      */
-    console.log(options); 
     const url = getApiUrl(queryKey);
     const schematicData = useQuery({
         queryKey: queryKey,

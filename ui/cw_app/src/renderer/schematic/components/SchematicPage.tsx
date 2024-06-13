@@ -22,4 +22,3 @@ function SchematicPage(props: PageProps){
 }
 
 export default withSchematic(SchematicPage);
-// export default SchematicPage;
