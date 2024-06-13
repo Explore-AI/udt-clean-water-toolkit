@@ -104,7 +104,7 @@ class GisToNeo4jCalculator3(GisToGraph):
                     'node_key': f"{node_key}_{gid}",
                     'gid': gid,
                     'node_label': asset_name,
-                    'AcousticLogger': has_logger  # Set AcousticLogger attribute
+                    'AcousticLogger': has_logger
                 }
 
                 # Create the asset node
