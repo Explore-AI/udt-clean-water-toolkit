@@ -186,7 +186,7 @@ function AssetsHydrantFillcolor() {
         binary: false,
         minZoom: 8,
         maxZoom: 18,
-        renderSubLayers: props => {
+        renderSubLayers: (props) => {
             return new IconLayer(props, {
                 iconMapping:
                     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
@@ -311,6 +311,63 @@ export const COMMON_STYLING = {
     stroked: true,
 };
 
+async function getValues() {
+    try {
+        // URL of the GeoServer WFS service
+        const url = `${GEOSERVER_URL}/geoserver/wfs?service=wfs&version=2.0.0&request=GetPropertyValue&typeNames=udt:utilities_dma&valueReference=code`;
+        const username = 'admin';
+        const password = 'myawesomegeoserver'; // TODO: Fetch this from config.ts
+        const credentials = `${username}:${password}`;
+        const encodedCredentials = btoa(credentials);
+
+        const headers = {
+            'Authorization': `Basic ${encodedCredentials}`
+        };
+
+        const response = await fetch(url, { headers });
+
+        // Check if the fetch was successful
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const xmlString = await response.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
+
+        // Check for parse errors
+        const parseError = xmlDoc.getElementsByTagName('parsererror');
+        if (parseError.length > 0) {
+            throw new Error(`Error parsing XML: ${parseError[0].textContent}`);
+        }
+
+        // Create an XPath evaluator
+        const evaluator = new XPathEvaluator();
+
+        // Define namespace resolver
+        const nsResolver = function(prefix) {
+            const ns = {
+                'wfs': 'http://www.opengis.net/wfs/2.0',
+                'udt': 'http://udt'
+            };
+            return ns[prefix] || null;
+        };
+
+        // Use XPath to select nodes
+        const result = evaluator.evaluate('//wfs:member//udt:code', xmlDoc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        const values = [];
+        for (let i = 0; i < result.snapshotLength; i++) {
+            values.push(result.snapshotItem(i).textContent.trim());
+        }
+
+        console.log(values);
+        return values;
+    } catch (error) {
+        // Log any errors that occur during the fetch or parsing
+        console.error(error);
+    }
+}
+
 export const POINT_STYLING = (AssetName: string) => {
     let Styling = '';
     if (AssetName === 'assets_pressurefitting') {
@@ -348,6 +405,7 @@ export const POINT_STYLING = (AssetName: string) => {
             getFillColor: (f) => Styling(f),
         };
     }
+
     return StylingOptions;
 };
 
@@ -374,7 +432,7 @@ export const POLYGON_STYLING = {
     opacity: 0.1,
     getFillColor: colorCategories({
         attr: 'code',
-        domain: ['ZABINB01', 'ZABIND03', 'ZCHIPO01', 'ZABIND08'], // TODO: get dmas from from geoserver
+        domain: ['ZABINB01', 'ZABIND03', 'ZCHIPO01', 'ZABIND08'], // TODO: We need to call getValues(); to get the array
         colors: 'BluYl',
         othersColor: [72, 123, 182],
     }),
@@ -391,6 +449,23 @@ export const createLayers = (newMapLayerProps = []) => {
             LayerStyle = LINE_STYLING(layerProps.key);
         } else if (layerProps.assetType === 'polygon') {
             LayerStyle = POLYGON_STYLING;
+        }
+        if (
+            layerProps.key === 'assets_hydrant' ||
+            layerProps.key === 'assets_logger' ||
+            layerProps.key === 'assets_networkoptvalve' ||
+            layerProps.key === 'assets_networkmeter'
+        ) {
+            return new MVTLayer({
+                pickable: true,
+                id: layerProps.key,
+                data: [MVT_LAYER_URL(layerProps.key)],
+                visible: layerProps.visible,
+                binary: false,
+                minZoom: 8,
+                maxZoom: 18,
+                renderSubLayers: LayerStyle.renderSubLayers,
+            });
         }
         return new MVTLayer({
             pickable: true,
