@@ -34,8 +34,8 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
             "key": node_id,
             "type": node_type,
             "position": {
-                "x": point_4326.x * 100.0,
-                "y": point_4326.y * 100.0,
+                "x": point_4326.x,
+                "y": point_4326.y,
                 # "x": position[0],
                 # "y": position[1],
             },

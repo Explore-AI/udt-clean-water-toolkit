@@ -1,8 +1,8 @@
 export const Distribution = () => {
     return (
         <svg
-            width="25"
-            height="40"
+            width="40"
+            height="60"
             viewBox="0 0 50 80"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -18,8 +18,8 @@ export const Distribution = () => {
 export const Double = () => {
     return (
         <svg
-            width="25"
-            height="38"
+            width="40"
+            height="55"
             viewBox="0 0 50 75"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -54,8 +54,8 @@ export const Double = () => {
 export const Single = () => {
     return (
         <svg
-            width="20"
-            height="20"
+            width="40"
+            height="40"
             viewBox="0 0 50 50"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
