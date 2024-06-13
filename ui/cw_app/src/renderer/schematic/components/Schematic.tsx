@@ -28,7 +28,7 @@ const handleNodeClick = (
 function Schematic() {
     const { data, isPending, isSuccess } = useFetchSchematicData(
         [TRUNKMAIN_QUERY_KEY],
-        { limit: 20 },
+        { limit: 30 },
     );
 
     const { data: layoutData } = useElkLayout(data || { nodes: [], edges: [] });
