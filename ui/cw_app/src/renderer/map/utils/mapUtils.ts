@@ -19,7 +19,7 @@ export const MVT_LAYER_URL = (asset_name: string) => {
 
 export const MAP_LAYERS_PROPS = [
     {
-        visible: true,
+        visible: false,
         label: 'Chambers',
         key: 'assets_chamber',
         assetType: 'point',
@@ -37,37 +37,37 @@ export const MAP_LAYERS_PROPS = [
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Loggers',
         key: 'assets_logger',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Network Meter',
         key: 'assets_networkmeter',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Network Opt Valve',
         key: 'assets_networkoptvalve',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Operational Site',
         key: 'assets_operationalsite',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Pressure Control Valve',
         key: 'assets_pressurecontrolvalve',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Pressure Fitting',
         key: 'assets_pressurefitting',
         assetType: 'point',
@@ -181,123 +181,6 @@ function AssetsChamberFillcolor(feature) {
     return getFillColorFeatures(feature, AssetsChamberColormap);
 }
 
-function AssetsHydrantFillcolor() {
-    return {
-        binary: false,
-        minZoom: 8,
-        maxZoom: 18,
-        renderSubLayers: (props) => {
-            return new IconLayer(props, {
-                iconMapping:
-                    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
-                iconAtlas: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.png`,
-                getIcon: (f: Feature<Geometry, PropertiesType>) => {
-                    switch (f.properties.gid) {
-                        case 'x':
-                            return 'hydrant';
-                        default:
-                            return 'hydrant';
-                    }
-                },
-                sizeScale: 1.5,
-                getSize: 10,
-                getColor: [234, 122, 100],
-                getPosition: (f) => f.geometry.coordinates,
-            });
-        },
-    };
-}
-
-function AssetsLoggerFillcolor() {
-    return {
-        binary: false,
-        minZoom: 8,
-        maxZoom: 18,
-        renderSubLayers: props => {
-            return new IconLayer(props, {
-                iconMapping:
-                    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
-                iconAtlas: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.png`,
-                getIcon: (f: Feature<Geometry, PropertiesType>) => {
-                    switch (f.properties.gid) {
-                        case 'x':
-                            return 'logger';
-                        default:
-                            return 'logger';
-                    }
-                },
-                sizeScale: 1.5,
-                getSize: 10,
-                getColor: [234, 122, 100],
-                getPosition: (f) => f.geometry.coordinates,
-            });
-        },
-    };
-}
-function AssetsNetworkmeterFillcolor() {
-    return {
-        binary: false,
-        minZoom: 8,
-        maxZoom: 18,
-        renderSubLayers: props => {
-            return new IconLayer(props, {
-                iconMapping:
-                    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
-                iconAtlas: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.png`,
-                getIcon: (f: Feature<Geometry, PropertiesType>) => {
-                    switch (f.properties.subtype) {
-                        case 'distribution_input_meter':
-                            return 'network-meter-distribution-input-meter';
-                        case 'district_meter':
-                            return 'network-meter-distribution-input-meter';
-                        case 'fire_meter':
-                            return 'network-meter-fire';
-                        case 'unknown':
-                            return 'network-meter-unkown';
-                        case 'waste_meter':
-                            return 'network-meter-waste';
-                        case 'zonal_meter':
-                            return 'network-meter-zonal';
-                        default:
-                            return 'assets_networkoptvalve';
-                    }
-                },
-                sizeScale: 1.5,
-                getSize: 10,
-                getColor: [234, 122, 100],
-                getPosition: (f) => f.geometry.coordinates,
-            });
-        },
-    };
-}
-
-function AssetsNetworkoptvalveFillcolor() {
-    return {
-        binary: false,
-        minZoom: 8,
-        maxZoom: 18,
-        renderSubLayers: props => {
-            return new IconLayer(props, {
-                iconMapping:
-                    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
-                iconAtlas: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.png`,
-                getIcon: (f: Feature<Geometry, PropertiesType>) => {
-                    switch (f.properties.gid) {
-                        case 'x':
-                            return 'assets_networkoptvalve';
-                        default:
-                            return 'assets_networkoptvalve';
-                    }
-                },
-                sizeScale: 1.5,
-                getSize: 10,
-                getColor: [234, 122, 100],
-                getPosition: (f) => f.geometry.coordinates,
-            });
-        },
-    };
-}
-
 function AssetsOperationalsiteFillcolor(feature) {
     return getFillColorFeatures(feature, AssetsOperationalsiteColormap);
 }
@@ -325,8 +208,6 @@ async function getValues() {
         };
 
         const response = await fetch(url, { headers });
-
-        // Check if the fetch was successful
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -340,8 +221,6 @@ async function getValues() {
         if (parseError.length > 0) {
             throw new Error(`Error parsing XML: ${parseError[0].textContent}`);
         }
-
-        // Create an XPath evaluator
         const evaluator = new XPathEvaluator();
 
         // Define namespace resolver
@@ -353,14 +232,11 @@ async function getValues() {
             return ns[prefix] || null;
         };
 
-        // Use XPath to select nodes
         const result = evaluator.evaluate('//wfs:member//udt:code', xmlDoc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         const values = [];
         for (let i = 0; i < result.snapshotLength; i++) {
             values.push(result.snapshotItem(i).textContent.trim());
         }
-
-        console.log(values);
         return values;
     } catch (error) {
         // Log any errors that occur during the fetch or parsing
@@ -374,14 +250,6 @@ export const POINT_STYLING = (AssetName: string) => {
         Styling = AssetsPressurefittingFillcolor;
     } else if (AssetName === 'assets_chamber') {
         Styling = AssetsChamberFillcolor;
-    } else if (AssetName === 'assets_hydrant') {
-        Styling = AssetsHydrantFillcolor();
-    } else if (AssetName === 'assets_logger') {
-        Styling = AssetsLoggerFillcolor();
-    } else if (AssetName === 'assets_networkmeter') {
-        Styling = AssetsNetworkmeterFillcolor();
-    } else if (AssetName === 'assets_networkoptvalve') {
-        Styling = AssetsNetworkoptvalveFillcolor();
     } else if (AssetName === 'assets_operationalsite') {
         Styling = AssetsOperationalsiteFillcolor;
     } else if (AssetName === 'assets_pressurecontrolvalve') {
@@ -389,13 +257,11 @@ export const POINT_STYLING = (AssetName: string) => {
     }
     let StylingOptions;
     if (
-        AssetName === 'assets_hydrant' ||
-        AssetName === 'assets_logger' ||
-        AssetName === 'assets_networkoptvalve' ||
-        AssetName === 'assets_networkmeter'
+        AssetName === 'assets_pressurefitting' ||
+        AssetName === 'assets_chamber' ||
+        AssetName === 'assets_operationalsite' ||
+        AssetName === 'assets_pressurecontrolvalve'
     ) {
-        StylingOptions = Styling;
-    } else {
         StylingOptions = {
             ...COMMON_STYLING,
             pointAntialiasing: true,
@@ -405,7 +271,6 @@ export const POINT_STYLING = (AssetName: string) => {
             getFillColor: (f) => Styling(f),
         };
     }
-
     return StylingOptions;
 };
 
@@ -437,6 +302,53 @@ export const POLYGON_STYLING = {
         othersColor: [72, 123, 182],
     }),
 };
+const assets_networkmeter_getIcon = (subtypes) => {
+    switch (subtypes.subtype) {
+        case 'distribution_input_meter':
+            return 'network-meter-distribution-input-meter';
+        case 'district_meter':
+            return 'marker';
+        case 'fire_meter':
+            return 'network-meter-fire';
+        case 'unknown':
+            return 'network-meter-unknown';
+        case 'waste_meter':
+            return 'network-meter-waste';
+        case 'zonal_meter':
+            return 'network-meter-zonal';
+        default:
+            return 'network-meter-default';
+    }
+};
+
+const assets_networkoptvalve_getIcon = (subtypes) => {
+    switch (subtypes.gid) {
+        default:
+            return 'assets_networkoptvalve';
+    }
+};
+
+const assets_logger_getIcon = (subtypes) => {
+    switch (subtypes.gid) {
+        default:
+            return 'logger';
+    }
+};
+
+const assets_hydrant_getIcon = (subtypes) => {
+    switch (subtypes.gid) {
+        default:
+            return 'hydrant';
+    }
+};
+
+const iconFunctions = {
+    assets_networkmeter: (subtype) => assets_networkmeter_getIcon(subtype),
+    assets_networkoptvalve: (subtype) =>
+        assets_networkoptvalve_getIcon(subtype),
+    assets_logger: (subtype) => assets_logger_getIcon(subtype),
+    assets_hydrant: (subtype) => assets_hydrant_getIcon(subtype),
+};
 
 export const createLayers = (newMapLayerProps = []) => {
     const mapLayerProps = !_isEmpty(newMapLayerProps)? newMapLayerProps: MAP_LAYERS_PROPS;
@@ -462,17 +374,30 @@ export const createLayers = (newMapLayerProps = []) => {
                 data: [MVT_LAYER_URL(layerProps.key)],
                 visible: layerProps.visible,
                 binary: false,
-                minZoom: 8,
+                minZoom: 13,
                 maxZoom: 18,
-                renderSubLayers: LayerStyle.renderSubLayers,
+                renderSubLayers: (props) => {
+                    return new IconLayer(props, {
+                        iconMapping:
+                            'http://localhost:8080/geoserver/styles/sprites/makisprite.json',
+                        iconAtlas:
+                            'http://localhost:8080/geoserver/styles/sprites/makisprite.png',
+
+                        getIcon: (f) => iconFunctions[layerProps.key](f.properties),
+                        sizeScale: 10,
+                        //getSize: 10,
+                        getPosition: (f) => f.geometry.coordinates,
+                    });
+                },
+            });
+        } else {
+            return new MVTLayer({
+                pickable: true,
+                id: layerProps.key,
+                data: [MVT_LAYER_URL(layerProps.key)],
+                visible: layerProps.visible,
+                ...LayerStyle,
             });
         }
-        return new MVTLayer({
-            pickable: true,
-            id: layerProps.key,
-            data: [MVT_LAYER_URL(layerProps.key)],
-            visible: layerProps.visible,
-            ...LayerStyle,
-        });
     });
 };
