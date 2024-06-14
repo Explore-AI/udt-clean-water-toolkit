@@ -9,6 +9,8 @@ DISTRIBUTION_MAIN__NAME = "distribution_main"
 
 CONNECTION_MAIN__NAME = "connection_main"
 
+ST_MAIN__NAME = "st_main"
+
 CHAMBER__NAME = "chamber"
 
 HYDRANT__NAME = "hydrant"
@@ -28,6 +30,18 @@ OPERATIONAL_SITE__NAME = "operational_site"
 PRESSURE_CONTROL_VALVE__NAME = "pressure_control_valve"
 
 PRESSURE_FITTING__NAME = "pressure_fitting"
+
+REGULATOR__NAME = "regulator"
+
+LISTENING_POST__NAME = "listening_post"
+
+INSERTION_FLOW_METER__NAME = "insertion_flow_meter"
+
+BULK_METER__NAME = "bulk_meter"
+
+REVENUE_METER__NAME = "revenue_meter"
+
+WATER_HATCH_BOX__NAME = "water_hatch_box"
 
 PIPE_END__NAME = "pipe_end"
 
