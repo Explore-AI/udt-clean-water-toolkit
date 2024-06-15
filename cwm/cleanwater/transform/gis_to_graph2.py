@@ -156,42 +156,47 @@ class GisToGraph2:
                 }
             )
 
-    @staticmethod
-    def _merge_pipe_junction_node(node, merged_nodes):
-        merged_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
-        merged_nodes[-1]["node_labels"].append("PipeJunction")
+    def _set_pipe_properties(self, node, network_nodes):
+
+        network_nodes[-1]["node_key"] = self._encode_node_key(
+            node["intersection_point_geometry"]
+        )
+
         try:
-            merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
+            network_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
         except KeyError:
-            merged_nodes[-1]["pipe_gids"] = node["pipe_gids"]
+            network_nodes[-1]["pipe_gids"] = node["pipe_gids"]
 
-        return merged_nodes
+        return network_nodes
 
-    @staticmethod
-    def _merge_pipe_end_node(node, merged_nodes):
-        merged_nodes[-1]["node_types"].append(PIPE_END__NAME)
-        merged_nodes[-1]["node_labels"].append("PipeEnd")
-        try:
-            merged_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
-        except KeyError:
-            merged_nodes[-1]["pipe_gids"] = node["pipe_gids"]
+    def _merge_pipe_junction_node(self, node, network_nodes):
+        network_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
+        network_nodes[-1]["node_labels"].extend(["NetworkNode", "PipeJunction"])
 
-        return merged_nodes
+        network_nodes = self._set_pipe_properties(node, network_nodes)
+        return network_nodes
 
-    def _merge_point_asset_node(self, node, merged_nodes):
-        merged_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
+    def _merge_pipe_end_node(self, node, network_nodes):
+        network_nodes[-1]["node_types"].append(PIPE_END__NAME)
+        network_nodes[-1]["node_labels"].extend(["NetworkNode", "PipeEnd"])
+
+        network_nodes = self._set_pipe_properties(node, network_nodes)
+        return network_nodes
+
+    def _merge_point_asset_node(self, node, network_nodes):
+        network_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
 
         subtype = node.get("subtype")
         if subtype:
-            merged_nodes[-1]["subtype"] = subtype
+            network_nodes[-1]["subtype"] = subtype
 
         acoustic_logger = node.get("acoustic_logger")
         if acoustic_logger:
-            merged_nodes[-1]["acoustic_logger"] = acoustic_logger
+            network_nodes[-1]["acoustic_logger"] = acoustic_logger
 
-        if "PointAsset" not in merged_nodes[-1]["node_labels"]:
-            merged_nodes[-1]["node_labels"].append("PointAsset")
-        merged_nodes[-1]["node_labels"].append(node["asset_label"])
+        if "PointAsset" not in network_nodes[-1]["node_labels"]:
+            network_nodes[-1]["node_labels"].append("PointAsset")
+        network_nodes[-1]["node_labels"].append(node["asset_label"])
 
         if node["asset_label"] not in self.network_node_labels:
             self.network_node_labels.append(node["asset_label"])
@@ -201,44 +206,42 @@ class GisToGraph2:
         if node_asset_gid_name not in self.point_asset_gid_names:
             self.point_asset_gid_names.append(node_asset_gid_name)
 
-        merged_nodes[-1][node_asset_gid_name] = node["gid"]
+        network_nodes[-1][node_asset_gid_name] = node["gid"]
 
         try:
-            merged_nodes[-1]["point_asset_names"].append(node["asset_name"])
-            merged_nodes[-1]["point_asset_gids"].append(node["gid"])
-            merged_nodes[-1]["point_assets_with_gids"][node_asset_gid_name] = node[
+            network_nodes[-1]["point_asset_names"].append(node["asset_name"])
+            network_nodes[-1]["point_asset_gids"].append(node["gid"])
+            network_nodes[-1]["point_assets_with_gids"][node_asset_gid_name] = node[
                 "gid"
             ]
 
         except KeyError:
-            merged_nodes[-1]["point_asset_names"] = [node["asset_name"]]
-            merged_nodes[-1]["point_asset_gids"] = [node["gid"]]
-            merged_nodes[-1]["point_assets_with_gids"] = {
+            network_nodes[-1]["point_asset_names"] = [node["asset_name"]]
+            network_nodes[-1]["point_asset_gids"] = [node["gid"]]
+            network_nodes[-1]["point_assets_with_gids"] = {
                 node_asset_gid_name: node["gid"]
             }
 
-        return merged_nodes
+        return network_nodes
 
-    def _set_merged_nodes_default_props(self, nodes, merged_nodes):
-        node_key = self._encode_node_key(nodes[0]["intersection_point_geometry"])
+    def _set_network_nodes_default_props(self, nodes, network_nodes):
         utility_name = nodes[0]["utility_name"]
 
-        merged_nodes.append(
+        network_nodes.append(
             {
                 "utility": utility_name,
                 "coords_27700": [
                     float(nodes[0]["intersection_point_geometry"].x),
                     float(nodes[0]["intersection_point_geometry"].y),
                 ],
-                "node_key": node_key,
                 "dma_codes": nodes[0]["dma_codes"],
                 "dma_names": nodes[0]["dma_names"],
                 "dmas": nodes[0]["dmas"],
                 "node_types": [],
-                "node_labels": ["NetworkNode"],
+                "node_labels": [],
             }
         )
-        return node_key, merged_nodes
+        return network_nodes
 
     @staticmethod
     def _consolidate_nodes_on_position(nodes_ordered):
@@ -261,41 +264,42 @@ class GisToGraph2:
 
         return consolidated_nodes
 
-    def _update_merged_nodes(self, node, merged_nodes):
+    def _update_network_nodes(self, node, network_nodes):
 
         if node["node_type"] == PIPE_JUNCTION__NAME:
-            merged_nodes = self._merge_pipe_junction_node(node, merged_nodes)
+            network_nodes = self._merge_pipe_junction_node(node, network_nodes)
         elif node["node_type"] == PIPE_END__NAME:
-            merged_nodes = self._merge_pipe_end_node(node, merged_nodes)
+            network_nodes = self._merge_pipe_end_node(node, network_nodes)
         elif node["node_type"] == POINT_ASSET__NAME:
-            merged_nodes = self._merge_point_asset_node(node, merged_nodes)
+            network_nodes = self._merge_point_asset_node(node, network_nodes)
 
-        return merged_nodes
+        return network_nodes
 
     def _set_nodes_and_edges(self, nodes_ordered):
 
         consolidated_nodes = self._consolidate_nodes_on_position(nodes_ordered)
 
-        merged_nodes = []
+        network_nodes = []
         pipe_edges = []
 
-        import pdb
-
-        pdb.set_trace()
         for nodes in consolidated_nodes:
 
-            node_key, merged_nodes = self._set_merged_nodes_default_props(
-                nodes, merged_nodes
-            )
+            network_nodes = self._set_network_nodes_default_props(nodes, network_nodes)
             for node in nodes:
+
+                network_nodes = self._update_network_nodes(node, network_nodes)
+
+                import pdb
+
+                pdb.set_trace()
                 self.create_dma_data(node, node_key)
-                merged_nodes = self._update_merged_nodes(node, merged_nodes)
+
                 # remove duplicates and sort node_types
-                merged_nodes[-1]["node_types"] = sorted(
-                    list(set((merged_nodes[-1]["node_types"])))
+                network_nodes[-1]["node_types"] = sorted(
+                    list(set((network_nodes[-1]["node_types"])))
                 )
 
-        return merged_nodes
+        return network_nodes
 
     def _get_base_pipe_data(self, qs_object) -> dict:
         base_pipe: dict = {}
@@ -694,7 +698,7 @@ class GisToGraph2:
 
         return json.dumps(dma_data)
 
-    def _encode_node_key(self, point):
+    def _encode_node_key(self, point, extra_params=[]):
         """
         Round and cast Point geometry coordinates to str to remove '.'
         then return back to int to make make coords sqid compatible.
@@ -705,9 +709,4 @@ class GisToGraph2:
 
         coord1_repr = int(str(round(point.coords[0], 3)).replace(".", ""))
         coord2_repr = int(str(round(point.coords[1], 3)).replace(".", ""))
-        return self.sqids.encode(
-            [
-                coord1_repr,
-                coord2_repr,
-            ]
-        )
+        return self.sqids.encode([coord1_repr, coord2_repr, *extra_params])
