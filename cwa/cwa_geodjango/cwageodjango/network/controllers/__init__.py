@@ -1,6 +1,7 @@
 from .base_gis_to_graph_controller import BaseGisToGraphController
 from .gis_to_neo4j_controller import GisToNeo4jController
 from .gis_to_neo4j_controller2 import GisToNeo4jController2
+from .gis_to_neo4j_controller3 import GisToNeo4jController3
 from .gis_to_nx_controller import GisToNxController
 from .gis_to_networkit_controller import GisToNkController
 from .neo4j_to_wntr_controller import Convert2Wntr
