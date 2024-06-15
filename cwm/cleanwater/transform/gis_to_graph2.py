@@ -217,7 +217,6 @@ class GisToGraph2:
                 node_asset_gid_name: node["gid"]
             }
 
-        print(merged_nodes)
         return merged_nodes
 
     def _set_merged_nodes_default_props(self, nodes, merged_nodes):
@@ -243,6 +242,10 @@ class GisToGraph2:
 
     @staticmethod
     def _consolidate_nodes_on_position(nodes_ordered):
+        """
+        Combine nodes based on their distance from the
+        start of the pipe.
+        """
         consolidated_nodes = [[nodes_ordered[0]]]
 
         prev_distance = round(nodes_ordered[0]["distance_from_pipe_start_cm"])
@@ -274,6 +277,11 @@ class GisToGraph2:
         consolidated_nodes = self._consolidate_nodes_on_position(nodes_ordered)
 
         merged_nodes = []
+        pipe_edges = []
+
+        import pdb
+
+        pdb.set_trace()
         for nodes in consolidated_nodes:
 
             node_key, merged_nodes = self._set_merged_nodes_default_props(
