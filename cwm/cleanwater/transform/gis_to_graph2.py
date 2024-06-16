@@ -185,8 +185,8 @@ class GisToGraph2:
 
         asset_node_data["gid"] = node["gid"]
 
-        if node["asset_label"] not in self.network_node_labels:
-            self.network_node_labels.append(node["asset_label"])
+        # if node["asset_label"] not in self.network_node_labels:
+        #     self.network_node_labels.append(node["asset_label"])
 
         subtype = node.get("subtype")
         if subtype:

@@ -27,9 +27,9 @@ class GisToNeo4jCalculator3(GisToGraph2):
 
     def __init__(self, config):
         self.config = config
-        self.all_edges_by_pipe = []
-        self.all_nodes_by_pipe = []
-        self.utility_relationships = []
+        self.all_pipe_nodes_by_pipe = []
+        self.all_pipe_edges_by_pipe = []
+        self.network_node_labels = []
 
         super().__init__(
             self.config.srid,
@@ -39,9 +39,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
             neoj4_point=self.config.neoj4_point,
         )
 
-    def _get_unique_nodes_and_edges(self):
-        all_nodes = flatten_concatenation(self.all_pipe_nodes_by_pipe)
-        all_edges = flatten_concatenation(self.all_pipe_edges_by_pipe)
+    def _get_unique_nodes_and_edges(self, all_nodes, all_edges):
 
         unique_node_keys = set()
         all_unique_nodes = []
@@ -62,13 +60,10 @@ class GisToNeo4jCalculator3(GisToGraph2):
         return all_unique_nodes, all_unique_edges
 
     @staticmethod
-    def set_static_node_properties():
+    def set_node_properties():
         return """
         n.node_key = node.node_key,
-        n.coords_27700 = node.coords_27700,
-        n.node_types = CASE WHEN node.node_types IS NOT NULL THEN node.node_types ELSE NULL END,
-        n.asset_names = CASE WHEN node.point_asset_names IS NOT NULL THEN node.point_asset_names ELSE NULL END,
-        n.asset_gids = CASE WHEN node.point_asset_gids IS NOT NULL THEN node.point_asset_gids ELSE NULL END
+        n.coords_27700 = node.coords_27700
         """
 
     def set_node_labels(self):
@@ -81,19 +76,22 @@ class GisToNeo4jCalculator3(GisToGraph2):
 
         return subquery
 
-    def _batch_create_network_nodes(self, all_unique_nodes):
+    def _batch_create_pipe_nodes(self):
+        nodes = flatten_concatenation(self.all_pipe_nodes_by_pipe)
+
         query = f"""UNWIND $all_unique_nodes AS node
          MERGE (n:NetworkNode {{node_key: node.node_key}})
          ON CREATE
              SET n.createdAt = timestamp()
              {self.set_node_labels()}
          SET
-         {self.set_static_node_properties()}
+         {self.set_node_properties()}
          RETURN n
          """
-        db.cypher_query(query, {"all_unique_nodes": all_unique_nodes})
 
-    def _batch_create_pipe_relations(self, all_unique_edges):
+        db.cypher_query(query, {"all_unique_nodes": nodes})
+
+    def _batch_create_pipe_node_relations(self, all_unique_edges):
         grouped_edges = defaultdict(list)
         for edge in all_unique_edges:
             grouped_edges[edge["asset_label"]].append(edge)
@@ -115,6 +113,21 @@ class GisToNeo4jCalculator3(GisToGraph2):
             RETURN r
             """
             db.cypher_query(query, {"edges": edges})
+
+    def _batch_create_asset_nodes(self):
+        nodes = flatten_concatenation(self.all_asset_nodes_by_pipe)
+
+        query = f"""UNWIND $all_unique_nodes AS node
+         MERGE (n:NetworkNode {{node_key: node.node_key}})
+         ON CREATE
+             SET n.createdAt = timestamp()
+             {self.set_node_labels()}
+         SET
+         {self.set_node_properties()}
+         RETURN n
+         """
+
+        db.cypher_query(query, {"all_unique_nodes": nodes})
 
     def _batch_create_dma_nodes(self):
         """Batch creates DMA nodes."""
@@ -153,10 +166,18 @@ class GisToNeo4jCalculator3(GisToGraph2):
         """
         db.cypher_query(query, {"utility_data": self.utility_data})
 
-    def _map_pipe_connected_asset_relations(self, all_unique_nodes, all_unique_edges):
+    def _map_pipe_connected_asset_relations(self):
 
-        self._batch_create_network_nodes(all_unique_nodes)
-        self._batch_create_pipe_relations(all_unique_edges)
+        # self.all_asset_nodes_by_pipe = []
+        # self.all_pipe_node_to_asset_node_edges = []
+        self._batch_create_pipe_nodes()
+        self._batch_create_pipe_node_relations()
+
+        self._batch_create_asset_nodes()
+        import pdb
+
+        pdb.set_trace()
+        self._batch_create_pipe_node_to_asset_node_relations()
 
         # Batch create DMA and Utility nodes
         self._batch_create_dma_nodes()
@@ -171,17 +192,18 @@ class GisToNeo4jCalculator3(GisToGraph2):
         self.all_pipe_edges_by_pipe = []
 
     def create_neo4j_graph(self) -> None:
-        import pdb
 
-        pdb.set_trace()
-        all_unique_nodes, all_unique_edges = self._get_unique_nodes_and_edges()
-        self._map_pipe_connected_asset_relations(all_unique_nodes, all_unique_edges)
+        # all_unique_nodes, all_unique_edges = self._get_unique_nodes_and_edges(
+        #     self.all_pipe_nodes_by_pipe, self.all_pipe_edges_by_pipe
+        # )
+
+        self._map_pipe_connected_asset_relations()
         self._reset_pipe_asset_data()
 
     def _create_neo4j_graph_parallel(self) -> None:
         with ThreadPool(self.config.thread_count) as p:
             p.starmap(
                 self._map_pipe_connected_asset_relations,
-                zip(self.all_edges_by_pipe, self.all_nodes_by_pipe),
+                zip(self.all_pipe_edges_by_pipe, self.all_pipe_nodes_by_pipe),
             )
         self._reset_pipe_asset_data()

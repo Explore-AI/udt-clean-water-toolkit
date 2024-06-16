@@ -1,5 +1,5 @@
 from neomodel import StructuredRel
 
 
-class HasUtility(StructuredRel):
+class HasAsset(StructuredRel):
     pass
