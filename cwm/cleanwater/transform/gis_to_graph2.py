@@ -38,6 +38,7 @@ class GisToGraph2:
             "NetworkNode",
             "PipeJunction",
             "PipeEnd",
+            "PointAsset",
         ]  # List of node labels with no duplicates
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
@@ -185,8 +186,8 @@ class GisToGraph2:
 
         asset_node_data["gid"] = node["gid"]
 
-        # if node["asset_label"] not in self.network_node_labels:
-        #     self.network_node_labels.append(node["asset_label"])
+        if node["asset_label"] not in self.network_node_labels:
+            self.network_node_labels.append(node["asset_label"])
 
         subtype = node.get("subtype")
         if subtype:
