@@ -61,22 +61,14 @@ class GisToNeo4jCalculator3(GisToGraph2):
 
         return all_unique_nodes, all_unique_edges
 
-    def set_dynamic_node_properties(self):
-        subquery = """n.node_types = CASE WHEN node.node_types IS NOT NULL THEN node.node_types ELSE NULL END,
-        n.asset_names = CASE WHEN node.point_asset_names IS NOT NULL THEN node.point_asset_names ELSE NULL END,
-        n.asset_gids = CASE WHEN node.point_asset_gids IS NOT NULL THEN node.point_asset_gids ELSE NULL END,\n"""
-        for point_asset in self.point_asset_gid_names:
-            subquery += f"""n.{point_asset} = CASE WHEN node.{point_asset}
-            IS NOT NULL THEN node.{point_asset}
-            ELSE NULL END,\n"""
-
-        return subquery[:-2]  # Remove trailing comma and newline
-
     @staticmethod
     def set_static_node_properties():
         return """
         n.node_key = node.node_key,
         n.coords_27700 = node.coords_27700,
+        n.node_types = CASE WHEN node.node_types IS NOT NULL THEN node.node_types ELSE NULL END,
+        n.asset_names = CASE WHEN node.point_asset_names IS NOT NULL THEN node.point_asset_names ELSE NULL END,
+        n.asset_gids = CASE WHEN node.point_asset_gids IS NOT NULL THEN node.point_asset_gids ELSE NULL END
         """
 
     def set_node_labels(self):
@@ -97,7 +89,6 @@ class GisToNeo4jCalculator3(GisToGraph2):
              {self.set_node_labels()}
          SET
          {self.set_static_node_properties()}
-         {self.set_dynamic_node_properties()}
          RETURN n
          """
         db.cypher_query(query, {"all_unique_nodes": all_unique_nodes})

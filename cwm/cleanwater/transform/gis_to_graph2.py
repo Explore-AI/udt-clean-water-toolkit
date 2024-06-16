@@ -36,7 +36,6 @@ class GisToGraph2:
             "PipeJunction",
             "PipeEnd",
         ]  # List of node labels with no duplicates
-        self.point_asset_gid_names = []  # List node assets with no duplicates
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         self.all_nodes_by_pipe, self.all_edges_by_pipe = list(
@@ -156,75 +155,75 @@ class GisToGraph2:
                 }
             )
 
-    def _set_pipe_properties(self, node, network_nodes):
+    def _set_pipe_properties(self, node, pipe_nodes):
 
-        network_nodes[-1]["node_key"] = self._encode_node_key(
+        pipe_nodes[-1]["node_key"] = self._encode_node_key(
             node["intersection_point_geometry"]
         )
 
         try:
-            network_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
+            pipe_nodes[-1]["pipe_gids"].extend(node["pipe_gids"])
         except KeyError:
-            network_nodes[-1]["pipe_gids"] = node["pipe_gids"]
+            pipe_nodes[-1]["pipe_gids"] = node["pipe_gids"]
 
-        return network_nodes
+        return pipe_nodes
 
-    def _merge_pipe_junction_node(self, node, network_nodes):
-        network_nodes[-1]["node_types"].append(PIPE_JUNCTION__NAME)
-        network_nodes[-1]["node_labels"].extend(["NetworkNode", "PipeJunction"])
+    def _merge_pipe_junction_node(self, node, pipe_nodes):
+        pipe_nodes[-1]["node_labels"].append("PipeJunction")
 
-        network_nodes = self._set_pipe_properties(node, network_nodes)
-        return network_nodes
+        return self._set_pipe_properties(node, pipe_nodes)
 
-    def _merge_pipe_end_node(self, node, network_nodes):
-        network_nodes[-1]["node_types"].append(PIPE_END__NAME)
-        network_nodes[-1]["node_labels"].extend(["NetworkNode", "PipeEnd"])
+    def _merge_pipe_end_node(self, node, pipe_nodes):
 
-        network_nodes = self._set_pipe_properties(node, network_nodes)
-        return network_nodes
+        pipe_nodes[-1]["node_labels"].append("PipeEnd")
 
-    def _merge_point_asset_node(self, node, network_nodes):
-        network_nodes[-1]["node_types"].append(POINT_ASSET__NAME)
+        return self._set_pipe_properties(node, pipe_nodes)
 
-        subtype = node.get("subtype")
-        if subtype:
-            network_nodes[-1]["subtype"] = subtype
+    def _handle_pipe_asset_node_labels(self, node, pipe_nodes):
 
-        acoustic_logger = node.get("acoustic_logger")
-        if acoustic_logger:
-            network_nodes[-1]["acoustic_logger"] = acoustic_logger
+        pipe_nodes[-1]["node_key"] = self._encode_node_key(
+            node["intersection_point_geometry"]
+        )
 
-        if "PointAsset" not in network_nodes[-1]["node_labels"]:
-            network_nodes[-1]["node_labels"].append("PointAsset")
-        network_nodes[-1]["node_labels"].append(node["asset_label"])
+        if "NetworkNode" not in pipe_nodes[-1]["node_labels"]:
+            pipe_nodes[-1]["node_labels"].append(["PipeJunction"])
+
+        return pipe_nodes
+
+    def _create_asset_node(self, node, asset_nodes):
+        asset_nodes.append(
+            {"node_labels": ["NetworkNode", "PointAsset", node["asset_label"]]}
+        )
+
+        asset_nodes[-1]["node_key"] = self._encode_node_key(
+            node["intersection_point_geometry"], extra_params=[node["gid"]]
+        )
+
+        asset_nodes[-1]["gid"] = node["gid"]
 
         if node["asset_label"] not in self.network_node_labels:
             self.network_node_labels.append(node["asset_label"])
 
-        node_asset_gid_name = f"{node['asset_name']}_gid"
+        subtype = node.get("subtype")
+        if subtype:
+            asset_nodes[-1]["subtype"] = subtype
 
-        if node_asset_gid_name not in self.point_asset_gid_names:
-            self.point_asset_gid_names.append(node_asset_gid_name)
+        acoustic_logger = node.get("acoustic_logger")
+        if acoustic_logger:
+            asset_nodes[-1]["acoustic_logger"] = acoustic_logger
 
-        network_nodes[-1][node_asset_gid_name] = node["gid"]
+        return asset_nodes
 
-        try:
-            network_nodes[-1]["point_asset_names"].append(node["asset_name"])
-            network_nodes[-1]["point_asset_gids"].append(node["gid"])
-            network_nodes[-1]["point_assets_with_gids"][node_asset_gid_name] = node[
-                "gid"
-            ]
+    def _merge_point_asset_node(self, node, network_nodes, asset_nodes):
 
-        except KeyError:
-            network_nodes[-1]["point_asset_names"] = [node["asset_name"]]
-            network_nodes[-1]["point_asset_gids"] = [node["gid"]]
-            network_nodes[-1]["point_assets_with_gids"] = {
-                node_asset_gid_name: node["gid"]
-            }
+        asset_nodes = self._create_asset_node(node, asset_nodes)
 
-        return network_nodes
+        if node.get("is_non_termini_asset_node"):
+            pipe_nodes = self._handle_pipe_asset_node_labels(node, network_nodes)
 
-    def _set_network_nodes_default_props(self, nodes, network_nodes):
+        return pipe_nodes, asset_nodes
+
+    def _set_pipe_nodes_default_props(self, nodes, network_nodes):
         utility_name = nodes[0]["utility_name"]
 
         network_nodes.append(
@@ -238,7 +237,7 @@ class GisToGraph2:
                 "dma_names": nodes[0]["dma_names"],
                 "dmas": nodes[0]["dmas"],
                 "node_types": [],
-                "node_labels": [],
+                "node_labels": ["NetworkNode"],
             }
         )
         return network_nodes
@@ -264,42 +263,58 @@ class GisToGraph2:
 
         return consolidated_nodes
 
-    def _update_network_nodes(self, node, network_nodes):
+    def _reconfigure_nodes(self, node, network_nodes, asset_nodes):
 
         if node["node_type"] == PIPE_JUNCTION__NAME:
-            network_nodes = self._merge_pipe_junction_node(node, network_nodes)
+            pipe_nodes = self._merge_pipe_junction_node(node, network_nodes)
         elif node["node_type"] == PIPE_END__NAME:
-            network_nodes = self._merge_pipe_end_node(node, network_nodes)
+            pipe_nodes = self._merge_pipe_end_node(node, network_nodes)
         elif node["node_type"] == POINT_ASSET__NAME:
-            network_nodes = self._merge_point_asset_node(node, network_nodes)
+            pipe_nodes, asset_nodes = self._merge_point_asset_node(
+                node, network_nodes, asset_nodes
+            )
+        else:
+            raise Exception(f"Invalid node_type ({node['node_type']}) detected.")
 
-        return network_nodes
+        return pipe_nodes, asset_nodes
 
     def _set_nodes_and_edges(self, nodes_ordered):
 
         consolidated_nodes = self._consolidate_nodes_on_position(nodes_ordered)
 
-        network_nodes = []
+        pipe_nodes = []
+        asset_nodes = []
         pipe_edges = []
+        pipe_asset_edges = []
+        pipe_asset_to_dma_edges = []
 
         for nodes in consolidated_nodes:
 
-            network_nodes = self._set_network_nodes_default_props(nodes, network_nodes)
+            pipe_nodes = self._set_pipe_nodes_default_props(nodes, pipe_nodes)
+
+            ### check if an asset node occurs at the
+            ### non-termini of a pipe. We have do this
+            ### to create a pipe-junction at this point.
+            if (len(nodes) == 1) and (nodes[0]["node_type"] == POINT_ASSET__NAME):
+                nodes[0]["is_non_termini_asset_node"] = True
+
             for node in nodes:
 
-                network_nodes = self._update_network_nodes(node, network_nodes)
-
-                import pdb
-
-                pdb.set_trace()
-                self.create_dma_data(node, node_key)
+                pipe_nodes, asset_nodes = self._reconfigure_nodes(
+                    node, pipe_nodes, asset_nodes
+                )
+                # self.create_dma_data(node, node_key)
 
                 # remove duplicates and sort node_types
-                network_nodes[-1]["node_types"] = sorted(
-                    list(set((network_nodes[-1]["node_types"])))
+                pipe_nodes[-1]["node_types"] = sorted(
+                    list(set((pipe_nodes[-1]["node_types"])))
                 )
 
-        return network_nodes
+        import pdb
+
+        pdb.set_trace()
+
+        return pipe_nodes, asset_nodes
 
     def _get_base_pipe_data(self, qs_object) -> dict:
         base_pipe: dict = {}
