@@ -40,8 +40,8 @@ class GisToNeo4jCalculator3(GisToGraph2):
         )
 
     def _get_unique_nodes_and_edges(self):
-        all_nodes = flatten_concatenation(self.all_nodes_by_pipe)
-        all_edges = flatten_concatenation(self.all_edges_by_pipe)
+        all_nodes = flatten_concatenation(self.all_pipe_nodes_by_pipe)
+        all_edges = flatten_concatenation(self.all_pipe_edges_by_pipe)
 
         unique_node_keys = set()
         all_unique_nodes = []
@@ -154,6 +154,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
         db.cypher_query(query, {"utility_data": self.utility_data})
 
     def _map_pipe_connected_asset_relations(self, all_unique_nodes, all_unique_edges):
+
         self._batch_create_network_nodes(all_unique_nodes)
         self._batch_create_pipe_relations(all_unique_edges)
 
@@ -166,11 +167,13 @@ class GisToNeo4jCalculator3(GisToGraph2):
         self._batch_create_utility_relationships()
 
     def _reset_pipe_asset_data(self):
-        self.all_edges_by_pipe = []
-        self.all_nodes_by_pipe = []
+        self.all_pipe_nodes_by_pipe = []
+        self.all_pipe_edges_by_pipe = []
 
     def create_neo4j_graph(self) -> None:
+        import pdb
 
+        pdb.set_trace()
         all_unique_nodes, all_unique_edges = self._get_unique_nodes_and_edges()
         self._map_pipe_connected_asset_relations(all_unique_nodes, all_unique_edges)
         self._reset_pipe_asset_data()
