@@ -33,17 +33,14 @@ export default memo((props: NodeProps<Node>) => {
             <div className={styles.nodeContainer}>
                 <div className={styles.containerTitle}>
                     <div className={styles.icon}>{assetIcon}</div>
-                    <p>
-                        {nodeProperties?.asset_names
-                            ? splitAssetName(nodeProperties?.asset_names[0])
-                            : 'Point Asset '}
-                    </p>
-                    <p>  -  </p>
-                    <p>
+                    <div className={styles.text}>
+                        <strong>{nodeProperties?.label}</strong>
+                    </div>
+                    <div className={styles.idText}>
                         {nodeProperties?.asset_gids
                             ? nodeProperties?.asset_gids[0]
                             : data.key}
-                    </p>
+                    </div>
                 </div>
             </div>
             <Handle

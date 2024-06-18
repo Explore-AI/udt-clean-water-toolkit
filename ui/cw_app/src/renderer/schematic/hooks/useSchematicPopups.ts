@@ -1,4 +1,4 @@
-// hook that creates and manages the Context for the Node Popups
+// hook that creates and manages the UI changes for the Node Popups in Schematic View 
 import { createContext, useState } from 'react';
 import { Node } from 'reactflow';
 import { Node as AssetNode } from '../types/types';

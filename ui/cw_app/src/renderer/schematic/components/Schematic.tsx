@@ -3,7 +3,6 @@ import LoadingSpinner from '../../core/components/LoadingSpinner';
 import { TRUNKMAIN_QUERY_KEY } from '../queries';
 import { isEmpty as _isEmpty } from 'lodash';
 import styles from '../css/Schematic.module.css';
-import useFetchSchematicData from '../hooks/useFetchSchematic';
 import AssetNode from './AssetNode';
 import PipeEdgeNode from './PipeNode';
 import ReactFlow, { Controls, Node } from 'reactflow';
@@ -11,6 +10,8 @@ import 'reactflow/dist/base.css';
 import useElkLayout from '../hooks/useElkLayout';
 import { AssetPopup } from './AssetPopup';
 import useAssetNodePopups from '../hooks/useSchematicPopups';
+import useGetData from '../../core/hooks/useGetData';
+import { SchematicProps } from '../types/types';
 
 const nodeTypes = {
     assetNode: AssetNode,
@@ -26,12 +27,9 @@ const handleNodeClick = (
 };
 
 function Schematic() {
-    const { data, isPending, isSuccess } = useFetchSchematicData(
-        [TRUNKMAIN_QUERY_KEY],
-        { limit: 30 },
-    );
-
-    const { data: layoutData } = useElkLayout(data || { nodes: [], edges: [] });
+    const { queryValues } = useGetData(TRUNKMAIN_QUERY_KEY);
+    const { data, isPending, isSuccess } = queryValues
+    const { data: layoutData } = useElkLayout(data as SchematicProps || { nodes: [], edges: [] });
 
     const { popups, openPopup, closePopup } = useAssetNodePopups();
 
