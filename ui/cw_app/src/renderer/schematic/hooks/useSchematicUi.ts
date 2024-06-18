@@ -4,24 +4,17 @@ import { isEmpty as _isEmpty, isNil as _isNil } from 'lodash';
 export const SchematicUiContext = createContext(); 
 
 export default function useSchematicUi(){
-    const [selectedNode, setSelectedNode] = useState(null);
-    const [popupOpen, setPopupOpen] = useState(false);
+    const [uiParams, setSchematicUiParams] = useState({}); 
 
-    const handleNodeClick = (node) => {
-        setSelectedNode(node);
-        setPopupOpen(true);
+    const handleSchematicParams = ( newParams, options={}) => {
+        if (_isNil(options) || _isEmpty(options)) {
+            setSchematicUiParams(newParams);
+        } 
+        if (options.keepCurrent) {
+            setSchematicUiParams(prevParams => ({ ...prevParams, ...newParams }));
+        }
+        return setSchematicUiParams(newParams)
     };
-
-    const handlePopupClose = () => {
-        setPopupOpen(false);
-        setSelectedNode(null);
-    };
-
-    return {
-        selectedNode,
-        popupOpen,
-        handleNodeClick,
-        handlePopupClose,
-    };
-
+    return { uiParams, setSchematicUiParams: handleSchematicParams}
+   
 }
