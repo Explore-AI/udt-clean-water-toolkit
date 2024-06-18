@@ -141,36 +141,19 @@ class GisToNeo4jCalculator3(GisToGraph2):
     def _batch_create_pipe_node_to_asset_node_relations(self):
         edges = flatten_concatenation(self.all_pipe_node_to_asset_node_edges)
 
-        grouped_edges = defaultdict(list)
-        import pdb
-
-        pdb.set_trace()
-        for edge in edges:
-            grouped_edges[edge["asset_label"]].append(edge)
-
-        import pdb
-
-        pdb.set_trace()
-        for asset_label, edges in grouped_edges.items():
-            query = f"""
+        query = f"""
             UNWIND $edges AS edge
             MATCH (n:NetworkNode {{node_key: edge.from_node_key}}),
                   (m:NetworkNode {{node_key: edge.to_node_key}})
-            MERGE (n)-[r:{asset_label} {{
-                gid: edge.gid,
-                material: edge.material,
-                diameter: edge.diameter,
-                segment_wkt: edge.segment_wkt,
-                segment_length: edge.segment_length
-                }}]-(m)
+            MERGE (n)-[r:HAS_ASSET {{
+            edge_key: edge.edge_key
+                }}]->(m)
             ON CREATE
-                SET r.createdAt = timestamp()
+                SET r.created_at = timestamp()
             RETURN r
             """
-            import pdb
 
-            pdb.set_trace()
-            db.cypher_query(query, {"edges": edges})
+        db.cypher_query(query, {"edges": edges})
 
     def _batch_create_dma_nodes(self):
         """Batch creates DMA nodes."""
@@ -182,6 +165,16 @@ class GisToNeo4jCalculator3(GisToGraph2):
         """
         db.cypher_query(query, {"dma_nodes": self.dma_data})
 
+    def _batch_create_dma_relationships(self):
+        """Batch creates relationships between NetworkNodes and DMA nodes."""
+        query = f"""
+        UNWIND $dma_data AS dma
+        MATCH (d:DMA {{code: dma.code}}), (n:NetworkNode {{node_key: dma.to_node_key}})
+        MERGE (d)-[:IN_DMA]->(n)
+        """
+
+        db.cypher_query(query, {"dma_data": self.dma_data})
+
     def _batch_create_utility_nodes(self):
         """Batch creates Utility nodes."""
         query = f"""
@@ -191,21 +184,12 @@ class GisToNeo4jCalculator3(GisToGraph2):
         """
         db.cypher_query(query, {"utility_data": self.utility_data})
 
-    def _batch_create_dma_relationships(self):
-        """Batch creates relationships between NetworkNodes and DMA nodes."""
-        query = f"""
-        UNWIND $dma_data AS dma
-        MATCH (n:NetworkNode {{node_key: dma.from_node_key}}), (d:DMA {{code: dma.code}})
-        MERGE (n)-[:IN_DMA]->(d)
-        """
-        db.cypher_query(query, {"dma_data": self.dma_data})
-
     def _batch_create_utility_relationships(self):
         """Batch creates relationships between NetworkNodes and Utility nodes."""
         query = f"""
         UNWIND $utility_data AS utility
-        MATCH (n:NetworkNode {{node_key: utility.node_key}}), (u:Utility {{name: utility.name}})
-        MERGE (n)-[:IN_UTILITY]->(u)
+        MATCH (u:Utility {{name: utility.name}}), (n:NetworkNode {{node_key: utility.to_node_key}})
+        MERGE (u)-[:IN_UTILITY]->(n)
         """
         db.cypher_query(query, {"utility_data": self.utility_data})
 
@@ -219,16 +203,12 @@ class GisToNeo4jCalculator3(GisToGraph2):
         self._batch_create_asset_nodes()
         self._batch_create_pipe_node_to_asset_node_relations()
 
-        import pdb
-
-        pdb.set_trace()
-
-        # Batch create DMA and Utility nodes
+        # Batch create DMA nodes and relationship
         self._batch_create_dma_nodes()
-        self._batch_create_utility_nodes()
-
-        # Batch create relationships between network nodes and DMA/Utility nodes
         self._batch_create_dma_relationships()
+
+        # Batch create utility nodes and relationship
+        self._batch_create_utility_nodes()
         self._batch_create_utility_relationships()
 
     def _reset_pipe_asset_data(self):
