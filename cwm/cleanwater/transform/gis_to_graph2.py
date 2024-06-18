@@ -39,7 +39,8 @@ class GisToGraph2:
             "PipeJunction",
             "PipeEnd",
             "PointAsset",
-        ]  # List of node labels with no duplicates
+        ]  # List of network node labels with no duplicates
+        self.network_edge_labels = []  # List of pipe edge labels with no duplicates
 
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         (
@@ -125,17 +126,19 @@ class GisToGraph2:
                     {
                         "code": dma_code,
                         "name": dma_name,
-                        "from_node_key": node_data["node_key"],
+                        "to_node_key": node_data["node_key"],
                     }
                 )
 
-    def create_utility_data(self, utility_name, node_key):
+    def create_utility_data(self, node_data):
+
+        utility_name = node_data["utility"]
         if utility_name not in self.utility_names:
             self.utility_names.extend(utility_name)
             self.utility_data.append(
                 {
                     "name": utility_name,
-                    "from_node_key": node_key,
+                    "to_node_key": node_data["node_key"],
                 }
             )
 
@@ -300,12 +303,14 @@ class GisToGraph2:
                 all_pipe_node_data = self._merge_all_pipe_node_props(
                     default_props, pipe_node_data
                 )
+                self.create_utility_data(all_pipe_node_data)
                 self.create_dma_data(all_pipe_node_data)
 
             if asset_node_data:
                 all_asset_node_data = self._merge_all_asset_node_props(
                     default_props, asset_node_data
                 )
+                self.create_utility_data(all_asset_node_data)
                 self.create_dma_data(all_asset_node_data)
 
         return all_pipe_node_data, all_asset_node_data
@@ -385,6 +390,9 @@ class GisToGraph2:
             line_segment = substring(
                 line_geom, from_location, to_location, normalized=True
             )
+
+            if base_pipe["asset_label"] not in self.network_edge_labels:
+                self.network_edge_labels.append(base_pipe["asset_label"])
 
             edges_by_pipe.append(
                 {
