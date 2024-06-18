@@ -56,7 +56,8 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
             "source": str(from_node_id),
             "target": str(to_node_id),
             "type": "straight",
-            "style": {"strokeWidth": "5px", "color": "black"},
+            'animated': True, 
+            "style": {"strokeWidth": "5px", "stroke": "#33658A"},
             "properties": edge_properties,
         }
 
