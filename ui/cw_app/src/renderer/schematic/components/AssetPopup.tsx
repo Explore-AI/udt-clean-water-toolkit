@@ -48,7 +48,7 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
                     <div className={styles.title}>
                         <div className={styles.icon}>{icon}</div>
                         <div>
-                            <p><strong> {splitAssetName(assetName).toUpperCase()} </strong></p>
+                            <p><strong> {splitAssetName(assetName).toUpperCase()}</strong></p>
                         </div>
                         <div style={{ textAlign: 'right', fontWeight: 300 }}>
                             <p>{assetId}</p>
@@ -56,24 +56,24 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
                     </div>
                     <hr />
                     <div className={styles.details}>
-                        <p>
+                        <div>
                             <strong>DMA Codes:</strong>{' '}
                             {assetDmas.codes.join(', ')}
-                        </p>
-                        <p>
+                        </div>
+                        <div>
                             <strong>DMA Names:</strong>{' '}
                             {assetDmas.names.join(', ')}
-                        </p>
-                        <p>
+                        </div>
+                        <div>
                             <strong>Asset Coordinates:</strong>{' '}
                             {` ${assetCoords[0]}, ${assetCoords[1]}`}
-                        </p>
-                        <p>
+                        </div>
+                        <div>
                             <strong>Node Types:</strong> {assetTypes.join(', ')}
-                        </p>
-                        <p>
+                        </div>
+                        <div>
                             <strong>Utility:</strong> {assetUtility}
-                        </p>
+                        </div>
                     </div>
                 </div>
             </Draggable>

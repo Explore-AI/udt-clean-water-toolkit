@@ -1,14 +1,14 @@
 import Schematic from "./Schematic";
 import { PageProps } from "../types/types";
-import useFetchSchematicData from "../hooks/useFetchSchematic";
 import { TRUNKMAIN_QUERY_KEY } from "../queries";
 import styles from '../css/SchematicPage.module.css'; 
 import withSchematic from "../hoc/withSchematic";
+import useFetchJson from "../../core/hooks/useFetchJson";
 
 function SchematicPage(props: PageProps){
     const { pageVisibility } = props; 
 
-    useFetchSchematicData([TRUNKMAIN_QUERY_KEY])
+    useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 30})
 
     const mainCss = `${styles.main} ${styles[pageVisibility]}`
 

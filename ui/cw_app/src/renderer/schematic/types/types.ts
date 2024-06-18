@@ -12,6 +12,7 @@ export interface AssetProperties {
     node_key?: string;
     node_types?: string[];
     utility?: string;
+    label?: string; 
 }
 
 export type Node = {
