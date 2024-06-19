@@ -13,6 +13,10 @@ from ..core.constants import (
     POINT_ASSET__NAME,
     GEOS_LINESTRING_TYPES,
     GEOS_POINT_TYPES,
+    NETWORK_NODE__LABEL,
+    PIPE_JUNCTION__LABEL,
+    PIPE_END__LABEL,
+    POINT_ASSET__LABEL,
 )
 
 
@@ -35,10 +39,10 @@ class GisToGraph2:
         self.utility_data = []
         self.utility_names = []  # List of utility names with no duplicates
         self.network_node_labels = [
-            "NetworkNode",
-            "PipeJunction",
-            "PipeEnd",
-            "PointAsset",
+            NETWORK_NODE__LABEL,
+            PIPE_JUNCTION__LABEL,
+            PIPE_END__LABEL,
+            POINT_ASSET__LABEL,
         ]  # List of network node labels with no duplicates
         self.network_edge_labels = []  # List of pipe edge labels with no duplicates
 
@@ -154,13 +158,13 @@ class GisToGraph2:
     def _merge_pipe_junction_node(self, node):
         pipe_node_data = {}
 
-        pipe_node_data["node_labels"] = ["PipeJunction"]
+        pipe_node_data["node_labels"] = [PIPE_JUNCTION__LABEL]
 
         return self._set_pipe_properties(node, pipe_node_data)
 
     def _merge_pipe_end_node(self, node):
         pipe_node_data = {}
-        pipe_node_data["node_labels"] = ["PipeEnd"]
+        pipe_node_data["node_labels"] = [PIPE_END__LABEL]
 
         return self._set_pipe_properties(node, pipe_node_data)
 
@@ -170,7 +174,7 @@ class GisToGraph2:
             node["intersection_point_geometry"]
         )
 
-        pipe_node_data["node_labels"] = ["PipeJunction"]
+        pipe_node_data["node_labels"] = [PIPE_JUNCTION__LABEL]
 
         return pipe_node_data
 
@@ -178,8 +182,8 @@ class GisToGraph2:
         asset_node_data = {}
 
         asset_node_data["node_labels"] = [
-            "NetworkNode",
-            "PointAsset",
+            NETWORK_NODE__LABEL,
+            POINT_ASSET__LABEL,
             node["asset_label"],
         ]
 
@@ -267,9 +271,9 @@ class GisToGraph2:
         all_pipe_node_data = default_props | pipe_node_data
 
         try:
-            all_pipe_node_data["node_labels"].append("NetworkNode")
+            all_pipe_node_data["node_labels"].append(NETWORK_NODE__LABEL)
         except KeyError:
-            all_pipe_node_data["node_labels"] = ["NetworkNode"]
+            all_pipe_node_data["node_labels"] = [NETWORK_NODE__LABEL]
 
         return all_pipe_node_data
 
@@ -279,7 +283,7 @@ class GisToGraph2:
         all_asset_node_data = {}
         if asset_node_data:
             all_asset_node_data = default_props | asset_node_data
-            all_asset_node_data["node_labels"].append("NetworkNode")
+            all_asset_node_data["node_labels"].append(NETWORK_NODE__LABEL)
 
         return all_asset_node_data
 

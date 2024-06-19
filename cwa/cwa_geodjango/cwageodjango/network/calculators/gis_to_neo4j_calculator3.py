@@ -163,6 +163,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
         ON CREATE SET d.name = dma.name
         RETURN d
         """
+
         db.cypher_query(query, {"dma_nodes": self.dma_data})
 
     def _batch_create_dma_relationships(self):
