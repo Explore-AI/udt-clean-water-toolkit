@@ -1,10 +1,9 @@
 import { Position, Handle, NodeProps } from 'reactflow';
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Node } from '../types/types';
 import styles from '../css/AssetNode.module.css';
 // import { Default } from './IconComponents/NetworkMeter';
 import { getIcons } from './IconComponents';
-import { splitAssetName } from '../utils/schematicUtils';
 
 const handleStyle = {
     top: '13px',
