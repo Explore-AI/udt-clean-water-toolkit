@@ -2,7 +2,6 @@ import { Position, Handle, NodeProps } from 'reactflow';
 import { memo } from 'react';
 import { Node } from '../types/types';
 import styles from '../css/AssetNode.module.css';
-// import { Default } from './IconComponents/NetworkMeter';
 import { getIcons } from './IconComponents';
 
 const handleStyle = {
