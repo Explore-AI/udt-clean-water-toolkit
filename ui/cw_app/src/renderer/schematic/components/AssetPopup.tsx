@@ -2,7 +2,7 @@
 import { AssetPopupProps } from '../types/types';
 import styles from '../css/AssetPopup.module.css';
 import { getIcons } from './IconComponents';
-import { splitAssetName, getDmas } from '../utils/schematicUtils';
+import { getDmas } from '../utils/schematicUtils';
 import { IconXboxX } from '@tabler/icons-react';
 import { CloseButton } from '@mantine/core';
 import Draggable from 'react-draggable';
@@ -48,10 +48,10 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
                     <div className={styles.title}>
                         <div className={styles.icon}>{icon}</div>
                         <div>
-                            <p><strong> {splitAssetName(assetName).toUpperCase()}</strong></p>
+                            <div><strong> {data.properties?.label} </strong></div>
                         </div>
                         <div style={{ textAlign: 'right', fontWeight: 300 }}>
-                            <p>{assetId}</p>
+                            <div>{assetId}</div>
                         </div>
                     </div>
                     <hr />
