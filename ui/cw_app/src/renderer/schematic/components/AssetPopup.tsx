@@ -1,0 +1,67 @@
+// create a popup for the asset node's properties
+import styles from '../css/AssetPopup.module.css';
+import Draggable from 'react-draggable';
+import { AssetPopupProps } from '../types/types';
+import { getIcons } from './IconComponents';
+import { getDmas } from '../utils/schematicUtils';
+import { IconXboxX } from '@tabler/icons-react';
+import { CloseButton } from '@mantine/core';
+
+export const AssetPopup: React.FC<AssetPopupProps> = ({
+    nodeProps,
+    onClose,
+}) => {
+
+//    const icon = getIcons(assetName);
+
+    return (
+        <>
+            <Draggable>
+                <div className={styles.popupContainer}>
+                    <div className={styles.closeButton}>
+                        <CloseButton
+                            onClick={onClose}
+                            icon={
+                                <IconXboxX
+                                    size={16}
+                                    stroke={2}
+                                    color="#EB9486"
+                                />
+                            }
+                        />
+                    </div>
+                    <div className={styles.title}>
+                        {/* <div className={styles.icon}>{icon}</div> */}
+                        <div>
+                            <div><strong> {nodeProps.label} </strong></div>
+                        </div>
+                        <div style={{ textAlign: 'right', fontWeight: 300 }}>
+                            <div>{null}</div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div className={styles.details}>
+                        <div>
+                            <strong>DMA Codes:</strong>{' '}
+                            {null}
+                        </div>
+                        <div>
+                            <strong>DMA Names:</strong>{' '}
+                            {null}
+                        </div>
+                        <div>
+                            <strong>Asset Coordinates:</strong>{' '}
+                            {` ${nodeProps.coords_27700[0]}, ${nodeProps.coords_27700[1]}`}
+                        </div>
+                        <div>
+                            <strong>Node Types:</strong> {null}
+                        </div>
+                        <div>
+                            <strong>Utility:</strong> {null}
+                        </div>
+                    </div>
+                </div>
+            </Draggable>
+        </>
+    );
+};

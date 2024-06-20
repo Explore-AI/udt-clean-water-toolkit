@@ -1,9 +1,11 @@
-import { Position, Handle, NodeProps } from 'reactflow';
-import { memo, useState } from 'react';
-import { Node } from '../types/types';
 import styles from '../css/AssetNode.module.css';
-// import { Default } from './IconComponents/NetworkMeter';
+import { useContext, memo } from 'react'
+import { Position, Handle, NodeProps } from 'reactflow';
+import { Node } from '../types/types';
+import { SchematicUiContext } from '../hooks/useSchematicUi'
 import { getIcons } from './IconComponents';
+import { includes as _includes, filter as _filter } from 'lodash'
+import { AssetPopup } from './AssetPopup';
 
 const handleStyle = {
     top: '13px',
@@ -19,43 +21,36 @@ const handleStyle = {
     minWidth: '1px',
 };
 
-const nodeStyle = {
-    backgroundColor: '#cfeef4',
-    width: '100px',
-    height: '50px',
-    borderRadius: '20%',
-    border: '2px solid #393939',
-    display: 'inline-block',
-};
-
-const splitAssetName = (name: string) => {
-    return name.replace(/_/g, ' ');
-};
-
-export default memo((props: NodeProps<Node>) => {
-    const { data } = props;
+const AssetNode = (props: NodeProps<Node>) => {
+    const { data, id: nodeId } = props;
     const { properties: nodeProperties } = data;
-    
+
+    const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
+
     const assetIcon = nodeProperties?.asset_names
-        ? getIcons(nodeProperties?.asset_names[0])
-        : getIcons('default');
+                    ? getIcons(nodeProperties?.asset_names[0])
+                    : getIcons('default');
+
+    const onClosePopup = (e) => {
+        const newNodePopupIds = _filter(nodePopupIds, (id) => id != nodeId );
+        setSchematicUiParams({ nodePopupIds: newNodePopupIds })
+        e.stopPropagation()
+
+    }
 
     return (
         <>
             <div className={styles.nodeContainer}>
                 <div className={styles.containerTitle}>
                     <div className={styles.icon}>{assetIcon}</div>
-                    <p>
-                        {nodeProperties?.asset_names
-                            ? splitAssetName(nodeProperties?.asset_names[0])
-                            : 'Point Asset '}
-                    </p>
-                    <p>  -  </p>
-                    <p>
+                    <div className={styles.text}>
+                        <strong>{nodeProperties?.label}</strong>
+                    </div>
+                    <div className={styles.idText}>
                         {nodeProperties?.asset_gids
-                            ? nodeProperties?.asset_gids[0]
-                            : data.key}
-                    </p>
+                        ? nodeProperties?.asset_gids[0]
+                        : data.key}
+                    </div>
                 </div>
             </div>
             <Handle
@@ -68,6 +63,15 @@ export default memo((props: NodeProps<Node>) => {
                 position={Position.Bottom}
                 style={{ visibility: 'hidden', ...handleStyle }}
             ></Handle>
+            { _includes(nodePopupIds, nodeId) &&
+              <AssetPopup
+                  nodeProps={nodeProperties}
+                  onClose={onClosePopup}
+              />
+            }
         </>
     );
-});
+};
+
+
+export default memo(AssetNode)

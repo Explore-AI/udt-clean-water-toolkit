@@ -28,14 +28,20 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
 
         point_bng = Point(position[0], position[1], srid=27700)
         point_4326 = point_bng.transform(4326, clone=True)
+        label = (
+            properties["asset_names"][0]
+            if properties.get("asset_names")
+            else "Point Asset"
+        )
+        properties["label"] = label.replace("_", " ").upper()
 
         return {
             "id": node_id,
             "key": node_id,
             "type": node_type,
             "position": {
-                "x": point_4326.x * 100.0,
-                "y": point_4326.y * 100.0,
+                "x": point_4326.x,
+                "y": point_4326.y,
                 # "x": position[0],
                 # "y": position[1],
             },
@@ -50,7 +56,8 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
             "source": str(from_node_id),
             "target": str(to_node_id),
             "type": "straight",
-            "style": {"strokeWidth": "5px", "color": "black"},
+            'animated': True, 
+            "style": {"strokeWidth": "5px", "stroke": "#33658A"},
             "properties": edge_properties,
         }
 
@@ -169,9 +176,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
             if edge_id in edge_ids:
                 continue
 
-            edge = self.create_edge(
-                edge_id, from_node_id, to_node_id, edge_properties
-            )
+            edge = self.create_edge(edge_id, from_node_id, to_node_id, edge_properties)
 
             edges.append(edge)
             edge_ids.append(edge_id)

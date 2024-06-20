@@ -15,12 +15,17 @@
     flex-direction: row;
     align-items: center;
     align-content: center;
+    
 }
 
-.containerTitle p {
+.containerTitle .text{
     font-family: Tahoma, sans-serif; 
-    font-weight: 500;
     font-size: 0.85rem; 
+}
+
+.containerTitle .idText {
+    margin-left: 10px;
+    text-align: right;
 }
 
 .icon {
