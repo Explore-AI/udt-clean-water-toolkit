@@ -7,17 +7,19 @@ export default function useSchematicUi() {
     const [uiParams, setSchematicUiParams] = useState({});
 
     const handleSchematicParams = (newParams, options = {}) => {
+        console.log("qqqqq", newParams)
         if (_isNil(options) || _isEmpty(options)) {
-            setSchematicUiParams(newParams);
-        }
-
-        if (options.keepCurrent) {
             setSchematicUiParams((prevParams) => ({
                 ...prevParams,
                 ...newParams,
             }));
         }
+
+        if (options.resetAll) {
+            setSchematicUiParams(newParams);
+        }
         return setSchematicUiParams(newParams);
     };
-    return { uiParams, setSchematicUiParams: handleSchematicParams };
+    console.log({ ...uiParams, setSchematicUiParams: handleSchematicParams }, "aaa")
+    return { ...uiParams, setSchematicUiParams: handleSchematicParams };
 }

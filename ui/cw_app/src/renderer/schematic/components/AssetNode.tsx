@@ -1,8 +1,11 @@
-import { Position, Handle, NodeProps } from 'reactflow';
-import { memo } from 'react';
-import { Node } from '../types/types';
 import styles from '../css/AssetNode.module.css';
+import { useContext, memo } from 'react'
+import { Position, Handle, NodeProps } from 'reactflow';
+import { Node } from '../types/types';
+import { SchematicUiContext } from '../hooks/useSchematicUi'
 import { getIcons } from './IconComponents';
+import { includes as _includes, filter as _filter } from 'lodash'
+import { AssetPopup } from './AssetPopup';
 
 const handleStyle = {
     top: '13px',
@@ -18,13 +21,22 @@ const handleStyle = {
     minWidth: '1px',
 };
 
-export default memo((props: NodeProps<Node>) => {
-    const { data } = props;
+const AssetNode = (props: NodeProps<Node>) => {
+    const { data, id: nodeId } = props;
     const { properties: nodeProperties } = data;
-    
+
+    const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
+
     const assetIcon = nodeProperties?.asset_names
-        ? getIcons(nodeProperties?.asset_names[0])
-        : getIcons('default');
+                    ? getIcons(nodeProperties?.asset_names[0])
+                    : getIcons('default');
+
+    const onClosePopup = (e) => {
+        const newNodePopupIds = _filter(nodePopupIds, (id) => id != nodeId );
+        setSchematicUiParams({ nodePopupIds: newNodePopupIds })
+        e.stopPropagation()
+
+    }
 
     return (
         <>
@@ -36,8 +48,8 @@ export default memo((props: NodeProps<Node>) => {
                     </div>
                     <div className={styles.idText}>
                         {nodeProperties?.asset_gids
-                            ? nodeProperties?.asset_gids[0]
-                            : data.key}
+                        ? nodeProperties?.asset_gids[0]
+                        : data.key}
                     </div>
                 </div>
             </div>
@@ -51,6 +63,15 @@ export default memo((props: NodeProps<Node>) => {
                 position={Position.Bottom}
                 style={{ visibility: 'hidden', ...handleStyle }}
             ></Handle>
+            { _includes(nodePopupIds, nodeId) &&
+              <AssetPopup
+                  nodeProps={nodeProperties}
+                  onClose={onClosePopup}
+              />
+            }
         </>
     );
-});
+};
+
+
+export default memo(AssetNode)
