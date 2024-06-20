@@ -1,14 +1,14 @@
 from django.contrib.gis.db import models
 from cwageodjango.utilities.models import DMA
-from cwageodjango.core.constants import DEFAULT_SRID, TRUNK_MAIN__NAME
+from cwageodjango.core.constants import DEFAULT_SRID, PIPE_MAIN__NAME
 
 
-class TrunkMain(models.Model):
-    gid = models.IntegerField(null=False, blank=False, unique=True, db_index=True)
+class PipeMain(models.Model):
+    tag = models.CharField(null=False, blank=False, unique=True, db_index=True)
     geometry = models.LineStringField(
         spatial_index=True, null=False, blank=False, srid=DEFAULT_SRID
     )
-    dmas = models.ManyToManyField(DMA, related_name="dma_trunk_mains")
+    dmas = models.ManyToManyField(DMA, related_name="dma_pipe_mains")
     geometry_4326 = models.LineStringField(
         spatial_index=True, null=False, blank=False, srid=4326
     )
@@ -21,4 +21,4 @@ class TrunkMain(models.Model):
         ordering = ["pk"]
 
     class AssetMeta:
-        asset_name = TRUNK_MAIN__NAME
+        asset_name = PIPE_MAIN__NAME

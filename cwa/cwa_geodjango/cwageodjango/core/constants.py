@@ -3,11 +3,7 @@
 
 DEFAULT_SRID = 27700
 
-TRUNK_MAIN__NAME = "trunk_main"
-
-DISTRIBUTION_MAIN__NAME = "distribution_main"
-
-CONNECTION_MAIN__NAME = "connection_main"
+PIPE_MAIN__NAME = "pipe_main"
 
 CHAMBER__NAME = "chamber"
 
@@ -36,11 +32,10 @@ PIPE_JUNCTION__NAME = "pipe_junction"
 POINT_ASSET__NAME = "point_asset"
 
 PIPE_ASSETS__CHOICES = [
-    (TRUNK_MAIN__NAME, "Trunk Main"),
-    (DISTRIBUTION_MAIN__NAME, "Distribution Main"),
+    (PIPE_MAIN__NAME, "Pipe Main"),
 ]
 
-PIPE_ASSETS__NAMES = [TRUNK_MAIN__NAME, DISTRIBUTION_MAIN__NAME]
+PIPE_ASSETS__NAMES = [PIPE_MAIN__NAME]
 
 GEOS_LINESTRING_TYPES = [1, 5]
 
