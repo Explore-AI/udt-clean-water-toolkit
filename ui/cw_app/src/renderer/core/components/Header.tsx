@@ -12,8 +12,8 @@ const links = [
     { path: '/graph', label: 'Graph' },
     { path: '/spatial-graph', label: 'Spatial Graph' },
     { path: '/schematic', label: 'Schematic' },
+    { path: '/table', label: 'Table'}, 
     { path: '/analysis', label: 'Analysis' },
-    { path: '/table', label: 'Table'}
 ];
 
 export default function Header() {

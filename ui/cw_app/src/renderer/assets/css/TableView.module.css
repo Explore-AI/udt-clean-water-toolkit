@@ -1,0 +1,16 @@
+.container {
+    display: flex; 
+    flex-direction: column;
+    width: 100%; 
+    margin: 2%; 
+    border: 1px solid green;
+}
+
+.table {
+    margin: 10px 10px;
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    width: 90%; 
+    height: 90%; 
+}

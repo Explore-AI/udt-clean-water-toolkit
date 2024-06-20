@@ -1,5 +1,10 @@
 .main {
-    background-color: #fff;
+    width: 100vw;
+    height: calc(100vh - 60px);
+    position: relative;
+    z-index: 1;
+    background-color: rgba(217, 217, 217, 0.3);
+    border: 1px solid red;
 }
 
 .visible {
@@ -7,6 +12,5 @@
 }
 
 .hidden {
-display: hidden;
-
+    display: none;
 }

@@ -13,6 +13,7 @@ const BaseRouter = () => {
                 <Route path="/schematic" element={<BaseSinglePage/>} />
                 <Route path="/analysis" element={<BaseSinglePage/>} />
                 <Route path="/spatial-graph/:dmas?" element={<BaseSinglePage/>} />
+                <Route path="/table" element={<BaseSinglePage/>} />
             </Routes>
         </BaseLayout>
     );
