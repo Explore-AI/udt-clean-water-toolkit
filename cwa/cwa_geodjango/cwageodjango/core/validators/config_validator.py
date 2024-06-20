@@ -13,6 +13,7 @@ class ConfigValidator(forms.Form):
     parallel = forms.BooleanField(required=False)
     thread_count = forms.IntegerField(required=False)
     processor_count = forms.IntegerField(required=False)
+    inpfile = forms.CharField(max_length=256, required=False)
     outputfile = forms.CharField(max_length=256, required=False)
     dma_codes = forms.CharField(max_length=256, required=False)
     utilities = forms.CharField(max_length=256, required=False)
@@ -78,7 +79,7 @@ class ConfigValidator(forms.Form):
             raise ValidationError("Incorrect format for dma_codes")
 
         return dma_codes
-    
+
     def clean_utilities(self):
 
         data = self.cleaned_data.get("utilities")

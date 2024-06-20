@@ -6,6 +6,7 @@ from cwageodjango.network.controllers import (
     GisToNeo4jController3,
     GisToNxController,
     GisToNkController,
+    InpToNeo4jController,
     Convert2Wntr,
     Neo4jToNkController,
     AcousticLoggerCoverage,
@@ -97,6 +98,10 @@ class Analysis(AppConf):
         convert2wntr.convert()
         convert2wntr.wntr_to_json()
 
+    def inp_to_neo4j(self) -> None:
+        convert2neo4j = InpToNeo4jController(self.validated_config)
+        convert2neo4j.convert()
+
     def neo4j_to_networkit_graphml(self) -> None:
         convert2networkit = Neo4jToNkController(self.validated_config)
         convert2networkit.convert()
@@ -118,6 +123,7 @@ class Analysis(AppConf):
             "neo4j2wntrjson": self.neo4j_to_wntr_json,
             "neo4j2networkitgraphml": self.neo4j_to_networkit_graphml,
             "networkcoverage": self.calc_acoustic_coverage,
+            "inp2neo4j": self.inp_to_neo4j,
         }
 
     @property
