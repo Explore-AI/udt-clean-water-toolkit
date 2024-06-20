@@ -25,6 +25,9 @@ Large numbers of features will take a long time to save."""
         pipe_mains_layer = ds[layer_index]
 
         new_mains = []
+        import pdb
+
+        pdb.set_trace()
         for feature in pipe_mains_layer:
 
             gid = feature.get("gisid")

@@ -1,7 +1,5 @@
-from abc import ABC, abstractmethod
 from django.db.models import Value, JSONField, OuterRef
 from django.db.models.functions import JSONObject
-from django.contrib.gis.db import models
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.expressions import ArraySubquery
 from django.db.models.query import QuerySet
@@ -19,26 +17,21 @@ from cwageodjango.assets.models import *
 from cwageodjango.core.db.models.functions import LineStartPoint, LineEndPoint
 
 
-class MainsController(ABC, GeoDjangoDataManager):
-    """This is an abstract base class and should not be
-    instantiated explicitly.
-    """
+class PipeMainsController(GeoDjangoDataManager):
+    """Convert pipe_mains data to a Queryset or GeoJSON."""
 
     WITHIN_DISTANCE = 0.5
     default_properties = [
         "id",
-        "gid",
+        "tag",
     ]  # should not include the geometry column as per convention
-
-    def __init__(self, model):
-        self.model = model
+    model = PipeMain
 
     def generate_dwithin_subquery(
         self,
         qs,
         json_fields,
         geometry_field="geometry",
-        inner_subqueries={},
         extra_json_fields={},
     ):
         """
@@ -55,6 +48,10 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         """
 
+        pm_inner_subquery = self._generate_dwithin_inner_subquery(
+            self.model.objects.all(), "tag", geometry_field=geometry_field
+        )
+
         subquery = (
             qs.filter(
                 geometry__dwithin=(OuterRef(geometry_field), D(m=self.WITHIN_DISTANCE))
@@ -63,7 +60,7 @@ class MainsController(ABC, GeoDjangoDataManager):
                 json=JSONObject(
                     **json_fields,
                     **extra_json_fields,
-                    **inner_subqueries,
+                    pm_touches_ids=pm_inner_subquery,
                     asset_name=Value(qs.model.AssetMeta.asset_name),
                     asset_label=Value(qs.model.__name__)
                 )
@@ -121,13 +118,13 @@ class MainsController(ABC, GeoDjangoDataManager):
         for qs in querysets:
             subquery1 = (
                 qs.filter(geometry__touches=OuterRef("start_point_geom"))
-                .values(json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id")))
+                .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
                 .order_by("pk")
             )
 
             subquery2 = (
                 qs.filter(geometry__touches=OuterRef("end_point_geom"))
-                .values(json=JSONObject(gids=ArrayAgg("gid"), ids=ArrayAgg("id")))
+                .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
                 .order_by("pk")
             )
 
@@ -156,7 +153,7 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         return {
             "id": "id",
-            "gid": "gid",
+            "tag": "tag",
             "geometry": geometry_field,
             "wkt": AsWKT(geometry_field),
             "dma_ids": ArrayAgg("dmas"),
@@ -179,7 +176,7 @@ class MainsController(ABC, GeoDjangoDataManager):
 
         return {
             "id": "id",
-            "gid": "gid",
+            "tag": "tag",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "material": "material",
@@ -192,11 +189,23 @@ class MainsController(ABC, GeoDjangoDataManager):
             "utilities": ArrayAgg("dmas__utility__name"),
         }
 
-    @abstractmethod
+
     def _generate_mains_subqueries(self):
-        raise NotImplementedError(
-            "Function should be defined in the child class and not called explicitly. "
-        )
+        pm_qs = self.model.objects.all().order_by("pk")
+
+        json_fields = self.get_pipe_json_fields()
+
+        subquery_pm_junctions = self.generate_touches_subquery(pm_qs, json_fields)
+
+        termini_subqueries = self.generate_termini_subqueries([pm_qs])
+
+        subqueries = {
+            "pipemain_junctions": ArraySubquery(subquery_pm_junctions),
+            "line_start_intersections": ArraySubquery(termini_subqueries[0]),
+            "line_end_intersections": ArraySubquery(termini_subqueries[1]),
+        }
+
+        return subqueries
 
     def _generate_asset_subqueries(self):
         json_fields = self.get_asset_json_fields()
