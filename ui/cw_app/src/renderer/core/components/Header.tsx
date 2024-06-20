@@ -13,6 +13,7 @@ const links = [
     { path: '/spatial-graph', label: 'Spatial Graph' },
     { path: '/schematic', label: 'Schematic' },
     { path: '/analysis', label: 'Analysis' },
+    { path: '/table', label: 'Table'}
 ];
 
 export default function Header() {
