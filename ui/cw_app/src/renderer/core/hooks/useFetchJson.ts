@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import useFilterParams from './useFilterParams'
 import { getApiUrl } from '../utils/http'
 import axios from 'axios'
@@ -24,7 +24,8 @@ const useFetchJson = (queryKey, options={}) => {
         retry: 0,
         queryFn: () => {
             return requestData(url, options)
-        }
+        }, 
+        placeholderData: keepPreviousData
     })
 
     return { queryValues, setFilterParams }

@@ -4,7 +4,9 @@
     position: relative;
     z-index: 1;
     background-color: rgba(217, 217, 217, 0.3);
-    border: 1px solid red;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
 }
 
 .visible {

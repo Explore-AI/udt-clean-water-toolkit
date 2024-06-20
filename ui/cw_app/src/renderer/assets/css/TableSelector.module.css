@@ -1,0 +1,16 @@
+.container {
+    display: flex; 
+    flex-wrap: nowrap;
+    width: 100%; 
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 15px; 
+    height: 15%;
+}
+
+.tab {
+    flex: 0 0 auto;
+    margin: 2px 5px; 
+    display: inline-block;
+    width: 200px; 
+}
