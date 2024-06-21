@@ -12,10 +12,8 @@ import useGetData from '../../core/hooks/useGetData';
 import styles from '../css/Table.module.css';
 import { getTableTitle } from '../utils/utils';
 
-
 export const Table = () => {
-    const { selectedKey } =
-        useContext(TableContext);
+    const { selectedKey } = useContext(TableContext);
     const { queryValues } = useGetData(selectedKey);
     const { data, isLoading, isFetching, refetch, isError } = queryValues;
     const label = getTableTitle(selectedKey.split('/')[1]);
