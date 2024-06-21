@@ -5,86 +5,128 @@ import { TableContext } from '../hooks/useTableUi';
 import { getKey } from '../queries';
 
 export const TableSelector = () => {
+    const checkSelectedKey = (key: string, selectedKey: string) =>
+        key === selectedKey.split('/')[1];
 
-    const { setTableUiParams } = useContext(TableContext);
+    const { selectedKey, setTableUiParams } = useContext(TableContext);
 
     const handleTabSelect = (tabName: string) => {
         const selectedTab = getKey(tabName);
-        setTableUiParams({selectedKey: selectedTab})
+        setTableUiParams({ selectedKey: selectedTab });
     };
 
     return (
         <div className={styles.container}>
-            <Button
+            <span
                 key="tm"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('trunk_main', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('trunk_main')}
             >
                 Trunk Mains
-            </Button>
-            <Button
+            </span>
+            <span
                 key="dm"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('distribution_main', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('distribution_main')}
             >
                 Distribution Mains
-            </Button>
-            <Button
+            </span>
+            <span
                 key="chm"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('chamber', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('chamber')}
             >
                 Chambers
-            </Button>
-            <Button
+            </span>
+            <span
                 key="hyd"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('hydrant', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('hydrant')}
             >
                 Hydrants
-            </Button>
-            <Button
+            </span>
+            <span
                 key="lg"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('logger', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('logger')}
             >
                 Loggers
-            </Button>
-            <Button
+            </span>
+            <span
                 key="nm"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('network_meter', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('network_meter')}
             >
                 Network Meters
-            </Button>
-            <Button
+            </span>
+            <span
                 key="nov"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('network_opt_valve', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('network_opt_valve')}
             >
                 Network Opt Valves
-            </Button>
-            <Button
+            </span>
+            <span
                 key="os"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('operational_site', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('operational_site')}
             >
                 Operational Sites
-            </Button>
-            <Button
+            </span>
+            <span
                 key="pcv"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('pressure_control_valve', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('pressure_control_valve')}
             >
                 Pressure Control Valves
-            </Button>
-            <Button
+            </span>
+            <span
                 key="pf"
-                className={styles.tab}
+                className={
+                    checkSelectedKey('pressure_fitting', selectedKey)
+                        ? `${styles.tab} ${styles.selected}`
+                        : `${styles.tab}`
+                }
                 onClick={() => handleTabSelect('pressure_fitting')}
             >
                 Pressure Fitting
-            </Button>
+            </span>
         </div>
     );
 };

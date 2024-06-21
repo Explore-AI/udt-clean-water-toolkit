@@ -5,7 +5,9 @@ import { TRUNK_MAINS } from '../queries';
 
 const withTable = (PageComponent: React.FC<PageProps>) => {
     const WithTable = (props: PageProps) => {
-        const tableUi = useTableUi({selectedKey: TRUNK_MAINS});
+        const tableUi = useTableUi({
+            selectedKey: TRUNK_MAINS,
+        });
 
         return (
             <TableContext.Provider value={tableUi}>
@@ -17,5 +19,4 @@ const withTable = (PageComponent: React.FC<PageProps>) => {
     return WithTable;
 };
 
-
-export default withTable; 
+export default withTable;

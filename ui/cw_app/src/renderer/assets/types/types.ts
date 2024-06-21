@@ -33,3 +33,12 @@ export type ApiResponse = {
     pagination?: DrfPagination, 
     items: Assets[] | Mains[], 
 }
+
+export type TableContextType = {
+    <Type>(uiParams: Type): Type, 
+    setTableUiParams: () => void; 
+}
+
+export type TabSelectType = {
+    selectedKey: string
+}
