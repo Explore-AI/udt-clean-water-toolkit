@@ -13,6 +13,10 @@ class PipeMain(models.Model):
         spatial_index=True, null=False, blank=False, srid=4326
     )
     material = models.CharField(max_length=255, null=False, blank=False, db_index=True)
+    pipe_type = models.CharField(max_length=255, null=False, blank=False, db_index=True)
+    pipe_subtype = models.CharField(
+        max_length=255, null=False, blank=False, db_index=True
+    )
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
     diameter = models.FloatField(null=False, blank=False)

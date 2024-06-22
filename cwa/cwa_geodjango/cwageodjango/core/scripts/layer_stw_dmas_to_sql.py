@@ -20,13 +20,16 @@ class Command(BaseCommand):
         utility, _ = Utility.objects.get_or_create(name="severn_trent_water")
 
         # Create a dummy dma as not all assets fall within a dma
+        # Create a dummy dma as not all assets fall within a dma
+        dma = DMA.objects.filter(utility=utility, code=r"undefined").first()
 
-        DMA.objects.get_or_create(
-            utility=utility,
-            name=r"undefined",
-            code=r"undefined",
-            geometry=GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID),
-        )
+        if not dma:
+            DMA.objects.create(
+                utility=utility,
+                name=r"undefined",
+                code=r"undefined",
+                geometry=GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID),
+            )
 
         ds = DataSource(ds_path)
 
@@ -46,7 +49,7 @@ Large numbers of features will take a long time to save."""
             new_dma = DMA(
                 utility=utility,
                 name=feature.get("wqz_sitena"),
-                code=feature.get("code"),
+                code=f"{feature.get('code')}_{feature.get('id_dma_cod')}",
                 geometry=dma_geom,
             )
 

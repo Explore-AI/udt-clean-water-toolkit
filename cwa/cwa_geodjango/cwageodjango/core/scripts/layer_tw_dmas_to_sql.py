@@ -20,12 +20,15 @@ class Command(BaseCommand):
         utility, _ = Utility.objects.get_or_create(name="thames_water")
 
         # Create a dummy dma as not all assets fall within a dma
-        DMA.objects.get_or_create(
-            utility=utility,
-            name=r"undefined",
-            code=r"undefined",
-            geometry=GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID),
-        )
+        dma = DMA.objects.filter(utility=utility, code=r"undefined").first()
+
+        if not dma:
+            DMA.objects.create(
+                utility=utility,
+                name=r"undefined",
+                code=r"undefined",
+                geometry=GEOSGeometry("MULTIPOLYGON EMPTY", srid=DEFAULT_SRID),
+            )
 
         ds = DataSource(ds_path)
 

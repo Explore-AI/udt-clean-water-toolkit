@@ -24,24 +24,25 @@ Large numbers of features will take a long time to save."""
 
         pipe_mains_layer = ds[layer_index]
 
-        new_mains = []
-        import pdb
+        new_pipe_mains = []
 
-        pdb.set_trace()
         for feature in pipe_mains_layer:
-
-            gid = feature.get("gisid")
+            tag = feature.get("gisid")
             geom = feature.geom
-            geom_4326 = feature.get("wkt_geometry_4326")
-            material = feature.get("MATERIAL") or "unknown"
-            diameter = feature.get("DIAMETER_mm")
+            # geom_4326 = feature.get("wkt_geom_4326")
+            material = feature.get("material") or "unknown"
+            diameter = feature.get("diameter")
+            pipe_type = feature.get("type")
+            pipe_subtype = feature.get("type")
 
             new_pipe_main = PipeMain(
-                gid=gid,
+                tag=tag,
                 geometry=geom.wkt,
-                geometry_4326=geom_4326,
+                # geometry_4326=geom_4326,
                 material=material,
                 diameter=diameter,
+                pipe_type=pipe_type,
+                pipe_subtype=pipe_subtype,
             )
             new_pipe_mains.append(new_pipe_main)
 
@@ -51,6 +52,9 @@ Large numbers of features will take a long time to save."""
 
         # save the last set of data as it will probably be less than 100000
         if new_pipe_mains:
+            import pdb
+
+            pdb.set_trace()
             PipeMain.objects.bulk_create(new_pipe_mains)
 
         DMAThroughModel = PipeMain.dmas.through
