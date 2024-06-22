@@ -17,9 +17,10 @@ class Command(BaseCommand):
         ds_path = kwargs.get("file")
         layer_index = kwargs.get("index")
 
-        utility, _ = Utility.objects.get_or_create(name="thames_water")
+        utility, _ = Utility.objects.get_or_create(name="severn_trent_water")
 
         # Create a dummy dma as not all assets fall within a dma
+
         DMA.objects.get_or_create(
             utility=utility,
             name=r"undefined",
@@ -40,12 +41,12 @@ Large numbers of features will take a long time to save."""
         for feature in dma_layer:
 
             # TODO: Not sure why but have to do this instead of feature.geom directly
-            dma_geom = GEOSGeometry(feature.get("wkt"), srid=DEFAULT_SRID)
+            dma_geom = GEOSGeometry(feature.geom.wkt, srid=DEFAULT_SRID)
 
             new_dma = DMA(
                 utility=utility,
-                name=feature.get("DMANAME"),
-                code=feature.get("DMAAREACODE"),
+                name=feature.get("wqz_sitena"),
+                code=feature.get("code"),
                 geometry=dma_geom,
             )
 
