@@ -4,7 +4,9 @@ from cwageodjango.core.constants import DEFAULT_SRID, NETWORK_METER__NAME
 
 
 class NetworkMeter(models.Model):
-    gid = models.IntegerField(null=False, blank=False, unique=True, db_index=True)
+    tag = models.CharField(
+        max_length=50, null=False, blank=False, unique=True, db_index=True
+    )
     # hsi_id = models.IntegerField(null=False, blank=False, unique=True)
     # tag_name = models.CharField(null=False, blank=False, unique=True)
 

@@ -6,7 +6,9 @@ from cwageodjango.core.constants import DEFAULT_SRID
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water dma codes from geospatial layers of interest to sql"
+    help = (
+        "Write Severn Trent Water dma codes from geospatial layers of interest to sql"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")

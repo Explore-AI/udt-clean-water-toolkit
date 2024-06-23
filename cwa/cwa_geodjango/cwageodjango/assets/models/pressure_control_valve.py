@@ -4,7 +4,9 @@ from cwageodjango.core.constants import DEFAULT_SRID, PRESSURE_CONTROL_VALVE__NA
 
 
 class PressureControlValve(models.Model):
-    gid = models.IntegerField(null=False, blank=False, unique=True, db_index=True)
+    tag = models.CharField(
+        max_length=50, null=False, blank=False, unique=True, db_index=True
+    )
     # hsi_id = models.IntegerField(null=False, blank=False, unique=True)
     # tag_name = models.CharField(null=False, blank=False, unique=True)
     geometry = models.PointField(
