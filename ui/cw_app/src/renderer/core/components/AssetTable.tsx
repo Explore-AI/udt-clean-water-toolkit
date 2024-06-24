@@ -8,14 +8,14 @@ import {
 import { ActionIcon, Tooltip } from '@mantine/core';
 import { IconRefresh } from '@tabler/icons-react';
 import { AssetTableProps, AssetsDataType } from '../types/types';
-import styles from '../css/AssetTable.module.css'
+import styles from '../css/AssetTable.module.css';
 
 export const AssetTable = ({
     data,
-    isLoading, 
+    isLoading,
     assetColumns,
     assetName,
-    refetch
+    refetch,
 }: AssetTableProps) => {
     const columns = useMemo<MRT_ColumnDef<AssetsDataType>[]>(
         () => assetColumns,
@@ -39,12 +39,15 @@ export const AssetTable = ({
         enableRowSelection: true,
         enableColumnOrdering: true,
         enableGlobalFilter: false,
+        mantineTableProps: { striped: 'even'}, 
+        paginationDisplayMode: 'pages',
+        mantineTableHeadCellProps: { className: styles.header},
         mantineTableContainerProps: {
-            style: { maxHeight: '60vh', width: '100%', border: '#fff' },
+            style: { height: '65vh', width: '100%', border: '#fff' },
         },
         state: {
-            isLoading: isLoading, 
-        }
+            isLoading: isLoading,
+        },
     });
 
     return <MantineReactTable table={table} />;

@@ -25,5 +25,3 @@ const tableKeys = {
         pressure_control_valve: PRESSURE_CONTROL_VALVE,
         pressure_fitting: PRESSURE_FITTING,
 } as tableType
-
-export const getKey = (key: string) => tableKeys[key] || key; 

@@ -9,3 +9,18 @@
     font-size: 1.15rem;
     margin: 0px 5px; 
 }
+
+.header {
+    font-weight: bold;
+    color: white; 
+    background-color: rgba(51, 101, 138);
+    border: transparent;
+
+    & svg { 
+        color: #fff;
+        &:hover{
+            background-color: rgba(50, 198, 221, 0.5);
+            border: transparent;
+        }
+    }
+}
