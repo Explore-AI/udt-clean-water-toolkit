@@ -28,7 +28,6 @@ export const TableView = () => {
 
     const component = pathComponent[assetType as string];
     useFetchJson(`${QUERY_PREFIX}/${assetType}`);
-    console.log(`${QUERY_PREFIX}/${assetType}`)
 
     return (
         <>
