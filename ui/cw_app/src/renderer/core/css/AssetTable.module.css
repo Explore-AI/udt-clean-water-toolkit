@@ -1,0 +1,11 @@
+.toolbar {
+    display: flex; 
+    align-items: center;
+}
+
+.title {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin: 0px 5px; 
+}

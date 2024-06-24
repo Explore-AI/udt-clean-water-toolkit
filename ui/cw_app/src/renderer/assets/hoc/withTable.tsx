@@ -3,8 +3,8 @@ import { PageProps } from '../../core/types/types';
 import useTableUi, { TableContext } from '../hooks/useTableUi';
 import { TRUNK_MAINS } from '../queries';
 
-const withTable = (PageComponent: React.FC<PageProps>) => {
-    const WithTable = (props: PageProps) => {
+const withAssets = (PageComponent: React.FC<PageProps>) => {
+    const WithAssets = (props: PageProps) => {
         const tableUi = useTableUi({
             selectedKey: TRUNK_MAINS,
         });
@@ -16,7 +16,7 @@ const withTable = (PageComponent: React.FC<PageProps>) => {
         );
     };
 
-    return WithTable;
+    return WithAssets;
 };
 
-export default withTable;
+export default withAssets;

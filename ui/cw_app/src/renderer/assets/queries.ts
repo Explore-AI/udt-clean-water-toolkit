@@ -1,4 +1,4 @@
-const QUERY_PREFIX = 'cw_gis_assets'
+export const QUERY_PREFIX = 'cw_gis_assets'
 export const DIST_MAINS = `${QUERY_PREFIX}/distribution_main`
 export const TRUNK_MAINS = `${QUERY_PREFIX}/trunk_main`
 export const CHAMBER = `${QUERY_PREFIX}/chamber`

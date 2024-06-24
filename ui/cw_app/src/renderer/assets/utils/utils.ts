@@ -17,3 +17,42 @@ const keys = {
 export const getTableTitle = (key: string) => {
     return keys[key]; 
 };
+
+
+export const defaultAssetColumns = [
+    {
+        accessorKey: 'gid',
+        header: 'GISID',
+        mantineTableHeadCellProps: {
+            style: { backgroundColor: '#33658A', color: '#fff' },
+        },
+    },
+    {
+        accessorKey: 'geometry',
+        header: 'Geometry',
+        mantineTableHeadCellProps: {
+            style: { backgroundColor: '#33658A', color: '#fff' },
+        },
+    },
+    {
+        accessorKey: 'created_at',
+        header: 'Created At',
+        mantineTableHeadCellProps: {
+            style: { backgroundColor: '#33658A', color: '#fff' },
+        },
+    },
+    {
+        accessorKey: 'modified_at',
+        header: 'Modified At',
+        mantineTableHeadCellProps: {
+            style: { backgroundColor: '#33658A', color: '#fff' },
+        },
+    },
+    {
+        accessorKey: 'dmas',
+        header: 'DMAS',
+        mantineTableHeadCellProps: {
+            style: { backgroundColor: '#33658A', color: '#fff' },
+        },
+    },
+]

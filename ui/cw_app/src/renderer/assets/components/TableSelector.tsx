@@ -1,132 +1,129 @@
-import { Button } from '@mantine/core';
 import styles from '../css/TableSelector.module.css';
-import { useContext } from 'react';
-import { TableContext } from '../hooks/useTableUi';
-import { getKey } from '../queries';
+import { Link, useParams } from 'react-router-dom';
 
 export const TableSelector = () => {
-    const checkSelectedKey = (key: string, selectedKey: string) =>
-        key === selectedKey.split('/')[1];
-
-    const { selectedKey, setTableUiParams } = useContext(TableContext);
-
-    const handleTabSelect = (tabName: string) => {
-        const selectedTab = getKey(tabName);
-        setTableUiParams({ selectedKey: selectedTab });
-    };
+    const { assetType } = useParams();
 
     return (
         <div className={styles.container}>
-            <span
+            <Link
                 key="tm"
                 className={
-                    checkSelectedKey('trunk_main', selectedKey)
+                    'trunk_main' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('trunk_main')}
+                to="/assets/trunk_main"
+                replace={true}
             >
                 Trunk Mains
-            </span>
-            <span
+            </Link>
+            <Link
                 key="dm"
                 className={
-                    checkSelectedKey('distribution_main', selectedKey)
+                    'distribution_main' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('distribution_main')}
+                to="/assets/distribution_main"
+                replace={true}
             >
                 Distribution Mains
-            </span>
-            <span
+            </Link>
+            <Link
                 key="chm"
                 className={
-                    checkSelectedKey('chamber', selectedKey)
+                    'chamber' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('chamber')}
+                to="/assets/chamber"
+                replace={true}
             >
                 Chambers
-            </span>
-            <span
-                key="hyd"
+            </Link>
+            <Link
+                key="hydrant"
                 className={
-                    checkSelectedKey('hydrant', selectedKey)
+                    'hydrant' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('hydrant')}
+                to="/assets/hydrant"
+                replace={true}
             >
                 Hydrants
-            </span>
-            <span
+            </Link>
+            <Link
                 key="lg"
                 className={
-                    checkSelectedKey('logger', selectedKey)
+                    'logger' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('logger')}
+                to="/assets/logger"
+                replace={true}
             >
                 Loggers
-            </span>
-            <span
+            </Link>
+            <Link
                 key="nm"
                 className={
-                    checkSelectedKey('network_meter', selectedKey)
+                    'network_meter' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('network_meter')}
+                to="/assets/network_meter"
             >
                 Network Meters
-            </span>
-            <span
+            </Link>
+            <Link
                 key="nov"
                 className={
-                    checkSelectedKey('network_opt_valve', selectedKey)
+                    'network_opt_valve' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('network_opt_valve')}
+                to="/assets/network_opt_valve"
             >
                 Network Opt Valves
-            </span>
-            <span
+            </Link>
+            <Link
                 key="os"
                 className={
-                    checkSelectedKey('operational_site', selectedKey)
+                    'operational_site' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('operational_site')}
+                to="/assets/operational_site"
+                replace={true}
             >
                 Operational Sites
-            </span>
-            <span
+            </Link>
+            <Link
                 key="pcv"
                 className={
-                    checkSelectedKey('pressure_control_valve', selectedKey)
+                    'pressure_control_valve' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('pressure_control_valve')}
+                to="/assets/pressure_control_valve"
+                replace={true}
             >
                 Pressure Control Valves
-            </span>
-            <span
+            </Link>
+            <Link
                 key="pf"
                 className={
-                    checkSelectedKey('pressure_fitting', selectedKey)
+                    'pressure_fitting' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                onClick={() => handleTabSelect('pressure_fitting')}
+                to="/assets/pressure_fitting"
+                replace={true}
             >
                 Pressure Fitting
-            </span>
+            </Link>
         </div>
     );
 };
