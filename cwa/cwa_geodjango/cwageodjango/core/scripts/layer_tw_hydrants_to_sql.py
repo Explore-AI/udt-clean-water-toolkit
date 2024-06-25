@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from cwageodjango.assets.models import Hydrant
-from cwageodjango.utilities.models import DMA
+from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
@@ -46,6 +46,10 @@ Large numbers of features will take a long time to save."""
         if new_hydrants:
             Hydrant.objects.bulk_create(new_hydrants)
 
+
+        # get the utility
+        utility = Utility.objects.get(name="thames_water")
+
         DMAThroughModel = Hydrant.dmas.through
         bulk_create_list = []
 
@@ -57,7 +61,7 @@ Large numbers of features will take a long time to save."""
             )
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [DMA.objects.get(name="undefined", utility=utility).pk]
 
             bulk_create_list.extend(
                 [

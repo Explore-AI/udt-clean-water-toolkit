@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from cwageodjango.assets.models import PipeMain
-from cwageodjango.utilities.models import DMA
+from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
@@ -27,9 +27,8 @@ Large numbers of features will take a long time to save."""
         new_pipe_mains = []
 
         for feature in pipe_mains_layer:
+
             tag = feature.get("gisid")
-            geom = feature.geom
-            # geom_4326 = feature.get("wkt_geom_4326")
             material = feature.get("material") or "unknown"
             diameter = feature.get("diameter")
             pipe_type = feature.get("type")
@@ -37,8 +36,8 @@ Large numbers of features will take a long time to save."""
 
             new_pipe_main = PipeMain(
                 tag=tag,
-                geometry=geom.wkt,
-                # geometry_4326=geom_4326,
+                geometry=feature.geom.wkt,
+                geometry_4326=feature.get("wkt_geom_4326"),
                 material=material,
                 diameter=diameter,
                 pipe_type=pipe_type,
@@ -52,10 +51,10 @@ Large numbers of features will take a long time to save."""
 
         # save the last set of data as it will probably be less than 100000
         if new_pipe_mains:
-            import pdb
-
-            pdb.set_trace()
             PipeMain.objects.bulk_create(new_pipe_mains)
+
+        # get the utility
+        utility = Utility.objects.get(name="thames_water")
 
         DMAThroughModel = PipeMain.dmas.through
         bulk_create_list = []
@@ -68,7 +67,7 @@ Large numbers of features will take a long time to save."""
             )
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [DMA.objects.get(name=r"undefined", utility=utility).pk]
 
             for dma_id in dma_ids:
                 bulk_create_list.append(
