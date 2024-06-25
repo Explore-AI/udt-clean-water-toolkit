@@ -2,7 +2,6 @@ from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
 from cwageodjango.config.settings import sqids
 import wntr
-from wntr import network
 
 
 class Convert2Wntr(Neo4j2Wntr):
@@ -23,7 +22,8 @@ class Convert2Wntr(Neo4j2Wntr):
         self.config = config
         super().__init__(sqids)
 
-    def query_graph(self, batch_size):
+    @staticmethod
+    def query_graph(batch_size):
         """
         Generator function to query the graph database in batches.
 
@@ -37,7 +37,10 @@ class Convert2Wntr(Neo4j2Wntr):
         offset = 0
         while True:
             results, m = db.cypher_query(
-                f"MATCH (n)-[r]-(m) RETURN n, r, m limit {batch_size}"
+                f"MATCH (n)-[r]-(m) "
+                f"WHERE (n:PipeJunction OR n:PipeEnd) AND "
+                f"(m:PipeJunction OR m:PipeEnd) "
+                f"RETURN n, r, m limit {batch_size}"
             )
             records = list(results)
             if not records:
