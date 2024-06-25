@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 import styles from '../css/TableView.module.css';
 import { TableSelector } from './TableSelector';
 import * as Table from './tables';
-import useFetchJson from '../../core/hooks/useFetchJson';
+import useFetchItems from '../../core/hooks/useFetchItems';
 import { QUERY_PREFIX } from '../queries';
 
 type componentObject = {
@@ -20,14 +20,18 @@ const pathComponent: componentObject = {
     operational_site: <Table.OperationalSiteTable />,
     pressure_control_valve: <Table.PressureControlValveTable />,
     pressure_fitting: <Table.PressureFittingTable />,
-    
+
 };
 
 export const TableView = () => {
     const { assetType } = useParams();
 
+    //params = useParams from react-router
+
+
     const component = pathComponent[assetType as string];
-    useFetchJson(`${QUERY_PREFIX}/${assetType}`);
+    // if no params then use default; 1 and 100
+    useFetchItems(`${QUERY_PREFIX}/${assetType}`, {params: {page_num: 1, page_size: 100}});
 
     return (
         <>
