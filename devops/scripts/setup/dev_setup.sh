@@ -11,7 +11,7 @@ echo "pip packages will be installed for the cwm in dev mode."
 echo
 
 
-docker compose -f ../../docker/docker-compose-postgis.yml -f ../../docker/docker-compose-neo4j.yml -f ../../docker/docker-compose-cwa-geodjango-dev.yml -f ../../docker/docker-compose-cwa-geoalchemy-dev.yml -f ../../docker/docker-compose-api-drf.yml up -d
+docker compose -f ../../docker/docker-compose-postgis.yml -f ../../docker/docker-compose-neo4j.yml -f ../../docker/docker-compose-cwa-geodjango-dev.yml -f ../../docker/docker-compose-cwa-geoalchemy-dev.yml -f ../../docker/docker-compose-api-drf.yml up -d --build
 
 CWA_GEODORM_CONTAINER_ID=`docker ps | grep udtcwageodjangodev | grep cwa_geodjango_dev | awk '{ print $1 }'`
 CWA_GEOALCHEMY_CONTAINER_ID=`docker ps | grep udtcwageoalchemydev | grep cwa_geoalchemy_dev | awk '{ print $1 }'`
