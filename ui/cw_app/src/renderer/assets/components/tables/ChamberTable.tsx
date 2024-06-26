@@ -1,27 +1,28 @@
-import { AssetTable } from '../../../core/components/AssetTable';
+import { BaseTable } from '../../../core/components/BaseTable';
 import useGetItems from '../../../core/hooks/useGetItems';
 import { defaultAssetColumns } from '../../utils/utils';
 import { CHAMBER } from '../../queries';
 import { AssetsDataType } from '../../../core/types/types';
-import { get as _get } from 'lodash'
+import { get as _get } from 'lodash';
+import usePagination from '../../../core/hooks/usePagination';
+import useFetchItems from '../../../core/hooks/useFetchItems';
 
 export const ChamberTable = () => {
-    const { items, isFetching, refetch, pagination } = useGetItems(CHAMBER);
-
-    //params = useParams from react-router
-
-    const onPaginationChange = (a) => {
-        console.log(a)
-        // fetch current params from url
-        // set new page values using the current params
-        // useNavaigate with the new query params added to the url
-        // the are page_size. page_num
-    }
+    // const { items, isFetching, refetch, pagination } = useGetItems(CHAMBER);
+    const { pagination: localPagination, setPagination } = usePagination();
+    const { queryValues } = useFetchItems(CHAMBER, {
+        params: {
+            page: localPagination.pageIndex + 1,
+            page_size: localPagination.pageSize,
+        },
+    });
+    const { data, isFetching, refetch} = queryValues; 
+    const { items, pagination } = data || {};
 
     return (
         <div>
-            <AssetTable
-                data={items as AssetsDataType[] || []}
+            <BaseTable
+                data={(items as AssetsDataType[]) || []}
                 isLoading={isFetching}
                 assetColumns={defaultAssetColumns}
                 assetName={'CHAMBERS'}
@@ -29,11 +30,8 @@ export const ChamberTable = () => {
                 manualPagination={true}
                 rowCount={_get(pagination, 'num_items')}
                 pageCount={_get(pagination, 'num_pages')}
-                pagination={
-                { pageIndex: _get(pagination, 'current_page', 1) - 1,
-                  pageSize: _get(pagination, 'page_size', 100)
-                }}
-                onPaginationChange={onPaginationChange}
+                pagination={localPagination}
+                onPaginationChange={setPagination}
             />
         </div>
     );
