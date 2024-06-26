@@ -38,7 +38,7 @@ export type BaseTableProps = {
     refetch: (
         options?: RefetchOptions | undefined,
     ) => Promise<QueryObserverResult<unknown, Error>>;
-    manualPagination?: boolean;
+    manualPagination: boolean;
     rowCount?: number;
     pagination?: { pageIndex: number; pageSize: number };
     pageCount?: number;
