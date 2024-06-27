@@ -14,15 +14,22 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
     def query_trunkmain_network(request):
         # get all assets connected to the trunkmains, as well as the trunkmain relationships
         limit = request.query_params.get("limit", 10)
-        query = f"""
-        match (n)-[r:TrunkMain]-(m)
-        return ID(n), n, ID(r), r, ID(m), m
-        limit {limit}
-        """
+        dma_code = request.query_params.get("dma_codes")
+        print(f'DMA Code {dma_code}')
+        print(f" Limit: {limit}")
+        print(f" query params: {request.query_params}")
+        if dma_code: 
+            query = f"""
+            match (n)-[r:TrunkMain]-(m) 
+            where n.dmas contains '{dma_code}'
+            return ID(n), n, ID(r), r, ID(m), m
+            limit {limit}
+            """
+            results, _ = db.cypher_query(query)
 
-        results, _ = db.cypher_query(query)
-
-        return results
+            return results
+        else: 
+            return []
 
     def create_node(self, node_id, position, node_type="default", properties={}):
 

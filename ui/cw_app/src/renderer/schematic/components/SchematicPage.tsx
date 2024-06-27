@@ -9,14 +9,14 @@ import useFetchItems from '../../core/hooks/useFetchItems';
 
 function SchematicPage(props: PageProps) {
     const { dmas } = useParams(); 
-    
+    console.log('dmas', dmas);
     let dmaCodes; 
     if (dmas){
         dmaCodes = dmas.split('-'); 
     }
     const { pageVisibility } = props;
 
-    useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 30, dma_codes: dmaCodes });
+    useFetchJson(TRUNKMAIN_QUERY_KEY, {params: { limit: 30, 'dma_codes': dmaCodes }});
     useFetchItems(DMA__QUERY_KEY); 
 
     const mainCss = `${styles.main} ${styles[pageVisibility]}`;

@@ -11,9 +11,11 @@ const MultiSelectField = (props) => {
         clearable,
         onSearchChange,
         onEnter,
+        maxValues 
     } = props;
 
     const [options, setOptions] = useState([]);
+    const [ dropdownOpened, setDropdownOpened ] = useState(false); 
 
     const handleChange = (values) => {
         setOptions(values);
@@ -22,6 +24,7 @@ const MultiSelectField = (props) => {
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             onEnter && onEnter(options);
+            setDropdownOpened(false);
         }
     };
 
@@ -38,6 +41,10 @@ const MultiSelectField = (props) => {
                 item.option[labelName] || item.option['value']
             }
             data={data}
+            hidePickedOptions
+            maxValues={maxValues}
+            onDropdownOpen={() => setDropdownOpened(true)}
+            dropdownOpened={dropdownOpened}
         />
     );
 };

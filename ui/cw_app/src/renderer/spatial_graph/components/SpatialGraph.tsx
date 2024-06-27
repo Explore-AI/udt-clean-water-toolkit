@@ -54,7 +54,7 @@ const SpatialGraph = () => {
     }
 
     return (
-        <>
+        <div style={{ width: '100%', height: '100%'}}>
             <div className={styles['search_box']}>
                 <MultiSelectField
                     labelName="code"
@@ -62,7 +62,9 @@ const SpatialGraph = () => {
                     onEnter={onFilterByDmas}
                     onSearchChange={onSearchChange}
                     searchable={true}
-                    data={items} />
+                    data={items} 
+                    maxValues={Infinity} // adjust as desired
+                    />
             </div>
             <ReactFlow
                 defaultNodes={data?.nodes}
@@ -75,7 +77,7 @@ const SpatialGraph = () => {
             >
                 <Controls />
             </ReactFlow>
-        </>
+        </div>
     );
 };
 

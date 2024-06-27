@@ -13,7 +13,7 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
 }) => {
 
 //    const icon = getIcons(assetName);
-
+    console.log('[AP] NodeProps: ', nodeProps)
     return (
         <>
             <Draggable>
@@ -43,11 +43,11 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
                     <div className={styles.details}>
                         <div>
                             <strong>DMA Codes:</strong>{' '}
-                            {null}
+                            {nodeProps?.dmas}
                         </div>
                         <div>
                             <strong>DMA Names:</strong>{' '}
-                            {null}
+                            {nodeProps?.dmas}
                         </div>
                         <div>
                             <strong>Asset Coordinates:</strong>{' '}

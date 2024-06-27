@@ -28,24 +28,9 @@ function Schematic() {
         (data as SchematicProps) || { nodes: [], edges: [] },
     );
     const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY);
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const { nodePopupIds, setSchematicUiParams } =
         useContext(SchematicUiContext);
-
-    const onNodeClick = (e: React.MouseEvent, node: Node) => {
-        setSchematicUiParams({
-            nodePopupIds: _union(nodePopupIds || [], [node.id]),
-        });
-    };
-
-    const onSearchChange = (value: string) => {
-        console.log('[s] value change');
-        setFilterParams(DMA__QUERY_KEY, {search: value,});
-    };
-
-    const onFilterByDmas = (options: string[]) => {
-        navigate(`/schematic/${options.join('-')}`)
-    }
 
     if (isPending) {
         return <LoadingSpinner />;
@@ -58,17 +43,37 @@ function Schematic() {
             </div>
         );
     }
+    const onNodeClick = (e: React.MouseEvent, node: Node) => {
+        setSchematicUiParams({
+            nodePopupIds: _union(nodePopupIds || [], [node.id]),
+        });
+    };
+
+    const onSearchChange = (value: string) => {
+        console.log('[s] value change');
+        setFilterParams(DMA__QUERY_KEY, { search: value });
+    };
+
+    const onFilterByDmas = (options) => {
+        navigate(`/schematic/${options.join('-')}`);
+    };
+
+    console.log('[s] data returned: ', data);
 
     return (
         <>
             <div className={styles.searchBox}>
-                <MultiSelectField 
+                <MultiSelectField
                     labelName="code"
                     clearable={true}
                     onEnter={onFilterByDmas}
                     onSearchChange={onSearchChange}
+                    placeholder="Select the DMA"
                     searchable={true}
-                    data={items} />
+                    data={items}
+                    maxValues={1}
+                />
+                
             </div>
             <ReactFlow
                 nodes={layoutData?.nodes}
