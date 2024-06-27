@@ -10,3 +10,12 @@
 .rfContainer {
     background-color: bisque;
 }
+
+.searchBox {
+    height: calc(2rem * var(--mantine-scale));
+    width: calc(25rem * var(--mantine-scale));
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 3;
+}

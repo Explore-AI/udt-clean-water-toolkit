@@ -1,19 +1,27 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import { MultiSelect } from '@mantine/core';
 
 const MultiSelectField = (props) => {
+    const {
+        label,
+        placeholder,
+        data,
+        labelName,
+        searchable,
+        clearable,
+        onSearchChange,
+        onEnter,
+    } = props;
 
-    const { label, placeholder, data, labelName, searchable, clearable, onSearchChange, onEnter } = props
-
-    const [ options, setOptions ] = useState([])
+    const [options, setOptions] = useState([]);
 
     const handleChange = (values) => {
-        setOptions(values)
-    }
+        setOptions(values);
+    };
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            onEnter && onEnter(options)
+            onEnter && onEnter(options);
         }
     };
 
@@ -26,10 +34,12 @@ const MultiSelectField = (props) => {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             searchable={searchable}
-            renderOption={ (item) => item.option[labelName] || item.option['value'] }
+            renderOption={(item) =>
+                item.option[labelName] || item.option['value']
+            }
             data={data}
         />
     );
-}
+};
 
-export default MultiSelectField
+export default MultiSelectField;

@@ -10,7 +10,7 @@ const BaseRouter = () => {
                 <Route path="/" element={<Navigate to="/map" replace={true} />} />
                 <Route path="/map/:latlong?" element={<BaseSinglePage />} />
                 <Route path="/graph" element={<BaseSinglePage/>} />
-                <Route path="/schematic" element={<BaseSinglePage/>} />
+                <Route path="/schematic/:dmas?" element={<BaseSinglePage/>} />
                 <Route path="/analysis" element={<BaseSinglePage/>} />
                 <Route path="/spatial-graph/:dmas?" element={<BaseSinglePage/>} />
                 <Route path="/assets" element={<Navigate to="/assets/trunk_main" replace={true} />} />
