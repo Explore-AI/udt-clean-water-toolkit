@@ -4,7 +4,12 @@ import {
     RefetchOptions,
 } from '@tanstack/react-query';
 import React from 'react';
-import { type MRT_ColumnDef } from 'mantine-react-table';
+import {
+    type MRT_ColumnDef,
+    type MRT_PaginationState,
+    type MRT_Updater, 
+
+} from 'mantine-react-table';
 
 export type PageProps = {
     pageVisibility: string;
@@ -25,7 +30,7 @@ export type AssetsDataType = {
     geometry_4326?: string;
 };
 
-export type AssetTableProps = {
+export type BaseTableProps = {
     data: AssetsDataType[];
     isLoading: boolean;
     assetColumns: MRT_ColumnDef<AssetsDataType>[];
@@ -33,4 +38,9 @@ export type AssetTableProps = {
     refetch: (
         options?: RefetchOptions | undefined,
     ) => Promise<QueryObserverResult<unknown, Error>>;
+    manualPagination: boolean;
+    rowCount?: number;
+    pagination?: { pageIndex: number; pageSize: number };
+    pageCount?: number;
+    onPaginationChange?: React.Dispatch<React.SetStateAction<MRT_PaginationState>>
 };
