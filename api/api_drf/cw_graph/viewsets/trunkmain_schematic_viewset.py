@@ -15,9 +15,6 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
         # get all assets connected to the trunkmains, as well as the trunkmain relationships
         limit = request.query_params.get("limit", 10)
         dma_code = request.query_params.get("dma_codes")
-        print(f'DMA Code {dma_code}')
-        print(f" Limit: {limit}")
-        print(f" query params: {request.query_params}")
         if dma_code: 
             query = f"""
             match (n)-[r:TrunkMain]-(m) 

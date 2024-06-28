@@ -60,7 +60,6 @@ function Schematic() {
         navigate(`/schematic/${options.join('-')}`);
     };
 
-    console.log('[s] data returned: ', data);
 
     return (
         <>
