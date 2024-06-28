@@ -1,16 +1,14 @@
 import pdb
-
 import numpy as np
 import pandas as pd
 from wntr import network
-from wntr.network import TimeSeries, Reservoir
 
 
 class Neo4j2Wntr:
     """
     Convert a Neo4j graph the to Water Network Toolkit (WNTR) format.
-
     """
+
     def __init__(self, sqids):
         self.wn = network.WaterNetworkModel()
         self.wn.options.hydraulic.inpfile_units = 'LPS'  # Litres per second
@@ -18,6 +16,7 @@ class Neo4j2Wntr:
         self.wn.add_pattern('pat2', [1, 2, 3, 4])
         self.sqids = sqids
         self.roughness_values = self.load_roughness_values('material_roughness.csv')
+        self.valve_types = ['PRV', 'PSV', 'FCV', 'TCV']  # Example valve types
 
     @staticmethod
     def load_roughness_values(csv_path):
@@ -43,7 +42,6 @@ class Neo4j2Wntr:
 
         Returns:
             unique_id (str): Unique ID generated using SQID encoding.
-
         """
         unique_id = self.sqids.encode([input_string])
         return str(unique_id)
@@ -58,24 +56,16 @@ class Neo4j2Wntr:
 
         Returns:
             node_id (str): SQIDS ID of the added node.
-
         """
         node_id = self.generate_unique_id(node_name)
+        res_id = self.generate_unique_id(node_name) + 'R'
 
-        reservoir = Reservoir(name=node_id, wn=self.wn, base_head=20, head_pattern='pat1')
-        reservoir._coordinates = coordinates
-        print(reservoir.name)
-        self.wn.add_reservoir(reservoir)
-
-        # self.wn.add_reservoir(node_id,
-        #                       base_head=20,
-        #                       coordinates=coordinates,
-        #                       head_pattern='pat1'
-        #                       )
-        print("created reservoir")
-
-
-        return node_id
+        self.wn.add_reservoir(res_id,
+                              base_head=20,
+                              coordinates=coordinates,
+                              head_pattern='pat1')
+        print("Created reservoir:", res_id)
+        return res_id, node_id
 
     def add_node(self, node_name, coordinates):
         """
@@ -87,12 +77,11 @@ class Neo4j2Wntr:
 
         Returns:
             node_id (str): SQIDS ID of the added node.
-
         """
         node_id = self.generate_unique_id(node_name)
 
-        generate_elevation = lambda: np.random.uniform(20, 40)  # replace with actual values
-        generate_base_demand = lambda: np.random.uniform(10, 50)  # replace with actual values
+        generate_elevation = lambda: np.random.uniform(20, 40)  # Example elevation range
+        generate_base_demand = lambda: np.random.uniform(10, 50)  # Example demand range
 
         self.wn.add_junction(
             node_id,
@@ -100,7 +89,7 @@ class Neo4j2Wntr:
             elevation=generate_elevation(),
             coordinates=coordinates
         )
-
+        print("Created junction:", node_id)
         return node_id
 
     def add_pipe(self, edge_id, start_node_id, end_node_id, length, diameter, material):
@@ -117,91 +106,148 @@ class Neo4j2Wntr:
 
         Returns:
             pipe_id (str): SQIDS ID of the added pipe.
-
         """
         pipe_id = self.generate_unique_id(edge_id)
-
-        roughness = self.roughness_values.get(material, None)
-
-        if roughness is None:
-            print(f"Material '{material}' not found in roughness data. Using default roughness.")
-            roughness = 120  # Default roughness value if material is not found
+        roughness = self.roughness_values.get(material, 120)  # Default roughness if material not found
 
         self.wn.add_pipe(pipe_id, start_node_id, end_node_id, length, diameter, roughness)
-
+        print("Created pipe:", pipe_id)
         return pipe_id
+
+    def add_pump(self, pump_name, start_node_id, end_node_id):
+        """
+        Adds a pump to the water network model.
+
+        Parameters:
+            pump_name (str): Name of the pump.
+            start_node_id (str): ID of the start node.
+            end_node_id (str): ID of the end node.
+
+        Returns:
+            pump_id (str): SQIDS ID of the added pump.
+        """
+        pump_id = self.generate_unique_id(pump_name)
+        curve_id = f'Curve_{pump_id}'
+
+        # Creating a pump curve (random realistic values for head and flow)
+        head_values = np.random.uniform(10, 50, size=3)  # Example head values
+        flow_values = np.random.uniform(0, 200, size=3)  # Example flow values
+        self.wn.add_curve(curve_id, head_values, flow_values)
+
+        self.wn.add_pump(pump_id, start_node_id, end_node_id, pump_curve=curve_id)
+        print("Created pump:", pump_id)
+        return pump_id
+
+    def add_valve(self, valve_name, start_node_id, end_node_id, valve_type=None):
+        """
+        Adds a valve to the water network model.
+
+        Parameters:
+            valve_name (str): Name of the valve.
+            start_node_id (str): ID of the start node.
+            end_node_id (str): ID of the end node.
+            valve_type (str): Type of the valve. If None, a random type is chosen.
+
+        Returns:
+            valve_id (str): SQIDS ID of the added valve.
+        """
+        valve_id = self.generate_unique_id(valve_name)
+        if valve_type is None:
+            valve_type = np.random.choice(self.valve_types)  # Randomly choose a valve type if not specified
+        setting = np.random.uniform(5, 50)  # Example setting value, can be adapted based on valve type
+
+        self.wn.add_valve(valve_id, start_node_id, end_node_id, valve_type, setting)
+        print("Created valve:", valve_id, "of type:", valve_type)
+        return valve_id
+
+    def add_patterns(self):
+        """
+        Adds demand and time patterns to the water network model.
+        """
+        # Example demand patterns (random values)
+        demand_pattern_values = np.random.uniform(0.5, 1.5, size=24).tolist()  # Demand pattern over 24 hours
+        self.wn.add_pattern('demand_pattern', demand_pattern_values)
+
+        # Example time pattern (random values, representing a day in hours)
+        time_pattern_values = np.random.uniform(1, 2, size=24).tolist()  # Multipliers for each hour
+        self.wn.add_pattern('time_pattern', time_pattern_values)
+        print("Added demand and time patterns.")
 
     def create_graph(self, graph):
         """
         Processes a batch of results from Neo4j query and adds corresponding nodes and pipes to the water network model.
 
         Parameters:
-            batch_result (list): List of results from Neo4j query.
-
+            graph (list): List of results from Neo4j query.
         """
-        count = 0
-        for attributes in graph:
-            count += 1
-            if count == 123:
-                start = attributes[1]._start_node
-                start_coords = start['coords_27700']
-                start_id = start._id
 
-                # Validate start node coordinates
-                if start_coords is None:
-                    print(f"Start node {start_id} has invalid coordinates: {start_coords}")
-                    continue
+        def validate_and_get_node(node):
+            """Validates the node and returns its coordinates and ID if valid."""
+            coords = node['coords_27700']
+            node_id = node._id
+            if coords is None:
+                print(f"Node {node_id} has invalid coordinates: {coords}")
+                return None, None
+            return coords, node_id
 
-                start_node_id = self.add_reservoir(start_id, start_coords)
+        def add_node_to_model(node, is_reservoir=False):
+            """Adds a node to the model and returns its ID, optionally as a reservoir."""
+            coords, node_id = validate_and_get_node(node)
+            if not coords:
+                return None, None
 
-                end = attributes[1]._end_node
-
-                end_coords = end['coords_27700']
-                end_id = end._id
-
-                # Validate end node coordinates
-                if end_coords is None:
-                    print(f"End node {end_id} has invalid coordinates: {end_coords}")
-                    continue
-
-                count += 1
-                end_node_id = self.add_node(end_id, end_coords)
-
-                edge_id = attributes[1]._id
-                edge_material = attributes[1]['material']
-                edge_diameter = attributes[1]['diameter']
-                edge_length = attributes[1]['segment_length']
-                self.add_pipe(edge_id, start_node_id, end_node_id, edge_length, edge_diameter, edge_material)
-
+            if is_reservoir:
+                return self.add_reservoir(node_id, coords)
             else:
-                start = attributes[1]._start_node
-                start_coords = start['coords_27700']
-                start_id = start._id
+                return self.add_node(node_id, coords), None
 
-                # Validate start node coordinates
-                if start_coords is None:
-                    print(f"Start node {start_id} has invalid coordinates: {start_coords}")
-                    continue
+        count = 0
+        reservoir_nodes = []
 
-                start_node_id = self.add_node(start_id, start_coords)
+        for attributes in graph:
+            edge = attributes[1]
+            start_node = edge._start_node
+            end_node = edge._end_node
 
-                end = attributes[1]._end_node
+            if count == 123:
+                start_node_id, _ = add_node_to_model(start_node)
+                end_node_id, res_node_id = add_node_to_model(end_node, is_reservoir=True)
+                reservoir_nodes.append(res_node_id)
+            else:
+                if start_node in reservoir_nodes:
+                    start_node_id, _ = self.add_reservoir(start_node._id, start_node['coords_27700'])
+                    reservoir_nodes.remove(start_node._id)
+                else:
+                    start_node_id, _ = add_node_to_model(start_node)
 
-                end_coords = end['coords_27700']
-                end_id = end._id
+                end_node_id, _ = add_node_to_model(end_node)
 
-                # Validate end node coordinates
-                if end_coords is None:
-                    print(f"End node {end_id} has invalid coordinates: {end_coords}")
-                    continue
+            if not start_node_id or not end_node_id:
+                continue
 
-                count += 1
-                end_node_id = self.add_node(end_id, end_coords)
+            # Add pipe to the model
+            edge_id = edge._id
+            edge_material = edge['material']
+            edge_diameter = edge['diameter'] / 1000  # Assuming diameter conversion
+            edge_length = edge['segment_length']
+            self.add_pipe(edge_id, start_node_id, end_node_id, edge_length, edge_diameter, edge_material)
 
-                edge_id = attributes[1]._id
-                edge_material = attributes[1]['material']
-                edge_diameter = attributes[1]['diameter']
-                edge_length = attributes[1]['segment_length']
-                self.add_pipe(edge_id, start_node_id, end_node_id, edge_length, edge_diameter, edge_material)
+            # Randomly add a pump or valve to the model
+            if np.random.rand() > 0.7:  # 30% chance to add a pump
+                self.add_pump(f'Pump_{count}', start_node_id, end_node_id)
+            elif np.random.rand() > 0.5:  # 50% chance to add a valve
+                self.add_valve(f'Valve_{count}', start_node_id, end_node_id)
+
+            count += 1
+
+        # Add demand and time patterns to the network
+        self.add_patterns()
 
         return self.wn
+
+# Example usage
+# sqids = <Initialize your SQIDS object>
+# graph_data = <Load your Neo4j graph data>
+# neo4j2wntr = Neo4j2Wntr(sqids)
+# wn_model = neo4j2wntr.create_graph(graph_data)
+
