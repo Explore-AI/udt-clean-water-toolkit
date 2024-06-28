@@ -48,7 +48,36 @@ class Neo4j2Wntr:
         unique_id = self.sqids.encode([input_string])
         return str(unique_id)
 
-    def add_node(self, node_name, coordinates, count):
+    def add_reservoir(self, node_name, coordinates):
+        """
+        Adds a node to the water network model.
+
+        Parameters:
+            node_name (str): ID of the node.
+            coordinates (tuple): EPSG:27700 coordinates of the node.
+
+        Returns:
+            node_id (str): SQIDS ID of the added node.
+
+        """
+        node_id = self.generate_unique_id(node_name)
+
+        reservoir = Reservoir(name=node_id, wn=self.wn, base_head=20, head_pattern='pat1')
+        reservoir._coordinates = coordinates
+        print(reservoir.name)
+        self.wn.add_reservoir(reservoir)
+
+        # self.wn.add_reservoir(node_id,
+        #                       base_head=20,
+        #                       coordinates=coordinates,
+        #                       head_pattern='pat1'
+        #                       )
+        print("created reservoir")
+
+
+        return node_id
+
+    def add_node(self, node_name, coordinates):
         """
         Adds a node to the water network model.
 
@@ -65,33 +94,13 @@ class Neo4j2Wntr:
         generate_elevation = lambda: np.random.uniform(20, 40)  # replace with actual values
         generate_base_demand = lambda: np.random.uniform(10, 50)  # replace with actual values
 
-        res_id = None
-        
-        if res_id is not None:
-            self.wn.get_node(res_id)
+        self.wn.add_junction(
+            node_id,
+            base_demand=generate_base_demand(),
+            elevation=generate_elevation(),
+            coordinates=coordinates
+        )
 
-        if count == 123:
-            res_id = node_id
-            # Add reservoir
-            self.wn.add_reservoir(node_id,
-                                  base_head=20,
-                                  coordinates=coordinates,
-                                  head_pattern='pat1'
-                                  )
-            print("created reservoir")
-
-            # Verify the node type
-            node = self.wn.get_node(node_id)
-            print(
-                f"Node '{node_id}' is now of type '{node.node_type}' with head timeseries base value {node.head_timeseries.base_value}.")
-            pdb.set_trace()
-        else:
-            self.wn.add_junction(
-                node_id,
-                base_demand=generate_base_demand(),
-                elevation=generate_elevation(),
-                coordinates=coordinates
-            )
         return node_id
 
     def add_pipe(self, edge_id, start_node_id, end_node_id, length, diameter, material):
@@ -132,35 +141,67 @@ class Neo4j2Wntr:
         """
         count = 0
         for attributes in graph:
-            start = attributes[1]._start_node
-            start_coords = start['coords_27700']
-            start_id = start._id
-
-            # Validate start node coordinates
-            if start_coords is None:
-                print(f"Start node {start_id} has invalid coordinates: {start_coords}")
-                continue
-
             count += 1
-            start_node_id = self.add_node(start_id, start_coords, count)
+            if count == 123:
+                start = attributes[1]._start_node
+                start_coords = start['coords_27700']
+                start_id = start._id
 
-            end = attributes[1]._end_node
+                # Validate start node coordinates
+                if start_coords is None:
+                    print(f"Start node {start_id} has invalid coordinates: {start_coords}")
+                    continue
 
-            end_coords = end['coords_27700']
-            end_id = end._id
+                start_node_id = self.add_reservoir(start_id, start_coords)
 
-            # Validate end node coordinates
-            if end_coords is None:
-                print(f"End node {end_id} has invalid coordinates: {end_coords}")
-                continue
+                end = attributes[1]._end_node
 
-            count += 1
-            end_node_id = self.add_node(end_id, end_coords, count)
+                end_coords = end['coords_27700']
+                end_id = end._id
 
-            edge_id = attributes[1]._id
-            edge_material = attributes[1]['material']
-            edge_diameter = attributes[1]['diameter']
-            edge_length = attributes[1]['segment_length']
-            self.add_pipe(edge_id, start_node_id, end_node_id, edge_length, edge_diameter, edge_material)
+                # Validate end node coordinates
+                if end_coords is None:
+                    print(f"End node {end_id} has invalid coordinates: {end_coords}")
+                    continue
+
+                count += 1
+                end_node_id = self.add_node(end_id, end_coords)
+
+                edge_id = attributes[1]._id
+                edge_material = attributes[1]['material']
+                edge_diameter = attributes[1]['diameter']
+                edge_length = attributes[1]['segment_length']
+                self.add_pipe(edge_id, start_node_id, end_node_id, edge_length, edge_diameter, edge_material)
+
+            else:
+                start = attributes[1]._start_node
+                start_coords = start['coords_27700']
+                start_id = start._id
+
+                # Validate start node coordinates
+                if start_coords is None:
+                    print(f"Start node {start_id} has invalid coordinates: {start_coords}")
+                    continue
+
+                start_node_id = self.add_node(start_id, start_coords)
+
+                end = attributes[1]._end_node
+
+                end_coords = end['coords_27700']
+                end_id = end._id
+
+                # Validate end node coordinates
+                if end_coords is None:
+                    print(f"End node {end_id} has invalid coordinates: {end_coords}")
+                    continue
+
+                count += 1
+                end_node_id = self.add_node(end_id, end_coords)
+
+                edge_id = attributes[1]._id
+                edge_material = attributes[1]['material']
+                edge_diameter = attributes[1]['diameter']
+                edge_length = attributes[1]['segment_length']
+                self.add_pipe(edge_id, start_node_id, end_node_id, edge_length, edge_diameter, edge_material)
 
         return self.wn
