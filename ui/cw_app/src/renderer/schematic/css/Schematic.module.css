@@ -14,8 +14,25 @@
 .searchBox {
     height: calc(2rem * var(--mantine-scale));
     width: calc(20rem * var(--mantine-scale));
-    position: absolute;
+    margin: 0px 5%; 
+    /* position: absolute;
     left: 20px;
     top: 20px;
-    z-index: 3;
+    z-index: 3; */
+}
+
+.controlHeader {
+    width: 100vw; 
+    height: calc(3.5rem * var(--mantine-scale)); 
+    background-color: #fff;
+    border-bottom: 1px solid #ccc; 
+    z-index: 2; 
+    display: flex;
+    align-items: center;
+
+}
+
+.dateTimePicker {
+    height: calc(2rem * var(--mantine-scale));
+    width: calc(15rem * var(--mantine-scale));
 }

@@ -1,5 +1,6 @@
 // use this to create the schematic view
 import 'reactflow/dist/base.css';
+import '@mantine/dates/styles.css';
 import { useContext } from 'react';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import styles from '../css/Schematic.module.css';
@@ -15,6 +16,7 @@ import { isEmpty as _isEmpty, union as _union } from 'lodash';
 import MultiSelectField from '../../core/components/MultiSelectField';
 import useGetItems from '../../core/hooks/useGetItems';
 import { useNavigate } from 'react-router-dom';
+import { DateTimeInput } from '../../core/components/DateTimePicker';
 
 const nodeTypes = {
     assetNode: AssetNode,
@@ -62,18 +64,22 @@ function Schematic() {
 
     return (
         <>
-            <div className={styles.searchBox}>
-                <MultiSelectField
-                    labelName="code"
-                    clearable={true}
-                    onEnter={onFilterByDmas}
-                    onSearchChange={onSearchChange}
-                    placeholder="Select the DMA"
-                    searchable={true}
-                    data={items}
-                    maxValues={1}
-                />
-                
+            <div className={styles.controlHeader}>
+                <div className={styles.searchBox}>
+                    <MultiSelectField
+                        labelName="code"
+                        clearable={true}
+                        onEnter={onFilterByDmas}
+                        onSearchChange={onSearchChange}
+                        placeholder="Select the DMA"
+                        searchable={true}
+                        data={items}
+                        maxValues={1}
+                    />
+                </div>
+                <div className={styles.dateTimePicker}>
+                    <DateTimeInput /> 
+                </div>
             </div>
             <ReactFlow
                 nodes={layoutData?.nodes}
