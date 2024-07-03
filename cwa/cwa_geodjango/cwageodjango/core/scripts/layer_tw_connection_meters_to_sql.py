@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from cwageodjango.assets.models import Chamber
+from cwageodjango.assets.models import ConnectionMeter
 from cwageodjango.utilities.models import DMA
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water chamber layer data to sql"
+    help = "Write Thames Water connection meter layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
@@ -22,29 +22,31 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        chamber_layer = ds[layer_index]
+        connection_meter_layer = ds[layer_index]
 
-        new_chambers = []
-        for feature in chamber_layer:
+        new_connection_meters = []
+        for feature in connection_meter_layer:
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
 
-            new_chamber = Chamber(gid=gid, geometry=geom.wkt, geometry_4326=geom_4326)
-            new_chambers.append(new_chamber)
+            new_connection_meter = ConnectionMeter(
+                tag=gid, geometry=geom.wkt, geometry_4326=geom_4326
+            )
+            new_connection_meters.append(new_connection_meter)
 
-            if len(new_chambers) == 100000:
-                Chamber.objects.bulk_create(new_chambers)
-                new_chambers = []
+            if len(new_connection_meters) == 100000:
+                ConnectionMeter.objects.bulk_create(new_connection_meters)
+                new_connection_meters = []
 
         # save the last set of data as it will probably be less than 100000
-        if new_chambers:
-            Chamber.objects.bulk_create(new_chambers)
+        if new_connection_meters:
+            ConnectionMeter.objects.bulk_create(new_connection_meters)
 
-        DMAThroughModel = Chamber.dmas.through
+        DMAThroughModel = ConnectionMeter.dmas.through
         bulk_create_list = []
-        for chamber in Chamber.objects.only("id", "geometry"):
-            wkt = chamber.geometry.wkt
+        for connection_meter in ConnectionMeter.objects.only("id", "geometry"):
+            wkt = connection_meter.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
                 "pk", flat=True
@@ -55,7 +57,9 @@ Large numbers of features will take a long time to save."""
 
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(chamber_id=chamber.pk, dma_id=dma_id)
+                    DMAThroughModel(
+                        connectionmeter_id=connection_meter.pk, dma_id=dma_id
+                    )
                     for dma_id in dma_ids
                 ]
             )

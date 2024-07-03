@@ -38,9 +38,9 @@ OPTSTRING=":f:"
 while getopts ${OPTSTRING} opt; do
     case ${opt} in
         f)
-            python3 main.py layer_stw_dmas_to_sql -f ${OPTARG} -x ${DMA_LAYER_INDEX}
-            python3 main.py layer_stw_mains_to_sql -f ${OPTARG} -x ${PIPES_LAYER_INDEX}
-            python3 main.py layer_stw_hydrants_to_sql -f ${OPTARG} -x ${HYDRANTS_LAYER_INDEX}
+            python3 manage.py layer_stw_dmas_to_sql -f ${OPTARG} -x ${DMA_LAYER_INDEX}
+            python3 manage.py layer_stw_mains_to_sql -f ${OPTARG} -x ${PIPES_LAYER_INDEX}
+            python3 manage.py layer_stw_hydrants_to_sql -f ${OPTARG} -x ${HYDRANTS_LAYER_INDEX}
             ;;
     esac
 done

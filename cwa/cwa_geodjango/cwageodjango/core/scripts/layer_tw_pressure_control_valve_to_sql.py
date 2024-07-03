@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from cwageodjango.assets.models import ConnectionMeter
+from cwageodjango.assets.models import PressureControlValve
 from cwageodjango.utilities.models import DMA
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water connection meter layer data to sql"
+    help = "Write Thames Water pressure control valve layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
@@ -22,31 +22,35 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        connection_meter_layer = ds[layer_index]
+        pressure_control_valve_layer = ds[layer_index]
 
-        new_connection_meters = []
-        for feature in connection_meter_layer:
+        new_pressure_control_valves = []
+        for feature in pressure_control_valve_layer:
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
+            subtype = feature.get("SUBTYPE")
 
-            new_connection_meter = ConnectionMeter(
-                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326
+            new_pressure_control_valve = PressureControlValve(
+                tag=gid, geometry=geom.wkt, geometry_4326=geom_4326, subtype=subtype
             )
-            new_connection_meters.append(new_connection_meter)
+            new_pressure_control_valves.append(new_pressure_control_valve)
 
-            if len(new_connection_meters) == 100000:
-                ConnectionMeter.objects.bulk_create(new_connection_meters)
-                new_connection_meters = []
+            if len(new_pressure_control_valves) == 100000:
+                PressureControlValve.objects.bulk_create(new_pressure_control_valves)
+                new_pressure_control_valves = []
 
         # save the last set of data as it will probably be less than 100000
-        if new_connection_meters:
-            ConnectionMeter.objects.bulk_create(new_connection_meters)
+        if new_pressure_control_valves:
+            PressureControlValve.objects.bulk_create(new_pressure_control_valves)
 
-        DMAThroughModel = ConnectionMeter.dmas.through
+        DMAThroughModel = PressureControlValve.dmas.through
         bulk_create_list = []
-        for connection_meter in ConnectionMeter.objects.only("id", "geometry"):
-            wkt = connection_meter.geometry.wkt
+
+        for pressure_control_valve in PressureControlValve.objects.only(
+            "id", "geometry"
+        ):
+            wkt = pressure_control_valve.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
                 "pk", flat=True
@@ -57,7 +61,9 @@ Large numbers of features will take a long time to save."""
 
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(connectionmeter_id=connection_meter.pk, dma_id=dma_id)
+                    DMAThroughModel(
+                        pressurecontrolvalve_id=pressure_control_valve.pk, dma_id=dma_id
+                    )
                     for dma_id in dma_ids
                 ]
             )

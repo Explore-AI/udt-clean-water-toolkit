@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from cwageodjango.assets.models import PressureControlValve
+from cwageodjango.assets.models import OperationalSite
 from cwageodjango.utilities.models import DMA
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water pressure control valve layer data to sql"
+    help = "Write Thames Water operational site layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
@@ -22,37 +22,33 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        pressure_control_valve_layer = ds[layer_index]
+        operational_site_layer = ds[layer_index]
 
-        new_pressure_control_valves = []
-        for feature in pressure_control_valve_layer:
+        new_operational_sites = []
+        for feature in operational_site_layer:
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
             subtype = feature.get("SUBTYPE")
 
-            new_pressure_control_valve = PressureControlValve(gid=gid,
-                                                    geometry=geom.wkt,
-                                                    geometry_4326=geom_4326,
-                                                    subtype=subtype
-                                                    )
-            new_pressure_control_valves.append(new_pressure_control_valve)
+            new_operational_site = OperationalSite(
+                tag=gid, geometry=geom.wkt, geometry_4326=geom_4326, subtype=subtype
+            )
+            new_operational_sites.append(new_operational_site)
 
-            if len(new_pressure_control_valves) == 100000:
-                PressureControlValve.objects.bulk_create(new_pressure_control_valves)
-                new_pressure_control_valves = []
+            if len(new_operational_sites) == 100000:
+                OperationalSite.objects.bulk_create(new_operational_sites)
+                new_operational_sites = []
 
         # save the last set of data as it will probably be less than 100000
-        if new_pressure_control_valves:
-            PressureControlValve.objects.bulk_create(new_pressure_control_valves)
+        if new_operational_sites:
+            OperationalSite.objects.bulk_create(new_operational_sites)
 
-        DMAThroughModel = PressureControlValve.dmas.through
+        DMAThroughModel = OperationalSite.dmas.through
         bulk_create_list = []
 
-        for pressure_control_valve in PressureControlValve.objects.only(
-            "id", "geometry"
-        ):
-            wkt = pressure_control_valve.geometry.wkt
+        for operational_site in OperationalSite.objects.only("id", "geometry"):
+            wkt = operational_site.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
                 "pk", flat=True
@@ -64,15 +60,14 @@ Large numbers of features will take a long time to save."""
             bulk_create_list.extend(
                 [
                     DMAThroughModel(
-                        pressurecontrolvalve_id=pressure_control_valve.pk, dma_id=dma_id
+                        operationalsite_id=operational_site.pk, dma_id=dma_id
                     )
                     for dma_id in dma_ids
                 ]
             )
-
             if len(bulk_create_list) == 100000:
-                    DMAThroughModel.objects.bulk_create(bulk_create_list)
-                    bulk_create_list = []
+                DMAThroughModel.objects.bulk_create(bulk_create_list)
+                bulk_create_list = []
 
         # save the last set of data as it will probably be less than 100000
         if bulk_create_list:

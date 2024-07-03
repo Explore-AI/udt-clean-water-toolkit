@@ -29,13 +29,15 @@ Large numbers of features will take a long time to save."""
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
-            logger = feature.get("Acoustic_Logger")
-    
 
-            new_hydrant = Hydrant(gid=gid,
-                                  geometry=geom.wkt,
-                                  geometry_4326=geom_4326,
-                                  acoustic_logger=logger)
+            logger = feature.get("acoustic_logger")
+
+            new_hydrant = Hydrant(
+                tag=gid,
+                geometry=geom.wkt,
+                geometry_4326=geom_4326,
+                acoustic_logger=logger,
+            )
             new_hydrants.append(new_hydrant)
 
             if len(new_hydrants) == 100000:
@@ -45,7 +47,6 @@ Large numbers of features will take a long time to save."""
         # save tnew_hydrants of data as it will probably be less than 100000
         if new_hydrants:
             Hydrant.objects.bulk_create(new_hydrants)
-
 
         # get the utility
         utility = Utility.objects.get(name="thames_water")
@@ -71,8 +72,8 @@ Large numbers of features will take a long time to save."""
             )
 
             if len(bulk_create_list) == 100000:
-                    DMAThroughModel.objects.bulk_create(bulk_create_list)
-                    bulk_create_list = []
+                DMAThroughModel.objects.bulk_create(bulk_create_list)
+                bulk_create_list = []
 
         # save the last set of data as it will probably be less than 100000
         if bulk_create_list:

@@ -31,8 +31,7 @@ Large numbers of features will take a long time to save."""
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
 
-            new_logger = Logger(gid=gid, geometry=geom.wkt,
-                                       geometry_4326=geom_4326)
+            new_logger = Logger(tag=gid, geometry=geom.wkt, geometry_4326=geom_4326)
             new_loggers.append(new_logger)
 
             if len(new_loggers) == 100000:
@@ -63,8 +62,8 @@ Large numbers of features will take a long time to save."""
             )
 
             if len(bulk_create_list) == 100000:
-                    DMAThroughModel.objects.bulk_create(bulk_create_list)
-                    bulk_create_list = []
+                DMAThroughModel.objects.bulk_create(bulk_create_list)
+                bulk_create_list = []
 
         # save the last set of data as it will probably be less than 100000
         if bulk_create_list:

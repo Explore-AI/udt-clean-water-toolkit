@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from cwageodjango.assets.models import NetworkMeter
+from cwageodjango.assets.models import ConsumptionMeter
 from cwageodjango.utilities.models import DMA
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water network meter layer data to sql"
+    help = "Write Thames Water consumption meter layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
@@ -22,32 +22,31 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        network_meter_layer = ds[layer_index]
+        consumption_meter_layer = ds[layer_index]
 
-        new_network_meters = []
-        for feature in network_meter_layer:
+        new_consumption_meters = []
+        for feature in consumption_meter_layer:
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
-            subtype = feature.get("SUBTYPE")
 
-            new_network_meter = NetworkMeter(
-                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326, subtype=subtype
+            new_consumption_meter = ConsumptionMeter(
+                tag=gid, geometry=geom.wkt, geometry_4326=geom_4326
             )
-            new_network_meters.append(new_network_meter)
+            new_consumption_meters.append(new_consumption_meter)
 
-            if len(new_network_meters) == 100000:
-                NetworkMeter.objects.bulk_create(new_network_meters)
-                new_network_meters = []
+            if len(new_consumption_meters) == 100000:
+                ConsumptionMeter.objects.bulk_create(new_consumption_meters)
+                new_consumption_meters = []
 
         # save the last set of data as it will probably be less than 100000
-        if new_network_meters:
-            NetworkMeter.objects.bulk_create(new_network_meters)
+        if new_consumption_meters:
+            ConsumptionMeter.objects.bulk_create(new_consumption_meters)
 
-        DMAThroughModel = NetworkMeter.dmas.through
+        DMAThroughModel = ConsumptionMeter.dmas.through
         bulk_create_list = []
-        for network_meter in NetworkMeter.objects.only("id", "geometry"):
-            wkt = network_meter.geometry.wkt
+        for consumption_meter in ConsumptionMeter.objects.only("id", "geometry"):
+            wkt = consumption_meter.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
                 "pk", flat=True
@@ -58,7 +57,9 @@ Large numbers of features will take a long time to save."""
 
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(networkmeter_id=network_meter.pk, dma_id=dma_id)
+                    DMAThroughModel(
+                        consumptionmeter_id=consumption_meter.pk, dma_id=dma_id
+                    )
                     for dma_id in dma_ids
                 ]
             )

@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from cwageodjango.assets.models import ConsumptionMeter
+from cwageodjango.assets.models import Chamber
 from cwageodjango.utilities.models import DMA
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water consumption meter layer data to sql"
+    help = "Write Thames Water chamber layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
@@ -22,32 +22,29 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        consumption_meter_layer = ds[layer_index]
+        chamber_layer = ds[layer_index]
 
-        new_consumption_meters = []
-        for feature in consumption_meter_layer:
+        new_chambers = []
+        for feature in chamber_layer:
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
 
+            new_chamber = Chamber(tag=gid, geometry=geom.wkt, geometry_4326=geom_4326)
+            new_chambers.append(new_chamber)
 
-            new_consumption_meter = ConsumptionMeter(
-                gid=gid, geometry=geom.wkt, geometry_4326=geom_4326
-            )
-            new_consumption_meters.append(new_consumption_meter)
-
-            if len(new_consumption_meters) == 100000:
-                ConsumptionMeter.objects.bulk_create(new_consumption_meters)
-                new_consumption_meters = []
+            if len(new_chambers) == 100000:
+                Chamber.objects.bulk_create(new_chambers)
+                new_chambers = []
 
         # save the last set of data as it will probably be less than 100000
-        if new_consumption_meters:
-            ConsumptionMeter.objects.bulk_create(new_consumption_meters)
+        if new_chambers:
+            Chamber.objects.bulk_create(new_chambers)
 
-        DMAThroughModel = ConsumptionMeter.dmas.through
+        DMAThroughModel = Chamber.dmas.through
         bulk_create_list = []
-        for consumption_meter in ConsumptionMeter.objects.only("id", "geometry"):
-            wkt = consumption_meter.geometry.wkt
+        for chamber in Chamber.objects.only("id", "geometry"):
+            wkt = chamber.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
                 "pk", flat=True
@@ -58,7 +55,7 @@ Large numbers of features will take a long time to save."""
 
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(consumptionmeter_id=consumption_meter.pk, dma_id=dma_id)
+                    DMAThroughModel(chamber_id=chamber.pk, dma_id=dma_id)
                     for dma_id in dma_ids
                 ]
             )

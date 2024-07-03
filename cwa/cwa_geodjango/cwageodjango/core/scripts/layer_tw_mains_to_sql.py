@@ -29,10 +29,9 @@ Large numbers of features will take a long time to save."""
         for feature in pipe_mains_layer:
 
             tag = feature.get("gisid")
-            material = feature.get("material") or "unknown"
-            diameter = feature.get("diameter")
+            material = feature.get("MATERIAL") or "unknown"
+            diameter = feature.get("DIAMETER_mm")
             pipe_type = feature.get("type")
-            pipe_subtype = feature.get("type")
 
             new_pipe_main = PipeMain(
                 tag=tag,
@@ -41,7 +40,6 @@ Large numbers of features will take a long time to save."""
                 material=material,
                 diameter=diameter,
                 pipe_type=pipe_type,
-                pipe_subtype=pipe_subtype,
             )
             new_pipe_mains.append(new_pipe_main)
 

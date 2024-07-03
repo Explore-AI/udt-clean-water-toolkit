@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from cwageodjango.assets.models import OperationalSite
+from cwageodjango.assets.models import NetworkMeter
 from cwageodjango.utilities.models import DMA
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water operational site layer data to sql"
+    help = "Write Thames Water network meter layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
@@ -22,35 +22,32 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        operational_site_layer = ds[layer_index]
+        network_meter_layer = ds[layer_index]
 
-        new_operational_sites = []
-        for feature in operational_site_layer:
+        new_network_meters = []
+        for feature in network_meter_layer:
             gid = feature.get("GISID")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
             subtype = feature.get("SUBTYPE")
 
-            new_operational_site = OperationalSite(gid=gid,
-                                                    geometry=geom.wkt,
-                                                    geometry_4326=geom_4326,
-                                                    subtype=subtype
-                                                    )
-            new_operational_sites.append(new_operational_site)
+            new_network_meter = NetworkMeter(
+                tag=gid, geometry=geom.wkt, geometry_4326=geom_4326, subtype=subtype
+            )
+            new_network_meters.append(new_network_meter)
 
-            if len(new_operational_sites) == 100000:
-                OperationalSite.objects.bulk_create(new_operational_sites)
-                new_operational_sites = []
+            if len(new_network_meters) == 100000:
+                NetworkMeter.objects.bulk_create(new_network_meters)
+                new_network_meters = []
 
         # save the last set of data as it will probably be less than 100000
-        if new_operational_sites:
-            OperationalSite.objects.bulk_create(new_operational_sites)
+        if new_network_meters:
+            NetworkMeter.objects.bulk_create(new_network_meters)
 
-        DMAThroughModel = OperationalSite.dmas.through
+        DMAThroughModel = NetworkMeter.dmas.through
         bulk_create_list = []
-
-        for operational_site in OperationalSite.objects.only("id", "geometry"):
-            wkt = operational_site.geometry.wkt
+        for network_meter in NetworkMeter.objects.only("id", "geometry"):
+            wkt = network_meter.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
                 "pk", flat=True
@@ -61,15 +58,14 @@ Large numbers of features will take a long time to save."""
 
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(
-                        operationalsite_id=operational_site.pk, dma_id=dma_id
-                    )
+                    DMAThroughModel(networkmeter_id=network_meter.pk, dma_id=dma_id)
                     for dma_id in dma_ids
                 ]
             )
+
             if len(bulk_create_list) == 100000:
-                    DMAThroughModel.objects.bulk_create(bulk_create_list)
-                    bulk_create_list = []
+                DMAThroughModel.objects.bulk_create(bulk_create_list)
+                bulk_create_list = []
 
         # save the last set of data as it will probably be less than 100000
         if bulk_create_list:
