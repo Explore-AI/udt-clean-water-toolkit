@@ -7,7 +7,6 @@ export default function useSchematicUi() {
     const [uiParams, setSchematicUiParams] = useState({});
 
     const handleSchematicParams = (newParams, options = {}) => {
-        console.log("qqqqq", newParams)
         if (_isNil(options) || _isEmpty(options)) {
             setSchematicUiParams((prevParams) => ({
                 ...prevParams,

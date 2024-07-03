@@ -23,7 +23,7 @@ docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -r requirements.txt -r d
 
 docker exec -it ${CWA_GEOALCHEMY_CONTAINER_ID} pip install -r requirements.txt
 
-docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../../cwm/
+docker exec -it ${CWA_GEODORM_CONTAINER_ID} pip install -e ../../cwm/
 
 docker exec -it ${CWA_GEODORM_CONTAINER_ID} bash -c "cd /opt/udt/api/api_drf/ && pip install -r requirements.txt -r dev-requirements.txt"
 
