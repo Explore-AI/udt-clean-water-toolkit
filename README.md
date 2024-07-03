@@ -4,7 +4,7 @@ NB: This project is in active development and the toolkit is in the alpha.
 
 ## 1. Overview
 
-Development of a clean water toolkit that combines aspects of a digital twin and clean water modelling/analysis. The project is funded by Ofwat in collaboration with Thames Water and Severn Trent Water. The modules and applications provided in this toolkit are not for production. The toolkit is for POC purposes only.
+Development of a clean water toolkit that combines aspects of a digital twin and clean water modelling/analysis. The project is funded by Ofwat in collaboration with Thames Water and Severn Trent Water. At this stage the modules and applications provided in this toolkit are not for production - the toolkit is for POC purposes only.
 
 ## 2. Toolkit structure
 
