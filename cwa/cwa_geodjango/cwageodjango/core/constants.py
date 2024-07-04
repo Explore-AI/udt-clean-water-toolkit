@@ -31,6 +31,12 @@ PIPE_JUNCTION__NAME = "pipe_junction"
 
 POINT_ASSET__NAME = "point_asset"
 
+LISTENING_POST__NAME = "listening_post"
+
+ISOLATION_VALVE__NAME = "isolation_valve"
+
+BULK_METER__NAME = "bulk_meter"
+
 PIPE_ASSETS__CHOICES = [
     (PIPE_MAIN__NAME, "Pipe Main"),
 ]

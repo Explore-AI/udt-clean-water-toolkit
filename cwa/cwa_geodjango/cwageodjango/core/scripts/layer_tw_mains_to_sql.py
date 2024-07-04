@@ -26,9 +26,20 @@ Large numbers of features will take a long time to save."""
 
         new_pipe_mains = []
 
+        duplicate_gisids = [387658, 8275631, 8274680, 8274681]
+
         for feature in pipe_mains_layer:
 
             tag = feature.get("gisid")
+
+            if tag in duplicate_gisids:
+                if PipeMain.objects.filter(tag=tag).first():
+                    continue
+                else:
+                    x = [pipe.tag for pipe in new_pipe_mains]
+                    if tag in x:
+                        continue
+
             material = feature.get("MATERIAL") or "unknown"
             diameter = feature.get("DIAMETER_mm")
             pipe_type = feature.get("type")
