@@ -84,7 +84,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
         nodes = flatten_concatenation(self.all_pipe_nodes_by_pipe)
 
         query = f"""UNWIND $all_unique_nodes AS node
-         MERGE (n:NetworkNode {{node_key: node.node_key}})
+         MERGE (n:NetworkAsset {{node_key: node.node_key}})
          ON CREATE
              SET n.createdAt = timestamp()
              {self.set_node_labels()}
@@ -105,10 +105,10 @@ class GisToNeo4jCalculator3(GisToGraph2):
         for asset_label, edges in grouped_edges.items():
             query = f"""
             UNWIND $edges AS edge
-            MATCH (n:NetworkNode {{node_key: edge.from_node_key}}),
-                  (m:NetworkNode {{node_key: edge.to_node_key}})
+            MATCH (n:NetworkAsset {{node_key: edge.from_node_key}}),
+                  (m:NetworkAsset {{node_key: edge.to_node_key}})
             MERGE (n)-[r:{asset_label} {{
-                gid: edge.gid,
+                tag: edge.tag,
                 material: edge.material,
                 diameter: edge.diameter,
                 segment_wkt: edge.segment_wkt,
@@ -126,13 +126,13 @@ class GisToNeo4jCalculator3(GisToGraph2):
         )
 
         query = f"""UNWIND $all_unique_nodes AS node
-         MERGE (n:NetworkNode {{node_key: node.node_key}})
+         MERGE (n:NetworkAsset {{node_key: node.node_key}})
          ON CREATE
              SET n.createdAt = timestamp()
              {self.set_node_labels()}
          SET
          {self.set_default_node_properties()},
-         n.gid = node.gid
+         n.tag = node.tag
          RETURN n
          """
 
@@ -143,8 +143,8 @@ class GisToNeo4jCalculator3(GisToGraph2):
 
         query = f"""
             UNWIND $edges AS edge
-            MATCH (n:NetworkNode {{node_key: edge.from_node_key}}),
-                  (m:NetworkNode {{node_key: edge.to_node_key}})
+            MATCH (n:NetworkAsset {{node_key: edge.from_node_key}}),
+                  (m:NetworkAsset {{node_key: edge.to_node_key}})
             MERGE (n)-[r:HAS_ASSET {{
             edge_key: edge.edge_key
                 }}]->(m)
@@ -167,10 +167,10 @@ class GisToNeo4jCalculator3(GisToGraph2):
         db.cypher_query(query, {"dma_nodes": self.dma_data})
 
     def _batch_create_dma_relationships(self):
-        """Batch creates relationships between NetworkNodes and DMA nodes."""
+        """Batch creates relationships between NetworkAssets and DMA nodes."""
         query = f"""
         UNWIND $dma_data AS dma
-        MATCH (d:DMA {{code: dma.code}}), (n:NetworkNode {{node_key: dma.to_node_key}})
+        MATCH (d:DMA {{code: dma.code}}), (n:NetworkAsset {{node_key: dma.to_node_key}})
         MERGE (d)-[:IN_DMA]->(n)
         """
 
@@ -186,10 +186,10 @@ class GisToNeo4jCalculator3(GisToGraph2):
         db.cypher_query(query, {"utility_data": self.utility_data})
 
     def _batch_create_utility_relationships(self):
-        """Batch creates relationships between NetworkNodes and Utility nodes."""
+        """Batch creates relationships between NetworkAssets and Utility nodes."""
         query = f"""
         UNWIND $utility_data AS utility
-        MATCH (u:Utility {{name: utility.name}}), (n:NetworkNode {{node_key: utility.to_node_key}})
+        MATCH (u:Utility {{name: utility.name}}), (n:NetworkAsset {{node_key: utility.to_node_key}})
         MERGE (u)-[:IN_UTILITY]->(n)
         """
         db.cypher_query(query, {"utility_data": self.utility_data})

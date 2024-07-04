@@ -13,7 +13,8 @@ from ..core.constants import (
     POINT_ASSET__NAME,
     GEOS_LINESTRING_TYPES,
     GEOS_POINT_TYPES,
-    NETWORK_NODE__LABEL,
+    NETWORK_ASSET__LABEL,
+    PIPE_ASSET__LABEL,
     PIPE_JUNCTION__LABEL,
     PIPE_END__LABEL,
     POINT_ASSET__LABEL,
@@ -39,7 +40,7 @@ class GisToGraph2:
         self.utility_data = []
         self.utility_names = []  # List of utility names with no duplicates
         self.network_node_labels = [
-            NETWORK_NODE__LABEL,
+            NETWORK_ASSET__LABEL,
             PIPE_JUNCTION__LABEL,
             PIPE_END__LABEL,
             POINT_ASSET__LABEL,
@@ -151,20 +152,20 @@ class GisToGraph2:
         pipe_node_data["node_key"] = self._encode_node_key(
             node["intersection_point_geometry"]
         )
-        pipe_node_data["pipe_gids"] = node["pipe_gids"]
+        pipe_node_data["pipe_tags"] = node["pipe_tags"]
 
         return pipe_node_data
 
     def _merge_pipe_junction_node(self, node):
         pipe_node_data = {}
 
-        pipe_node_data["node_labels"] = [PIPE_JUNCTION__LABEL]
+        pipe_node_data["node_labels"] = [PIPE_ASSET__LABEL, PIPE_JUNCTION__LABEL]
 
         return self._set_pipe_properties(node, pipe_node_data)
 
     def _merge_pipe_end_node(self, node):
         pipe_node_data = {}
-        pipe_node_data["node_labels"] = [PIPE_END__LABEL]
+        pipe_node_data["node_labels"] = [PIPE_ASSET__LABEL, PIPE_END__LABEL]
 
         return self._set_pipe_properties(node, pipe_node_data)
 
@@ -174,7 +175,7 @@ class GisToGraph2:
             node["intersection_point_geometry"]
         )
 
-        pipe_node_data["node_labels"] = [PIPE_JUNCTION__LABEL]
+        pipe_node_data["node_labels"] = [PIPE_ASSET__LABEL, PIPE_JUNCTION__LABEL]
 
         return pipe_node_data
 
@@ -182,7 +183,7 @@ class GisToGraph2:
         asset_node_data = {}
 
         asset_node_data["node_labels"] = [
-            NETWORK_NODE__LABEL,
+            NETWORK_ASSET__LABEL,
             POINT_ASSET__LABEL,
             node["asset_label"],
         ]
@@ -191,7 +192,7 @@ class GisToGraph2:
             node["intersection_point_geometry"], extra_params=[randint(1, 100)]
         )
 
-        asset_node_data["gid"] = node["gid"]
+        asset_node_data["tag"] = node["tag"]
 
         if node["asset_label"] not in self.network_node_labels:
             self.network_node_labels.append(node["asset_label"])
@@ -271,9 +272,9 @@ class GisToGraph2:
         all_pipe_node_data = default_props | pipe_node_data
 
         try:
-            all_pipe_node_data["node_labels"].append(NETWORK_NODE__LABEL)
+            all_pipe_node_data["node_labels"].append(NETWORK_ASSET__LABEL)
         except KeyError:
-            all_pipe_node_data["node_labels"] = [NETWORK_NODE__LABEL]
+            all_pipe_node_data["node_labels"] = [NETWORK_ASSET__LABEL]
 
         return all_pipe_node_data
 
@@ -283,7 +284,7 @@ class GisToGraph2:
         all_asset_node_data = {}
         if asset_node_data:
             all_asset_node_data = default_props | asset_node_data
-            all_asset_node_data["node_labels"].append(NETWORK_NODE__LABEL)
+            all_asset_node_data["node_labels"].append(NETWORK_ASSET__LABEL)
 
         return all_asset_node_data
 
@@ -403,7 +404,7 @@ class GisToGraph2:
                     "from_node_key": from_node["node_key"],
                     "to_node_key": to_node["node_key"],
                     "edge_key": f"{from_node['node_key']}-{to_node['node_key']}",
-                    "gid": base_pipe["gid"],
+                    "tag": base_pipe["tag"],
                     "material": base_pipe["material"],
                     "diameter": base_pipe["diameter"],
                     "asset_name": base_pipe["asset_name"],
@@ -441,7 +442,7 @@ class GisToGraph2:
         base_pipe: dict = {}
 
         base_pipe["id"] = qs_object.pk
-        base_pipe["gid"] = qs_object.gid
+        base_pipe["tag"] = qs_object.tag
         base_pipe["asset_name"] = qs_object.asset_name
         base_pipe["asset_label"] = qs_object.asset_label
         base_pipe["pipe_length"] = qs_object.pipe_length
@@ -460,22 +461,22 @@ class GisToGraph2:
         base_pipe["start_point_geom"] = qs_object.start_point_geom
         base_pipe["end_point_geom"] = qs_object.end_point_geom
 
-        base_pipe["line_start_intersection_gids"] = []
+        base_pipe["line_start_intersection_tags"] = []
         base_pipe["line_start_intersection_ids"] = []
         for line in qs_object.line_start_intersections:
-            base_pipe["line_start_intersection_gids"].extend(line["gids"])
+            base_pipe["line_start_intersection_tags"].extend(line["tags"])
             base_pipe["line_start_intersection_ids"].extend(line["ids"])
 
-        base_pipe["line_start_intersection_gids"].remove(qs_object.gid)
+        base_pipe["line_start_intersection_tags"].remove(qs_object.tag)
         base_pipe["line_start_intersection_ids"].remove(qs_object.id)
 
-        base_pipe["line_end_intersection_gids"] = []
+        base_pipe["line_end_intersection_tags"] = []
         base_pipe["line_end_intersection_ids"] = []
         for line in qs_object.line_end_intersections:
-            base_pipe["line_end_intersection_gids"].extend(line["gids"])
+            base_pipe["line_end_intersection_tags"].extend(line["tags"])
             base_pipe["line_end_intersection_ids"].extend(line["ids"])
 
-        base_pipe["line_end_intersection_gids"].remove(qs_object.gid)
+        base_pipe["line_end_intersection_tags"].remove(qs_object.tag)
         base_pipe["line_end_intersection_ids"].remove(qs_object.id)
 
         # base_pipe["start_geom_latlong"] = qs_object.start_geom_latlong
@@ -487,11 +488,7 @@ class GisToGraph2:
         return base_pipe
 
     def _combine_all_pipe_junctions(self, pipe_qs_object) -> list:
-        return (
-            pipe_qs_object.trunkmain_junctions
-            + pipe_qs_object.distmain_junctions
-            + pipe_qs_object.connmain_junctions
-        )
+        return pipe_qs_object.pipemain_junctions
 
     def _combine_all_point_assets(self, pipe_qs_object) -> list:
         return (
@@ -595,21 +592,21 @@ class GisToGraph2:
 
     @staticmethod
     def _get_non_termini_intersecting_pipes(base_pipe, junctions_with_positions):
-        termini_intersecting_pipe_gids = (
-            base_pipe["line_start_intersection_gids"]
-            + base_pipe["line_end_intersection_gids"]
+        termini_intersecting_pipe_tags = (
+            base_pipe["line_start_intersection_tags"]
+            + base_pipe["line_end_intersection_tags"]
         )
 
         non_termini_intersecting_pipes = [
             pipe
             for pipe in junctions_with_positions
-            if pipe["gid"] not in termini_intersecting_pipe_gids
+            if pipe["tag"] not in termini_intersecting_pipe_tags
         ]
 
         # non_termini_intersecting_pipes.append(
         #     {
         #         "id": 1,
-        #         "gid": 88888888,
+        #         "tag": 88888888,
         #         "distance_from_pipe_start_cm": 73,
         #         "intersection_point_geometry": base_pipe["start_point_geom"],
         #     }
@@ -617,7 +614,7 @@ class GisToGraph2:
         # non_termini_intersecting_pipes.append(
         #     {
         #         "id": 2,
-        #         "gid": 333333,
+        #         "tag": 333333,
         #         "distance_from_pipe_start_cm": 50,
         #         "intersection_point_geometry": base_pipe["start_point_geom"],
         #     }
@@ -625,7 +622,7 @@ class GisToGraph2:
         # non_termini_intersecting_pipes.append(
         #     {
         #         "id": 3,
-        #         "gid": 999999,
+        #         "tag": 999999,
         #         "distance_from_pipe_start_cm": 50,
         #         "intersection_point_geometry": base_pipe["start_point_geom"],
         #     }
@@ -633,7 +630,7 @@ class GisToGraph2:
         # non_termini_intersecting_pipes.append(
         #     {
         #         "id": 4,
-        #         "gid": 77777,
+        #         "tag": 77777,
         #         "distance_from_pipe_start_cm": 73,
         #         "intersection_point_geometry": base_pipe["start_point_geom"],
         #     }
@@ -641,7 +638,7 @@ class GisToGraph2:
         # non_termini_intersecting_pipes.append(
         #     {
         #         "id": 5,
-        #         "gid": 111111,
+        #         "tag": 111111,
         #         "distance_from_pipe_start_cm": 73,
         #         "intersection_point_geometry": base_pipe["start_point_geom"],
         #     }
@@ -649,7 +646,7 @@ class GisToGraph2:
         # non_termini_intersecting_pipes.append(
         #     {
         #         "id": 6,
-        #         "gid": 222222,
+        #         "tag": 222222,
         #         "distance_from_pipe_start_cm": 35,
         #         "intersection_point_geometry": base_pipe["start_point_geom"],
         #     }
@@ -662,25 +659,25 @@ class GisToGraph2:
         # round to int to make distance comparisons more robust
         end_node_distance_cm = round(base_pipe["pipe_length"].cm)
 
-        line_start_intersection_gids = base_pipe["line_start_intersection_gids"]
-        line_end_intersection_gids = base_pipe["line_end_intersection_gids"]
+        line_start_intersection_tags = base_pipe["line_start_intersection_tags"]
+        line_end_intersection_tags = base_pipe["line_end_intersection_tags"]
 
-        start_node_gids = sorted([base_pipe["gid"], *line_start_intersection_gids])
-        end_node_gids = sorted([base_pipe["gid"], *line_end_intersection_gids])
+        start_node_tags = sorted([base_pipe["tag"], *line_start_intersection_tags])
+        end_node_tags = sorted([base_pipe["tag"], *line_end_intersection_tags])
 
-        if not line_start_intersection_gids:
+        if not line_start_intersection_tags:
             start_node_type = PIPE_END__NAME
         else:
             start_node_type = PIPE_JUNCTION__NAME
 
-        if not line_end_intersection_gids:
+        if not line_end_intersection_tags:
             end_node_type = PIPE_END__NAME
         else:
             end_node_type = PIPE_JUNCTION__NAME
 
         nodes_ordered = [
             {
-                "pipe_gids": start_node_gids,
+                "pipe_tags": start_node_tags,
                 "node_type": start_node_type,
                 "distance_from_pipe_start_cm": start_node_distance_cm,
                 "dma_codes": base_pipe["dma_codes"],
@@ -691,7 +688,7 @@ class GisToGraph2:
                 **base_pipe,
             },
             {
-                "pipe_gids": end_node_gids,
+                "pipe_tags": end_node_tags,
                 "node_type": end_node_type,
                 "distance_from_pipe_start_cm": end_node_distance_cm,
                 "dma_codes": base_pipe["dma_codes"],
@@ -712,12 +709,12 @@ class GisToGraph2:
 
         position_index = 0
         for pipe in non_termini_intersecting_pipes:
-            pipe_gid = pipe["gid"]
+            pipe_tag = pipe["tag"]
             # distance_from_start_cm must be an
             # int for sqid compatible hashing
             distance_from_pipe_start_cm = pipe["distance_from_pipe_start_cm"]
 
-            gids = sorted([pipe_gid, base_pipe["gid"]])
+            tags = sorted([pipe_tag, base_pipe["tag"]])
             if distance_from_pipe_start_cm not in distances:
 
                 position_index = bisect.bisect_right(
@@ -729,7 +726,7 @@ class GisToGraph2:
                 nodes_ordered.insert(
                     position_index,
                     {
-                        "pipe_gids": gids,
+                        "pipe_tags": tags,
                         "node_type": PIPE_JUNCTION__NAME,
                         "utility_name": self._get_utility(base_pipe),
                         "distance_from_pipe_start_cm": distance_from_pipe_start_cm,
@@ -745,9 +742,9 @@ class GisToGraph2:
 
                 distances.append(distance_from_pipe_start_cm)
             else:
-                nodes_ordered[position_index]["pipe_gids"].append(pipe_gid)
-                nodes_ordered[position_index]["pipe_gids"] = sorted(
-                    nodes_ordered[position_index]["pipe_gids"]
+                nodes_ordered[position_index]["pipe_tags"].append(pipe_tag)
+                nodes_ordered[position_index]["pipe_tags"] = sorted(
+                    nodes_ordered[position_index]["pipe_tags"]
                 )
 
         return nodes_ordered
