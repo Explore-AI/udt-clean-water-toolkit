@@ -18,9 +18,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         ds_path = kwargs.get("file")
         layer_index = kwargs.get("index")
-        import pdb
 
-        pdb.set_trace()
         utility, _ = Utility.objects.get_or_create(name="severn_trent_water")
 
         # Create a dummy dma as not all assets fall within a dma

@@ -27,16 +27,12 @@ Large numbers of features will take a long time to save."""
         new_pipe_mains = []
 
         for feature in pipe_mains_layer:
-            import pdb
-
-            pdb.set_trace()
             tag = feature.get("gisid")
             geom = feature.geom
             # geom_4326 = feature.get("wkt_geom_4326")
             material = feature.get("material") or "unknown"
             diameter = feature.get("diameter") or -1
-            pipe_type = feature.get("sub_type")
-            pipe_subtype = feature.get("type")
+            pipe_type = feature.get("type")
 
             new_pipe_main = PipeMain(
                 tag=tag,
@@ -45,7 +41,6 @@ Large numbers of features will take a long time to save."""
                 material=material,
                 diameter=diameter,
                 pipe_type=pipe_type,
-                pipe_subtype=pipe_subtype,
             )
             new_pipe_mains.append(new_pipe_main)
 
