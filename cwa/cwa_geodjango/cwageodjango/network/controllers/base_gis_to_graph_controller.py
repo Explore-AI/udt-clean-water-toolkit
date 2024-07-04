@@ -1,9 +1,5 @@
 from django.db.models.query import QuerySet
-from cwageodjango.assets.controllers import (
-    ConnectionMainsController,
-    TrunkMainsController,
-    DistributionMainsController,
-)
+from cwageodjango.assets.controllers import PipeMainsController
 
 
 class BaseGisToGraphController:
