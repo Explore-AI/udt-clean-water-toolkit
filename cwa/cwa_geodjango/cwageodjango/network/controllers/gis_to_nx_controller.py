@@ -1,10 +1,10 @@
 from django.db.models.query import QuerySet
 from ..calculators import GisToNxCalculator
 
-# from cwageodjango.assets.controllers import (
-#     TrunkMainsController,
-#     DistributionMainsController,
-# )
+from cwageodjango.assets.controllers import (
+    TrunkMainsController,
+    DistributionMainsController,
+)
 
 
 class GisToNxController(GisToNxCalculator):

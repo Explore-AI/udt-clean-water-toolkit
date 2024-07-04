@@ -2,11 +2,11 @@ from django.db.models.query import QuerySet
 from ..calculators import GisToNeo4jCalculator
 from ..models import initialise_node_labels
 
-# from cwageodjango.assets.controllers import (
-#     ConnectionMainsController,
-#     TrunkMainsController,
-#     DistributionMainsController
-# )
+from cwageodjango.assets.controllers import (
+    ConnectionMainsController,
+    TrunkMainsController,
+    DistributionMainsController,
+)
 
 
 class GisToNeo4jController(GisToNeo4jCalculator):
