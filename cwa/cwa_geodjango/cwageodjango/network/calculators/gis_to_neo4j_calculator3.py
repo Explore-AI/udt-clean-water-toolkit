@@ -170,8 +170,8 @@ class GisToNeo4jCalculator3(GisToGraph2):
         """Batch creates relationships between NetworkAssets and DMA nodes."""
         query = f"""
         UNWIND $dma_data AS dma
-        MATCH (d:DMA {{code: dma.code}}), (n:NetworkAsset {{node_key: dma.to_node_key}})
-        MERGE (d)-[:IN_DMA]->(n)
+        MATCH (n:NetworkAsset {{node_key: dma.to_node_key}}), (d:DMA {{code: dma.code}})
+        MERGE (n)-[:IN_DMA]->(d)
         """
 
         db.cypher_query(query, {"dma_data": self.dma_data})
@@ -189,8 +189,8 @@ class GisToNeo4jCalculator3(GisToGraph2):
         """Batch creates relationships between NetworkAssets and Utility nodes."""
         query = f"""
         UNWIND $utility_data AS utility
-        MATCH (u:Utility {{name: utility.name}}), (n:NetworkAsset {{node_key: utility.to_node_key}})
-        MERGE (u)-[:IN_UTILITY]->(n)
+        MATCH (n:NetworkAsset {{node_key: utility.to_node_key}}), (u:Utility {{name: utility.name}})
+        MERGE (n)-[:IN_UTILITY]->(u)
         """
         db.cypher_query(query, {"utility_data": self.utility_data})
 

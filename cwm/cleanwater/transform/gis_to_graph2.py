@@ -14,7 +14,7 @@ from ..core.constants import (
     GEOS_LINESTRING_TYPES,
     GEOS_POINT_TYPES,
     NETWORK_ASSET__LABEL,
-    PIPE_ASSET__LABEL,
+    PIPE_NODE__LABEL,
     PIPE_JUNCTION__LABEL,
     PIPE_END__LABEL,
     POINT_ASSET__LABEL,
@@ -159,13 +159,13 @@ class GisToGraph2:
     def _merge_pipe_junction_node(self, node):
         pipe_node_data = {}
 
-        pipe_node_data["node_labels"] = [PIPE_ASSET__LABEL, PIPE_JUNCTION__LABEL]
+        pipe_node_data["node_labels"] = [PIPE_NODE__LABEL, PIPE_JUNCTION__LABEL]
 
         return self._set_pipe_properties(node, pipe_node_data)
 
     def _merge_pipe_end_node(self, node):
         pipe_node_data = {}
-        pipe_node_data["node_labels"] = [PIPE_ASSET__LABEL, PIPE_END__LABEL]
+        pipe_node_data["node_labels"] = [PIPE_NODE__LABEL, PIPE_END__LABEL]
 
         return self._set_pipe_properties(node, pipe_node_data)
 
@@ -175,7 +175,7 @@ class GisToGraph2:
             node["intersection_point_geometry"]
         )
 
-        pipe_node_data["node_labels"] = [PIPE_ASSET__LABEL, PIPE_JUNCTION__LABEL]
+        pipe_node_data["node_labels"] = [PIPE_NODE__LABEL, PIPE_JUNCTION__LABEL]
 
         return pipe_node_data
 

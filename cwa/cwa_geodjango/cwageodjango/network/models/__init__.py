@@ -4,7 +4,7 @@ from .point_asset import PointAsset
 from .pipe_main import PipeMain
 from .in_dma import InDma
 from .in_utility import InUtility
-from .network_node import NetworkNode
+from .network_asset import NetworkAsset
 from .pipe_node import PipeNode
 from .pipe_junction import PipeJunction
 from .has_asset import HasAsset
@@ -21,8 +21,8 @@ def initialise_node_labels():
 
     if node_count == 0:
         remove_all_labels()
-        install_labels(NetworkNode, quiet=False)
-        install_labels(DMA, quiet=False)
-        install_labels(Utility, quiet=False)
-        install_labels(PipeMain, quiet=False)
-        install_labels(PipeNode, quiet=False)
+        install_labels(NetworkAsset)
+        install_labels(DMA)
+        install_labels(Utility)
+        install_labels(PipeMain)
+        install_labels(PipeNode)
