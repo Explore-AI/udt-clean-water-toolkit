@@ -21,6 +21,13 @@ from ..core.constants import (
 )
 
 
+def flatten_concatenation(matrix):
+    flat_list = []
+    for row in matrix:
+        flat_list += row
+    return flat_list
+
+
 class GisToGraph2:
     def __init__(
         self, srid, sqids, processor_count=None, chunk_size=None, neoj4_point=False
@@ -36,9 +43,7 @@ class GisToGraph2:
         self.all_asset_nodes_by_pipe = []
         self.all_pipe_node_to_asset_node_edges = []
         self.dma_data = []
-        self.dma_codes = []  # List of dma_codes with no duplicates
         self.utility_data = []
-        self.utility_names = []  # List of utility names with no duplicates
         self.network_node_labels = [
             NETWORK_ASSET__LABEL,
             PIPE_JUNCTION__LABEL,
@@ -53,6 +58,9 @@ class GisToGraph2:
             self.all_pipe_edges_by_pipe,
             self.all_asset_nodes_by_pipe,
             self.all_pipe_node_to_asset_node_edges,
+            self.dma_data,
+            self.utility_data,
+            all_asset_node_labels,
         ) = list(
             zip(
                 *map(
@@ -62,6 +70,10 @@ class GisToGraph2:
             )
         )
 
+        self.network_node_labels.extend(
+            list(set(flatten_concatenation(all_asset_node_labels)))
+        )
+
     def calc_pipe_point_relative_positions_parallel(self, pipes_qs: list) -> None:
         with Pool(processes=self.processor_count) as p:
             (
@@ -69,6 +81,9 @@ class GisToGraph2:
                 self.all_pipe_edges_by_pipe,
                 self.all_asset_nodes_by_pipe,
                 self.all_pipe_node_to_asset_node_edges,
+                self.dma_data,
+                self.utility_data,
+                all_asset_node_labels,
             ) = zip(
                 *p.imap_unordered(
                     self._map_relative_positions_calc,
@@ -76,6 +91,10 @@ class GisToGraph2:
                     self.chunk_size,
                 )
             )
+
+        self.network_node_labels.extend(
+            list(set(flatten_concatenation(all_asset_node_labels)))
+        )
 
     def _map_relative_positions_calc(self, pipe_qs_object):
 
@@ -113,6 +132,9 @@ class GisToGraph2:
             pipe_edges_by_pipe,
             asset_nodes_by_pipe,
             pipe_node_to_asset_node_edges,
+            dma_data,
+            utility_data,
+            all_asset_node_labels,
         ) = self._set_nodes_and_edges(base_pipe, nodes_ordered)
 
         return (
@@ -120,32 +142,30 @@ class GisToGraph2:
             pipe_edges_by_pipe,
             asset_nodes_by_pipe,
             pipe_node_to_asset_node_edges,
+            dma_data,
+            utility_data,
+            all_asset_node_labels,
         )
 
     def create_dma_data(self, node_data):
 
+        dma_data = []
         for dma_code, dma_name in zip(node_data["dma_codes"], node_data["dma_names"]):
-            if dma_code not in self.dma_codes:
-                self.dma_codes.extend(node_data["dma_codes"])
-                self.dma_data.append(
-                    {
-                        "code": dma_code,
-                        "name": dma_name,
-                        "to_node_key": node_data["node_key"],
-                    }
-                )
-
-    def create_utility_data(self, node_data):
-
-        utility_name = node_data["utility"]
-        if utility_name not in self.utility_names:
-            self.utility_names.extend(utility_name)
-            self.utility_data.append(
+            dma_data.append(
                 {
-                    "name": utility_name,
+                    "code": dma_code,
+                    "name": dma_name,
                     "to_node_key": node_data["node_key"],
                 }
             )
+        return dma_data
+
+    def create_utility_data(self, node_data):
+
+        return {
+            "name": node_data["utility"],
+            "to_node_key": node_data["node_key"],
+        }
 
     def _set_pipe_properties(self, node, pipe_node_data):
 
@@ -194,8 +214,8 @@ class GisToGraph2:
 
         asset_node_data["tag"] = node["tag"]
 
-        if node["asset_label"] not in self.network_node_labels:
-            self.network_node_labels.append(node["asset_label"])
+        # if node["asset_label"] not in self.network_node_labels:
+        #     self.network_node_labels.append(node["asset_label"])
 
         subtype = node.get("subtype")
         if subtype:
@@ -300,6 +320,8 @@ class GisToGraph2:
 
         all_pipe_node_data = {}
         all_asset_node_data = {}
+        all_asset_node_labels = []
+
         for node in cnodes:
 
             pipe_node_data, asset_node_data = self._reconfigure_nodes(node)
@@ -308,17 +330,25 @@ class GisToGraph2:
                 all_pipe_node_data = self._merge_all_pipe_node_props(
                     default_props, pipe_node_data
                 )
-                self.create_utility_data(all_pipe_node_data)
-                self.create_dma_data(all_pipe_node_data)
+                utility_data = self.create_utility_data(all_pipe_node_data)
+                dma_data = self.create_dma_data(all_pipe_node_data)
 
             if asset_node_data:
                 all_asset_node_data = self._merge_all_asset_node_props(
                     default_props, asset_node_data
                 )
-                self.create_utility_data(all_asset_node_data)
-                self.create_dma_data(all_asset_node_data)
 
-        return all_pipe_node_data, all_asset_node_data
+                all_asset_node_labels.append(node["asset_label"])
+                utility_data = self.create_utility_data(all_asset_node_data)
+                dma_data = self.create_dma_data(all_asset_node_data)
+
+        return (
+            all_pipe_node_data,
+            all_asset_node_data,
+            dma_data,
+            utility_data,
+            all_asset_node_labels,
+        )
 
     @staticmethod
     def _create_pipe_node_to_asset_node_edge(pipe_node, asset_nodes_for_pipe_node):
@@ -340,17 +370,14 @@ class GisToGraph2:
     def _set_network_node_and_edge_data(self, consolidated_nodes):
         """
 
-
         consolidated_nodes: list of nodes on a pipe ordered based on
         position from the start of the line. Each element is a list
         contains all pipe_junctions/assets or pipe_ends/assets at the
         same coordinates and this sublist has no order.
 
-        nodes: The pipe_junctions/assets or pipe_ends/assets at the
+        cnodes: The pipe_junctions/assets or pipe_ends/assets at the
         same coordinates. There should only be one pipe_junction or pipe_end node.
-        There can be any number of asset nodes.Has no particular order.
-
-
+        There can be any number of asset nodes. Has no particular order.
 
         """
 
@@ -361,7 +388,13 @@ class GisToGraph2:
         for cnodes in consolidated_nodes:
             asset_nodes.append([])
 
-            pipe_node_data, asset_node_data = self._create_pipe_asset_nodes(cnodes)
+            (
+                pipe_node_data,
+                asset_node_data,
+                dma_data,
+                utility_data,
+                all_asset_node_labels,
+            ) = self._create_pipe_asset_nodes(cnodes)
 
             if pipe_node_data:
                 pipe_nodes.append(pipe_node_data)
@@ -377,7 +410,14 @@ class GisToGraph2:
                 )
             )
 
-        return pipe_nodes, asset_nodes, pipe_asset_edges
+        return (
+            pipe_nodes,
+            asset_nodes,
+            pipe_asset_edges,
+            dma_data,
+            utility_data,
+            all_asset_node_labels,
+        )
 
     def _get_edges_by_pipe(self, base_pipe, nodes_by_pipe):
         edges_by_pipe = []
@@ -424,9 +464,14 @@ class GisToGraph2:
 
         consolidated_nodes = self._consolidate_nodes_on_position(nodes_ordered)
 
-        nodes_by_pipe, asset_nodes_by_pipe, pipe_node_to_asset_node_edges = (
-            self._set_network_node_and_edge_data(consolidated_nodes)
-        )
+        (
+            nodes_by_pipe,
+            asset_nodes_by_pipe,
+            pipe_node_to_asset_node_edges,
+            dma_data,
+            utility_data,
+            all_asset_node_labels,
+        ) = self._set_network_node_and_edge_data(consolidated_nodes)
 
         # create edges between junction and end nodes for the pipe
         edges_by_pipe = self._get_edges_by_pipe(base_pipe, nodes_by_pipe)
@@ -436,6 +481,9 @@ class GisToGraph2:
             edges_by_pipe,
             asset_nodes_by_pipe,
             pipe_node_to_asset_node_edges,
+            dma_data,
+            utility_data,
+            all_asset_node_labels,
         )
 
     def _get_base_pipe_data(self, qs_object) -> dict:

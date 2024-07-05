@@ -164,7 +164,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
         RETURN d
         """
 
-        db.cypher_query(query, {"dma_nodes": self.dma_data})
+        db.cypher_query(query, {"dma_nodes": flatten_concatenation(self.dma_data)})
 
     def _batch_create_dma_relationships(self):
         """Batch creates relationships between NetworkAssets and DMA nodes."""
@@ -174,7 +174,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
         MERGE (n)-[:IN_DMA]->(d)
         """
 
-        db.cypher_query(query, {"dma_data": self.dma_data})
+        db.cypher_query(query, {"dma_data": flatten_concatenation(self.dma_data)})
 
     def _batch_create_utility_nodes(self):
         """Batch creates Utility nodes."""
