@@ -183,7 +183,9 @@ class GisToNeo4jCalculator3(GisToGraph2):
         MERGE (u:Utility {{name: utility.name}})
         RETURN u
         """
-        db.cypher_query(query, {"utility_data": self.utility_data})
+        db.cypher_query(
+            query, {"utility_data": flatten_concatenation(self.utility_data)}
+        )
 
     def _batch_create_utility_relationships(self):
         """Batch creates relationships between NetworkAssets and Utility nodes."""
@@ -192,7 +194,9 @@ class GisToNeo4jCalculator3(GisToGraph2):
         MATCH (n:NetworkAsset {{node_key: utility.to_node_key}}), (u:Utility {{name: utility.name}})
         MERGE (n)-[:IN_UTILITY]->(u)
         """
-        db.cypher_query(query, {"utility_data": self.utility_data})
+        db.cypher_query(
+            query, {"utility_data": flatten_concatenation(self.utility_data)}
+        )
 
     def _map_pipe_connected_asset_relations(self):
 

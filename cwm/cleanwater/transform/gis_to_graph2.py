@@ -158,14 +158,17 @@ class GisToGraph2:
                     "to_node_key": node_data["node_key"],
                 }
             )
+
         return dma_data
 
     def create_utility_data(self, node_data):
 
-        return {
-            "name": node_data["utility"],
-            "to_node_key": node_data["node_key"],
-        }
+        return [
+            {
+                "name": node_data["utility"],
+                "to_node_key": node_data["node_key"],
+            }
+        ]
 
     def _set_pipe_properties(self, node, pipe_node_data):
 
@@ -321,7 +324,8 @@ class GisToGraph2:
         all_pipe_node_data = {}
         all_asset_node_data = {}
         all_asset_node_labels = []
-
+        all_dma_data = []
+        all_utility_data = []
         for node in cnodes:
 
             pipe_node_data, asset_node_data = self._reconfigure_nodes(node)
@@ -332,6 +336,8 @@ class GisToGraph2:
                 )
                 utility_data = self.create_utility_data(all_pipe_node_data)
                 dma_data = self.create_dma_data(all_pipe_node_data)
+                all_utility_data.extend(utility_data)
+                all_dma_data.extend(dma_data)
 
             if asset_node_data:
                 all_asset_node_data = self._merge_all_asset_node_props(
@@ -341,12 +347,14 @@ class GisToGraph2:
                 all_asset_node_labels.append(node["asset_label"])
                 utility_data = self.create_utility_data(all_asset_node_data)
                 dma_data = self.create_dma_data(all_asset_node_data)
+                all_utility_data.extend(utility_data)
+                all_dma_data.extend(dma_data)
 
         return (
             all_pipe_node_data,
             all_asset_node_data,
-            dma_data,
-            utility_data,
+            all_dma_data,
+            all_utility_data,
             all_asset_node_labels,
         )
 
@@ -384,6 +392,9 @@ class GisToGraph2:
         pipe_nodes: list = []
         asset_nodes: list = []
         pipe_asset_edges: list = []
+        all_dma_data: list = []
+        all_utility_data: list = []
+        all_asset_node_labels: list = []
 
         for cnodes in consolidated_nodes:
             asset_nodes.append([])
@@ -393,7 +404,7 @@ class GisToGraph2:
                 asset_node_data,
                 dma_data,
                 utility_data,
-                all_asset_node_labels,
+                asset_node_labels,
             ) = self._create_pipe_asset_nodes(cnodes)
 
             if pipe_node_data:
@@ -410,12 +421,16 @@ class GisToGraph2:
                 )
             )
 
+            all_dma_data.extend(dma_data)
+            all_utility_data.extend(utility_data)
+            all_asset_node_labels.extend(asset_node_labels)
+
         return (
             pipe_nodes,
             asset_nodes,
             pipe_asset_edges,
-            dma_data,
-            utility_data,
+            all_dma_data,
+            all_utility_data,
             all_asset_node_labels,
         )
 
