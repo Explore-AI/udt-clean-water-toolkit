@@ -46,6 +46,7 @@ class GisToGraph2:
         self.utility_data = []
         self.network_node_labels = [
             NETWORK_ASSET__LABEL,
+            PIPE_NODE__LABEL,
             PIPE_JUNCTION__LABEL,
             PIPE_END__LABEL,
             POINT_ASSET__LABEL,
