@@ -15,26 +15,28 @@ class BaseGisToGraphController:
         query_offset, query_limit = self._get_query_offset_limit(pipes_pks)
 
         for offset in range(query_offset, query_limit, self.config.batch_size):
-            limit = offset + self.config.batch_size
+            # limit = offset + self.config.batch_size
             from timeit import default_timer as timer
 
             t0 = timer()
 
             start_pk = pipes_pks[offset]
 
-            print(offset, limit)
+            print(offset, offset + self.config.batch_size)
 
-            qs = list(pipes_qs.filter(pk__gte=start_pk)[:limit])
+            qs = pipes_qs.filter(pk__gte=start_pk)[: self.config.batch_size]
+
+            qs_data = list(qs)
 
             t1 = timer()
             print("qs", t1 - t0)
 
             if self.config.parallel:
                 # defined in child class
-                self.calc_pipe_point_relative_positions_parallel(qs)
+                self.calc_pipe_point_relative_positions_parallel(qs_data)
             else:
                 # defined in child class
-                self.calc_pipe_point_relative_positions(qs)
+                self.calc_pipe_point_relative_positions(qs_data)
 
             qs = []
             t2 = timer()

@@ -623,11 +623,12 @@ class GisToGraph2:
                     base_pipe_geom,
                     coords,
                 )
-
                 data.append(
                     {
                         **junction_or_asset,
-                        "intersection_point_geometry": intersection_geom,
+                        "intersection_point_geometry": GEOSGeometry(
+                            f"POINT ({coords[0]} {coords[1]})", self.srid
+                        ),
                         # distance returned is based on srid and should be in meters.
                         # Convert to cm and round.
                         "distance_from_pipe_start_cm": round(
