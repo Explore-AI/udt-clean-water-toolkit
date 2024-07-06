@@ -5,7 +5,7 @@ from .in_dma import InDma
 from .in_utility import InUtility
 
 
-class NetworkAsset(StructuredNode):
+class NetworkNode(StructuredNode):
     __abstract__ = True
 
     coords_27700 = ArrayProperty(required=True)

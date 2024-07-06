@@ -1,9 +1,9 @@
 from neomodel import IntegerProperty
-from .network_asset import NetworkAsset
+from .network_node import NetworkNode
 from cwageodjango.core.constants import POINT_ASSET__NAME
 
 
-class PointAsset(NetworkAsset):
+class PointAsset(NetworkNode):
     __optional_labels__ = [
         "NetworkOptValve",
         "Hydrant",

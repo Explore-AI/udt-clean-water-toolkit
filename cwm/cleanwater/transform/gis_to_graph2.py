@@ -13,7 +13,7 @@ from ..core.constants import (
     POINT_ASSET__NAME,
     GEOS_LINESTRING_TYPES,
     GEOS_POINT_TYPES,
-    NETWORK_ASSET__LABEL,
+    NETWORK_NODE__LABEL,
     PIPE_NODE__LABEL,
     PIPE_JUNCTION__LABEL,
     PIPE_END__LABEL,
@@ -45,7 +45,7 @@ class GisToGraph2:
         self.dma_data = []
         self.utility_data = []
         self.network_node_labels = [
-            NETWORK_ASSET__LABEL,
+            NETWORK_NODE__LABEL,
             PIPE_NODE__LABEL,
             PIPE_JUNCTION__LABEL,
             PIPE_END__LABEL,
@@ -207,7 +207,7 @@ class GisToGraph2:
         asset_node_data = {}
 
         asset_node_data["node_labels"] = [
-            NETWORK_ASSET__LABEL,
+            NETWORK_NODE__LABEL,
             POINT_ASSET__LABEL,
             node["asset_label"],
         ]
@@ -296,9 +296,9 @@ class GisToGraph2:
         all_pipe_node_data = default_props | pipe_node_data
 
         try:
-            all_pipe_node_data["node_labels"].append(NETWORK_ASSET__LABEL)
+            all_pipe_node_data["node_labels"].append(NETWORK_NODE__LABEL)
         except KeyError:
-            all_pipe_node_data["node_labels"] = [NETWORK_ASSET__LABEL]
+            all_pipe_node_data["node_labels"] = [NETWORK_NODE__LABEL]
 
         return all_pipe_node_data
 
@@ -308,7 +308,7 @@ class GisToGraph2:
         all_asset_node_data = {}
         if asset_node_data:
             all_asset_node_data = default_props | asset_node_data
-            all_asset_node_data["node_labels"].append(NETWORK_ASSET__LABEL)
+            all_asset_node_data["node_labels"].append(NETWORK_NODE__LABEL)
 
         return all_asset_node_data
 
