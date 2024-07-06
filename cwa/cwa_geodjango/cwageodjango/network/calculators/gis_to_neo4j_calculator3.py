@@ -218,8 +218,12 @@ class GisToNeo4jCalculator3(GisToGraph2):
         self._batch_create_utility_relationships()
 
     def _reset_pipe_asset_data(self):
-        self.all_pipe_nodes_by_pipe = []
         self.all_pipe_edges_by_pipe = []
+        self.all_pipe_nodes_by_pipe = []
+        self.all_asset_nodes_by_pipe = []
+        self.all_pipe_node_to_asset_node_edges = []
+        self.dma_data = []
+        self.utility_data = []
 
     def create_neo4j_graph(self) -> None:
 
@@ -228,7 +232,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
         # )
 
         self._map_pipe_connected_asset_relations()
-        self._reset_pipe_asset_data()
+        self.reset_pipe_asset_data()
 
     def _create_neo4j_graph_parallel(self) -> None:
         with ThreadPool(self.config.thread_count) as p:
@@ -236,4 +240,4 @@ class GisToNeo4jCalculator3(GisToGraph2):
                 self._map_pipe_connected_asset_relations,
                 zip(self.all_pipe_edges_by_pipe, self.all_pipe_nodes_by_pipe),
             )
-        self._reset_pipe_asset_data()
+        self.reset_pipe_asset_data()

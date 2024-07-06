@@ -53,6 +53,14 @@ class GisToGraph2:
         ]  # List of network node labels with no duplicates
         self.network_edge_labels = []  # List of pipe edge labels with no duplicates
 
+    def reset_pipe_asset_data(self):
+        self.all_pipe_edges_by_pipe = []
+        self.all_pipe_nodes_by_pipe = []
+        self.all_asset_nodes_by_pipe = []
+        self.all_pipe_node_to_asset_node_edges = []
+        self.dma_data = []
+        self.utility_data = []
+
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         (
             self.all_pipe_nodes_by_pipe,
