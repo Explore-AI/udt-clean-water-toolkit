@@ -177,6 +177,7 @@ class PipeMainsController(GeoDjangoDataManager):
         return {
             "id": "id",
             "tag": "tag",
+            "pipe_type": "pipe_type",
             "geometry": "geometry",
             "wkt": AsWKT("geometry"),
             "material": "material",
@@ -188,7 +189,6 @@ class PipeMainsController(GeoDjangoDataManager):
             "dma_names": ArrayAgg("dmas__name"),
             "utilities": ArrayAgg("dmas__utility__name"),
         }
-
 
     def _generate_mains_subqueries(self):
         pm_qs = self.model.objects.all().order_by("pk")

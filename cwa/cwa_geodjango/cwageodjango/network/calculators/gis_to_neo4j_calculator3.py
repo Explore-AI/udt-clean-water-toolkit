@@ -109,6 +109,7 @@ class GisToNeo4jCalculator3(GisToGraph2):
                   (m:NetworkNode {{node_key: edge.to_node_key}})
             MERGE (n)-[r:{asset_label} {{
                 tag: edge.tag,
+                pipe_type: edge.pipe_type,
                 material: edge.material,
                 diameter: edge.diameter,
                 segment_wkt: edge.segment_wkt,

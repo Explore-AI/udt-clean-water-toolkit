@@ -461,6 +461,7 @@ class GisToGraph2:
                     "to_node_key": to_node["node_key"],
                     "edge_key": f"{from_node['node_key']}-{to_node['node_key']}",
                     "tag": base_pipe["tag"],
+                    "pipe_type": base_pipe["pipe_type"],
                     "material": base_pipe["material"],
                     "diameter": base_pipe["diameter"],
                     "asset_name": base_pipe["asset_name"],
@@ -507,6 +508,7 @@ class GisToGraph2:
 
         base_pipe["id"] = qs_object.pk
         base_pipe["tag"] = qs_object.tag
+        base_pipe["pipe_type"] = qs_object.pipe_type
         base_pipe["asset_name"] = qs_object.asset_name
         base_pipe["asset_label"] = qs_object.asset_label
         base_pipe["pipe_length"] = qs_object.pipe_length
