@@ -22,7 +22,7 @@ def flatten_concatenation(matrix):
     return flat_list
 
 
-class GisToNeo4jCalculator3(GisToGraph2):
+class GisToNeo4jCalculator(GisToGraph2):
     """Create a Neo4J graph of assets from a geospatial network of assets"""
 
     def __init__(self, config):

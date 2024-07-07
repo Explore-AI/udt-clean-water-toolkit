@@ -1,9 +1,9 @@
 from .base_gis_to_graph_controller import BaseGisToGraphController
-from ..calculators import GisToNeo4jCalculator3
+from ..calculators import GisToNeo4jCalculator
 from ..models import initialise_node_labels
 
 
-class GisToNeo4jController3(BaseGisToGraphController, GisToNeo4jCalculator3):
+class GisToNeo4jController(BaseGisToGraphController, GisToNeo4jCalculator3):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
