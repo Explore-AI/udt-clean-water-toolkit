@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from cwageodjango.assets.models import OperationalSite
-from cwageodjango.utilities.models import DMA
+from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
@@ -44,6 +44,9 @@ Large numbers of features will take a long time to save."""
         if new_operational_sites:
             OperationalSite.objects.bulk_create(new_operational_sites)
 
+        # get the utility
+        utility = Utility.objects.get(name="thames_water")
+
         DMAThroughModel = OperationalSite.dmas.through
         bulk_create_list = []
 
@@ -52,12 +55,12 @@ Large numbers of features will take a long time to save."""
         ).only("id", "geometry"):
             wkt = operational_site.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+            dma_ids = DMA.objects.filter(
+                geometry__intersects=wkt, utility=utility
+            ).values_list("pk", flat=True)
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [DMA.objects.get(name=r"undefined", utility=utility).pk]
 
             bulk_create_list.extend(
                 [

@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from cwageodjango.assets.models import NetworkOptValve
-from cwageodjango.utilities.models import DMA
+from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
@@ -46,19 +46,20 @@ Large numbers of features will take a long time to save."""
         if new_network_opt_valves:
             NetworkOptValve.objects.bulk_create(new_network_opt_valves)
 
+        # get the utility
+        utility = Utility.objects.get(name="thames_water")
+
         DMAThroughModel = NetworkOptValve.dmas.through
         bulk_create_list = []
-        for network_opt_valve in NetworkOptValve.objects.filter(
-            dmas__utility__name="thames_water"
-        ).only("id", "geometry"):
+        for network_opt_valve in NetworkOptValve.objects.only("id", "geometry"):
             wkt = network_opt_valve.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+            dma_ids = DMA.objects.filter(
+                geometry__intersects=wkt, utility=utility
+            ).values_list("pk", flat=True)
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [DMA.objects.get(code=r"undefined", utility=utility).pk]
             bulk_create_list.extend(
                 [
                     DMAThroughModel(

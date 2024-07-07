@@ -1,8 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.utils import LayerMapping
 from cwageodjango.assets.models import IsolationValve
-from cwageodjango.utilities.models import DMA
+from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
@@ -44,19 +43,20 @@ Large numbers of features will take a long time to save."""
         if new_isolation_valves:
             IsolationValve.objects.bulk_create(new_isolation_valves)
 
+        # get the utility
+        utility = Utility.objects.get(name="severn_trent_water")
+
         DMAThroughModel = IsolationValve.dmas.through
         bulk_create_list = []
-        for isolation_valve in IsolationValve.objects.filter(
-            dmas__utility__name="severn_trent_water"
-        ).only("id", "geometry"):
+        for isolation_valve in IsolationValve.objects.only("id", "geometry"):
             wkt = isolation_valve.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+            dma_ids = DMA.objects.filter(
+                geometry__intersects=wkt, utility=utility
+            ).values_list("pk", flat=True)
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [DMA.objects.get(name=r"undefined", utility=utility).pk]
 
             bulk_create_list.extend(
                 [

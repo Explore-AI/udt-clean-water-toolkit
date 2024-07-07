@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from cwageodjango.assets.models import PressureControlValve
-from cwageodjango.utilities.models import DMA
+from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
@@ -44,20 +44,23 @@ Large numbers of features will take a long time to save."""
         if new_pressure_control_valves:
             PressureControlValve.objects.bulk_create(new_pressure_control_valves)
 
+        # get the utility
+        utility = Utility.objects.get(name="thames_water")
+
         DMAThroughModel = PressureControlValve.dmas.through
         bulk_create_list = []
 
-        for pressure_control_valve in PressureControlValve.objects.filter(
-            dmas__utility__name="thames_water"
-        ).only("id", "geometry"):
+        for pressure_control_valve in PressureControlValve.objects.only(
+            "id", "geometry"
+        ):
             wkt = pressure_control_valve.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+            dma_ids = DMA.objects.filter(
+                geometry__intersects=wkt, utility=utility
+            ).values_list("pk", flat=True)
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [DMA.objects.get(name=r"undefined", utility=utility).pk]
 
             bulk_create_list.extend(
                 [

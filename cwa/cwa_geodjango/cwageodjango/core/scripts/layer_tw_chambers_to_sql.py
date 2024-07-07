@@ -43,17 +43,17 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = Chamber.dmas.through
         bulk_create_list = []
-        for chamber in Chamber.objects.filter(dmas__utility__name="thames_water").only(
-            "id", "geometry"
-        ):
+        for chamber in Chamber.objects.only("id", "geometry"):
             wkt = chamber.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+            dma_ids = DMA.objects.filter(
+                geometry__intersects=wkt, utility__name="thames_water"
+            ).values_list("pk", flat=True)
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [
+                    DMA.objects.get(code=r"undefined", utility__name="thames_water").pk
+                ]
 
             bulk_create_list.extend(
                 [

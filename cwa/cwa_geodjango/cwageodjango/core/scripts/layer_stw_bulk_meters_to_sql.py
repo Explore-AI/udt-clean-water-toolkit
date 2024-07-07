@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
 from cwageodjango.assets.models import BulkMeter
-from cwageodjango.utilities.models import DMA
+from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
@@ -43,19 +43,20 @@ Large numbers of features will take a long time to save."""
         if new_bulk_meters:
             BulkMeter.objects.bulk_create(new_bulk_meters)
 
+        # get the utility
+        utility = Utility.objects.get(name="severn_trent_water")
+
         DMAThroughModel = BulkMeter.dmas.through
         bulk_create_list = []
-        for bulk_meter in BulkMeter.objects.filter(
-            dmas__utility__name="severn_trent_water"
-        ).only("id", "geometry"):
+        for bulnk_meter in BulkMeter.objects.only("id", "geometry"):
             wkt = bulk_meter.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+            dma_ids = DMA.objects.filter(
+                geometry__intersects=wkt, utility=utility
+            ).values_list("pk", flat=True)
 
             if not dma_ids:
-                dma_ids = [DMA.objects.get(name=r"undefined").pk]
+                dma_ids = [DMA.objects.get(name=r"undefined", utility=utility).pk]
 
             bulk_create_list.extend(
                 [

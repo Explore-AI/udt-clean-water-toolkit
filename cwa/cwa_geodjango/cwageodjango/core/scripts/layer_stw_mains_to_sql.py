@@ -57,15 +57,13 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = PipeMain.dmas.through
         bulk_create_list = []
-        for pipe_main in PipeMain.objects.filter(
-            dmas__utility__name="severn_trent_water"
-        ).only("id", "geometry"):
+        for pipe_main in PipeMain.objects.only("id", "geometry"):
 
             wkt = pipe_main.geometry.wkt
 
-            dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
-                "pk", flat=True
-            )
+            dma_ids = DMA.objects.filter(
+                geometry__intersects=wkt, utility=utility
+            ).values_list("pk", flat=True)
 
             if not dma_ids:
                 dma_ids = [DMA.objects.get(name=r"undefined", utility=utility).pk]
