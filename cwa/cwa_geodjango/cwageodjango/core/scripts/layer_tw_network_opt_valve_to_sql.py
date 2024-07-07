@@ -48,7 +48,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = NetworkOptValve.dmas.through
         bulk_create_list = []
-        for network_opt_valve in NetworkOptValve.objects.only("id", "geometry"):
+        for network_opt_valve in NetworkOptValve.objects.filter(
+            dmas__utility__name="thames_water"
+        ).only("id", "geometry"):
             wkt = network_opt_valve.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(

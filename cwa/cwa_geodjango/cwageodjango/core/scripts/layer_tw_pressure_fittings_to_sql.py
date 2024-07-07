@@ -46,7 +46,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = PressureFitting.dmas.through  # create our intermediary model
         bulk_create_list = []
-        for pressure_fitting in PressureFitting.objects.only("id", "geometry"):
+        for pressure_fitting in PressureFitting.objects.filter(
+            dmas__utility__name="thames_water"
+        ).only("id", "geometry"):
             wkt = pressure_fitting.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(

@@ -67,7 +67,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = PipeMain.dmas.through
         bulk_create_list = []
-        for pipe_main in PipeMain.objects.only("id", "geometry"):
+        for pipe_main in PipeMain.objects.filter(
+            dmas__utility__name="thames_water"
+        ).only("id", "geometry"):
 
             wkt = pipe_main.geometry.wkt
 

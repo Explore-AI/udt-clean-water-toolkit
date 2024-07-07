@@ -46,7 +46,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = ListeningPost.dmas.through
         bulk_create_list = []
-        for listening_post in ListeningPost.objects.only("id", "geometry"):
+        for listening_post in ListeningPost.objects.filter(
+            dmas__utility__name="severn_trent_water"
+        ).only("id", "geometry"):
             wkt = listening_post.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(

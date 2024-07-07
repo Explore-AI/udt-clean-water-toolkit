@@ -45,7 +45,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = ConsumptionMeter.dmas.through
         bulk_create_list = []
-        for consumption_meter in ConsumptionMeter.objects.only("id", "geometry"):
+        for consumption_meter in ConsumptionMeter.objects.filter(
+            dmas__utility__name="thames_water"
+        ).only("id", "geometry"):
             wkt = consumption_meter.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(

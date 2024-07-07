@@ -47,9 +47,9 @@ Large numbers of features will take a long time to save."""
         DMAThroughModel = PressureControlValve.dmas.through
         bulk_create_list = []
 
-        for pressure_control_valve in PressureControlValve.objects.only(
-            "id", "geometry"
-        ):
+        for pressure_control_valve in PressureControlValve.objects.filter(
+            dmas__utility__name="thames_water"
+        ).only("id", "geometry"):
             wkt = pressure_control_valve.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(

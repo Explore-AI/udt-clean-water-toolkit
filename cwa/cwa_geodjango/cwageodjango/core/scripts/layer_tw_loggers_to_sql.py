@@ -44,7 +44,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = Logger.dmas.through
         bulk_create_list = []
-        for logger in Logger.objects.only("id", "geometry"):
+        for logger in Logger.objects.filter(dmas__utility__name="thames_water").only(
+            "id", "geometry"
+        ):
             wkt = logger.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(

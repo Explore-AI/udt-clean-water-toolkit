@@ -45,7 +45,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = ConnectionMeter.dmas.through
         bulk_create_list = []
-        for connection_meter in ConnectionMeter.objects.only("id", "geometry"):
+        for connection_meter in ConnectionMeter.filter(
+            dmas__utility__name="thames_water"
+        ).only("id", "geometry"):
             wkt = connection_meter.geometry.wkt
 
             dma_ids = DMA.objects.filter(geometry__intersects=wkt).values_list(
