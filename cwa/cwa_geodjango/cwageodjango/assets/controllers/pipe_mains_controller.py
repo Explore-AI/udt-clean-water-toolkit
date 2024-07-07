@@ -231,7 +231,7 @@ class PipeMainsController(GeoDjangoDataManager):
             extra_json_fields={"subtype": "subtype"},
         )
         subquery7 = self.generate_dwithin_subquery(
-            NetworkMeter.objects.all(),
+            NetworkMeter.objecpts.all(),
             json_fields,
             extra_json_fields={"subtype": "subtype"},
         )
@@ -249,14 +249,32 @@ class PipeMainsController(GeoDjangoDataManager):
             json_fields,
             extra_json_fields={"acoustic_logger": "acoustic_logger"},
         )
+
         subquery11 = self.generate_dwithin_subquery(
             ConnectionMeter.objects.all(),
             json_fields,
         )
+
         subquery12 = self.generate_dwithin_subquery(
             ConsumptionMeter.objects.all(),
             json_fields,
         )
+
+        subquery13 = self.generate_dwithin_subquery(
+            ListeningPost.objects.all(),
+            json_fields,
+        )
+
+        subquery14 = self.generate_dwithin_subquery(
+            IsolationValve.objects.all(),
+            json_fields,
+        )
+
+        subquery15 = self.generate_dwithin_subquery(
+            BulkMeter.objects.all(),
+            json_fields,
+        )
+
         subqueries = {
             "logger_data": ArraySubquery(subquery3),
             "hydrant_data": ArraySubquery(subquery4),
@@ -265,9 +283,12 @@ class PipeMainsController(GeoDjangoDataManager):
             "network_meter_data": ArraySubquery(subquery7),
             "chamber_data": ArraySubquery(subquery8),
             "operational_site_data": ArraySubquery(subquery9),
-            "network_opt_valve": ArraySubquery(subquery10),
+            "network_opt_valve_data": ArraySubquery(subquery10),
             "connection_meter_data": ArraySubquery(subquery11),
             "consumption_meter_data": ArraySubquery(subquery12),
+            "listening_post_data": ArraySubquery(subquery13),
+            "isolation_valve_data": ArraySubquery(subquery14),
+            "bulk_meter_data": ArraySubquery(subquery15),
         }
         return subqueries
 
