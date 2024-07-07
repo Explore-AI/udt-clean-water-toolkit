@@ -230,8 +230,9 @@ class PipeMainsController(GeoDjangoDataManager):
             json_fields,
             extra_json_fields={"subtype": "subtype"},
         )
+
         subquery7 = self.generate_dwithin_subquery(
-            NetworkMeter.objecpts.all(),
+            NetworkMeter.objects.all(),
             json_fields,
             extra_json_fields={"subtype": "subtype"},
         )
