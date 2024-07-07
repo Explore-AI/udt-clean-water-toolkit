@@ -1,4 +1,3 @@
-from .bulk_meter import BulkMeter
 from .pipe_main import PipeMain
 from .hydrant import Hydrant
 from .logger import Logger
@@ -12,3 +11,4 @@ from .connection_meter import ConnectionMeter
 from .consumption_meter import ConsumptionMeter
 from .listening_post import ListeningPost
 from .isolation_valve import IsolationValve
+from .bulk_meter import BulkMeter

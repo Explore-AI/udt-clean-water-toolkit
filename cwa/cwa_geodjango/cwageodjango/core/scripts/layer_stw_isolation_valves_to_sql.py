@@ -27,7 +27,7 @@ Large numbers of features will take a long time to save."""
 
         new_isolation_valves = []
         for feature in isolation_valve_layer:
-            gid = feature.get("GISID")
+            gid = feature.get("tag")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
 
@@ -58,9 +58,7 @@ Large numbers of features will take a long time to save."""
 
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(
-                        isolation_valve_id=isolation_valve.pk, dma_id=dma_id
-                    )
+                    DMAThroughModel(isolationvalve_id=isolation_valve.pk, dma_id=dma_id)
                     for dma_id in dma_ids
                 ]
             )

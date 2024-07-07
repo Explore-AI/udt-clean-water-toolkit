@@ -30,7 +30,6 @@ while getopts ${OPTSTRING} opt; do
             python3 manage.py layer_tw_network_opt_valve_to_sql -f ${OPTARG} -x ${WNETWORKOPTVALVE_LAYER_INDEX}
             python3 manage.py layer_tw_connection_meters_to_sql -f ${OPTARG} -x ${WCONNECTIONMETER_LAYER_INDEX}
             python3 manage.py layer_tw_consumption_meters_to_sql -f ${OPTARG} -x ${WCONSUMPTIONMETER_LAYER_INDEX}
-            ;;
     esac
 done
 

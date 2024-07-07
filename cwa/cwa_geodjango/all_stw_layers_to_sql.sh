@@ -45,6 +45,5 @@ while getopts ${OPTSTRING} opt; do
             python3 manage.py layer_stw_listening_posts_to_sql -f ${OPTARG} -x ${LISTENINGPOST_LAYER_INDEX}
             python3 manage.py layer_stw_isolation_valves_to_sql -f ${OPTARG} -x ${WATER_ISOLATION_VALVES_LAYER_INDEX}
             python3 manage.py layer_stw_bulk_meters_to_sql -f ${OPTARG} -x ${BULK_METERS_LAYER_INDEX}
-            ;;
     esac
 done

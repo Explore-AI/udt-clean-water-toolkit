@@ -27,17 +27,17 @@ Large numbers of features will take a long time to save."""
         new_pipe_mains = []
 
         for feature in pipe_mains_layer:
-            tag = feature.get("gisid")
+            tag = feature.get("tag")
             geom = feature.geom
-            # geom_4326 = feature.get("wkt_geom_4326")
+            geom_4326 = feature.get("wkt_geom_4326")
             material = feature.get("material") or "unknown"
-            diameter = feature.get("diameter") or -1
+            diameter = feature.get("DIAMETER_mm") or -1
             pipe_type = feature.get("type")
 
             new_pipe_main = PipeMain(
                 tag=tag,
                 geometry=geom.wkt,
-                # geometry_4326=geom_4326,
+                geometry_4326=geom_4326,
                 material=material,
                 diameter=diameter,
                 pipe_type=pipe_type,
