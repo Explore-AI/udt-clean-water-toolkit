@@ -221,7 +221,7 @@ class GisToGraph:
         ]
 
         asset_node_data["node_key"] = self._encode_node_key(
-            node["intersection_point_geometry"], extra_params=[randint(1, 100)]
+            node["intersection_point_geometry"], extra_params=node["dma_ids"]
         )
 
         asset_node_data["tag"] = node["tag"]
