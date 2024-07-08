@@ -1,5 +1,3 @@
-import pdb
-
 from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
 from cwageodjango.config.settings import sqids
@@ -39,11 +37,12 @@ class Convert2Wntr(Neo4j2Wntr):
         offset = 0
         while True:
             results, m = db.cypher_query(
-                f"MATCH (n:NetworkAsset)-[r]-(m:NetworkAsset) "
+                f"MATCH (n)-[r]-(m) "
+                f"WHERE (n:PipeJunction OR n:PipeEnd) AND "
+                f"(m:PipeJunction OR m:PipeEnd) "
                 f"RETURN n, r, m limit {batch_size}"
             )
             records = list(results)
-
             if not records:
                 break
 
