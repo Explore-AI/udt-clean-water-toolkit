@@ -70,7 +70,10 @@ class BaseGisToGraphController:
     # This fn is a candidate to be abstracted out into the NetworkController
     def _get_pipe_and_asset_data(self) -> QuerySet:
 
-        filters = {"dma_codes": self.config.dma_codes}
+        filters = {
+            "utility_names": self.config.utility_names,
+            "dma_codes": self.config.dma_codes,
+        }
 
         pipes_qs: QuerySet = self.get_mains_data(filters)
 

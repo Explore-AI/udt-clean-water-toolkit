@@ -111,31 +111,21 @@ class PipeMainsController(GeoDjangoDataManager):
 
         return subquery
 
-    def generate_termini_subqueries(self, querysets):
-        start_point_subqueries = []
-        end_point_subqueries = []
+    def generate_termini_subqueries(self, qs):
 
-        for qs in querysets:
-            subquery1 = (
-                qs.filter(geometry__touches=OuterRef("start_point_geom"))
-                .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
-                .order_by("pk")
-            )
-
-            subquery2 = (
-                qs.filter(geometry__touches=OuterRef("end_point_geom"))
-                .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
-                .order_by("pk")
-            )
-
-            start_point_subqueries.append(subquery1)
-            end_point_subqueries.append(subquery2)
-
-        subquery_line_start = start_point_subqueries[0].union(
-            *start_point_subqueries[0:]
+        subquery_line_start = (
+            qs.exclude(pk=OuterRef("id"))
+            .filter(geometry__touches=OuterRef("start_point_geom"))
+            .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
+            .order_by("pk")
         )
 
-        subquery_line_end = end_point_subqueries[0].union(*end_point_subqueries[0:])
+        subquery_line_end = (
+            qs.exclude(pk=OuterRef("id"))
+            .filter(geometry__touches=OuterRef("end_point_geom"))
+            .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
+            .order_by("pk")
+        )
 
         return subquery_line_start, subquery_line_end
 
@@ -197,7 +187,7 @@ class PipeMainsController(GeoDjangoDataManager):
 
         subquery_pm_junctions = self.generate_touches_subquery(pm_qs, json_fields)
 
-        termini_subqueries = self.generate_termini_subqueries([pm_qs])
+        termini_subqueries = self.generate_termini_subqueries(pm_qs)
 
         subqueries = {
             "pipemain_junctions": ArraySubquery(subquery_pm_junctions),
@@ -294,13 +284,22 @@ class PipeMainsController(GeoDjangoDataManager):
         return subqueries
 
     @staticmethod
+    def _filter_by_utility(qs, filters):
+        utility_names = filters.get("utility_names")
+
+        if not utility_names:
+            return qs
+
+        return qs.filter(dmas__utility__name__in=utility_names)
+
+    @staticmethod
     def _filter_by_dma(qs, filters):
         dma_codes = filters.get("dma_codes")
 
         if not dma_codes:
             return qs
 
-        return qs.filter(dmas__code__in=filters.get("dma_codes"))
+        return qs.filter(dmas__code__in=dma_codes)
 
     def get_pipe_point_relation_queryset(self, filters):
         mains_intersection_subqueries = self._generate_mains_subqueries()
@@ -309,6 +308,7 @@ class PipeMainsController(GeoDjangoDataManager):
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
         qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
 
+        qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
 
         qs = qs.annotate(
