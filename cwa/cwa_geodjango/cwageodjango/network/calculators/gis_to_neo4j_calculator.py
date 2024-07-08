@@ -1,7 +1,7 @@
 from multiprocessing.pool import ThreadPool
 from neomodel import db
 from collections import defaultdict
-from cleanwater.transform import GisToGraph2
+from cleanwater.transform import GisToGraph
 from cwageodjango.core.constants import (
     PIPE_JUNCTION__NAME,
     PIPE_END__NAME,
@@ -22,7 +22,7 @@ def flatten_concatenation(matrix):
     return flat_list
 
 
-class GisToNeo4jCalculator(GisToGraph2):
+class GisToNeo4jCalculator(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial network of assets"""
 
     def __init__(self, config):
