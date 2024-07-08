@@ -48,7 +48,7 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = BulkMeter.dmas.through
         bulk_create_list = []
-        for bulnk_meter in BulkMeter.objects.only("id", "geometry"):
+        for bulnk_meter in BulkMeter.objects.filter(dmas=None).only("id", "geometry"):
             wkt = bulk_meter.geometry.wkt
 
             dma_ids = DMA.objects.filter(

@@ -48,7 +48,9 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = IsolationValve.dmas.through
         bulk_create_list = []
-        for isolation_valve in IsolationValve.objects.only("id", "geometry"):
+        for isolation_valve in IsolationValve.objects.filter(dmas=None).only(
+            "id", "geometry"
+        ):
             wkt = isolation_valve.geometry.wkt
 
             dma_ids = DMA.objects.filter(

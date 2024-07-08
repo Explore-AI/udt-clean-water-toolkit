@@ -53,7 +53,7 @@ Large numbers of features will take a long time to save."""
         DMAThroughModel = Hydrant.dmas.through
         bulk_create_list = []
 
-        for hydrant in Hydrant.objects.only("id", "geometry"):
+        for hydrant in Hydrant.objects.filter(dmas=None).only("id", "geometry"):
             wkt = hydrant.geometry.wkt
 
             dma_ids = DMA.objects.filter(

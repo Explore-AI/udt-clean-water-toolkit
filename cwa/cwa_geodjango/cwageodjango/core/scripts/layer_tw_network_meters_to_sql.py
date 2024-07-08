@@ -49,7 +49,7 @@ Large numbers of features will take a long time to save."""
 
         DMAThroughModel = NetworkMeter.dmas.through
         bulk_create_list = []
-        for network_meter in NetworkMeter.only("id", "geometry"):
+        for network_meter in NetworkMeter.objects.only("id", "geometry"):
             wkt = network_meter.geometry.wkt
 
             dma_ids = DMA.objects.filter(
