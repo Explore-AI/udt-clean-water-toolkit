@@ -50,9 +50,7 @@ Large numbers of features will take a long time to save."""
         DMAThroughModel = OperationalSite.dmas.through
         bulk_create_list = []
 
-        for operational_site in OperationalSite.objects.filter(
-            dmas__utility__name="thames_water"
-        ).only("id", "geometry"):
+        for operational_site in OperationalSite.objects.only("id", "geometry"):
             wkt = operational_site.geometry.wkt
 
             dma_ids = DMA.objects.filter(
