@@ -26,6 +26,9 @@ class PipesAndAssets(GeoDjangoDataManager):
         "tag",
     ]  # should not include the geometry column as per convention
 
+    def __init__(self, method):
+        self.method = method
+
     def generate_dwithin_subquery(
         self,
         qs,
@@ -189,8 +192,8 @@ class PipesAndAssets(GeoDjangoDataManager):
             "utilities": ArrayAgg("dmas__utility__name"),
         }
 
-    def _generate_mains_subqueries(self):
-        pm_qs = self.model.objects.all().order_by("pk")
+    def _generate_mains_subqueries(self, mains_qs):
+        pm_qs = mains_qs.order_by("pk")
 
         json_fields = self.get_pipe_json_fields()
 
@@ -301,17 +304,19 @@ class PipesAndAssets(GeoDjangoDataManager):
 
         return qs.filter(dmas__code__in=filters.get("dma_codes"))
 
-    def get_pipe_point_relation_queryset(self, pipe_models, asset_models, filters):
+    def get_pipe_point_relation_queryset(
+        self, mains_qs, mains_qs_name, asset_models_qs, filters
+    ):
         mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
+        qs = mains_qs.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_dma(qs, filters)
 
         qs = qs.annotate(
-            asset_name=Value(self.model.AssetMeta.asset_name),
+            asset_name=Value(mains_qs_name),
             asset_label=Value(qs.model.__name__),
             pipe_length=Length("geometry"),
             wkt=AsWKT("geometry"),
