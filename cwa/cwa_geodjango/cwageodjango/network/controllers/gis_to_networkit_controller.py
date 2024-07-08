@@ -1,12 +1,10 @@
 from django.db.models.query import QuerySet
 import networkit as nk
-from ..calculators import GisToNkCalculator
-from cwageodjango.assets.controllers import (
-    PipeMainsController,
-)
+from cleanwater.transform import GisToNk
+from cwageodjango.assets.controllers import PipeMainsController
 
 
-class GisToNkController(GisToNkCalculator):
+class GisToNkController(GisToNk):
     """
     Create a NetworKit graph of assets from a geospatial
     network of assets
@@ -53,6 +51,7 @@ class GisToNkController(GisToNkCalculator):
         Writes the network graph to a specified GraphML file using the NetworkKit library.
         """
         nk.writeGraph(self.G, self.config.outputfile, nk.Format.GML)
+
     def _get_query_offset_limit(self, pipes_qs):
         """
         Calculate query offset and limit for batching.

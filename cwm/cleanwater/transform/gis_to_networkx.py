@@ -2,19 +2,19 @@ import json
 from networkx import Graph
 import networkx as nx
 from cleanwater.transform import GisToGraph
-from cwageodjango.config.settings import sqids
 import matplotlib.pyplot as plt
 import geopandas as gpd
 from shapely import wkt
 from shapely.geometry import Point
 
 
-class GisToNxCalculator(GisToGraph):
+class GisToNx(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, config):
+    def __init__(self, config, sqids):
         self.config = config
+        self.sqids = sqids
         self.G: Graph = Graph()
 
         self.all_edges_by_pipe = []

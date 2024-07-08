@@ -1,13 +1,8 @@
 from django.db.models.query import QuerySet
-from ..calculators import GisToNxCalculator
-
-# from cwageodjango.assets.controllers import (
-#     TrunkMainsController,
-#     DistributionMainsController,
-# )
+from cleanwater.transform import GisToNx
 
 
-class GisToNxController(GisToNxCalculator):
+class GisToNxController(GisToNx):
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 

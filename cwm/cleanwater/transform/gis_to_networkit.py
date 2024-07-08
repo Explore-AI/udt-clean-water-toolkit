@@ -1,13 +1,15 @@
 import networkit as nk
-from cleanwater.transform import GisToGraph
-from cwageodjango.config.settings import sqids
+from .gis_to_graph import GisToGraph
 
-class GisToNkCalculator(GisToGraph):
+
+class GisToNk(GisToGraph):
     """
     Calculate network graph from geospatial asset data.
     """
-    def __init__(self, config):
+
+    def __init__(self, config, sqids):
         self.config = config
+        self.sqids = sqids
         self.G: Graph = nk.Graph(edgesIndexed=True)
         self.edgelabel = self.G.attachEdgeAttribute("label", str)
         self.edgegid = self.G.attachEdgeAttribute("gid", str)
@@ -51,10 +53,10 @@ class GisToNkCalculator(GisToGraph):
         node_index = {}
 
         for i, pipe in enumerate(self.all_edges_by_pipe):
-            from_node_key = pipe[0]['from_node_key']
-            to_node_key = pipe[0]['to_node_key']
-            edge_gid = pipe[0]['gid']
-            
+            from_node_key = pipe[0]["from_node_key"]
+            to_node_key = pipe[0]["to_node_key"]
+            edge_gid = pipe[0]["gid"]
+
             # Check if from_node_key exists in node_index, if not, assign a new index
             if from_node_key not in self.node_index:
                 self.node_index[from_node_key] = len(self.node_index) + 1
@@ -69,16 +71,16 @@ class GisToNkCalculator(GisToGraph):
             self.add_pipe(from_node_id, to_node_id)
 
             # Add edge attributes
-            self.edgelabel[from_node_id, to_node_id] = pipe[0]['asset_label']
+            self.edgelabel[from_node_id, to_node_id] = pipe[0]["asset_label"]
             self.edgegid[from_node_id, to_node_id] = str(edge_gid)
 
             for n in self.all_nodes_by_pipe[i]:
-                if n.get('node_key') == from_node_key:
-                    self.nodelabel[from_node_id] = n.get('node_labels')[-1]
-                elif n.get('node_key') == to_node_key:
-                    self.nodelabel[to_node_id] = n.get('node_labels')[-1]
+                if n.get("node_key") == from_node_key:
+                    self.nodelabel[from_node_id] = n.get("node_labels")[-1]
+                elif n.get("node_key") == to_node_key:
+                    self.nodelabel[to_node_id] = n.get("node_labels")[-1]
             # Add node labels
             # Assuming asset_label is the label for both from_node and to_node
-            asset_label = pipe[0]['asset_label']
+            asset_label = pipe[0]["asset_label"]
             self.nodelabel[from_node_id] = asset_label
             self.nodelabel[to_node_id] = asset_label
