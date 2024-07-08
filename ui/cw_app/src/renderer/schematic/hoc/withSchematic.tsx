@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageProps } from '../types/types';
+import { PageProps } from '../../core/types/types';
 import useSchematicUi, { SchematicUiContext } from '../hooks/useSchematicUi';
 
 const withSchematic = (PageComponent: React.FC<PageProps>) => {

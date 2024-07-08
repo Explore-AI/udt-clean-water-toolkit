@@ -13,6 +13,8 @@ class PointAsset(NetworkNode):
         "Chamber",
         "PressureFitting",
         "PressureControlValve",
+        "ConnectionMeter",
+        "ConsumptionMeter",
     ]
 
     gid = IntegerProperty(required=True, index=True)

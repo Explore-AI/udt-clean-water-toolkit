@@ -10,7 +10,7 @@ const useGetItems = (queryKey) => {
         enabled: false
     })
 
-    return { items: queryValues.data?.items, pagination: queryValues.data?.pagination, setFilterParams }
+    return { items: queryValues.data?.items, pagination: queryValues.data?.pagination, setFilterParams, ...queryValues }
 }
 
 export default useGetItems

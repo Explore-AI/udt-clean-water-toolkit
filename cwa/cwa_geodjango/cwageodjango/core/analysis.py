@@ -2,10 +2,9 @@ import argparse
 from cwageodjango.core.conf import AppConf
 from cwageodjango.network.controllers import (
     GisToNeo4jController,
-    GisToNeo4jController2,
-    GisToNeo4jController3,
     GisToNxController,
     GisToNkController,
+    InpToNeo4jController,
     Convert2Wntr,
     Neo4jToNkController,
     AcousticLoggerCoverage,
@@ -48,22 +47,6 @@ class Analysis(AppConf):
         else:
             gis_to_neo4j.create_network()
 
-    def cleanwater_gis2neo4j2(self) -> None:
-        gis_to_neo4j2 = GisToNeo4jController2(self.validated_config)
-
-        if self.validated_config.parallel:
-            gis_to_neo4j2.create_network_parallel()
-        else:
-            gis_to_neo4j2.create_network()
-
-    def cleanwater_gis2neo4j3(self) -> None:
-        gis_to_neo4j2 = GisToNeo4jController3(self.validated_config)
-
-        if self.validated_config.parallel:
-            gis_to_neo4j2.create_network_parallel()
-        else:
-            gis_to_neo4j2.create_network()
-
     def cleanwater_gis2networkit(self) -> None:
         gis_to_nk = GisToNkController(self.validated_config)
         gis_to_nk.create_network()
@@ -97,6 +80,10 @@ class Analysis(AppConf):
         convert2wntr.convert()
         convert2wntr.wntr_to_json()
 
+    def inp_to_neo4j(self) -> None:
+        convert2neo4j = InpToNeo4jController(self.validated_config)
+        convert2neo4j.convert()
+
     def neo4j_to_networkit_graphml(self) -> None:
         convert2networkit = Neo4jToNkController(self.validated_config)
         convert2networkit.convert()
@@ -111,13 +98,12 @@ class Analysis(AppConf):
         return {
             "gis2nx": self.cleanwater_gis2nx,
             "gis2neo4j": self.cleanwater_gis2neo4j,
-            "gis2neo4j2": self.cleanwater_gis2neo4j2,
-            "gis2neo4j3": self.cleanwater_gis2neo4j3,
             "gis2nk": self.cleanwater_gis2networkit,
             "neo4j2wntrinp": self.neo4j_to_wntr_inp,
             "neo4j2wntrjson": self.neo4j_to_wntr_json,
             "neo4j2networkitgraphml": self.neo4j_to_networkit_graphml,
             "networkcoverage": self.calc_acoustic_coverage,
+            "inp2neo4j": self.inp_to_neo4j,
         }
 
     @property

@@ -2,31 +2,29 @@
 DATA_PATH=/tmp/CW_20231108_060001.gdb
 
 if [ -n "$1" ];then
-	DATA_PATH=$1
+  DATA_PATH=$1
 fi
 
 FORMAT=GPKG
 if [ -n "$2" ];then
-	DATA_PATH=$2
+  DATA_PATH=$2
 fi
 
 #Export directly to PostgreSQL
 if [[ ${FORMAT} == 'GPKG' ]];then
-   export EXPORT_FORMAT='-f GPKG data.gpkg'
-else
-   export EXPORT_FORMAT='-f PostgreSQL "PG:dbname='${DATABASE}' host=${DB_HOST:-localhost} port=${DB_PORT:-5432} user='${DB_USER}' password='${DB_PASSWORD}' sslmode=allow active_schema=${SCHEMA:-public}"'
+   export EXPORT_FORMAT='-f GPKG /tmp/data.gpkg'
 fi
 # Import master DMA into geopackage
 directory=$(dirname "$DATA_PATH")
 pushd "${directory}" || exit
-if [ -f DMA.csv ];then
-  csv_import="ogr2ogr -progress --config PG_USE_COPY YES ${EXPORT_FORMAT}  -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "dma" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 DMA.csv -oo AUTODETECT_TYPE=YES --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid --config OGR-SQLITE-CACHE 2000 --config OGR_SQLITE_SYNCHRONOUS OFF --config OGR_GPKG_NUM_THREADS ALL_CPUS"
+if [ -f dma.csv ];then
+  csv_import="ogr2ogr -progress --config PG_USE_COPY YES ${EXPORT_FORMAT}  -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "dma" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 dma.csv -oo AUTODETECT_TYPE=YES --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid --config OGR-SQLITE-CACHE 2000 --config OGR_SQLITE_SYNCHRONOUS OFF --config OGR_GPKG_NUM_THREADS ALL_CPUS"
   eval "$csv_import"
 fi
 
 # Define columns needed to be converted for each column. Shape is the name of the geom column
 declare -A dictionary
-array=(wChamber wDistributionMain wHydrant wLogger wNetworkMeter wNetworkOptValve wOperationalSite wPressureContValve wPressureFitting wTrunkMain)
+array=(wChamber wDistributionMain wHydrant wLogger wNetworkMeter wNetworkOptValve wOperationalSite wPressureContValve wPressureFitting wTrunkMain wConnectionMain)
 
 # Define columns needed to be converted for each column. Shape is the name of the geom column
 dictionary["wChamber"]="GISID,SHORTGISID,shape"
@@ -39,14 +37,16 @@ dictionary["wOperationalSite"]="GISID,LIFECYCLESTATUS,SUBTYPECD,OPTSITEOWNER,COR
 dictionary["wPressureContValve"]="GISID,LIFECYCLESTATUS,SUBTYPECD,VALVEOWNER,CONTROLREF,SUPPLYPURPOSE,NORMALPOSITION,VALVEFACE,VALVECONTMETHOD,SYMBOLCODE,shape"
 dictionary["wPressureFitting"]="GISID,LIFECYCLESTATUS,SUBTYPECD,NETWORKCODE,shape"
 dictionary["wTrunkMain"]="GISID,SUBTYPECD,LIFECYCLESTATUS,MEASUREDLENGTH,MAINOWNER,WATERTRACEWEIGHT,OPERATINGPRESSURE,PROTECTION,NETWORKCODE,WATERTYPE,MATERIAL,OPERATION,PRESSURETYPE,HYDARULICFAMILYTYPE,shape"
+dictionary["wConnectionMain"]="GISID,SUBTYPECD,LIFECYCLESTATUS,MEASUREDLENGTH,WATERTRACEWEIGHT,MAINOWNER,MATERIAL,shape"
 # Generate the ogr2ogr command based on key value pairs
 for layer in "${!dictionary[@]}"; do
+  table_name=${layer,,}
     # It seems line layers are stored as multi curve and others can be stored as multi
-	if [[ $layer == 'wDistributionMain' || $layer == 'wTrunkMain' ]];then
-		GEOM_TYPE='CONVERT_TO_LINEAR'
-	else
-		GEOM_TYPE='PROMOTE_TO_MULTI'
-	fi
+  if [[ $layer == 'wDistributionMain' || $layer == 'wTrunkMain' || $layer == 'wConnectionMain' ]];then
+    GEOM_TYPE='LINESTRING'
+  else
+    GEOM_TYPE='POINT'
+  fi
     # Split the string stored in dictionary[$layer] by comma
     IFS=',' read -ra values <<< "${dictionary[$layer]}"
 
@@ -62,28 +62,32 @@ for layer in "${!dictionary[@]}"; do
     done
 
     # SQL statement to select desired columns and also convert to wkt
-    final_sql="SELECT $sql_statement,CAST(ST_AsText(ST_Transform("shape",4326)) AS TEXT) wkt_geom_4326 FROM $layer"
+    if [[ $layer == 'wDistributionMain' || $layer == 'wTrunkMain' || $layer == 'wConnectionMain' ]];then
+      final_sql="SELECT $sql_statement,'$layer' as type,CAST(ST_AsText(ST_Transform("shape",4326)) AS TEXT) wkt_geom_4326 FROM $layer"
+    else
+      final_sql="SELECT $sql_statement,CAST(ST_AsText(ST_Transform("shape",4326)) AS TEXT) wkt_geom_4326 FROM $layer"
+    fi
+
 
     # Final SQL command
-	echo -e "\e[32m ---------------------------------------------------- \033[0m"
+    echo -e "\e[32m ---------------------------------------------------- \033[0m"
     echo -e "[Data Conversion] Converting FGDB layer : \e[1;31m ${layer} \033[0m"
-    command="ogr2ogr -progress --config PG_USE_COPY YES ${EXPORT_FORMAT}  ${DATA_PATH} ${layer} -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "${layer}" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 -nlt ${GEOM_TYPE} -dialect sqlite -sql \"$final_sql\" --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid --config OGR-SQLITE-CACHE 2000 --config OGR_SQLITE_SYNCHRONOUS OFF --config OGR_GPKG_NUM_THREADS ALL_CPUS"
-
+    if [[ $layer == 'wDistributionMain' || $layer == 'wTrunkMain' ]];then
+      command="ogr2ogr -progress --config PG_USE_COPY YES ${EXPORT_FORMAT}  ${DATA_PATH} ${layer} -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -addfields -nln pipes -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 -nlt ${GEOM_TYPE} -dialect sqlite -sql \"$final_sql\" --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid --config OGR-SQLITE-CACHE 2000 --config OGR_SQLITE_SYNCHRONOUS OFF --config OGR_GPKG_NUM_THREADS ALL_CPUS"
+    else
+      command="ogr2ogr -progress --config PG_USE_COPY YES ${EXPORT_FORMAT}  ${DATA_PATH} ${layer} -overwrite -lco GEOMETRY_NAME=geom -lco FID=gid -nln "${table_name}" -s_srs EPSG:27700 -t_srs EPSG:27700 -skipfailures -gt 300000 -nlt ${GEOM_TYPE} -dialect sqlite -sql \"$final_sql\" --config OGR_ORGANIZE_POLYGONS SKIP -forceNullable -makevalid --config OGR-SQLITE-CACHE 2000 --config OGR_SQLITE_SYNCHRONOUS OFF --config OGR_GPKG_NUM_THREADS ALL_CPUS"
+    fi
     # evaluate the ogr2ogr command
     eval "$command"
+    if [[ $layer == 'wDistributionMain' || $layer == 'wTrunkMain' || $layer == 'wConnectionMain' ]];then
+      geom_update="update ${table_name} set wkt_geom_4326 = ST_AsText(ST_Transform(geom,4326))"
+      update_geom_sql="ogrinfo -dialect sqlite -sql \"$geom_update\" /tmp/data.gpkg"
+      eval $update_geom_sql
+    fi
+    if [[ $layer == 'wHydrant' || $layer == 'wNetworkOptValve' ]];then
+      update_table="alter table ${table_name} ADD COLUMN acoustic_logger boolean DEFAULT FALSE"
+      update_table_sql="ogrinfo -dialect sqlite -sql \"$update_table\" /tmp/data.gpkg"
+      eval $update_table_sql
+    fi
 done
 
-# Cleanup data
-# For geopackage you might need to run the following SELECT EnableGpkgAmphibiousMode();
-cat > cleanup.sql <<EOF
-SELECT load_extension("mod_spatialite");
-EOF
-
-# Check if SQLite3 is installed to run SQL against geopackage
-# Also Install the following apt update;apt install -y sqlite3 libsqlite3-mod-spatialite
-if dpkg -l | grep -q "sqlite3"; then
-    echo "Running cleanup.sql script to sanitize the layers"
-	#sqlite3 data.gpkg < cleanup.sql
-else
-    echo "Geopackage is not cleaned, please install SQLITE3 and run the script"
-fi

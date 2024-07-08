@@ -12,6 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y \
         binutils \
         libproj-dev \
         gdal-bin \
+        build-essential \
         libgdal-dev
 
 RUN mkdir -p /opt/udt/cwa/cwa_geoalchemy

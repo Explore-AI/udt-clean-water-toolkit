@@ -21,8 +21,8 @@ def initialise_node_labels():
 
     if node_count == 0:
         remove_all_labels()
-        install_labels(NetworkNode, quiet=False)
-        install_labels(DMA, quiet=False)
-        install_labels(Utility, quiet=False)
-        install_labels(PipeMain, quiet=False)
-        install_labels(PipeNode, quiet=False)
+        install_labels(NetworkNode)
+        install_labels(DMA)
+        install_labels(Utility)
+        install_labels(PipeMain)
+        install_labels(PipeNode)

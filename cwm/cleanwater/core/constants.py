@@ -3,6 +3,7 @@ PIPE_JUNCTION__NAME = "pipe_junction"
 POINT_ASSET__NAME = "point_asset"
 
 NETWORK_NODE__LABEL = "NetworkNode"
+PIPE_NODE__LABEL = "PipeNode"
 PIPE_JUNCTION__LABEL = "PipeJunction"
 PIPE_END__LABEL = "PipeEnd"
 POINT_ASSET__LABEL = "PointAsset"
