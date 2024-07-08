@@ -26,9 +26,6 @@ class PipesAndAssets(GeoDjangoDataManager):
         "tag",
     ]  # should not include the geometry column as per convention
 
-    def __init__(self, pipe_models, asset_models):
-        pass
-
     def generate_dwithin_subquery(
         self,
         qs,
@@ -304,7 +301,7 @@ class PipesAndAssets(GeoDjangoDataManager):
 
         return qs.filter(dmas__code__in=filters.get("dma_codes"))
 
-    def get_pipe_point_relation_queryset(self, filters):
+    def get_pipe_point_relation_queryset(self, pipe_models, asset_models, filters):
         mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
 
