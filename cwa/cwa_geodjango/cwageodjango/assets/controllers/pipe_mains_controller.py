@@ -334,12 +334,14 @@ class PipeMainsController(GeoDjangoDataManager):
 
         qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
 
+        qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
         return qs.count()
 
     def get_mains_pks(self, filters):
         qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
 
+        qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
         return list(qs.values_list("pk", flat=True).order_by("pk"))
 
