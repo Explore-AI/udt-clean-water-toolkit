@@ -66,9 +66,12 @@ class AcousticLoggerCoverage:
                 list(processed_edges)
             )
 
-        cypher_query = f"""MATCH (n {{node_key: '{node_key}'}})-[r]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} AND type(r) IN ['DistributionMain', 'TrunkMain']
-        RETURN n, r, m
-        """
+        cypher_query = f"""MATCH (n {{node_key : '{node_key}'}})-[r:PipeMain]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} RETURN n,r,m;"""
+
+        # f"""MATCH (n {{node_key: '{node_key}'}})-[r]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} AND type(r) IN ['DistributionMain', 'TrunkMain']
+        # RETURN n, r, m
+        # """
+
         results, _ = db.cypher_query(cypher_query)
         return results
 
@@ -260,7 +263,7 @@ class AcousticLoggerCoverage:
             else:
                 break
 
-    def query_graph_dma(self, dmas, utilities):
+    def query_graph_dma_logger_nodes(self, dmas, utilities):
         """
         Generator function to query the graph database for loggers within a specific DMA.
 
@@ -271,18 +274,30 @@ class AcousticLoggerCoverage:
             results: Result object containing query results.
 
         """
-        results, m = db.cypher_query(
-            f"MATCH (n)-[:HAS_UTILITY]->(u:Utility),(n)-[:HAS_DMA]->(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} AND n.acoustic_logger IS NOT NULL RETURN n;"
+        loggers, m = db.cypher_query(
+            f"""MATCH (n:Logger)-[:IN_UTILITY]-(u:Utility), (n)-[:IN_DMA]-(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} 
+             WITH n MATCH (n)-[:HAS_ASSET]-(s:NetworkNode) RETURN n"""
         )
-        return results
 
-    def process_logger(self, loggers):
-        for node in loggers:
-            logger_key = node[0].get("node_key")
-            logger_gid = node[0].get("asset_gids")[0]
-            logger_coords = node[0].get("coords_27700")
+        logger_nodes, _ = db.cypher_query(
+            f"""MATCH (n:Logger)-[:IN_UTILITY]-(u:Utility), (n)-[:IN_DMA]-(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} 
+             WITH n MATCH (n)-[:HAS_ASSET]-(s:NetworkNode) RETURN s"""
+        )
+        return loggers, logger_nodes
 
-            connected_edges = self.get_next_edges(logger_key, set())
+    def process_loggers(self, loggers, logger_nodes):
+        for logger in loggers:
+            for l_node in logger_nodes:
+                logger_key = logger[0].get("node_key")
+                logger_tag = logger[0].get("tag")
+                logger_coords = logger[0].get("coords_27700")
+
+                l_node_key = l_node[0].get("node_key")
+
+            print(logger_key, logger_tag, logger_coords, l_node_key)
+
+            connected_edges = self.get_next_edges(l_node_key, set())
+
             processed_edges = set()
             processed_nodes = set()
 
@@ -295,47 +310,49 @@ class AcousticLoggerCoverage:
                 pipe_length = edge[1].get("segment_length")
                 travel_distance = self.detection_dist.get(pipe_material)
 
-                if pipe_length <= travel_distance:
-                    remaining_distance = travel_distance - pipe_length
-                    self.update_edge_attributes(
-                        start_node_key,
-                        end_node_key,
-                        logger_key,
-                        logger_gid,
-                        logger_coords,
-                        pipe_length,
-                    )
-                    processed_edges.add(pipe_id)
-                    processed_nodes.add(logger_key)
+                print(pipe_id, pipe_material, pipe_length, travel_distance)
 
-                    if remaining_distance > 0:
-                        node_key = (
-                            end_node_key
-                            if start_node_key in processed_nodes
-                            else start_node_key
-                        )
-                        self.process_connected_edges(
-                            node_key,
-                            remaining_distance,
-                            processed_edges,
-                            processed_nodes,
-                            pipe_material,
-                            logger_key,
-                            logger_gid,
-                            logger_coords,
-                            is_initial=False,
-                        )
-                elif pipe_length > travel_distance:
-                    covered_distance = pipe_length - travel_distance
-                    self.update_edge_attributes(
-                        start_node_key,
-                        end_node_key,
-                        logger_key,
-                        logger_gid,
-                        logger_coords,
-                        travel_distance,
-                    )
-                    continue
+            #     if pipe_length <= travel_distance:
+            #         remaining_distance = travel_distance - pipe_length
+            #         self.update_edge_attributes(
+            #             start_node_key,
+            #             end_node_key,
+            #             logger_key,
+            #             logger_gid,
+            #             logger_coords,
+            #             pipe_length,
+            #         )
+            #         processed_edges.add(pipe_id)
+            #         processed_nodes.add(logger_key)
+
+            #         if remaining_distance > 0:
+            #             node_key = (
+            #                 end_node_key
+            #                 if start_node_key in processed_nodes
+            #                 else start_node_key
+            #             )
+            #             self.process_connected_edges(
+            #                 node_key,
+            #                 remaining_distance,
+            #                 processed_edges,
+            #                 processed_nodes,
+            #                 pipe_material,
+            #                 logger_key,
+            #                 logger_gid,
+            #                 logger_coords,
+            #                 is_initial=False,
+            #             )
+            #     elif pipe_length > travel_distance:
+            #         covered_distance = pipe_length - travel_distance
+            #         self.update_edge_attributes(
+            #             start_node_key,
+            #             end_node_key,
+            #             logger_key,
+            #             logger_gid,
+            #             logger_coords,
+            #             travel_distance,
+            #         )
+            #         continue
 
     def query_total_pipe_lengths_dma(self, dmas, utilities):
         query = f"""
@@ -410,12 +427,14 @@ class AcousticLoggerCoverage:
         Compute coverage.
 
         """
-        sub_graph = self.query_graph_dma(self.config.dma_codes, self.config.utilities)
+        loggers, logger_nodes = self.query_graph_dma_logger_nodes(
+            self.config.dma_codes, self.config.utilities
+        )
 
-        self.initialise_csv()
+        # self.initialise_csv()
 
-        self.process_logger(sub_graph)
+        self.process_loggers(loggers, logger_nodes)
 
-        self.update_edge_coverage_fraction(self.config.outputfile)
+        # self.update_edge_coverage_fraction(self.config.outputfile)
 
-        self.summary_statistics(self.config.outputfile)
+        # self.summary_statistics(self.config.outputfile)
