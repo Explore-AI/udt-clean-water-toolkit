@@ -1,4 +1,3 @@
-import wntr
 from wntr import network
 import pandas as pd
 import numpy as np
@@ -51,21 +50,20 @@ class Neo4j2Wntr:
         """
         return tuple(coords)
 
-    def add_node(self, id, coordinates, elevation, base_demand):
+    def add_node(self, id, coordinates):
         """
         Adds a node to the water network model.
 
         Parameters:
             id (str): ID of the node.
-            x (float): X-coordinate of the node.
-            y (float): Y-coordinate of the node.
-            elevation (float): Elevation of the node.
-            base_demand (float): Base demand at the node.
+            coordinates (tuple): Coordinates of the node.
 
         Returns:
             node_id (str): SQIDS ID of the added node.
         """
         node_id = self.generate_unique_id(id)
+        elevation = self.generate_random_value(20, 40)  # Example elevation range
+        base_demand = self.generate_random_value(10, 50)  # Example demand range
         self.wn.add_junction(node_id, elevation=elevation, base_demand=base_demand, coordinates=coordinates)
         return node_id
 
@@ -99,16 +97,12 @@ class Neo4j2Wntr:
             start = attributes[1]._start_node
             coordinates = self.convert_coords(start['coords_27700'])
             start_id = start._id
-            elevation = self.generate_random_value(20, 40)  # Example elevation range
-            base_demand = self.generate_random_value(10, 50)  # Example demand range
-            start_node_id = self.add_node(start_id, coordinates, elevation, base_demand)
+            start_node_id = self.add_node(start_id, coordinates)
 
             end = attributes[1]._end_node
             coordinates = self.convert_coords(end['coords_27700'])
             end_id = end._id
-            elevation = self.generate_random_value(20, 40)  # Example elevation range
-            base_demand = self.generate_random_value(10, 50)  # Example demand range
-            end_node_id = self.add_node(end_id, coordinates, elevation, base_demand)
+            end_node_id = self.add_node(end_id, coordinates)
 
             edge_id = attributes[1]._id
             diameter = attributes[1].get('diameter', 0.1)  # Default diameter
