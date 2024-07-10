@@ -276,27 +276,20 @@ class AcousticLoggerCoverage:
         """
         loggers, m = db.cypher_query(
             f"""MATCH (n:Logger)-[:IN_UTILITY]-(u:Utility), (n)-[:IN_DMA]-(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} 
-             WITH n MATCH (n)-[:HAS_ASSET]-(s:NetworkNode) RETURN n"""
+             WITH n MATCH (n)-[:HAS_ASSET]-(s:NetworkNode) RETURN n, s"""
         )
+        return loggers
 
-        logger_nodes, _ = db.cypher_query(
-            f"""MATCH (n:Logger)-[:IN_UTILITY]-(u:Utility), (n)-[:IN_DMA]-(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} 
-             WITH n MATCH (n)-[:HAS_ASSET]-(s:NetworkNode) RETURN s"""
-        )
-        return loggers, logger_nodes
-
-    def process_loggers(self, loggers, logger_nodes):
+    def process_loggers(self, loggers):
         for logger in loggers:
-            for l_node in logger_nodes:
-                logger_key = logger[0].get("node_key")
-                logger_tag = logger[0].get("tag")
-                logger_coords = logger[0].get("coords_27700")
+            logger_key = logger[0].get("node_key")
+            logger_tag = logger[0].get("tag")
+            logger_coords = logger[0].get("coords_27700")
+            logger_networknode_key = logger[1].get("node_key")
 
-                l_node_key = l_node[0].get("node_key")
+            print(logger_key, logger_tag, logger_coords, logger_networknode_key)
 
-            print(logger_key, logger_tag, logger_coords, l_node_key)
-
-            connected_edges = self.get_next_edges(l_node_key, set())
+            connected_edges = self.get_next_edges(logger_networknode_key, set())
 
             processed_edges = set()
             processed_nodes = set()
@@ -427,13 +420,13 @@ class AcousticLoggerCoverage:
         Compute coverage.
 
         """
-        loggers, logger_nodes = self.query_graph_dma_logger_nodes(
+        loggers = self.query_graph_dma_logger_nodes(
             self.config.dma_codes, self.config.utilities
         )
 
         # self.initialise_csv()
 
-        self.process_loggers(loggers, logger_nodes)
+        self.process_loggers(loggers)
 
         # self.update_edge_coverage_fraction(self.config.outputfile)
 
