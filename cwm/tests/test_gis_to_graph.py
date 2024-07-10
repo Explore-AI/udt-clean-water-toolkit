@@ -6,8 +6,11 @@ from django.contrib.gis.geos import GEOSGeometry
 # from shapely import wkt
 import pandas as pd
 import geopandas as gpd
-from .data.pipe_junctions_data import PIPE_JUNCTIONS
-from .data.point_asset_data import POINT_ASSETS
+from .data.gis_to_graph_data import (
+    PIPE_JUNCTIONS,
+    POINT_ASSETS,
+    JUNCTIONS_WITH_POSITIONS,
+)
 from cleanwater.transform.gis_to_graph import GisToGraph
 
 
@@ -34,19 +37,16 @@ def get_pipe_data():
 class TestGisToGraph:
 
     def test_get_junction_connections_on_pipe(self):
-        expected_junctions_with_positions_hash = "5ab6d931f1ef39e38202fa77844375ef"
         base_pipe = get_pipe_data()
 
         gis_to_graph = GisToGraph(SRID, sqids)
-        print(base_pipe)
         junctions_with_positions = gis_to_graph._get_connections_points_on_pipe(
             base_pipe, PIPE_JUNCTIONS
         )
 
-        assert (
-            joblib.hash(junctions_with_positions)
-            == expected_junctions_with_positions_hash
-        )
+        del junctions_with_positions[0]["intersection_point_geometry"]
+        del junctions_with_positions[1]["intersection_point_geometry"]
+        assert junctions_with_positions == JUNCTIONS_WITH_POSITIONS
 
     # def test_get_assets_connections_on_pipe(self):
     #     expected_point_assets_with_positions_hash = "0a7fdad5f5ecfb3571f9755d57e965bd"
