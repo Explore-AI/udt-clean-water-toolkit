@@ -1,10 +1,12 @@
 import pdb
 
 import numpy as np
-from neomodel import db
 import wntr
-from cleanwater.transform import Neo4j2Wntr  # Adjust import path as needed
-from cwageodjango.config.settings import sqids  # Adjust import path as needed
+from wntr.network import Pipe, Valve
+from neomodel import db
+from cleanwater.transform import Neo4j2Wntr
+from cwageodjango.config.settings import sqids
+
 
 class Convert2Wntr(Neo4j2Wntr):
     """
@@ -18,14 +20,22 @@ class Convert2Wntr(Neo4j2Wntr):
     Attributes:
         config: Configuration object containing settings for the conversion.
         valve_types: List of valve types to choose from.
+        wn: WNTR WaterNetworkModel instance.
+        node_to_edges: Dictionary mapping nodes to their outgoing edges.
+        nx_graph: NetworkX directed graph representation of the network.
     """
 
     def __init__(self, config):
-        self.config = config
-        self.valve_types = ['PRV', 'PSV', 'FCV', 'TCV']  # Example valve types
         super().__init__(sqids)
+        self.config = config
+        self.all_nodes = set()
+        self.all_edges = set()  # List to store all edges
+        self.node_to_edges = {}  # Dictionary for mapping nodes to their outgoing edges
+        self.valve_types = ['PRV', 'PSV', 'FCV', 'TCV']  # Example valve types
+        self.wn = wntr.network.WaterNetworkModel()  # Initialize WNTR model
 
-    def query_graph(self, batch_size, query_limit):
+    @staticmethod
+    def query_graph(batch_size, query_limit):
         """
         Generator function to query the graph database in batches.
 
@@ -38,208 +48,231 @@ class Convert2Wntr(Neo4j2Wntr):
         """
         offset = 0
         total_loaded = 0
-        batches_processed = 0
 
         while total_loaded < query_limit:
-            results, meta = db.cypher_query(
-                f"""
-                MATCH (n)-[r]-(m)
-                WHERE NOT (r:IN_UTILITY OR r:IN_DMA) 
-                RETURN n, r, m
-                SKIP {offset}
-                LIMIT {batch_size}
-                """
-            )
+            try:
+                results, meta = db.cypher_query(
+                    f"""
+                    MATCH (n)-[r]-(m)
+                    WHERE NOT (r:IN_UTILITY OR r:IN_DMA) 
+                    RETURN n, r, m
+                    SKIP {offset}
+                    LIMIT {batch_size}
+                    """
+                )
+            except Exception as e:
+                print(f"Error querying the database: {e}")
+                break
+
             records = list(results)
             total_loaded += len(records)
-            batches_processed += 1
+            offset += batch_size
 
             if not records:
                 break
 
             yield results
-            offset += batch_size
-
-            if len(records) < batch_size:
-                break
 
     def convert(self):
         """
         Converts the Neo4j graph data to WNTR format.
         """
-        # Query graph once and process nodes and edges
+
+        print("Compiling nodes and edges")
         graph_data = self.query_graph(self.config.batch_size, self.config.query_limit)
         for sub_graph in graph_data:
-            print("processing nodes")
-            self.create_nodes_and_assets(sub_graph)
-            print("processing edges")
-            self.create_links_and_assets(sub_graph)
+            for record in sub_graph:
+                start_node = record[0]
+                relation = record[1]
+                end_node = record[2]
 
-    def create_nodes_and_assets(self, graph):
+                # Add start and end nodes to set of all nodes
+                self.all_nodes.add(start_node)
+                self.all_nodes.add(end_node)
+
+                # Add edge to list of all edges
+                self.all_edges.add(relation)
+
+                # Map nodes to their outgoing edges
+                if start_node not in self.node_to_edges:
+                    self.node_to_edges[start_node] = []
+                self.node_to_edges[start_node].append((start_node, relation, end_node))
+
+        print("Processing nodes")
+        for node in self.all_nodes:
+            if self.is_valve(node._id):
+                self.handle_valve_nodes(node)
+            if not self.is_valve(node._id):
+                self.create_nodes_and_assets(node)
+
+        print("Processing edges")
+        for node in self.all_nodes:
+            if self.is_valve(node._id):
+                self.create_valve_edges(node)
+
+        self.create_links_and_assets()
+
+    def handle_valve_nodes(self, valve_node):
+        valve_id = valve_node._id
+        coordinates = self.convert_coords(valve_node['coords_27700'])
+        new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
+        new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
+        self.add_node(self.generate_unique_id(valve_id), coordinates)
+        self.add_node(new_start_node_id, coordinates)  # Replace 'coordinates' with appropriate value
+        self.add_node(new_end_node_id, coordinates)  # Replace 'coordinates' with appropriate value
+
+    def create_nodes_and_assets(self, node):
         """
         Create nodes and their associated assets (e.g., reservoirs) from Neo4j graph data.
 
         Parameters:
-            graph (list): List of results from Neo4j query.
+            node: specific node from graph query.
         """
-        unique_node_ids = set()  # Set to store unique node IDs
 
-        for attributes in graph:
-            start = attributes[1]._start_node
-            start_id = start._id
+        coordinates = self.convert_coords(node['coords_27700'])
 
-            if start_id not in unique_node_ids:
-                coordinates = self.convert_coords(start['coords_27700'])
+        # Check if node has asset
+        if self.is_reservoir(node._id):
+            base_head = 20.0  # Example base head
+            res_id = self.generate_unique_id(node._id)
+            self.wn.add_reservoir(res_id, base_head=base_head, coordinates=coordinates)
+        else:
+            # No asset, add as junction
+            node_id = self.generate_unique_id(node._id)
+            self.add_node(node_id, coordinates)
 
-                # Check if node has asset
-                asset = db.cypher_query(f"MATCH (n)-[r:HAS_ASSET]->(a) WHERE id(n)={start_id} RETURN a")[0]
-                if asset:
-                    asset_node = asset[0][0]
-                    if "OperationalSite" in asset_node.labels:
-                        base_head = 20.0  # Example base head
-                        res_id = self.generate_unique_id(start_id)
-                        self.wn.add_reservoir(res_id, base_head=base_head, coordinates=coordinates)
-                    elif "NetworkOptValve" in asset_node.labels:
-                        continue
-                    else:
-                        self.add_node(start_id, coordinates)
-                else:
-                    # No asset, add as junction
-                    self.add_node(start_id, coordinates)
-
-                unique_node_ids.add(start_id)  # Add node ID to set of processed nodes
-
-            end = attributes[1]._end_node
-            end_id = end._id
-
-            if end_id not in unique_node_ids:
-                coordinates = self.convert_coords(end['coords_27700'])
-
-                # Check if node has asset
-                asset = db.cypher_query(f"MATCH (n)-[r:HAS_ASSET]->(a) WHERE id(n)={end_id} RETURN a")[0]
-                if asset:
-                    asset_node = asset[0][0]
-                    if "OperationalSite" in asset_node.labels:
-                        base_head = 20.0  # Example base head
-                        res_id = self.generate_unique_id(end_id)
-                        self.wn.add_reservoir(res_id, base_head=base_head, coordinates=coordinates)
-                    elif "NetworkOptValve" in asset_node.labels:
-                        continue
-                    else:
-                        self.add_node(end_id, coordinates)
-                else:
-                    # No asset, add as junction
-                    self.add_node(end_id, coordinates)
-
-                unique_node_ids.add(end_id)  # Add node ID to set of processed nodes
-
-    def create_links_and_assets(self, graph):
+    def create_valve_edges(self, valve_node):
         """
-        Create links (pipes and valves) and their associated assets (e.g., valves) from Neo4j graph data.
+        Process a valve node by replacing it with a triad (node, edge, node).
 
         Parameters:
-            graph (list): List of results from Neo4j query.
+            valve_node: Valve node from Neo4j graph data.
         """
-        for attributes in graph:
-            start = attributes[1]._start_node
-            start_node_id = self.generate_unique_id(start._id)
+        valve_id = valve_node._id
+        valve_type = np.random.choice(self.valve_types)  # Choose valve type
+        outgoing_edges = self.node_to_edges.get(valve_node, [])
+        if len(outgoing_edges) == 1:
+            end_node_id = self.generate_unique_id(outgoing_edges[0][2]._id)
+            relation = outgoing_edges[0][1]
+            new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
+            new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
+            valve_link_id = self.generate_unique_id(valve_id) + "_" + valve_type + "_valve"
+            diameter = relation["diameter"]
+            length = relation["segment_length"]
+            roughness = self.roughness_values.get(relation["material"].lower())
 
-            end = attributes[1]._end_node
-            end_node_id = self.generate_unique_id(end._id)
+            # Create edge connecting the new nodes
+            valve = Valve(valve_link_id,
+                          new_start_node_id,
+                          new_end_node_id,
+                          self.wn)
 
-            edge_id = attributes[1]._id
-            diameter = attributes[1].get('diameter', 0.1)  # Default diameter
-            length = attributes[1].get('segment_length', 1.0)  # Default length
-            roughness = self.roughness_values.get(attributes[1].get('material'), 120)
+            self.wn.add_valve(valve_link_id,
+                              new_start_node_id,
+                              new_end_node_id,
+                              diameter,
+                              valve_type,
+                              initial_status='OPEN')
+            # Update existing edge to connect to the new nodes
+            self.add_pipe(relation._id, end_node_id, new_start_node_id, diameter, length, roughness)
 
-            # Handle link assets
-            self.add_link_assets(start, start_node_id, end, end_node_id, diameter)
+        else:
+            start_node1 = outgoing_edges[0][2]
+            relation1 = outgoing_edges[0][1]
+            relation2 = outgoing_edges[1][1]
+            end_node2 = outgoing_edges[1][2]
 
-            if not self.is_asset(start) and not self.is_asset(end):
-                self.add_pipe(edge_id, start_node_id, end_node_id, diameter, length, roughness)
+            start_node1_id = self.generate_unique_id(start_node1._id)
+            length1 = relation1["segment_length"]
+            diameter1 = relation1["diameter"]
+            roughness1 = self.roughness_values.get(relation1["material"].lower())
 
-    def add_link_assets(self, start_node, start_node_id, end_node, end_node_id, diameter):
+            end_node2_id = self.generate_unique_id(end_node2._id)
+            length2 = relation2["segment_length"]
+            diameter2 = relation2["diameter"]
+            roughness2 = self.roughness_values.get(relation2["material"].lower())
+
+            new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
+            new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
+            valve_link_id = self.generate_unique_id(valve_id) + "_" + valve_type + "_valve"
+
+            # Create edge connecting the new nodes
+            valve = Valve(valve_link_id,
+                          new_start_node_id,
+                          new_end_node_id,
+                          self.wn)
+
+            self.wn.add_valve(valve_link_id,
+                              new_start_node_id,
+                              new_end_node_id,
+                              diameter1,
+                              valve_type,
+                              initial_status='OPEN')
+            # pdb.set_trace()
+            # Update existing edge to connect to the new nodes
+            self.add_pipe(relation1._id, start_node1_id, new_start_node_id, diameter1, length1, roughness1)
+            self.add_pipe(relation2._id, new_end_node_id, end_node2_id, diameter2, length2, roughness2)
+
+    def create_links_and_assets(self):
         """
-        Add link assets (e.g., valves) to the WNTR model.
-
-        Parameters:
-            start_node (neomodel Node): Start node of the link.
-            start_node_id (str): WNTR start node ID.
-            end_node (neomodel Node): End node of the link.
-            end_node_id (str): WNTR end node ID.
-            diameter (float): Diameter of the link.
+        Create links (pipes) and their associated assets (e.g., valves) from Neo4j graph data.
         """
-        if "NetworkOptValve" in start_node.labels or "PressureControlValve" in start_node.labels:
-            connected_nodes, diameter = self.get_connected_nodes(start_node)
-            valve_type = np.random.choice(self.valve_types)
-            if len(connected_nodes) == 2:
-                self.wn.add_valve(start_node_id, connected_nodes[0], connected_nodes[1], diameter, valve_type)
-        elif "NetworkOptValve" in end_node.labels or "PressureControlValve" in end_node.labels:
-            connected_nodes, diameter = self.get_connected_nodes(end_node)
-            valve_type = np.random.choice(self.valve_types)
-            if len(connected_nodes) == 2:
-                self.wn.add_valve(end_node_id, connected_nodes[0], connected_nodes[1], diameter, valve_type)
+        for edge in self.all_edges:
+            start_node = edge._start_node
+            end_node = edge._end_node
 
-    def is_asset(self, node):
-        """
-        Check if a node is an asset.
+            start_node_id = self.generate_unique_id(start_node._id)
+            end_node_id = self.generate_unique_id(end_node._id)
+            diameter = edge["diameter"]
+            length = edge["segment_length"]
+            roughness = self.roughness_values.get(edge['material'].lower())
 
-        Parameters:
-            node (neomodel Node): Node to check.
+            if self.is_valve(start_node._id) or self.is_valve(end_node._id):
+                # Skip valve edges (already processed in create_valve_edges)
+                continue
 
-        Returns:
-            bool: True if the node is an asset, False otherwise.
-        """
-        asset = db.cypher_query(f"MATCH (n)-[r:HAS_ASSET]->(a) WHERE id(n)={node._id} RETURN a")[0]
-        return bool(asset)
-
-    def get_connected_nodes(self, node):
-        """
-        Get the IDs of nodes connected to the given node, excluding any nodes that are assets.
-
-        Parameters:
-            node (neomodel Node): Node to find connected nodes for.
-
-        Returns:
-            connected_node_ids (list): List of connected node IDs.
-            diameter (float): Diameter of the pipe connecting the nodes.
-        """
-        results, _ = db.cypher_query(f"MATCH (n)-[r:PipeMain]-(m) WHERE id(n)={node._id} RETURN r, m")
-
-        connected_nodes = []
-        coords = []
-        ids = []
-        diameter = None
-
-        for result in results:
-            relationship = result[0]
-            connected_node = result[1]
-
-            if 'Asset' not in connected_node.labels:
-                ids.append(connected_node.id)
-                connected_nodes.append(self.generate_unique_id(connected_node.id))
-                coords.append(connected_node['coords_27700'])
-
-            if diameter is None:  # Assuming all connections have the same diameter
-                diameter = relationship['diameter']
-
-        self.add_node(ids[1], coords[1])
-        return connected_nodes, diameter
+            self.add_pipe(edge._id, start_node_id, end_node_id, diameter, length, roughness)
 
     def wntr_to_inp(self):
         """
         Write the WNTR model to EPANET INP file format.
-
-        Parameters:
-            filename (str): Name of the output file.
         """
         wntr.network.write_inpfile(self.wn, filename=self.config.outputfile)
 
-    def wntr_to_json(self):
+    @staticmethod
+    def is_reservoir(node_id):
         """
-        Write the WNTR model to JSON file format.
+        Check if a node represents a reservoir.
 
         Parameters:
-            filename (str): Name of the output file.
+            node_id: ID of the node.
+
+        Returns:
+            bool: True if the node represents a reservoir, False otherwise.
         """
-        wntr.utils.network.write_json(self.wn, filename=self.config.outputfile)
+        asset_query = f"""
+                MATCH (n)-[r:HAS_ASSET]->(a:OperationalSite) 
+                WHERE id(n)={node_id} 
+                RETURN a
+                """
+        reservoir = db.cypher_query(asset_query)[0]
+        return bool(reservoir)
+
+    @staticmethod
+    def is_valve(node_id):
+        """
+        Check if a node represents a valve.
+
+        Parameters:
+            node_id: ID of the node.
+
+        Returns:
+            bool: True if the node represents a valve, False otherwise.
+        """
+        asset_query = f"""
+                MATCH (n)-[r:HAS_ASSET]->(a) 
+                WHERE id(n)={node_id} AND (a:NetworkOptValve OR a:PressureControlValve)
+                RETURN a
+                """
+        valve = db.cypher_query(asset_query)[0]
+        return bool(valve)

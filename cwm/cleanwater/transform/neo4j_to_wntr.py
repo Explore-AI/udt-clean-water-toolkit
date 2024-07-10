@@ -9,7 +9,7 @@ class Neo4j2Wntr:
     def __init__(self, sqids):
         self.wn = network.WaterNetworkModel()
         self.sqids = sqids
-        self.roughness_values = self.load_roughness_values('material_roughness.csv')
+        self.roughness_values = self.load_roughness_values('material_roughness2.csv')
 
     def generate_unique_id(self, input_string):
         """
@@ -61,11 +61,9 @@ class Neo4j2Wntr:
         Returns:
             node_id (str): SQIDS ID of the added node.
         """
-        node_id = self.generate_unique_id(id)
         elevation = self.generate_random_value(20, 40)  # Example elevation range
         base_demand = self.generate_random_value(10, 50)  # Example demand range
-        self.wn.add_junction(node_id, elevation=elevation, base_demand=base_demand, coordinates=coordinates)
-        return node_id
+        self.wn.add_junction(id, elevation=elevation, base_demand=base_demand, coordinates=coordinates)
 
     def add_pipe(self, edge_id, start_node_id, end_node_id, diameter, length, roughness=100.0):
         """
@@ -85,29 +83,3 @@ class Neo4j2Wntr:
         pipe_id = self.generate_unique_id(edge_id)
         self.wn.add_pipe(pipe_id, start_node_id, end_node_id, length=length, diameter=diameter, roughness=roughness)
         return pipe_id
-
-    def create_graph(self, graph):
-        """
-        Processes a batch of results from Neo4j query and adds corresponding nodes and pipes to the water network model.
-
-        Parameters:
-            graph (list): List of results from Neo4j query.
-        """
-        for attributes in graph:
-            start = attributes[1]._start_node
-            coordinates = self.convert_coords(start['coords_27700'])
-            start_id = start._id
-            start_node_id = self.add_node(start_id, coordinates)
-
-            end = attributes[1]._end_node
-            coordinates = self.convert_coords(end['coords_27700'])
-            end_id = end._id
-            end_node_id = self.add_node(end_id, coordinates)
-
-            edge_id = attributes[1]._id
-            diameter = attributes[1].get('diameter', 0.1)  # Default diameter
-            length = attributes[1].get('segment_length', 1.0)  # Default length
-            roughness = self.roughness_values.get(attributes[1].get('material'), 120)
-            self.add_pipe(edge_id, start_node_id, end_node_id, diameter, length, roughness)
-
-        return self.wn
