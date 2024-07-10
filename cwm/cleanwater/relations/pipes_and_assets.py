@@ -17,7 +17,7 @@ from cwageodjango.assets.models import *
 from cwageodjango.core.db.models.functions import LineStartPoint, LineEndPoint
 
 
-class PipesAndAssets(GeoDjangoDataManager):
+class PipeMainsController(GeoDjangoDataManager):
     """Convert pipe_mains data to a Queryset or GeoJSON."""
 
     WITHIN_DISTANCE = 0.5
@@ -25,9 +25,6 @@ class PipesAndAssets(GeoDjangoDataManager):
         "id",
         "tag",
     ]  # should not include the geometry column as per convention
-
-    def __init__(self, method):
-        self.method = method
 
     def generate_dwithin_subquery(
         self,
@@ -113,31 +110,21 @@ class PipesAndAssets(GeoDjangoDataManager):
 
         return subquery
 
-    def generate_termini_subqueries(self, querysets):
-        start_point_subqueries = []
-        end_point_subqueries = []
+    def generate_termini_subqueries(self, qs):
 
-        for qs in querysets:
-            subquery1 = (
-                qs.filter(geometry__touches=OuterRef("start_point_geom"))
-                .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
-                .order_by("pk")
-            )
-
-            subquery2 = (
-                qs.filter(geometry__touches=OuterRef("end_point_geom"))
-                .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
-                .order_by("pk")
-            )
-
-            start_point_subqueries.append(subquery1)
-            end_point_subqueries.append(subquery2)
-
-        subquery_line_start = start_point_subqueries[0].union(
-            *start_point_subqueries[0:]
+        subquery_line_start = (
+            qs.exclude(pk=OuterRef("id"))
+            .filter(geometry__touches=OuterRef("start_point_geom"))
+            .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
+            .order_by("pk")
         )
 
-        subquery_line_end = end_point_subqueries[0].union(*end_point_subqueries[0:])
+        subquery_line_end = (
+            qs.exclude(pk=OuterRef("id"))
+            .filter(geometry__touches=OuterRef("end_point_geom"))
+            .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
+            .order_by("pk")
+        )
 
         return subquery_line_start, subquery_line_end
 
@@ -192,14 +179,14 @@ class PipesAndAssets(GeoDjangoDataManager):
             "utilities": ArrayAgg("dmas__utility__name"),
         }
 
-    def _generate_mains_subqueries(self, mains_qs):
-        pm_qs = mains_qs.order_by("pk")
+    def _generate_mains_subqueries(self):
+        pm_qs = self.model.objects.all().order_by("pk")
 
         json_fields = self.get_pipe_json_fields()
 
         subquery_pm_junctions = self.generate_touches_subquery(pm_qs, json_fields)
 
-        termini_subqueries = self.generate_termini_subqueries([pm_qs])
+        termini_subqueries = self.generate_termini_subqueries(pm_qs)
 
         subqueries = {
             "pipemain_junctions": ArraySubquery(subquery_pm_junctions),
@@ -296,27 +283,35 @@ class PipesAndAssets(GeoDjangoDataManager):
         return subqueries
 
     @staticmethod
+    def _filter_by_utility(qs, filters):
+        utility_names = filters.get("utility_names")
+
+        if not utility_names:
+            return qs
+
+        return qs.filter(dmas__utility__name__in=utility_names)
+
+    @staticmethod
     def _filter_by_dma(qs, filters):
         dma_codes = filters.get("dma_codes")
 
         if not dma_codes:
             return qs
 
-        return qs.filter(dmas__code__in=filters.get("dma_codes"))
+        return qs.filter(dmas__code__in=dma_codes)
 
-    def get_pipe_point_relation_queryset(
-        self, mains_qs, mains_qs_name, asset_models_qs, filters
-    ):
+    def get_pipe_point_relation_queryset(self, filters):
         mains_intersection_subqueries = self._generate_mains_subqueries()
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = mains_qs.prefetch_related("dmas", "dmas__utility")
+        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
 
+        qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
 
         qs = qs.annotate(
-            asset_name=Value(mains_qs_name),
+            asset_name=Value(self.model.AssetMeta.asset_name),
             asset_label=Value(qs.model.__name__),
             pipe_length=Length("geometry"),
             wkt=AsWKT("geometry"),
@@ -338,12 +333,14 @@ class PipesAndAssets(GeoDjangoDataManager):
 
         qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
 
+        qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
         return qs.count()
 
-    def get_mains_pks(self, filters):
-        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
+    def get_mains_pks(self, pipe_mains_qs, filters):
+        qs = pipe_mains_qs.prefetch_related("dmas", "dmas__utility")
 
+        qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
         return list(qs.values_list("pk", flat=True).order_by("pk"))
 
