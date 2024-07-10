@@ -99,7 +99,7 @@ class AcousticLoggerCoverage:
                 list(processed_edges)
             )
 
-        cypher_query = f"""MATCH (n {{node_key : '{node_key}'}})-[r:PipeMain]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} RETURN n,r,m;"""
+        cypher_query = f"""MATCH (n:NetworkNode {{node_key : '{node_key}'}})-[r:PipeMain]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} RETURN n,r,m;"""
 
         results, _ = db.cypher_query(cypher_query)
         return results
@@ -243,6 +243,7 @@ class AcousticLoggerCoverage:
                     )
 
                     if self.check_for_pipe_end(node_key=node_key):
+                        print(f"Pipe end detected at {node_key}")
                         edge_distance = 0
                         break
 
@@ -269,6 +270,7 @@ class AcousticLoggerCoverage:
                         )
 
                         if self.check_for_pipe_end(node_key=node_key):
+                            print(f"Pipe end detected at {node_key}")
                             remaining_distance -= edge_distance
                             edge_distance = 0
                             continue
@@ -315,8 +317,6 @@ class AcousticLoggerCoverage:
             logger_coords = logger[0].get("coords_27700")
             logger_networknode_key = logger[1].get("node_key")
 
-            print(logger_key, logger_gid, logger_coords, logger_networknode_key)
-
             connected_edges = self.get_next_edges(logger_networknode_key, set())
 
             processed_edges = set()
@@ -331,7 +331,15 @@ class AcousticLoggerCoverage:
                 pipe_length = edge[1].get("segment_length")
                 travel_distance = self.detection_dist.get(pipe_material)
 
-                print(pipe_id, pipe_material, pipe_length, travel_distance)
+                print(
+                    "Running for Logger:",
+                    logger_key,
+                    "at ",
+                    logger_networknode_key,
+                    "edge: ",
+                    pipe_id,
+                    travel_distance,
+                )
 
                 if pipe_length <= travel_distance:
                     remaining_distance = travel_distance - pipe_length
@@ -344,7 +352,7 @@ class AcousticLoggerCoverage:
                         pipe_length,
                     )
                     processed_edges.add(pipe_id)
-                    processed_nodes.add(logger_key)
+                    processed_nodes.add(logger_networknode_key)
 
                     if remaining_distance > 0:
                         node_key = (
@@ -456,6 +464,6 @@ class AcousticLoggerCoverage:
 
         self.process_loggers(loggers)
 
-        # self.update_edge_coverage_fraction(self.config.outputfile)
+        self.update_edge_coverage_fraction(self.config.outputfile)
 
         # self.summary_statistics(self.config.outputfile)
