@@ -101,10 +101,6 @@ class AcousticLoggerCoverage:
 
         cypher_query = f"""MATCH (n {{node_key : '{node_key}'}})-[r:PipeMain]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} RETURN n,r,m;"""
 
-        # f"""MATCH (n {{node_key: '{node_key}'}})-[r]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} AND type(r) IN ['DistributionMain', 'TrunkMain']
-        # RETURN n, r, m
-        # """
-
         results, _ = db.cypher_query(cypher_query)
         return results
 
@@ -118,10 +114,9 @@ class AcousticLoggerCoverage:
         coverage_len,
     ):
         query = f"""
-                    MATCH (n {{node_key: '{start_node_key}'}})-[:HAS_UTILITY]->(u:Utility), 
-                        (n {{node_key: '{start_node_key}'}})-[:HAS_DMA]->(d:DMA), 
-                        (n {{node_key: '{start_node_key}'}})-[r]-(m {{node_key: '{end_node_key}'}})
-                    WHERE type(r) IN ['DistributionMain', 'TrunkMain']
+                    MATCH (n:NetworkNode {{node_key: '{start_node_key}'}})-[:IN_UTILITY]->(u:Utility), 
+                        (n:NetworkNode {{node_key: '{start_node_key}'}})-[:IN_DMA]->(d:DMA), 
+                        (n:NetworkNode {{node_key: '{start_node_key}'}})-[r:PipeMain]-(m:NetworkNode {{node_key: '{end_node_key}'}})
                     WITH r, 
                         CASE WHEN r.coveredbyLogger IS NOT NULL THEN r.coveredbyLogger + '|' + '{logger_key}' ELSE '{logger_key}' END AS newCoveredByLogger,
                         CASE WHEN r.coverageLen IS NOT NULL THEN r.coverageLen + '|' + '{coverage_len}' ELSE '{coverage_len}' END AS newCoverageLen,
@@ -316,11 +311,11 @@ class AcousticLoggerCoverage:
     def process_loggers(self, loggers):
         for logger in loggers:
             logger_key = logger[0].get("node_key")
-            logger_tag = logger[0].get("tag")
+            logger_gid = logger[0].get("tag")
             logger_coords = logger[0].get("coords_27700")
             logger_networknode_key = logger[1].get("node_key")
 
-            print(logger_key, logger_tag, logger_coords, logger_networknode_key)
+            print(logger_key, logger_gid, logger_coords, logger_networknode_key)
 
             connected_edges = self.get_next_edges(logger_networknode_key, set())
 
@@ -338,47 +333,47 @@ class AcousticLoggerCoverage:
 
                 print(pipe_id, pipe_material, pipe_length, travel_distance)
 
-            #     if pipe_length <= travel_distance:
-            #         remaining_distance = travel_distance - pipe_length
-            #         self.update_edge_attributes(
-            #             start_node_key,
-            #             end_node_key,
-            #             logger_key,
-            #             logger_gid,
-            #             logger_coords,
-            #             pipe_length,
-            #         )
-            #         processed_edges.add(pipe_id)
-            #         processed_nodes.add(logger_key)
+                if pipe_length <= travel_distance:
+                    remaining_distance = travel_distance - pipe_length
+                    self.update_edge_attributes(
+                        start_node_key,
+                        end_node_key,
+                        logger_key,
+                        logger_gid,
+                        logger_coords,
+                        pipe_length,
+                    )
+                    processed_edges.add(pipe_id)
+                    processed_nodes.add(logger_key)
 
-            #         if remaining_distance > 0:
-            #             node_key = (
-            #                 end_node_key
-            #                 if start_node_key in processed_nodes
-            #                 else start_node_key
-            #             )
-            #             self.process_connected_edges(
-            #                 node_key,
-            #                 remaining_distance,
-            #                 processed_edges,
-            #                 processed_nodes,
-            #                 pipe_material,
-            #                 logger_key,
-            #                 logger_gid,
-            #                 logger_coords,
-            #                 is_initial=False,
-            #             )
-            #     elif pipe_length > travel_distance:
-            #         covered_distance = pipe_length - travel_distance
-            #         self.update_edge_attributes(
-            #             start_node_key,
-            #             end_node_key,
-            #             logger_key,
-            #             logger_gid,
-            #             logger_coords,
-            #             travel_distance,
-            #         )
-            #         continue
+                    if remaining_distance > 0:
+                        node_key = (
+                            end_node_key
+                            if start_node_key in processed_nodes
+                            else start_node_key
+                        )
+                        self.process_connected_edges(
+                            node_key,
+                            remaining_distance,
+                            processed_edges,
+                            processed_nodes,
+                            pipe_material,
+                            logger_key,
+                            logger_gid,
+                            logger_coords,
+                            is_initial=False,
+                        )
+                elif pipe_length > travel_distance:
+                    covered_distance = pipe_length - travel_distance
+                    self.update_edge_attributes(
+                        start_node_key,
+                        end_node_key,
+                        logger_key,
+                        logger_gid,
+                        logger_coords,
+                        travel_distance,
+                    )
+                    continue
 
     def query_total_pipe_lengths_dma(self, dmas, utilities):
         query = f"""
@@ -457,7 +452,7 @@ class AcousticLoggerCoverage:
             self.config.dma_codes, self.config.utilities
         )
 
-        # self.initialise_csv()
+        self.initialise_csv()
 
         self.process_loggers(loggers)
 
