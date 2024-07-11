@@ -1,8 +1,6 @@
 import pdb
-
 import numpy as np
 import wntr
-from wntr.network import Pipe, Valve
 from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
 from cwageodjango.config.settings import sqids
@@ -21,7 +19,6 @@ class Convert2Wntr(Neo4j2Wntr):
         config: Configuration object containing settings for the conversion.
         valve_types: List of valve types to choose from.
         wn: WNTR WaterNetworkModel instance.
-        node_to_edges: Dictionary mapping nodes to their outgoing edges.
         nx_graph: NetworkX directed graph representation of the network.
     """
 
@@ -29,13 +26,12 @@ class Convert2Wntr(Neo4j2Wntr):
         super().__init__(sqids)
         self.config = config
         self.all_nodes = set()
-        self.all_edges = set()  # List to store all edges
-        self.node_to_edges = {}  # Dictionary for mapping nodes to their outgoing edges
+        self.all_valves = set()
+        self.all_edges = set()
         self.valve_types = ['PRV', 'PSV', 'FCV', 'TCV']  # Example valve types
         self.wn = wntr.network.WaterNetworkModel()  # Initialize WNTR model
 
-    @staticmethod
-    def query_graph(batch_size, query_limit):
+    def query_graph(self, batch_size, query_limit):
         """
         Generator function to query the graph database in batches.
 
@@ -48,29 +44,40 @@ class Convert2Wntr(Neo4j2Wntr):
         """
         offset = 0
         total_loaded = 0
-
         while total_loaded < query_limit:
             try:
-                results, meta = db.cypher_query(
-                    f"""
-                    MATCH (n)-[r]-(m)
-                    WHERE NOT (r:IN_UTILITY OR r:IN_DMA) 
-                    RETURN n, r, m
-                    SKIP {offset}
-                    LIMIT {batch_size}
+                if self.config.dma_codes:  # Check if there are any DMA codes specified
+                    dma_codes_str = ", ".join(f"'{dma_code}'" for dma_code in self.config.dma_codes)
+                    query = f"""
+                        MATCH (n)-[r]-(m), (n)-[:IN_DMA]->(d), (m)-[:IN_DMA]->(d)
+                        WHERE d.code IN [{dma_codes_str}]
+                        AND NOT (type(r) = 'IN_UTILITY' OR type(r) = 'IN_DMA' OR type(r) = 'HAS_ASSET')
+                        RETURN n, r, m
+                        SKIP {offset}
+                        LIMIT {batch_size}
                     """
-                )
+                else:
+                    query = f"""
+                        MATCH (n)-[r]-(m)
+                        WHERE NOT (type(r) = 'IN_UTILITY' OR type(r) = 'IN_DMA' OR type(r) = 'HAS_ASSET')
+                        RETURN n, r, m
+                        SKIP {offset}
+                        LIMIT {batch_size}
+                    """
+
+                results, meta = db.cypher_query(query)
+                offset += batch_size
             except Exception as e:
                 print(f"Error querying the database: {e}")
                 break
 
             records = list(results)
             total_loaded += len(records)
-            offset += batch_size
 
             if not records:
                 break
 
+            print("Loaded", total_loaded)
             yield results
 
     def convert(self):
@@ -93,17 +100,17 @@ class Convert2Wntr(Neo4j2Wntr):
                 # Add edge to list of all edges
                 self.all_edges.add(relation)
 
-                # Map nodes to their outgoing edges
-                if start_node not in self.node_to_edges:
-                    self.node_to_edges[start_node] = []
-                self.node_to_edges[start_node].append((start_node, relation, end_node))
-
         print("Processing nodes")
         for node in self.all_nodes:
             if self.is_valve(node._id):
-                self.handle_valve_nodes(node)
-            if not self.is_valve(node._id):
+                self.all_valves.add(node)
+            elif not self.is_valve(node._id):
                 self.create_nodes_and_assets(node)
+            else:
+                print(node)
+                pdb.set_trace()
+        for valve_node in self.all_valves:
+            self.handle_valve_nodes(valve_node)
 
         print("Processing edges")
         for node in self.all_nodes:
@@ -118,8 +125,8 @@ class Convert2Wntr(Neo4j2Wntr):
         new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
         new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
         self.add_node(self.generate_unique_id(valve_id), coordinates)
-        self.add_node(new_start_node_id, coordinates)  # Replace 'coordinates' with appropriate value
-        self.add_node(new_end_node_id, coordinates)  # Replace 'coordinates' with appropriate value
+        self.add_node(new_start_node_id, coordinates)
+        self.add_node(new_end_node_id, coordinates)
 
     def create_nodes_and_assets(self, node):
         """
@@ -150,22 +157,31 @@ class Convert2Wntr(Neo4j2Wntr):
         """
         valve_id = valve_node._id
         valve_type = np.random.choice(self.valve_types)  # Choose valve type
-        outgoing_edges = self.node_to_edges.get(valve_node, [])
-        if len(outgoing_edges) == 1:
-            end_node_id = self.generate_unique_id(outgoing_edges[0][2]._id)
-            relation = outgoing_edges[0][1]
+
+        outgoing_edges = [edge
+                          for edge in self.all_edges
+                          if edge._start_node._id == valve_id
+                          or edge._end_node._id == valve_id]
+
+        if len(outgoing_edges) == 0:
+            print(valve_id)
+            pdb.set_trace()
+        elif len(outgoing_edges) == 1:
+            end_node_id = self.generate_unique_id(outgoing_edges[0]._end_node._id)
+            relation = outgoing_edges[0]
             new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
             new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
             valve_link_id = self.generate_unique_id(valve_id) + "_" + valve_type + "_valve"
             diameter = relation["diameter"]
             length = relation["segment_length"]
-            roughness = self.roughness_values.get(relation["material"].lower())
+            material = relation["material"]
+            roughness = self.roughness_values.get(material.lower() if material else "unknown")
 
             # Create edge connecting the new nodes
-            valve = Valve(valve_link_id,
-                          new_start_node_id,
-                          new_end_node_id,
-                          self.wn)
+            # valve = Valve(valve_link_id,
+            #               new_start_node_id,
+            #               new_end_node_id,
+            #               self.wn)
 
             self.wn.add_valve(valve_link_id,
                               new_start_node_id,
@@ -176,31 +192,33 @@ class Convert2Wntr(Neo4j2Wntr):
             # Update existing edge to connect to the new nodes
             self.add_pipe(relation._id, end_node_id, new_start_node_id, diameter, length, roughness)
 
-        else:
-            start_node1 = outgoing_edges[0][2]
-            relation1 = outgoing_edges[0][1]
-            relation2 = outgoing_edges[1][1]
-            end_node2 = outgoing_edges[1][2]
+        elif len(outgoing_edges) == 2:
+            start_node1 = outgoing_edges[0]._end_node
+            relation1 = outgoing_edges[0]
+            relation2 = outgoing_edges[1]
+            end_node2 = outgoing_edges[1]._end_node
 
             start_node1_id = self.generate_unique_id(start_node1._id)
             length1 = relation1["segment_length"]
             diameter1 = relation1["diameter"]
-            roughness1 = self.roughness_values.get(relation1["material"].lower())
+            material1 = relation1["material"]
+            roughness1 = self.roughness_values.get(material1.lower() if material1 else "unknown")
 
             end_node2_id = self.generate_unique_id(end_node2._id)
             length2 = relation2["segment_length"]
             diameter2 = relation2["diameter"]
-            roughness2 = self.roughness_values.get(relation2["material"].lower())
+            material2 = relation2["material"]
+            roughness2 = self.roughness_values.get(material2.lower() if material2 else "unknown")
 
             new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
             new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
             valve_link_id = self.generate_unique_id(valve_id) + "_" + valve_type + "_valve"
 
             # Create edge connecting the new nodes
-            valve = Valve(valve_link_id,
-                          new_start_node_id,
-                          new_end_node_id,
-                          self.wn)
+            # valve = Valve(valve_link_id,
+            #               new_start_node_id,
+            #               new_end_node_id,
+            #               self.wn)
 
             self.wn.add_valve(valve_link_id,
                               new_start_node_id,
@@ -208,10 +226,12 @@ class Convert2Wntr(Neo4j2Wntr):
                               diameter1,
                               valve_type,
                               initial_status='OPEN')
-            # pdb.set_trace()
             # Update existing edge to connect to the new nodes
             self.add_pipe(relation1._id, start_node1_id, new_start_node_id, diameter1, length1, roughness1)
             self.add_pipe(relation2._id, new_end_node_id, end_node2_id, diameter2, length2, roughness2)
+        else:
+            # add exception to suggest valve with more than two outgoing pipes is not supported
+            pdb.set_trace()
 
     def create_links_and_assets(self):
         """
@@ -221,15 +241,15 @@ class Convert2Wntr(Neo4j2Wntr):
             start_node = edge._start_node
             end_node = edge._end_node
 
+            if self.is_valve(start_node._id) or self.is_valve(end_node._id):
+                # Skip valve edges (already processed in create_valve_edges)
+                continue
+
             start_node_id = self.generate_unique_id(start_node._id)
             end_node_id = self.generate_unique_id(end_node._id)
             diameter = edge["diameter"]
             length = edge["segment_length"]
             roughness = self.roughness_values.get(edge['material'].lower())
-
-            if self.is_valve(start_node._id) or self.is_valve(end_node._id):
-                # Skip valve edges (already processed in create_valve_edges)
-                continue
 
             self.add_pipe(edge._id, start_node_id, end_node_id, diameter, length, roughness)
 
@@ -276,3 +296,16 @@ class Convert2Wntr(Neo4j2Wntr):
                 """
         valve = db.cypher_query(asset_query)[0]
         return bool(valve)
+
+    def is_in_dma(self, node_id):
+        if self.config.dma_codes:  # Check if there are any DMA codes specified
+            dma_codes_str = ", ".join(f"'{dma_code}'" for dma_code in self.config.dma_codes)
+            dma_query = f"""
+                MATCH (n)-[:IN_DMA]->(d)
+                WHERE id(n)={node_id} AND d.code IN [{dma_codes_str}]
+                RETURN d
+            """
+
+            in_dma = db.cypher_query(dma_query)
+            return bool(in_dma)
+        return True
