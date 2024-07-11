@@ -49,17 +49,15 @@ class Convert2Wntr(Neo4j2Wntr):
                 if self.config.dma_codes:  # Check if there are any DMA codes specified
                     dma_codes_str = ", ".join(f"'{dma_code}'" for dma_code in self.config.dma_codes)
                     query = f"""
-                        MATCH (n)-[r]-(m), (n)-[:IN_DMA]->(d), (m)-[:IN_DMA]->(d)
+                        MATCH (n)-[r:PipeMain]-(m), (n)-[:IN_DMA]->(d), (m)-[:IN_DMA]->(d)
                         WHERE d.code IN [{dma_codes_str}]
-                        AND NOT (type(r) = 'IN_UTILITY' OR type(r) = 'IN_DMA' OR type(r) = 'HAS_ASSET')
                         RETURN n, r, m
                         SKIP {offset}
                         LIMIT {batch_size}
                     """
                 else:
                     query = f"""
-                        MATCH (n)-[r]-(m)
-                        WHERE NOT (type(r) = 'IN_UTILITY' OR type(r) = 'IN_DMA' OR type(r) = 'HAS_ASSET')
+                        MATCH (n)-[r:PipeMain]-(m)
                         RETURN n, r, m
                         SKIP {offset}
                         LIMIT {batch_size}
@@ -177,18 +175,13 @@ class Convert2Wntr(Neo4j2Wntr):
             material = relation["material"]
             roughness = self.roughness_values.get(material.lower() if material else "unknown")
 
-            # Create edge connecting the new nodes
-            # valve = Valve(valve_link_id,
-            #               new_start_node_id,
-            #               new_end_node_id,
-            #               self.wn)
-
             self.wn.add_valve(valve_link_id,
                               new_start_node_id,
                               new_end_node_id,
                               diameter,
                               valve_type,
                               initial_status='OPEN')
+
             # Update existing edge to connect to the new nodes
             self.add_pipe(relation._id, end_node_id, new_start_node_id, diameter, length, roughness)
 
@@ -214,18 +207,13 @@ class Convert2Wntr(Neo4j2Wntr):
             new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
             valve_link_id = self.generate_unique_id(valve_id) + "_" + valve_type + "_valve"
 
-            # Create edge connecting the new nodes
-            # valve = Valve(valve_link_id,
-            #               new_start_node_id,
-            #               new_end_node_id,
-            #               self.wn)
-
             self.wn.add_valve(valve_link_id,
                               new_start_node_id,
                               new_end_node_id,
                               diameter1,
                               valve_type,
                               initial_status='OPEN')
+
             # Update existing edge to connect to the new nodes
             self.add_pipe(relation1._id, start_node1_id, new_start_node_id, diameter1, length1, roughness1)
             self.add_pipe(relation2._id, new_end_node_id, end_node2_id, diameter2, length2, roughness2)
@@ -296,16 +284,3 @@ class Convert2Wntr(Neo4j2Wntr):
                 """
         valve = db.cypher_query(asset_query)[0]
         return bool(valve)
-
-    def is_in_dma(self, node_id):
-        if self.config.dma_codes:  # Check if there are any DMA codes specified
-            dma_codes_str = ", ".join(f"'{dma_code}'" for dma_code in self.config.dma_codes)
-            dma_query = f"""
-                MATCH (n)-[:IN_DMA]->(d)
-                WHERE id(n)={node_id} AND d.code IN [{dma_codes_str}]
-                RETURN d
-            """
-
-            in_dma = db.cypher_query(dma_query)
-            return bool(in_dma)
-        return True
