@@ -10,6 +10,7 @@ from .data.gis_to_graph_data import (
     PIPE_JUNCTIONS,
     POINT_ASSETS,
     JUNCTIONS_WITH_POSITIONS,
+    POINT_ASSETS_WITH_POSITIONS
 )
 from cleanwater.transform.gis_to_graph import GisToGraph
 
@@ -48,19 +49,17 @@ class TestGisToGraph:
         del junctions_with_positions[1]["intersection_point_geometry"]
         assert junctions_with_positions == JUNCTIONS_WITH_POSITIONS
 
-    # This function needs to be modified to so that it's done in the same way as the one above
-    # def test_get_assets_connections_on_pipe(self):
-    #     expected_point_assets_with_positions_hash = "0a7fdad5f5ecfb3571f9755d57e965bd"
+    
+    def test_get_connections_points_on_pipe(self):
 
-    #     base_pipes = get_pipe_data()
+        base_pipe = get_pipe_data()
 
-    #     gis_to_graph = GisToGraph(SRID, sqids)
 
-    #     point_assets_with_positions = gis_to_graph._get_connections_points_on_pipe(
-    #         base_pipe, point_assets
-    #     )
+        gis_to_graph = GisToGraph(SRID, sqids)
 
-    #     assert (
-    #         joblib.hash(point_assets_with_positions)
-    #         == expected_point_assets_with_positions_hash
-    #     )
+        point_assets_with_positions = gis_to_graph._get_connections_points_on_pipe(base_pipe,JUNCTIONS_WITH_POSITIONS
+        )
+
+        del point_assets_with_positions[0]["intersection_point_geometry"]
+        del point_assets_with_positions[1]["intersection_point_geometry"]
+        assert point_assets_with_positions == POINT_ASSETS_WITH_POSITIONS
