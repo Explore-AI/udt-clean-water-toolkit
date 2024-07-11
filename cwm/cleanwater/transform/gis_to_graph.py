@@ -145,9 +145,7 @@ class GisToGraph:
             utility_data,
             all_asset_node_labels,
         ) = self._set_nodes_and_edges(base_pipe, nodes_ordered)
-        import pdb
 
-        pdb.set_trace()
         return (
             pipe_nodes_by_pipe,
             pipe_edges_by_pipe,
