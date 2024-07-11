@@ -218,8 +218,7 @@ class Convert2Wntr(Neo4j2Wntr):
             self.add_pipe(relation1._id, start_node1_id, new_start_node_id, diameter1, length1, roughness1)
             self.add_pipe(relation2._id, new_end_node_id, end_node2_id, diameter2, length2, roughness2)
         else:
-            # add exception to suggest valve with more than two outgoing pipes is not supported
-            pdb.set_trace()
+            raise ValueError("Valves cannot be connected to more than one pipe main!")
 
     def create_links_and_assets(self):
         """
