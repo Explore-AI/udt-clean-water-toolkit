@@ -10,7 +10,7 @@ from .data.gis_to_graph_data import (
     PIPE_JUNCTIONS,
     POINT_ASSETS,
     JUNCTIONS_WITH_POSITIONS,
-    POINT_ASSETS_WITH_POSITIONS
+    POINT_ASSETS_WITH_POSITIONS,
 )
 from cleanwater.transform.gis_to_graph import GisToGraph
 
@@ -49,17 +49,28 @@ class TestGisToGraph:
         del junctions_with_positions[1]["intersection_point_geometry"]
         assert junctions_with_positions == JUNCTIONS_WITH_POSITIONS
 
-    
     def test_get_connections_points_on_pipe(self):
 
         base_pipe = get_pipe_data()
 
-
         gis_to_graph = GisToGraph(SRID, sqids)
 
-        point_assets_with_positions = gis_to_graph._get_connections_points_on_pipe(base_pipe,JUNCTIONS_WITH_POSITIONS
+        point_assets_with_positions = gis_to_graph._get_connections_points_on_pipe(
+            base_pipe, JUNCTIONS_WITH_POSITIONS
         )
 
         del point_assets_with_positions[0]["intersection_point_geometry"]
         del point_assets_with_positions[1]["intersection_point_geometry"]
         assert point_assets_with_positions == POINT_ASSETS_WITH_POSITIONS
+
+    # def test_set_node_properties(self):
+
+    #     base_pipe = get_pipe_data()
+
+    #     gis_to_graph = GisToGraph(SRID, sqids)
+
+    #     nodes_ordered = gis_to_graph._set_node_properties(
+    #         base_pipe, JUNCTIONS_WITH_POSITIONS, POINT_ASSETS_WITH_POSITIONS
+    #     )
+
+    #     print(nodes_ordered)
