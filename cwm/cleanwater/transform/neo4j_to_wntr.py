@@ -50,7 +50,7 @@ class Neo4j2Wntr:
         """
         return tuple(coords)
 
-    def add_node(self, id, coordinates):
+    def add_junction(self, id, coordinates):
         """
         Adds a node to the water network model.
 
@@ -64,6 +64,24 @@ class Neo4j2Wntr:
         elevation = self.generate_random_value(20, 40)  # Example elevation range
         base_demand = self.generate_random_value(10, 50)  # Example demand range
         self.wn.add_junction(id, elevation=elevation, base_demand=base_demand, coordinates=coordinates)
+
+    def add_valve(self, valve_link_id, new_start_node_id, new_end_node_id, diameter, valve_type):
+        """
+        Add a valve to the Water Network Toolkit (WNTR) model.
+
+        Parameters:
+            valve_link_id: Unique ID for the valve link.
+            new_start_node_id: ID of the new start node for the valve.
+            new_end_node_id: ID of the new end node for the valve.
+            diameter: Diameter of the valve.
+            valve_type: Type of the valve.
+        """
+        self.wn.add_valve(valve_link_id,
+                          new_start_node_id,
+                          new_end_node_id,
+                          diameter,
+                          valve_type,
+                          initial_status='OPEN')
 
     def add_pipe(self, edge_id, start_node_id, end_node_id, diameter, length, roughness=100.0):
         """

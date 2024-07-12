@@ -26,7 +26,6 @@ class Convert2Wntr(Neo4j2Wntr):
         super().__init__(sqids)
         self.config = config
         self.all_nodes = set()
-        self.all_valves = set()
         self.all_edges = set()
         self.valve_types = ['PRV', 'PSV', 'FCV', 'TCV']  # Example valve types
         self.wn = wntr.network.WaterNetworkModel()  # Initialize WNTR model
@@ -51,17 +50,28 @@ class Convert2Wntr(Neo4j2Wntr):
                     query = f"""
                         MATCH (n)-[r:PipeMain]-(m), (n)-[:IN_DMA]->(d), (m)-[:IN_DMA]->(d)
                         WHERE d.code IN [{dma_codes_str}]
-                        RETURN n, r, m
+                        WITH n, m, COLLECT(r) AS edges
+                        UNWIND edges AS edge
+                        WITH n, m, edge
+                        ORDER BY id(edge) // Optional: Choose which edge to keep based on certain criteria
+                        WITH n, m, COLLECT(edge)[0] AS uniqueEdge
+                        RETURN n, uniqueEdge, m
                         SKIP {offset}
                         LIMIT {batch_size}
-                    """
+                        """
+
                 else:
-                    query = f"""
-                        MATCH (n)-[r:PipeMain]-(m)
-                        RETURN n, r, m
-                        SKIP {offset}
-                        LIMIT {batch_size}
-                    """
+                    query = f"""                    
+                            MATCH (n)-[r:PipeMain]-(m)
+                            WITH n, m, COLLECT(r) AS edges
+                            UNWIND edges AS edge
+                            WITH n, m, edge
+                            ORDER BY id(edge) // Optional: Choose which edge to keep based on certain criteria
+                            WITH n, m, COLLECT(edge)[0] AS uniqueEdge
+                            RETURN n, uniqueEdge, m
+                            SKIP {offset}
+                            LIMIT {batch_size}
+                            """
 
                 results, meta = db.cypher_query(query)
                 offset += batch_size
@@ -99,32 +109,23 @@ class Convert2Wntr(Neo4j2Wntr):
                 self.all_edges.add(relation)
 
         print("Processing nodes")
+        self.all_nodes = set(self.remove_duplicate_nodes(list(self.all_nodes)))
         for node in self.all_nodes:
-            if self.is_valve(node._id):
-                self.all_valves.add(node)
-            elif not self.is_valve(node._id):
-                self.create_nodes_and_assets(node)
-            else:
-                print(node)
-                pdb.set_trace()
-        for valve_node in self.all_valves:
-            self.handle_valve_nodes(valve_node)
+            self.create_nodes_and_assets(node)
+
+        num_nodes = len(self.all_nodes)
+        num_wntr_nodes = len(self.wn.node_name_list)
 
         print("Processing edges")
-        for node in self.all_nodes:
-            if self.is_valve(node._id):
-                self.create_valve_edges(node)
-
         self.create_links_and_assets()
 
-    def handle_valve_nodes(self, valve_node):
-        valve_id = valve_node._id
-        coordinates = self.convert_coords(valve_node['coords_27700'])
-        new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
-        new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
-        self.add_node(self.generate_unique_id(valve_id), coordinates)
-        self.add_node(new_start_node_id, coordinates)
-        self.add_node(new_end_node_id, coordinates)
+        num_edges = len(self.all_edges)
+        num_wntr_edges = len(self.wn.link_name_list)
+
+        print("Total nodes queried:", num_nodes)
+        print("Total nodes in WNTR model:", num_wntr_nodes)
+        print("Total edges queried:", num_edges)
+        print("Total edges in WNTR model:", num_wntr_edges)
 
     def create_nodes_and_assets(self, node):
         """
@@ -144,81 +145,9 @@ class Convert2Wntr(Neo4j2Wntr):
         else:
             # No asset, add as junction
             node_id = self.generate_unique_id(node._id)
-            self.add_node(node_id, coordinates)
+            self.add_junction(node_id, coordinates)
 
-    def create_valve_edges(self, valve_node):
-        """
-        Process a valve node by replacing it with a triad (node, edge, node).
 
-        Parameters:
-            valve_node: Valve node from Neo4j graph data.
-        """
-        valve_id = valve_node._id
-        valve_type = np.random.choice(self.valve_types)  # Choose valve type
-
-        outgoing_edges = [edge
-                          for edge in self.all_edges
-                          if edge._start_node._id == valve_id
-                          or edge._end_node._id == valve_id]
-
-        if len(outgoing_edges) == 0:
-            print(valve_id)
-            pdb.set_trace()
-        elif len(outgoing_edges) == 1:
-            end_node_id = self.generate_unique_id(outgoing_edges[0]._end_node._id)
-            relation = outgoing_edges[0]
-            new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
-            new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
-            valve_link_id = self.generate_unique_id(valve_id) + "_" + valve_type + "_valve"
-            diameter = relation["diameter"]
-            length = relation["segment_length"]
-            material = relation["material"]
-            roughness = self.roughness_values.get(material.lower() if material else "unknown")
-
-            self.wn.add_valve(valve_link_id,
-                              new_start_node_id,
-                              new_end_node_id,
-                              diameter,
-                              valve_type,
-                              initial_status='OPEN')
-
-            # Update existing edge to connect to the new nodes
-            self.add_pipe(relation._id, end_node_id, new_start_node_id, diameter, length, roughness)
-
-        elif len(outgoing_edges) == 2:
-            start_node1 = outgoing_edges[0]._end_node
-            relation1 = outgoing_edges[0]
-            relation2 = outgoing_edges[1]
-            end_node2 = outgoing_edges[1]._end_node
-
-            start_node1_id = self.generate_unique_id(start_node1._id)
-            length1 = relation1["segment_length"]
-            diameter1 = relation1["diameter"]
-            material1 = relation1["material"]
-            roughness1 = self.roughness_values.get(material1.lower() if material1 else "unknown")
-
-            end_node2_id = self.generate_unique_id(end_node2._id)
-            length2 = relation2["segment_length"]
-            diameter2 = relation2["diameter"]
-            material2 = relation2["material"]
-            roughness2 = self.roughness_values.get(material2.lower() if material2 else "unknown")
-
-            new_start_node_id = self.generate_unique_id(valve_id) + "_valve_start"
-            new_end_node_id = self.generate_unique_id(valve_id) + "_valve_end"
-            valve_link_id = self.generate_unique_id(valve_id) + "_" + valve_type + "_valve"
-
-            self.wn.add_valve(valve_link_id,
-                              new_start_node_id,
-                              new_end_node_id,
-                              diameter1,
-                              valve_type,
-                              initial_status='OPEN')
-
-            # Update existing edge to connect to the new nodes
-            self.add_pipe(relation1._id, start_node1_id, new_start_node_id, diameter1, length1, roughness1)
-            self.add_pipe(relation2._id, new_end_node_id, end_node2_id, diameter2, length2, roughness2)
-        else:
-            raise ValueError("Valves cannot be connected to more than one pipe main!")
 
     def create_links_and_assets(self):
         """
@@ -227,18 +156,19 @@ class Convert2Wntr(Neo4j2Wntr):
         for edge in self.all_edges:
             start_node = edge._start_node
             end_node = edge._end_node
-
-            if self.is_valve(start_node._id) or self.is_valve(end_node._id):
-                # Skip valve edges (already processed in create_valve_edges)
-                continue
-
             start_node_id = self.generate_unique_id(start_node._id)
             end_node_id = self.generate_unique_id(end_node._id)
             diameter = edge["diameter"]
             length = edge["segment_length"]
             roughness = self.roughness_values.get(edge['material'].lower())
 
-            self.add_pipe(edge._id, start_node_id, end_node_id, diameter, length, roughness)
+            if self.is_valve(end_node._id):
+                valve_type = np.random.choice(self.valve_types)
+                valve_id = self.generate_unique_id(edge._id)
+                self.add_valve(valve_id, start_node_id, end_node_id, diameter, valve_type)
+            else:
+                self.add_pipe(edge._id, start_node_id, end_node_id, diameter, length, roughness)
+
 
     def wntr_to_inp(self):
         """
@@ -283,3 +213,24 @@ class Convert2Wntr(Neo4j2Wntr):
                 """
         valve = db.cypher_query(asset_query)[0]
         return bool(valve)
+
+    @staticmethod
+    def remove_duplicate_nodes(node_list):
+        """
+        Remove duplicate nodes from a list of nodes.
+
+        Parameters:
+            node_list (list of dict): List of nodes to remove duplicates from.
+
+        Returns:
+            list: List of nodes with duplicates removed.
+        """
+        seen_nodes = []
+        result = []
+
+        for node in node_list:
+            if node not in seen_nodes:
+                seen_nodes.append(node)
+                result.append(node)
+
+        return result
