@@ -26,6 +26,10 @@ class PipeMainsController(GeoDjangoDataManager):
         "tag",
     ]  # should not include the geometry column as per convention
 
+    def __init__(self, pipe_model, asset_models):
+        self.pipe_model = pipe_model
+        self.asset_models = asset_models
+
     def generate_dwithin_subquery(
         self,
         qs,
@@ -48,7 +52,7 @@ class PipeMainsController(GeoDjangoDataManager):
         """
 
         pm_inner_subquery = self._generate_dwithin_inner_subquery(
-            self.model.objects.all(), "tag", geometry_field=geometry_field
+            self.pipe_model.objects.all(), "tag", geometry_field=geometry_field
         )
 
         subquery = (
@@ -180,7 +184,7 @@ class PipeMainsController(GeoDjangoDataManager):
         }
 
     def _generate_mains_subqueries(self):
-        pm_qs = self.model.objects.all().order_by("pk")
+        pm_qs = self.pipe_model.objects.all().order_by("pk")
 
         json_fields = self.get_pipe_json_fields()
 
@@ -196,8 +200,17 @@ class PipeMainsController(GeoDjangoDataManager):
 
         return subqueries
 
+    def generate_asset_subquery(self, asset_model, json_fields):
+        return self.generate_dwithin_subquery(asset_model.objects.all(), json_fields)
+
     def _generate_asset_subqueries(self):
         json_fields = self.get_asset_json_fields()
+
+        subqueries = {}
+        for name, asset_model in asset_models.items():
+            subquery = self.generate_asset_subquery(asset_model, json_fields)
+            subqueries[name] = subquery
+
 
         # This section is deliberately left verbose for clarity
         subquery3 = self.generate_dwithin_subquery(Logger.objects.all(), json_fields)
@@ -305,13 +318,13 @@ class PipeMainsController(GeoDjangoDataManager):
         asset_subqueries = self._generate_asset_subqueries()
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
+        qs = self.pipe_model.objects.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
 
         qs = qs.annotate(
-            asset_name=Value(self.model.AssetMeta.asset_name),
+            asset_name=Value(self.pipe_model.AssetMeta.asset_name),
             asset_label=Value(qs.model.__name__),
             pipe_length=Length("geometry"),
             wkt=AsWKT("geometry"),
@@ -331,14 +344,14 @@ class PipeMainsController(GeoDjangoDataManager):
 
     def get_mains_count(self, filters):
 
-        qs = self.model.objects.prefetch_related("dmas", "dmas__utility")
+        qs = self.pipe_model.objects.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
         return qs.count()
 
-    def get_mains_pks(self, pipe_mains_qs, filters):
-        qs = pipe_mains_qs.prefetch_related("dmas", "dmas__utility")
+    def get_mains_pks(self, filters):
+        qs = self.pipe_model.objects.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
@@ -355,7 +368,7 @@ class PipeMainsController(GeoDjangoDataManager):
         json_properties = dict(zip(properties, properties))
 
         qs: QuerySet = (
-            self.model.objects.values(*properties)
+            self.pipe_model.objects.values(*properties)
             .annotate(
                 geojson=JSONObject(
                     properties=JSONObject(**json_properties),
