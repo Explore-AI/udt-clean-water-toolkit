@@ -1,13 +1,16 @@
 from wntr import network
+import random
+
 
 class Neo4j2Wntr:
     """
     Convert a Neo4j graph the to Water Network Toolkit (WNTR) format.
-
     """
+
     def __init__(self, sqids):
         self.wn = network.WaterNetworkModel()
         self.sqids = sqids
+        self.valve_types = ["PRV", "PSV", "FCV", "TCV"]
 
     def generate_unique_id(self, input_string):
         """
@@ -23,7 +26,7 @@ class Neo4j2Wntr:
         unique_id = self.sqids.encode([input_string])
         return str(unique_id)
 
-    def add_node(self, id, x, y):
+    def add_node(self, id, x, y, node_type=None):
         """
         Adds a node to the water network model.
 
@@ -31,13 +34,31 @@ class Neo4j2Wntr:
             id (str): ID of the node.
             x (float): X-coordinate of the node.
             y (float): Y-coordinate of the node.
+            node_type (str, optional): Type of the node. Defaults to None.
 
         Returns:
             node_id (str): SQIDS ID of the added node.
 
         """
-        node_id = self.generate_unique_id(id)
-        self.wn.add_junction(node_id, coordinates=(x, y))
+        node_id = id
+
+        if node_type and "NetworkOptValve" in node_type:
+            base_head = random.uniform(80, 120)  # Example head value
+            self.wn.add_reservoir(node_id, base_head=base_head, coordinates=(x, y))
+        else:
+            # Random elevation between 0 and 100 meters
+            elevation = random.uniform(0, 100)
+
+            # Random base demand between 0 and 1 cubic meters per second
+            base_demand = random.uniform(0, 1)
+
+            self.wn.add_junction(
+                node_id,
+                base_demand=base_demand,
+                elevation=elevation,
+                coordinates=(x, y),
+            )
+
         return node_id
 
     def add_pipe(self, edge_id, start_node_id, end_node_id):
@@ -53,32 +74,51 @@ class Neo4j2Wntr:
             pipe_id (str): SQIDS ID of the added pipe.
 
         """
-        pipe_id = self.generate_unique_id(edge_id)
+        pipe_id = edge_id
 
-        self.wn.add_pipe(pipe_id, start_node_id, end_node_id)
+        # Assigning default values to pipe attributes
+        length = random.uniform(100, 1000)  # in meters
+        diameter = random.uniform(0.1, 1)  # in meters
+        roughness = random.uniform(100, 150)  # Hazen-Williams C-factor
+
+        self.wn.add_pipe(
+            pipe_id,
+            start_node_id,
+            end_node_id,
+            length=length,
+            diameter=diameter,
+            roughness=roughness,
+        )
 
         return pipe_id
 
-    def create_graph(self, graph):
+    def create_graph(self, network_nodes_results, asset_dict):
         """
-        Processes a batch of results from Neo4j query and adds corresponding nodes and pipes to the water network model.
+        Processes results from Neo4j query and adds corresponding nodes and pipes to the water network model.
 
         Parameters:
-            batch_result (list): List of results from Neo4j query.
+            network_nodes_results (list): List of results from Neo4j query for network nodes and pipes.
+            asset_dict (dict): Dictionary containing node IDs and their asset labels.
 
         """
-        for attributes in graph:
+        for attributes in network_nodes_results:
             start = attributes[1]._start_node
-            x, y = start['x_coord'], start['y_coord']
+            start_x, start_y = (
+                start.get("coords_27700")[0],
+                start.get("coords_27700")[1],
+            )
             start_id = start._id
-            start_node_id = self.add_node(start_id, x, y)
+            start_type = asset_dict.get(start_id, [])
 
             end = attributes[1]._end_node
-            x, y = end['x_coord'], end['y_coord']
+            end_x, end_y = end.get("coords_27700")[0], end.get("coords_27700")[1]
             end_id = end._id
-            end_node_id = self.add_node(end_id, x, y)
+            end_type = asset_dict.get(end_id, [])
 
             edge_id = attributes[1]._id
-            self.add_pipe(edge_id, start_node_id, end_node_id)
 
-            return self.wn
+            start_node_id = self.add_node(str(start_id), start_x, start_y, start_type)
+            end_node_id = self.add_node(str(end_id), end_x, end_y, end_type)
+            self.add_pipe(str(edge_id), start_node_id, end_node_id)
+
+        return self.wn
