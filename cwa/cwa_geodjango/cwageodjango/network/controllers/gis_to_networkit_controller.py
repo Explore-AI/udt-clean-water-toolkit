@@ -1,13 +1,10 @@
 from django.db.models.query import QuerySet
 import networkit as nk
-from ..calculators import GisToNkCalculator
-from cwageodjango.assets.controllers import (
-    TrunkMainsController,
-    DistributionMainsController,
-)
+from cleanwater.transform import GisToNk
+from cwageodjango.assets.controllers import PipeMainsController
 
 
-class GisToNkController(GisToNkCalculator):
+class GisToNkController(GisToNk):
     """
     Create a NetworKit graph of assets from a geospatial
     network of assets
@@ -54,6 +51,7 @@ class GisToNkController(GisToNkCalculator):
         Writes the network graph to a specified GraphML file using the NetworkKit library.
         """
         nk.writeGraph(self.G, self.config.outputfile, nk.Format.GML)
+
     def _get_query_offset_limit(self, pipes_qs):
         """
         Calculate query offset and limit for batching.
@@ -77,27 +75,24 @@ class GisToNkController(GisToNkCalculator):
         else:
             query_offset = self.config.query_offset
         return query_offset, query_limit
+
+    # This fn is a candidate to be abstracted out into the NetworkController
     def _get_pipe_and_asset_data(self) -> QuerySet:
         """
         Retrieve pipe and asset data from the database.
-        Retrieves trunk mains and distribution mains data from the database and combines them
+        Retrieves pipe mains and distribution mains data from the database and combines them
         into a single QuerySet.
         Returns:
             QuerySet: A QuerySet object containing pipe and asset data.
         """
 
-    # This fn is a candidate to be abstracted out into the NetworkController
-    def _get_pipe_and_asset_data(self) -> QuerySet:
-
         filters = {"dma_codes": self.config.dma_codes}
 
-        trunk_mains_qs: QuerySet = self.get_trunk_mains_data(filters)
-        distribution_mains_qs: QuerySet = self.get_distribution_mains_data(filters)
+        pipe_qs: QuerySet = self.get_pipe_mains_data(filters)
 
-        pipes_qs = trunk_mains_qs.union(distribution_mains_qs, all=True)
-        return pipes_qs
+        return pipe_qs
 
-    def get_trunk_mains_data(self, filters={}) -> QuerySet:
+    def get_pipe_mains_data(self, filters={}) -> QuerySet:
         """
         Retrieve trunk mains data from the database.
         Uses the TrunkMainsController to query and retrieve trunk mains data from the database.
@@ -105,16 +100,5 @@ class GisToNkController(GisToNkCalculator):
             QuerySet: A QuerySet object containing trunk mains data.
         """
 
-        tm: TrunkMainsController = TrunkMainsController()
+        tm: PipeMainsController = PipeMainsController()
         return tm.get_pipe_point_relation_queryset(filters)
-
-    def get_distribution_mains_data(self, filters={}) -> QuerySet:
-        """
-        Retrieve distribution mains data from the database.
-        Uses the DistributionMainsController to query and retrieve distribution mains data from
-        the database.
-        Returns:
-            QuerySet: A QuerySet object containing distribution mains data.
-        """
-        dm: DistributionMainsController = DistributionMainsController()
-        return dm.get_pipe_point_relation_queryset(filters)

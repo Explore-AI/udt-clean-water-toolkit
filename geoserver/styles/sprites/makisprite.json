@@ -1,107 +1,135 @@
 {
   "hydrant": {
-    "height": 80,
-    "pixelRatio": 1,
-    "width": 50,
     "x": 0,
-    "y": 0
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
   },
   "logger": {
-    "height": 77,
-    "pixelRatio": 1,
-    "width": 77,
-    "x": 0,
-    "y": 80
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "network-meter-distribution-input-meter": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 0,
-    "y": 157
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "network-meter-district-meter": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 50,
-    "y": 157
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "network-meter-fire": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 100,
-    "y": 157
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "network-meter-unkown": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 150,
-    "y": 157
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "network-meter-waste": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 0,
-    "y": 207
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "network-meter-zonal": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 50,
-    "y": 207
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "network-opt-valve": {
-    "height": 54,
-    "pixelRatio": 1,
-    "width": 54,
-    "x": 77,
-    "y": 80
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "operational_site_non-potable_state_closed": {
-    "height": 54,
-    "pixelRatio": 1,
-    "width": 54,
-    "x": 131,
-    "y": 80
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "operational_site_non_potable_state_default": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 100,
-    "y": 207
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "operational_site_non_potable_state_inoperable": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 150,
-    "y": 207
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "operational_site_non_potable_state_inoperable_closed": {
-    "height": 54,
-    "pixelRatio": 1,
-    "width": 54,
-    "x": 100,
-    "y": 0
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "operational_site_variation_double": {
-    "height": 75,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 50,
-    "y": 0
-  },
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+  ,
   "operational_site_variation_single": {
-    "height": 50,
-    "pixelRatio": 1,
-    "width": 50,
-    "x": 0,
-    "y": 257
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
   }
 }

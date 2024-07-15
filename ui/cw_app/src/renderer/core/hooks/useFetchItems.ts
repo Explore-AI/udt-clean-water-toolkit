@@ -3,7 +3,6 @@ import useFilterParams from './useFilterParams'
 import { getApiUrl } from '../utils/http'
 
 const useFetchItems = (queryKey, options={}) => {
-
     const { filterParams, setFilterParams } = useFilterParams(queryKey, options.params)
 
     const url = getApiUrl(queryKey, filterParams)

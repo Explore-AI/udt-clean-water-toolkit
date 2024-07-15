@@ -17,7 +17,7 @@ const handleStyle = {
 };
 
 
-const PipeEdgeNode = memo(() => {
+export default memo(() => {
     return (
         <>
             <Handle type="target" position={Position.Top} style={{ visibility: 'hidden', ...handleStyle}}/>
@@ -26,4 +26,3 @@ const PipeEdgeNode = memo(() => {
     );
 });
 
-export { PipeEdgeNode };

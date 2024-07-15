@@ -1,0 +1,19 @@
+.container {
+    display: flex; 
+    flex-direction: column;
+    width: 98%; 
+    margin: 2%; 
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: rgba(32, 30, 30, 0.15) 1.95px 1.95px 2.6px;
+    align-items: center;
+    justify-items: stretch;
+}
+
+.table { 
+    width: 100%; 
+}
+
+.title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

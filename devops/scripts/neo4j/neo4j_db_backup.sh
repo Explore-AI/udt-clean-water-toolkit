@@ -16,7 +16,7 @@ CURRENT_DATETIME=`date "+%d-%m-%Y_%H-%M-%S"`
 BACKUP_FILE_NAME=${DB_BACKUPS_DIR}/udt_neo4j_db_backup_${CURRENT_DATETIME}.dump
 
 if [[ -z ${DB_CONTAINER_ID} ]];then
-  echo "${DB_CONTAINER_ID} is not running, please run it using the docker-compose-postgis.yml"
+  echo "${DB_CONTAINER_ID} is not running, please run it using the docker-compose-neo4j.yml"
 else
   docker stop ${DB_CONTAINER_ID}
   #docker run -it  --rm --env-file ../../docker/env_files/.db_env --volume=docker_neo4j-data:/data --volume=docker_neo4j:/backups neo4j/neo4j-admin neo4j-admin database dump neo4j --verbose --to-path=/backups
