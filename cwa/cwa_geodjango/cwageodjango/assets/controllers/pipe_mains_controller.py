@@ -20,7 +20,7 @@ from cwageodjango.core.db.models.functions import LineStartPoint, LineEndPoint
 class PipeMainsController(GeoDjangoDataManager):
     """Convert pipe_mains data to a Queryset or GeoJSON."""
 
-    WITHIN_DISTANCE = 0.5
+    WITHIN_DISTANCE = 0.1
     default_properties = [
         "id",
         "tag",
