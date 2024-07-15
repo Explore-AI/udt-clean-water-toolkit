@@ -226,9 +226,9 @@ class AcousticLoggerCoverage:
                 pipe_material = edge[1].get("material")
                 pipe_length = edge[1].get("segment_length")
 
-                print(
-                    f"Running for {pipe_id}, {edge_distance} on the edge left, {remaining_distance} in total"
-                )
+                # print(
+                #     f"Running for {pipe_id}, {edge_distance} on the edge left, {remaining_distance} in total"
+                # )
 
                 if pipe_length > edge_distance:
                     covered_distance = edge_distance
@@ -251,7 +251,7 @@ class AcousticLoggerCoverage:
                     )
 
                     if self.check_for_pipe_end(node_key=node_key):
-                        print(f"Pipe end detected at {node_key}")
+                        # print(f"Pipe end detected at {node_key}")
                         edge_distance = 0
                         break
 
@@ -278,7 +278,7 @@ class AcousticLoggerCoverage:
                         )
 
                         if self.check_for_pipe_end(node_key=node_key):
-                            print(f"Pipe end detected at {node_key}")
+                            # print(f"Pipe end detected at {node_key}")
                             edge_distance = 0
                             continue
 
@@ -338,15 +338,15 @@ class AcousticLoggerCoverage:
                 pipe_length = edge[1].get("segment_length")
                 travel_distance = self.detection_dist.get(pipe_material)
 
-                print(
-                    "Running for Logger:",
-                    logger_key,
-                    "at ",
-                    logger_networknode_key,
-                    "edge: ",
-                    pipe_id,
-                    travel_distance,
-                )
+                # print(
+                #     "Running for Logger:",
+                #     logger_key,
+                #     "at ",
+                #     logger_networknode_key,
+                #     "edge: ",
+                #     pipe_id,
+                #     travel_distance,
+                # )
 
                 if pipe_length <= travel_distance:
                     remaining_distance = travel_distance - pipe_length
