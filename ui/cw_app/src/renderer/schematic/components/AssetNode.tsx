@@ -1,6 +1,12 @@
+import styles from '../css/AssetNode.module.css';
+import { useContext, memo } from 'react'
 import { Position, Handle, NodeProps } from 'reactflow';
-import { memo } from 'react';
 import { Node } from '../types/types';
+import { SchematicUiContext } from '../hooks/useSchematicUi'
+import { getIcons } from './IconComponents';
+import { includes as _includes, filter as _filter } from 'lodash'
+import { AssetPopup } from './AssetPopup';
+
 const handleStyle = {
     top: '13px',
     bottom: '0px',
@@ -14,19 +20,39 @@ const handleStyle = {
     maxWidth: '1px',
     minWidth: '1px',
 };
-const nodeStyle = {
-    backgroundColor: '#cfeef4',
-    width: '100px',
-    height: '50px',
-    borderRadius: '20%',
-    border: '2px solid #393939',
-    display: 'inline-block',
-};
 
-const AssetNode = memo(() => {
+const AssetNode = (props: NodeProps<Node>) => {
+    const { data, id: nodeId } = props;
+    const { properties: nodeProperties } = data;
+
+    const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
+
+    const assetIcon = nodeProperties?.asset_names
+                    ? getIcons(nodeProperties?.asset_names[0])
+                    : getIcons('default');
+
+    const onClosePopup = (e) => {
+        const newNodePopupIds = _filter(nodePopupIds, (id) => id != nodeId );
+        setSchematicUiParams({ nodePopupIds: newNodePopupIds })
+        e.stopPropagation()
+
+    }
+
     return (
         <>
-            <div style={nodeStyle}></div>
+            <div className={styles.nodeContainer}>
+                <div className={styles.containerTitle}>
+                    <div className={styles.icon}>{assetIcon}</div>
+                    <div className={styles.text}>
+                        <strong>{nodeProperties?.label}</strong>
+                    </div>
+                    <div className={styles.idText}>
+                        {nodeProperties?.asset_gids
+                        ? nodeProperties?.asset_gids[0]
+                        : data.key}
+                    </div>
+                </div>
+            </div>
             <Handle
                 type="target"
                 position={Position.Top}
@@ -37,8 +63,15 @@ const AssetNode = memo(() => {
                 position={Position.Bottom}
                 style={{ visibility: 'hidden', ...handleStyle }}
             ></Handle>
+            { _includes(nodePopupIds, nodeId) &&
+              <AssetPopup
+                  nodeProps={nodeProperties}
+                  onClose={onClosePopup}
+              />
+            }
         </>
     );
-});
+};
 
-export { AssetNode };
+
+export default memo(AssetNode)

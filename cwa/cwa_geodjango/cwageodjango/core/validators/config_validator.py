@@ -13,9 +13,10 @@ class ConfigValidator(forms.Form):
     parallel = forms.BooleanField(required=False)
     thread_count = forms.IntegerField(required=False)
     processor_count = forms.IntegerField(required=False)
+    inpfile = forms.CharField(max_length=256, required=False)
     outputfile = forms.CharField(max_length=256, required=False)
     dma_codes = forms.CharField(max_length=256, required=False)
-    utilities = forms.CharField(max_length=256, required=False)
+    utility_names = forms.CharField(max_length=256, required=False)
 
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
@@ -78,19 +79,19 @@ class ConfigValidator(forms.Form):
             raise ValidationError("Incorrect format for dma_codes")
 
         return dma_codes
-    
-    def clean_utilities(self):
 
-        data = self.cleaned_data.get("utilities")
+    def clean_utility_names(self):
+
+        data = self.cleaned_data.get("utility_names")
 
         if not data:
             return None
 
         # TODO: add explicit exception handles
         try:
-            utilities = data.split(",")
-            utilities = [code.strip() for code in utilities]
+            utility_names = data.split(",")
+            utility_names = [name.strip() for name in utility_names]
         except:
-            raise ValidationError("Incorrect format for utilities")
+            raise ValidationError("Incorrect format for utility_names")
 
-        return utilities
+        return utility_names

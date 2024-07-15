@@ -6,7 +6,7 @@ declare module '*.css' {
     export default classes;
 }
 // https://webpack.js.org/guides/typescript/#importing-other-assets
-// declare module '*.svg' {
-//     const content: any;
-//     export default content;
-// }
+declare module '*.svg' {
+    const content: any;
+    export default content;
+}

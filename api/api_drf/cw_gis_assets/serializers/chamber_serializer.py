@@ -7,7 +7,7 @@ class ChamberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chamber
         fields = ["gid", "geometry", "dmas", "modified_at", "created_at"]
-        read_only_fields = "id"
+        read_only_fields = ["id"]
 
 
 class ChamberGeoJsonSerializer(BaseGeoJsonSerializer):

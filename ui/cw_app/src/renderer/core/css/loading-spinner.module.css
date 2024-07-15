@@ -1,8 +1,8 @@
 .spinner {
     display: flex;
-    flexDirection: column;
-    alignItems: center;
-    justifyItems: center;
-    padding: 5px;
-    marginTop: 5px;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+    padding: 2%;
+    margin-top: 5px;
 }

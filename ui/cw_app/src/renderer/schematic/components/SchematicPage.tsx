@@ -1,21 +1,24 @@
-import Schematic from "./Schematic";
-import { PageProps } from "../types/types";
-import useFetchSchematicData from "../hooks/useFetchSchematic";
-import { TRUNKMAIN_QUERY_KEY } from "../queries";
-import styles from '../css/SchematicPage.module.css'; 
+import Schematic from './Schematic';
+import { PageProps } from '../../core/types/types';
+import { TRUNKMAIN_QUERY_KEY } from '../queries';
+import styles from '../css/SchematicPage.module.css';
+import withSchematic from '../hoc/withSchematic';
+import useFetchJson from '../../core/hooks/useFetchJson';
 
-export default function SchematicPage(props: PageProps){
-    const { pageVisibility } = props; 
+function SchematicPage(props: PageProps) {
+    const { pageVisibility } = props;
 
-    useFetchSchematicData([TRUNKMAIN_QUERY_KEY])
+    useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 30 });
 
-    const mainCss = `${styles.main} ${styles[pageVisibility]}`
+    const mainCss = `${styles.main} ${styles[pageVisibility]}`;
 
-    return(
-        <> 
+    return (
+        <>
             <div className={mainCss}>
                 <Schematic />
             </div>
         </>
-    )
+    );
 }
+
+export default withSchematic(SchematicPage);

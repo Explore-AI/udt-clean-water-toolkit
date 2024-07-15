@@ -11,7 +11,7 @@ while getopts ${OPTSTRING} opt; do
     case ${opt} in
         f)
             if [[ -z ${DB_CONTAINER_ID} ]];then
-                echo "${DB_CONTAINER_ID} is not running, please run it using the docker-compose-postgis.yml"
+                echo "${DB_CONTAINER_ID} is not running, please run it using the docker-compose-neo4j.yml"
             else
             docker cp ${OPTARG} ${DB_CONTAINER_ID}:/backups/neo4j.dump
             docker stop ${DB_CONTAINER_ID}
