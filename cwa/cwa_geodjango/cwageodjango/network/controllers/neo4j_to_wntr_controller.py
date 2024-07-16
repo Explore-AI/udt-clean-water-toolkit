@@ -1,4 +1,3 @@
-import pdb
 from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
 from cwageodjango.config.settings import sqids
@@ -192,11 +191,9 @@ class Convert2Wntr(Neo4j2Wntr):
 
             if str(start_node_id) not in self.wn.node_name_list:
                 print(f"Missing start node! {start_node_id} for link {link_id}")
-                pdb.set_trace()
 
             if str(end_node_id) not in self.wn.node_name_list:
                 print(f"Missing end node! {end_node_id} for link {link_id}")
-                pdb.set_trace()
 
             diameter = link["diameter"]
             length = link["segment_length"]
