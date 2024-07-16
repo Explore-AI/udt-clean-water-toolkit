@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "cwageodjango.assets",
     "cwageodjango.utilities",
     "django.contrib.gis",
+    "cwageodjango.waterpipes"
 ]
 
 # Database

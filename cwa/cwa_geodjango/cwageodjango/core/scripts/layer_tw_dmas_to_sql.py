@@ -43,13 +43,13 @@ Large numbers of features will take a long time to save."""
         for feature in dma_layer:
 
             # TODO: Not sure why but have to do this instead of feature.geom directly
-            dma_geom = GEOSGeometry(feature.get("wkt"), srid=DEFAULT_SRID)
+            # dma_geom = GEOSGeometry(feature.get("wkt"), srid=DEFAULT_SRID)
 
             new_dma = DMA(
                 utility=utility,
                 name=feature.get("DMANAME"),
                 code=feature.get("DMAAREACODE"),
-                geometry=dma_geom,
+                geometry=feature.geom.wkt,
             )
 
             new_dmas.append(new_dma)

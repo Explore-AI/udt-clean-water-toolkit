@@ -81,6 +81,7 @@ class AcousticLoggerCoverage:
                     "logger_gid",
                     "logger_coords",
                     "pipe_id",
+                    "pipe_tag",
                     "pipe_material",
                     "pipe_length",
                     "coverage_length",
@@ -123,7 +124,8 @@ class AcousticLoggerCoverage:
                         n.node_key AS startNodeKey,
                         n.coords_27700 AS startNodeCoords,
                         m.node_key AS endNodeKey,
-                        m.coords_27700 AS endNodeCoords, 
+                        m.coords_27700 AS endNodeCoords,
+                        r.tag as pipe_tag,
                         r.material AS PipeMaterial,
                         r.segment_length AS PipeLength,
                         r.segment_wkt AS PipeWkt,
@@ -131,7 +133,7 @@ class AcousticLoggerCoverage:
                         d.code AS dma
                     SET r.coveredbyLogger = newCoveredByLogger,
                         r.coverageLen = newCoverageLen
-                    RETURN utility, dma, id(r) AS pipe_id, 
+                    RETURN utility, dma, id(r) AS pipe_id, pipe_tag,
                         '{coverage_len}' AS coverage_length, 
                         startNodeKey, startNodeCoords, 
                         endNodeKey, endNodeCoords, 
@@ -145,14 +147,15 @@ class AcousticLoggerCoverage:
                 utility = result[0]
                 dma = result[1]
                 pipe_id = result[2]
-                coverage_length = result[3]
-                start_node_key = result[4]
-                start_node_coords = result[5]
-                end_node_key = result[6]
-                end_node_coords = result[7]
-                pipe_material = result[8]
-                pipe_length = result[9]
-                pipe_wkt = result[10]
+                pipe_tag = result[3]
+                coverage_length = result[4]
+                start_node_key = result[5]
+                start_node_coords = result[6]
+                end_node_key = result[7]
+                end_node_coords = result[8]
+                pipe_material = result[9]
+                pipe_length = result[10]
+                pipe_wkt = result[11]
                 writer.writerow(
                     [
                         utility,
@@ -161,6 +164,7 @@ class AcousticLoggerCoverage:
                         logger_gid,
                         logger_coords,
                         pipe_id,
+                        pipe_tag,
                         pipe_material,
                         pipe_length,
                         coverage_length,
@@ -222,6 +226,10 @@ class AcousticLoggerCoverage:
                 pipe_material = edge[1].get("material")
                 pipe_length = edge[1].get("segment_length")
 
+                # print(
+                #     f"Running for {pipe_id}, {edge_distance} on the edge left, {remaining_distance} in total"
+                # )
+
                 if pipe_length > edge_distance:
                     covered_distance = edge_distance
                     remaining_distance -= edge_distance
@@ -243,7 +251,9 @@ class AcousticLoggerCoverage:
                     )
 
                     if self.check_for_pipe_end(node_key=node_key):
-                        print(f"Pipe end detected at {node_key}")
+
+                        # print(f"Pipe end detected at {node_key}")
+
                         edge_distance = 0
                         break
 
@@ -270,8 +280,9 @@ class AcousticLoggerCoverage:
                         )
 
                         if self.check_for_pipe_end(node_key=node_key):
-                            print(f"Pipe end detected at {node_key}")
-                            remaining_distance -= edge_distance
+
+                            # print(f"Pipe end detected at {node_key}")
+
                             edge_distance = 0
                             continue
 
@@ -279,7 +290,7 @@ class AcousticLoggerCoverage:
                         is_initial = False
                         self.process_connected_edges(
                             node_key,
-                            edge_distance,
+                            remaining_distance,
                             processed_edges,
                             processed_nodes,
                             pipe_material,
@@ -331,15 +342,15 @@ class AcousticLoggerCoverage:
                 pipe_length = edge[1].get("segment_length")
                 travel_distance = self.detection_dist.get(pipe_material)
 
-                print(
-                    "Running for Logger:",
-                    logger_key,
-                    "at ",
-                    logger_networknode_key,
-                    "edge: ",
-                    pipe_id,
-                    travel_distance,
-                )
+                # print(
+                #     "Running for Logger:",
+                #     logger_key,
+                #     "at ",
+                #     logger_networknode_key,
+                #     "edge: ",
+                #     pipe_id,
+                #     travel_distance,
+                # )
 
                 if pipe_length <= travel_distance:
                     remaining_distance = travel_distance - pipe_length
@@ -385,13 +396,12 @@ class AcousticLoggerCoverage:
 
     def query_total_pipe_lengths_dma(self, dmas, utilities):
         query = f"""
-            MATCH (n)-[:HAS_UTILITY]->(u:Utility), (n)-[:HAS_DMA]->(d:DMA)
+            MATCH (n:NetworkNode)-[:IN_UTILITY]->(u:Utility), (n)-[:IN_DMA]->(d:DMA)
             WHERE u.name IN {utilities} AND d.code IN {dmas}
             WITH n, u, d
-            MATCH (n)-[r]-(m)
-            WHERE type(r) IN ['DistributionMain', 'TrunkMain']
+            MATCH (n)-[r:PipeMain]-(m)
             RETURN u.name AS utility, d.code AS dma, sum(r.segment_length) AS total_length;
-        """
+            """
         results, m = db.cypher_query(query)
         return results
 
