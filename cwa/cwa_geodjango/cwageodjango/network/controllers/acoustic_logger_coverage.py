@@ -251,7 +251,9 @@ class AcousticLoggerCoverage:
                     )
 
                     if self.check_for_pipe_end(node_key=node_key):
+
                         # print(f"Pipe end detected at {node_key}")
+
                         edge_distance = 0
                         break
 
@@ -278,7 +280,9 @@ class AcousticLoggerCoverage:
                         )
 
                         if self.check_for_pipe_end(node_key=node_key):
+
                             # print(f"Pipe end detected at {node_key}")
+
                             edge_distance = 0
                             continue
 
@@ -472,4 +476,4 @@ class AcousticLoggerCoverage:
 
         self.update_edge_coverage_fraction(self.config.outputfile)
 
-        self.summary_statistics(self.config.outputfile)
+        # self.summary_statistics(self.config.outputfile)

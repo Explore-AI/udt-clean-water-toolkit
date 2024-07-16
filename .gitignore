@@ -181,3 +181,6 @@ devops/scripts/geoserver/output
 *.django_env
 
 report/
+cwm/cleanwater/transform/neo4j_to_wntr_v1.py
+cwa/cwa_geodjango/test_ZLATON01.inp
+cwa/cwa_geodjango/cwageodjango/network/controllers/neo4j_to_wntr_controller_v1.py
