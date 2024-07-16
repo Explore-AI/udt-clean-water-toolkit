@@ -1,8 +1,8 @@
 import pdb
 
+import numpy as np
+import pandas as pd
 from wntr import network
-import random
-
 
 class Neo4j2Wntr:
     """
@@ -13,6 +13,14 @@ class Neo4j2Wntr:
         self.wn = network.WaterNetworkModel()
         self.sqids = sqids
         self.valve_types = ["PRV", "PSV", "FCV", "TCV"]
+        self.roughness_values = self.load_roughness_values('material_roughness2.csv')
+
+    @staticmethod
+    def convert_coords(coords):
+        """
+        Helper function to convert coords_27700 to a tuple.
+        """
+        return tuple(coords)
 
     def flatten_list(self, nested_list):
         flattened_list = []
@@ -22,6 +30,13 @@ class Neo4j2Wntr:
             else:
                 flattened_list.append(item)
         return flattened_list
+
+    @staticmethod
+    def generate_random_value(min_value, max_value):
+        """
+        Generate a random value within the specified range.
+        """
+        return np.random.uniform(min_value, max_value)
 
     def generate_unique_id(self, input_string):
         """
@@ -37,42 +52,36 @@ class Neo4j2Wntr:
         unique_id = self.sqids.encode([input_string])
         return str(unique_id)
 
-    def add_node(self, id, x, y):
+    @staticmethod
+    def load_roughness_values(csv_path):
+        """
+        Load roughness values from a CSV file into a dictionary.
+        """
+        try:
+            df = pd.read_csv(csv_path)
+            roughness_dict = pd.Series(df.roughness.values, index=df.material).to_dict()
+
+            return roughness_dict
+        except Exception as e:
+            return {}
+
+    def add_node(self, id, coordinates):
         """
         Adds a node to the water network model.
 
         Parameters:
             id (str): ID of the node.
-            x (float): X-coordinate of the node.
-            y (float): Y-coordinate of the node.
-            node_type (str, optional): Type of the node. Defaults to None.
+            coordinates (tuple): Coordinates of the node.
 
         Returns:
             node_id (str): SQIDS ID of the added node.
-
         """
-        node_id = id
+        node_id = str(id)
+        elevation = self.generate_random_value(20, 40)  # Example elevation range
+        base_demand = self.generate_random_value(10, 50)  # Example demand range
+        self.wn.add_junction(node_id, elevation=elevation, base_demand=base_demand, coordinates=coordinates)
 
-        # if node_type and "NetworkOptValve" in node_type or "PressureControlValve" in node_type:
-        #     base_head = random.uniform(80, 120)  # Example head value
-        #     self.wn.add_reservoir(node_id, base_head=base_head, coordinates=(x, y))
-        # else:
-        # Random elevation between 0 and 100 meters
-        elevation = random.uniform(0, 100)
-
-        # Random base demand between 0 and 1 cubic meters per second
-        base_demand = random.uniform(0, 1)
-
-        self.wn.add_junction(
-            node_id,
-            base_demand=base_demand,
-            elevation=elevation,
-            coordinates=(x, y),
-        )
-
-        return node_id
-
-    def add_pipe(self, edge_id, start_node_id, end_node_id):
+    def add_pipe(self, edge_id, start_node_id, end_node_id, diameter, length):
         """
         Adds a pipe to the water network model.
 
@@ -80,86 +89,26 @@ class Neo4j2Wntr:
             edge_id (str): ID of the edge (pipe).
             start_node_id (str): ID of the start node.
             end_node_id (str): ID of the end node.
+            diameter (float): Diameter of the pipe.
+            length (float): Length of the pipe.
+            roughness (float): Roughness coefficient of the pipe.
 
         Returns:
             pipe_id (str): SQIDS ID of the added pipe.
-
         """
-        pipe_id = edge_id
-
-        # Assigning default values to pipe attributes
-        length = random.uniform(100, 1000)  # in meters
-        diameter = random.uniform(0.1, 1)  # in meters
-        roughness = random.uniform(100, 150)  # Hazen-Williams C-factor
-
+        pipe_id = str(edge_id)
+        start_node_id = str(start_node_id)
+        end_node_id = str(end_node_id)
+        roughness = 120.0
         self.wn.add_pipe(
             pipe_id,
             start_node_id,
             end_node_id,
             length=length,
             diameter=diameter,
-            roughness=roughness,
-        )
+            roughness=roughness)
 
-        return pipe_id
 
-    def create_graph(self, network_triads_results, asset_dict):
-        """
-        Processes results from Neo4j query and adds corresponding nodes and pipes to the water network model.
 
-        Parameters:
-            network_nodes_results (list): List of results from Neo4j query for network nodes and pipes.
-            asset_dict (dict): Dictionary containing node IDs and their asset labels.
 
-        Returns:
-            wn: Updated water network model.
-        """
-        for triad in network_triads_results:
-            edge = triad[1]
-            start = edge._start_node
-            start_x, start_y = (
-                start.get("coords_27700")[0],
-                start.get("coords_27700")[1],
-            )
-            start_id = start._id
-
-            end = edge._end_node
-            end_x, end_y = (
-                end.get("coords_27700")[0],
-                end.get("coords_27700")[1],
-            )
-            end_id = end._id
-
-            edge_id = edge._id
-
-            # Adding nodes and pipe to self.wn
-            start_node_id = self.add_node(str(start_id), start_x, start_y)
-            if start_node_id is None:
-                print(f"Failed to add node: {start_id}")
-                continue
-
-            end_node_id = self.add_node(str(end_id), end_x, end_y)
-            if end_node_id is None:
-                print(f"Failed to add node: {end_id}")
-                continue
-
-            pipe_added = self.add_pipe(str(edge_id), start_node_id, end_node_id)
-            if not pipe_added:
-                print(f"Failed to add pipe: {edge_id}")
-                continue
-
-            # Check if nodes and link are present in self.wn
-            if start_node_id not in self.wn.nodes:
-                print(f"Node {start_node_id} not found in self.wn")
-                continue
-
-            if end_node_id not in self.wn.nodes:
-                print(f"Node {end_node_id} not found in self.wn")
-                continue
-
-            if edge_id not in self.wn.links:
-                print(f"Link {edge_id} not found in self.wn")
-                continue
-
-        return self.wn
 

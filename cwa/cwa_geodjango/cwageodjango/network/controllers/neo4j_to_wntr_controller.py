@@ -1,10 +1,8 @@
 import pdb
-import random  # Remove if not used
 from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
 from cwageodjango.config.settings import sqids
 import wntr
-from wntr import network
 
 
 class Convert2Wntr(Neo4j2Wntr):
@@ -25,75 +23,86 @@ class Convert2Wntr(Neo4j2Wntr):
         self.config = config
         self.links_loaded = []
         self.nodes_loaded = []
+        self.asset_dict = {}
 
-    def query_network_triads(self):
+    def query_neo4j(self):
         """
-        Generator function to query the graph database in batches.
-
-        Yields:
-            results: Result object containing batched query results.
+        Query the graph database in batches and populate self.nodes_loaded directly.
         """
         offset = 0
-        total_loaded = 0
-        utilities = list(set((self.config.utility_names or []) + (self.config.utilities or [])))
+        total_nodes_loaded = 0
+        utilities = list(set((self.config.utilities or [])))
         dmas = list(set(self.config.dma_codes))
 
-        while total_loaded < self.config.query_limit:
+        conditions = []
+        if dmas:
+            dma_codes_str = ", ".join(f"'{dma_code}'" for dma_code in dmas)
+            conditions.append(f"dn.code IN [{dma_codes_str}]")
+
+        if utilities:
+            utility_names_str = ", ".join(f"'{utility_name}'" for utility_name in utilities)
+            conditions.append(f"un.name IN [{utility_names_str}]")
+
+        where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+        node_query_base = """
+            MATCH (n)-[r:PipeMain]->(m)
+            MATCH (n)-[:IN_DMA]->(dn)
+            MATCH (n)-[:IN_UTILITY]->(un)
+            WHERE {conditions}
+            RETURN n,m
+            SKIP {offset}
+            LIMIT {batch_size}
+        """
+
+        edge_query_base = """
+            MATCH (n)-[r:PipeMain]->(m)
+            MATCH (n)-[:IN_DMA]->(dn)
+            MATCH (n)-[:IN_UTILITY]->(un)
+            WHERE {conditions}
+            RETURN r
+            SKIP {offset}
+            LIMIT {batch_size}
+        """
+
+        while total_nodes_loaded < self.config.query_limit:
             try:
-                base_query = """
-                    MATCH (n)-[r:PipeMain]->(m)
-                    MATCH (n)-[:IN_DMA]->(dn)
-                    MATCH (m)-[:IN_DMA]->(dm)
-                    MATCH (n)-[:IN_UTILITY]->(un)
-                    MATCH (m)-[:IN_UTILITY]->(um)
-                    WHERE {conditions}
-                    RETURN n, r, m
-                    SKIP {offset}
-                    LIMIT {batch_size}
-                """
-                conditions = []
-                if dmas:
-                    dma_codes_str = ", ".join(f"'{dma_code}'" for dma_code in dmas)
-                    conditions.append(f"dn.code IN [{dma_codes_str}] AND dm.code IN [{dma_codes_str}]")
+                node_query = node_query_base.format(
+                    conditions=where_clause,
+                    offset=offset,
+                    batch_size=self.config.batch_size
+                )
 
-                if utilities:
-                    utility_names_str = ", ".join(f"'{utility_name}'" for utility_name in utilities)
-                    conditions.append(f"un.name IN [{utility_names_str}] AND um.name IN [{utility_names_str}]")
+                edge_query = edge_query_base.format(
+                    conditions=where_clause,
+                    offset=offset,
+                    batch_size=self.config.batch_size
+                )
 
-                where_clause = " AND ".join(conditions) if conditions else "1=1"
-                query = base_query.format(conditions=where_clause, offset=offset, batch_size=self.config.batch_size)
-
-                print("Retrieving data")
-                results, meta = db.cypher_query(query)
+                node_results, _ = db.cypher_query(node_query)
+                edge_results, _ = db.cypher_query(edge_query)
                 offset += self.config.batch_size
             except Exception as e:
                 print(f"Error querying the database: {e}")
                 break
 
-            records = list(results)
-            total_loaded += len(records)
+            node_results = self.flatten_list(node_results)
+            edge_results = self.flatten_list(edge_results)
 
-            if not records:
+            new_nodes = [record for record in node_results if
+                         record['node_key'] not in {node['node_key'] for node in self.nodes_loaded}]
+            new_edges = [record for record in edge_results if
+                         record.id not in {link.id for link in self.links_loaded}]
+
+            self.nodes_loaded.extend(new_nodes)
+            self.links_loaded.extend(new_edges)
+            total_nodes_loaded += len(new_nodes)
+
+            if not new_nodes:
                 print("Query returned no records")
                 break
 
-            print(f"Loaded {total_loaded}")
-
-            node_keys = {node['node_key'] for node in self.nodes_loaded}
-            links_ids = {link.id for link in self.links_loaded}
-
-            for record in records:
-                if record[0]['node_key'] not in node_keys:
-                    self.nodes_loaded.append(record[0])
-                    node_keys.add(record[0]['node_key'])
-                if record[2]['node_key'] not in node_keys:
-                    self.nodes_loaded.append(record[2])
-                    node_keys.add(record[2]['node_key'])
-                if record[1].id not in links_ids:
-                    self.links_loaded.append(record[1])
-                    links_ids.add(record[1].id)
-
-            yield results
+            print(f"Loaded {len(self.nodes_loaded)} unique nodes")
 
     def query_assets_for_nodes(self, node_ids):
         """
@@ -147,31 +156,58 @@ class Convert2Wntr(Neo4j2Wntr):
         Returns:
             asset_dict (dict): Dictionary containing node IDs and their types.
         """
-        asset_dict = {}
         for subgraph in graph:
             for attributes in subgraph:
                 node_id = attributes[0]
                 node_labels = attributes[1]
-                asset_dict[node_id] = node_labels
-        return asset_dict
+                self.asset_dict[node_id] = node_labels
 
     def convert(self):
         """
         Converts the Neo4j graph data to WNTR format.
         """
-        network_triads_results = self.query_network_triads()
+        # Query the Neo4j database and process nodes and links in batches
+        self.query_neo4j()
+
+        # Query assets for the loaded nodes
         node_ids = [node._id for node in self.nodes_loaded]
         asset_results = self.query_assets_for_nodes(node_ids)
-        asset_dict = self.generate_asset_dict(asset_results)
+        self.generate_asset_dict(asset_results)
 
-        for subgraph in network_triads_results:
-            self.create_graph(subgraph, asset_dict)
+        # Create the WNTR graph
+        self.create_graph()
+
+    def create_graph(self):
+        """
+        Create a WNTR graph from the loaded nodes and links.
+        """
+        for node in self.nodes_loaded:
+            coordinates = self.convert_coords(node['coords_27700'])
+            self.add_node(node._id, coordinates)
+
+        for link in self.links_loaded:
+            link_id = link.id
+            start_node_id = link._start_node._id
+            end_node_id = link._end_node._id
+
+            if str(start_node_id) not in self.wn.node_name_list:
+                print(f"Missing start node! {start_node_id} for link {link_id}")
+                pdb.set_trace()
+
+            if str(end_node_id) not in self.wn.node_name_list:
+                print(f"Missing end node! {end_node_id} for link {link_id}")
+                pdb.set_trace()
+
+            diameter = link["diameter"]
+            length = link["segment_length"]
+            # roughness = self.roughness_values.get(link['material'].lower())
+            self.add_pipe(link_id, start_node_id, end_node_id, diameter, length)
 
     def wntr_to_inp(self):
         """
         Exports the WNTR model to an INP (EPANET input file) format.
         """
-        print(f"fetched nodes: {len(self.nodes_loaded)}, fetched links: {len(self.links_loaded)}")
+        print(f"Fetched nodes: {len(self.nodes_loaded)}, Fetched links: {len(self.links_loaded)}")
         print(f"WN nodes: {len(self.wn.node_name_list)}, WN links: {len(self.wn.link_name_list)}")
 
         wntr.network.write_inpfile(self.wn, filename=self.config.inpfile)
