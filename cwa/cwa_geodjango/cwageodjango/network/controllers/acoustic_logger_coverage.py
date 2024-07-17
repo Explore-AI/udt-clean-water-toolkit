@@ -8,33 +8,66 @@ class AcousticLoggerCoverage:
     def __init__(self, config):
         self.config = config
         self.detection_dist = {
-            "ductile_iron": 150,
-            "cast_iron": 150,
-            "steel": 150,
+            "ST": 150,
+            "DI": 150,
+            "UNK": 150,
+            "CI": 150,
+            "MDPE": 70,
+            "HPPE": 70,
+            "POL": 70,
+            "GRP": 70,
+            "UPC": 70,
+            "CN": 150,
+            "SI": 150,
+            "AC": 70,
             "unknown": 150,
-            "polyethylene_black_poly": 70,
-            "pe80_medium_density_polyethylene": 70,
-            "asbestos_cement": 70,
-            "unplasticised_polyvinyl_chloride": 70,
-            "pe100_high_performance_polyethylene": 70,
-            "concrete": 70,
-            "glass_reinforced_plastic": 70,
-            "molecular_orientated_polyvinyl_chloride": 70,
-            "spun_iron": 150,
-            "coated_steel": 150,
-            "lead": 150,
-            "barrier_pipecoated_aluminium": 150,
-            "other": 70,
-            "poly_vinyl_chloride": 70,
-            "brick": 70,
-            "galvanised_iron": 150,
-            "fibreglass": 70,
-            "hpp": 70,
-            "alkathene": 70,
-            "copper": 150,
-            "alloyed_polyvinyl_chloride": 70,
-            "biaxial_polyvinyl_chloride": 70,
-            "galvanized_steel": 150,
+            "CS": 150,
+            "OTH": 150,
+            "MOPC": 70,
+            "LD": 70,
+            "BP": 70,
+            "PVC": 70,
+            "BR": 70,
+            "FG": 70,
+            "CP": 150,
+            "GI": 150,
+            "AK": 150,
+            "MDP": 70,
+            "HPP": 70,
+            "PL": 70,
+            "APC": 70,
+            "BPC": 70,
+            "GS": 70,
+            "HDPE": 70,
+            "PO": 70,
+            "UPVC": 70,
+            "HPPEP": 70,
+            "PE": 70,
+            "U": 150,
+            "GAL": 150,
+            "PEAL": 150,
+            "CU": 150,
+            "PUR": 70,
+            "POLY": 70,
+            "CO": 150,
+            "CC": 150,
+            "LEAD": 150,
+            "OT": 150,
+            "PC": 70,
+            "VC": 70,
+            "HPPEN": 70,
+            "MDPEN": 70,
+            "PP": 70,
+            "MDPEP": 70,
+            "GF": 150,
+            "P": 70,
+            "PSC": 70,
+            "PEN": 70,
+            "LDPE": 70,
+            "SHPPE": 150,
+            "PVCMO": 150,
+            "None": 150,
+            "MAR": 70,
         }
 
     def initialise_csv(self):
@@ -48,6 +81,7 @@ class AcousticLoggerCoverage:
                     "logger_gid",
                     "logger_coords",
                     "pipe_id",
+                    "pipe_tag",
                     "pipe_material",
                     "pipe_length",
                     "coverage_length",
@@ -66,9 +100,8 @@ class AcousticLoggerCoverage:
                 list(processed_edges)
             )
 
-        cypher_query = f"""MATCH (n {{node_key: '{node_key}'}})-[r]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} AND type(r) IN ['DistributionMain', 'TrunkMain']
-        RETURN n, r, m
-        """
+        cypher_query = f"""MATCH (n:NetworkNode {{node_key : '{node_key}'}})-[r:PipeMain]-(m:NetworkNode) WHERE NOT id(r) IN {list(processed_edges)} {processed_nodes_condition} RETURN n,r,m;"""
+
         results, _ = db.cypher_query(cypher_query)
         return results
 
@@ -82,17 +115,17 @@ class AcousticLoggerCoverage:
         coverage_len,
     ):
         query = f"""
-                    MATCH (n {{node_key: '{start_node_key}'}})-[:HAS_UTILITY]->(u:Utility), 
-                        (n {{node_key: '{start_node_key}'}})-[:HAS_DMA]->(d:DMA), 
-                        (n {{node_key: '{start_node_key}'}})-[r]-(m {{node_key: '{end_node_key}'}})
-                    WHERE type(r) IN ['DistributionMain', 'TrunkMain']
+                    MATCH (n:NetworkNode {{node_key: '{start_node_key}'}})-[:IN_UTILITY]->(u:Utility), 
+                        (n:NetworkNode {{node_key: '{start_node_key}'}})-[:IN_DMA]->(d:DMA), 
+                        (n:NetworkNode {{node_key: '{start_node_key}'}})-[r:PipeMain]-(m:NetworkNode {{node_key: '{end_node_key}'}})
                     WITH r, 
                         CASE WHEN r.coveredbyLogger IS NOT NULL THEN r.coveredbyLogger + '|' + '{logger_key}' ELSE '{logger_key}' END AS newCoveredByLogger,
                         CASE WHEN r.coverageLen IS NOT NULL THEN r.coverageLen + '|' + '{coverage_len}' ELSE '{coverage_len}' END AS newCoverageLen,
                         n.node_key AS startNodeKey,
                         n.coords_27700 AS startNodeCoords,
                         m.node_key AS endNodeKey,
-                        m.coords_27700 AS endNodeCoords, 
+                        m.coords_27700 AS endNodeCoords,
+                        r.tag as pipe_tag,
                         r.material AS PipeMaterial,
                         r.segment_length AS PipeLength,
                         r.segment_wkt AS PipeWkt,
@@ -100,7 +133,7 @@ class AcousticLoggerCoverage:
                         d.code AS dma
                     SET r.coveredbyLogger = newCoveredByLogger,
                         r.coverageLen = newCoverageLen
-                    RETURN utility, dma, id(r) AS pipe_id, 
+                    RETURN utility, dma, id(r) AS pipe_id, pipe_tag,
                         '{coverage_len}' AS coverage_length, 
                         startNodeKey, startNodeCoords, 
                         endNodeKey, endNodeCoords, 
@@ -114,14 +147,15 @@ class AcousticLoggerCoverage:
                 utility = result[0]
                 dma = result[1]
                 pipe_id = result[2]
-                coverage_length = result[3]
-                start_node_key = result[4]
-                start_node_coords = result[5]
-                end_node_key = result[6]
-                end_node_coords = result[7]
-                pipe_material = result[8]
-                pipe_length = result[9]
-                pipe_wkt = result[10]
+                pipe_tag = result[3]
+                coverage_length = result[4]
+                start_node_key = result[5]
+                start_node_coords = result[6]
+                end_node_key = result[7]
+                end_node_coords = result[8]
+                pipe_material = result[9]
+                pipe_length = result[10]
+                pipe_wkt = result[11]
                 writer.writerow(
                     [
                         utility,
@@ -130,6 +164,7 @@ class AcousticLoggerCoverage:
                         logger_gid,
                         logger_coords,
                         pipe_id,
+                        pipe_tag,
                         pipe_material,
                         pipe_length,
                         coverage_length,
@@ -191,6 +226,10 @@ class AcousticLoggerCoverage:
                 pipe_material = edge[1].get("material")
                 pipe_length = edge[1].get("segment_length")
 
+                # print(
+                #     f"Running for {pipe_id}, {edge_distance} on the edge left, {remaining_distance} in total"
+                # )
+
                 if pipe_length > edge_distance:
                     covered_distance = edge_distance
                     remaining_distance -= edge_distance
@@ -212,6 +251,9 @@ class AcousticLoggerCoverage:
                     )
 
                     if self.check_for_pipe_end(node_key=node_key):
+
+                        # print(f"Pipe end detected at {node_key}")
+
                         edge_distance = 0
                         break
 
@@ -238,7 +280,9 @@ class AcousticLoggerCoverage:
                         )
 
                         if self.check_for_pipe_end(node_key=node_key):
-                            remaining_distance -= edge_distance
+
+                            # print(f"Pipe end detected at {node_key}")
+
                             edge_distance = 0
                             continue
 
@@ -246,7 +290,7 @@ class AcousticLoggerCoverage:
                         is_initial = False
                         self.process_connected_edges(
                             node_key,
-                            edge_distance,
+                            remaining_distance,
                             processed_edges,
                             processed_nodes,
                             pipe_material,
@@ -260,7 +304,7 @@ class AcousticLoggerCoverage:
             else:
                 break
 
-    def query_graph_dma(self, dmas, utilities):
+    def query_graph_dma_logger_nodes(self, dmas, utilities):
         """
         Generator function to query the graph database for loggers within a specific DMA.
 
@@ -271,18 +315,21 @@ class AcousticLoggerCoverage:
             results: Result object containing query results.
 
         """
-        results, m = db.cypher_query(
-            f"MATCH (n)-[:HAS_UTILITY]->(u:Utility),(n)-[:HAS_DMA]->(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} AND n.acoustic_logger IS NOT NULL RETURN n;"
+        loggers, m = db.cypher_query(
+            f"""MATCH (n:Logger)-[:IN_UTILITY]-(u:Utility), (n)-[:IN_DMA]-(d:DMA) WHERE u.name IN {utilities} AND d.code IN {dmas} 
+             WITH n MATCH (n)-[:HAS_ASSET]-(s:NetworkNode) RETURN n, s"""
         )
-        return results
+        return loggers
 
-    def process_logger(self, loggers):
-        for node in loggers:
-            logger_key = node[0].get("node_key")
-            logger_gid = node[0].get("asset_gids")[0]
-            logger_coords = node[0].get("coords_27700")
+    def process_loggers(self, loggers):
+        for logger in loggers:
+            logger_key = logger[0].get("node_key")
+            logger_gid = logger[0].get("tag")
+            logger_coords = logger[0].get("coords_27700")
+            logger_networknode_key = logger[1].get("node_key")
 
-            connected_edges = self.get_next_edges(logger_key, set())
+            connected_edges = self.get_next_edges(logger_networknode_key, set())
+
             processed_edges = set()
             processed_nodes = set()
 
@@ -295,6 +342,16 @@ class AcousticLoggerCoverage:
                 pipe_length = edge[1].get("segment_length")
                 travel_distance = self.detection_dist.get(pipe_material)
 
+                # print(
+                #     "Running for Logger:",
+                #     logger_key,
+                #     "at ",
+                #     logger_networknode_key,
+                #     "edge: ",
+                #     pipe_id,
+                #     travel_distance,
+                # )
+
                 if pipe_length <= travel_distance:
                     remaining_distance = travel_distance - pipe_length
                     self.update_edge_attributes(
@@ -306,7 +363,7 @@ class AcousticLoggerCoverage:
                         pipe_length,
                     )
                     processed_edges.add(pipe_id)
-                    processed_nodes.add(logger_key)
+                    processed_nodes.add(logger_networknode_key)
 
                     if remaining_distance > 0:
                         node_key = (
@@ -339,13 +396,12 @@ class AcousticLoggerCoverage:
 
     def query_total_pipe_lengths_dma(self, dmas, utilities):
         query = f"""
-            MATCH (n)-[:HAS_UTILITY]->(u:Utility), (n)-[:HAS_DMA]->(d:DMA)
+            MATCH (n:NetworkNode)-[:IN_UTILITY]->(u:Utility), (n)-[:IN_DMA]->(d:DMA)
             WHERE u.name IN {utilities} AND d.code IN {dmas}
             WITH n, u, d
-            MATCH (n)-[r]-(m)
-            WHERE type(r) IN ['DistributionMain', 'TrunkMain']
+            MATCH (n)-[r:PipeMain]-(m)
             RETURN u.name AS utility, d.code AS dma, sum(r.segment_length) AS total_length;
-        """
+            """
         results, m = db.cypher_query(query)
         return results
 
@@ -410,12 +466,14 @@ class AcousticLoggerCoverage:
         Compute coverage.
 
         """
-        sub_graph = self.query_graph_dma(self.config.dma_codes, self.config.utilities)
+        loggers = self.query_graph_dma_logger_nodes(
+            self.config.dma_codes, self.config.utilities
+        )
 
         self.initialise_csv()
 
-        self.process_logger(sub_graph)
+        self.process_loggers(loggers)
 
         self.update_edge_coverage_fraction(self.config.outputfile)
 
-        self.summary_statistics(self.config.outputfile)
+        # self.summary_statistics(self.config.outputfile)
