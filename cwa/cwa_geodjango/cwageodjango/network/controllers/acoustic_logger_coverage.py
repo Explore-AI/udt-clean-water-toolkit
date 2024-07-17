@@ -420,7 +420,7 @@ class AcousticLoggerCoverage:
         df = pd.read_csv(outputfile, header=[0])
         dma = self.config.dma_codes
         total_pipe_lengths = self.query_total_pipe_lengths_dma(
-            self.config.dma_codes, self.config.utilities
+            self.config.dma_codes, self.config.utility_names
         )
         df_summary = pd.DataFrame(
             total_pipe_lengths, columns=["utility", "dma", "total_pipe_lengths"]
@@ -467,7 +467,7 @@ class AcousticLoggerCoverage:
 
         """
         loggers = self.query_graph_dma_logger_nodes(
-            self.config.dma_codes, self.config.utilities
+            self.config.dma_codes, self.config.utility_names
         )
 
         self.initialise_csv()
