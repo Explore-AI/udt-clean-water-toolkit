@@ -65,7 +65,7 @@ class Neo4j2Wntr:
         except Exception as e:
             return {}
 
-    def add_node(self, id, coordinates):
+    def add_node(self, node_id, coordinates, node_type = None):
         """
         Adds a node to the water network model.
 
@@ -76,10 +76,25 @@ class Neo4j2Wntr:
         Returns:
             node_id (str): SQIDS ID of the added node.
         """
-        node_id = str(id)
+        node_id_str = str(node_id)
+        if node_type:
+            if "OperationalSite" in node_type:
+                self.add_reservoir(node_id_str, coordinates)
+        else:
+            self.add_junction(node_id_str, coordinates)
+
+
+    def add_junction(self, node_id_str, coordinates):
         elevation = self.generate_random_value(20, 40)  # Example elevation range
         base_demand = self.generate_random_value(10, 50)  # Example demand range
-        self.wn.add_junction(node_id, elevation=elevation, base_demand=base_demand, coordinates=coordinates)
+        self.wn.add_junction(node_id_str,
+                             elevation=elevation,
+                             base_demand=base_demand,
+                             coordinates=coordinates)
+
+    def add_reservoir(self, node_id_str, coordinates):
+        base_head = 20.0  # Example base head
+        self.wn.add_reservoir(node_id_str, base_head=base_head, coordinates=coordinates)
 
     def add_pipe(self, edge_id, start_node_id, end_node_id, diameter, length):
         """
