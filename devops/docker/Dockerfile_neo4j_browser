@@ -1,12 +1,11 @@
 FROM ubuntu:22.04
 
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN DEBIAN_FRONTEND=noninteractive apt update
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update
-
-RUN DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN set -eux; \
+    apt-get update; \
+    apt-get -y --no-install-recommends install \
         vim \
         python3.11 \
         python3-dev \
