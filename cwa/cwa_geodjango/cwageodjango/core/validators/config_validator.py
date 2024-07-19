@@ -20,6 +20,7 @@ class ConfigValidator(forms.Form):
     wntr_simulation_length_hours = forms.IntegerField(required=False)
     wntr_simulation_timestep_hours = forms.IntegerField(required=False)
 
+
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
 
     def clean(self):
