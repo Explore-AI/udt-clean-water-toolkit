@@ -30,7 +30,7 @@ class Convert2Wntr(Neo4j2Wntr):
         """
         offset = 0
         total_nodes_loaded = 0
-        utilities = list(set((self.config.utilities or [])))
+        utilities = list(set((self.config.utility_names or [])))
         dmas = list(set(self.config.dma_codes))
 
         conditions = []
@@ -113,7 +113,7 @@ class Convert2Wntr(Neo4j2Wntr):
         Returns:
             results: Result object containing node IDs and their asset labels.
         """
-        utilities = (self.config.utility_names or []) + (self.config.utilities or [])
+        utilities = self.config.utility_names or []
         dmas = self.config.dma_codes
 
         base_query = """

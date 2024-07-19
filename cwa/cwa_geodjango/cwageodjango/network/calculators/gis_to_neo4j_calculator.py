@@ -121,6 +121,12 @@ class GisToNeo4jCalculator(GisToGraph):
             """
             db.cypher_query(query, {"edges": edges})
 
+    def set_dynamic_asset_node_properties(self):
+        subquery = """n.acoustic_logger = CASE WHEN node.acoustic_logger IS NOT NULL THEN node.acoustic_logger ELSE NULL END,
+        n.subtype = CASE WHEN node.subtype IS NOT NULL THEN node.subtype ELSE NULL END"""
+
+        return subquery  # Remove trailing comma and newline
+
     def _batch_create_asset_nodes(self):
         nodes = flatten_concatenation(
             flatten_concatenation(self.all_asset_nodes_by_pipe)
@@ -132,7 +138,8 @@ class GisToNeo4jCalculator(GisToGraph):
              SET n.createdAt = timestamp()
              {self.set_node_labels()}
          SET
-         {self.set_default_node_properties()},
+        {self.set_default_node_properties()},
+        {self.set_dynamic_asset_node_properties()},
          n.tag = node.tag
          RETURN n
          """
