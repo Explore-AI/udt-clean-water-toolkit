@@ -1,21 +1,21 @@
-# create an api that filters based on the Trunkmains
+# create an api that filters based on the PipekMains
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from neomodel import db
 from django.contrib.gis.geos import Point
 
 
-class SchematicTrunkMainViewset(viewsets.ViewSet):
+class SchematicPipeMainViewset(viewsets.ViewSet):
     http_method_names = ["get"]
 
     # match (n)-[r:TrunkMain]-(m) return n, r, m limit 500
 
     @staticmethod
-    def query_trunkmain_network(request):
-        # get all assets connected to the trunkmains, as well as the trunkmain relationships
+    def query_pipemain_network(request):
+        # get all assets connected to the pipemains, as well as the pipemain relationships
         limit = request.query_params.get("limit", 10)
         query = f"""
-        match (n)-[r:TrunkMain]-(m)
+        match (n:NetworkNode)-[r:PipeMain]-(m:NetworkNode)
         return ID(n), n, ID(r), r, ID(m), m
         limit {limit}
         """
@@ -56,7 +56,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
             "source": str(from_node_id),
             "target": str(to_node_id),
             "type": "straight",
-            'animated': True, 
+            "animated": True,
             "style": {"strokeWidth": "5px", "stroke": "#33658A"},
             "properties": edge_properties,
         }
@@ -208,7 +208,7 @@ class SchematicTrunkMainViewset(viewsets.ViewSet):
         return {"nodes": all_nodes, "edges": all_edges}
 
     def list(self, request):
-        results = self.query_trunkmain_network(request)
+        results = self.query_pipemain_network(request)
         nodes_edges = self.get_nodes_edges(results)
 
         return Response(nodes_edges, status=status.HTTP_200_OK)
