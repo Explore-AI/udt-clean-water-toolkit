@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "cwageodjango.assets",
     "cwageodjango.utilities",
     "cwageodjango.network",
+    "cwageodjango.waterpipes",
     "cw_core",
     "cw_gis_assets",
     "cw_graph",

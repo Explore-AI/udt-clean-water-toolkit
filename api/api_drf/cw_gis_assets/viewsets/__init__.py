@@ -24,3 +24,5 @@ from .pressure_fitting_viewset import (
     PressureFittingViewSet,
     PressureFittingGeoJsonViewSet,
 )
+
+from .pipeflow_viewset import PipeFlowViewSet

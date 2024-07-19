@@ -26,3 +26,4 @@ from .pressure_fitting_serializer import (
     PressureFittingSerializer,
     PressureFittingGeoJsonSerializer,
 )
+from .pipeflow_serializer import PipeFlowSerializer

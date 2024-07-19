@@ -21,6 +21,7 @@ from .viewsets import (
     PressureControlValveGeoJsonViewSet,
     PressureFittingViewSet,
     PressureFittingGeoJsonViewSet,
+    PipeFlowViewSet,
 )
 
 
@@ -80,5 +81,7 @@ router.register(
     PressureFittingGeoJsonViewSet,
     "pressure_fitting-geojson",
 )
+
+router.register(r"pipe_flows", PipeFlowViewSet, basename="pipe_main_flows")
 
 urlpatterns = router.urls
