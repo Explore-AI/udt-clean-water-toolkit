@@ -4,34 +4,23 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.expressions import ArraySubquery
 from django.db.models.query import QuerySet
 from django.contrib.gis.measure import D
-from django.contrib.gis.db.models.functions import (
-    AsGeoJSON,
-    Cast,
-    Length,
-    AsWKT,
-    Transform,
-    Intersection,
-)
+from django.contrib.gis.db.models.functions import AsGeoJSON, Cast, Length, AsWKT
 from cleanwater.data_managers import GeoDjangoDataManager
-from cwageodjango.assets.models import *
 from cwageodjango.core.db.models.functions import LineStartPoint, LineEndPoint
 
 
-class PipeMainsController(GeoDjangoDataManager):
+class PipeAndAssets(GeoDjangoDataManager):
     """Convert pipe_mains data to a Queryset or GeoJSON."""
 
-    WITHIN_DISTANCE = 0.5
+    WITHIN_DISTANCE = 0.1
     default_properties = [
         "id",
         "tag",
     ]  # should not include the geometry column as per convention
 
-    def __init__(self, pipe_model, asset_models):
-        self.pipe_model = pipe_model
-        self.asset_models = asset_models
-
     def generate_dwithin_subquery(
         self,
+        pipe_model,
         qs,
         json_fields,
         geometry_field="geometry",
@@ -52,7 +41,7 @@ class PipeMainsController(GeoDjangoDataManager):
         """
 
         pm_inner_subquery = self._generate_dwithin_inner_subquery(
-            self.pipe_model.objects.all(), "tag", geometry_field=geometry_field
+            pipe_model.objects.all(), "tag", geometry_field=geometry_field
         )
 
         subquery = (
@@ -183,8 +172,8 @@ class PipeMainsController(GeoDjangoDataManager):
             "utilities": ArrayAgg("dmas__utility__name"),
         }
 
-    def _generate_mains_subqueries(self):
-        pm_qs = self.pipe_model.objects.all().order_by("pk")
+    def _generate_mains_subqueries(self, pipe_model):
+        pm_qs = pipe_model.objects.all().order_by("pk")
 
         json_fields = self.get_pipe_json_fields()
 
@@ -200,99 +189,18 @@ class PipeMainsController(GeoDjangoDataManager):
 
         return subqueries
 
-    def generate_asset_subquery(self, asset_model, json_fields):
-        return self.generate_dwithin_subquery(asset_model.objects.all(), json_fields)
-
-    def _generate_asset_subqueries(self):
+    def _generate_asset_subqueries(self, pipe_model, point_assets):
         json_fields = self.get_asset_json_fields()
 
-        subqueries = {}
-        for name, asset_model in asset_models.items():
-            subquery = self.generate_asset_subquery(asset_model, json_fields)
-            subqueries[name] = subquery
-
-
         # This section is deliberately left verbose for clarity
-        subquery3 = self.generate_dwithin_subquery(Logger.objects.all(), json_fields)
 
-        subquery4 = self.generate_dwithin_subquery(
-            Hydrant.objects.all(),
-            json_fields,
-            extra_json_fields={"acoustic_logger": "acoustic_logger"},
-        )
+        subqueries = {}
+        for annotation, asset_model in point_assets.items():
+            subquery = self.generate_dwithin_subquery(
+                pipe_model, asset_model.objects.all(), json_fields
+            )
+            subqueries[annotation] = subquery
 
-        subquery5 = self.generate_dwithin_subquery(
-            PressureFitting.objects.all(),
-            json_fields,
-            extra_json_fields={"subtype": "subtype"},
-        )
-
-        subquery6 = self.generate_dwithin_subquery(
-            PressureControlValve.objects.all(),
-            json_fields,
-            extra_json_fields={"subtype": "subtype"},
-        )
-
-        subquery7 = self.generate_dwithin_subquery(
-            NetworkMeter.objects.all(),
-            json_fields,
-            extra_json_fields={"subtype": "subtype"},
-        )
-
-        subquery8 = self.generate_dwithin_subquery(Chamber.objects.all(), json_fields)
-
-        subquery9 = self.generate_dwithin_subquery(
-            OperationalSite.objects.all(),
-            json_fields,
-            extra_json_fields={"subtype": "subtype"},
-        )
-
-        subquery10 = self.generate_dwithin_subquery(
-            NetworkOptValve.objects.all(),
-            json_fields,
-            extra_json_fields={"acoustic_logger": "acoustic_logger"},
-        )
-
-        subquery11 = self.generate_dwithin_subquery(
-            ConnectionMeter.objects.all(),
-            json_fields,
-        )
-
-        subquery12 = self.generate_dwithin_subquery(
-            ConsumptionMeter.objects.all(),
-            json_fields,
-        )
-
-        subquery13 = self.generate_dwithin_subquery(
-            ListeningPost.objects.all(),
-            json_fields,
-        )
-
-        subquery14 = self.generate_dwithin_subquery(
-            IsolationValve.objects.all(),
-            json_fields,
-        )
-
-        subquery15 = self.generate_dwithin_subquery(
-            BulkMeter.objects.all(),
-            json_fields,
-        )
-
-        subqueries = {
-            "logger_data": ArraySubquery(subquery3),
-            "hydrant_data": ArraySubquery(subquery4),
-            "pressure_fitting_data": ArraySubquery(subquery5),
-            "pressure_valve_data": ArraySubquery(subquery6),
-            "network_meter_data": ArraySubquery(subquery7),
-            "chamber_data": ArraySubquery(subquery8),
-            "operational_site_data": ArraySubquery(subquery9),
-            "network_opt_valve_data": ArraySubquery(subquery10),
-            "connection_meter_data": ArraySubquery(subquery11),
-            "consumption_meter_data": ArraySubquery(subquery12),
-            "listening_post_data": ArraySubquery(subquery13),
-            "isolation_valve_data": ArraySubquery(subquery14),
-            "bulk_meter_data": ArraySubquery(subquery15),
-        }
         return subqueries
 
     @staticmethod
@@ -313,18 +221,18 @@ class PipeMainsController(GeoDjangoDataManager):
 
         return qs.filter(dmas__code__in=dma_codes)
 
-    def get_pipe_point_relation_queryset(self, filters):
-        mains_intersection_subqueries = self._generate_mains_subqueries()
-        asset_subqueries = self._generate_asset_subqueries()
+    def get_pipe_point_relation_queryset(self, pipe_model, point_assets, filters):
+        mains_intersection_subqueries = self._generate_mains_subqueries(pipe_model)
+        asset_subqueries = self._generate_asset_subqueries(pipe_model, point_assets)
 
         # https://stackoverflow.com/questions/51102389/django-return-array-in-subquery
-        qs = self.pipe_model.objects.prefetch_related("dmas", "dmas__utility")
+        qs = pipe_model.objects.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
 
         qs = qs.annotate(
-            asset_name=Value(self.pipe_model.AssetMeta.asset_name),
+            asset_name=Value(pipe_model.AssetMeta.asset_name),
             asset_label=Value(qs.model.__name__),
             pipe_length=Length("geometry"),
             wkt=AsWKT("geometry"),
@@ -342,16 +250,16 @@ class PipeMainsController(GeoDjangoDataManager):
 
         return qs
 
-    def get_mains_count(self, filters):
+    def get_mains_count(self, pipe_model, filters):
 
-        qs = self.pipe_model.objects.prefetch_related("dmas", "dmas__utility")
+        qs = pipe_model.objects.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
         return qs.count()
 
-    def get_mains_pks(self, filters):
-        qs = self.pipe_model.objects.prefetch_related("dmas", "dmas__utility")
+    def get_mains_pks(self, pipe_model, filters):
+        qs = pipe_model.objects.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_utility(qs, filters)
         qs = self._filter_by_dma(qs, filters)
@@ -368,7 +276,7 @@ class PipeMainsController(GeoDjangoDataManager):
         json_properties = dict(zip(properties, properties))
 
         qs: QuerySet = (
-            self.pipe_model.objects.values(*properties)
+            self.model.objects.values(*properties)
             .annotate(
                 geojson=JSONObject(
                     properties=JSONObject(**json_properties),

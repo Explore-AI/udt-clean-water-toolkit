@@ -61,6 +61,7 @@ class GisToGraph:
         self.dma_data = []
         self.utility_data = []
 
+
     def calc_pipe_point_relative_positions(self, pipes_qs: list) -> None:
         (
             self.all_pipe_nodes_by_pipe,
