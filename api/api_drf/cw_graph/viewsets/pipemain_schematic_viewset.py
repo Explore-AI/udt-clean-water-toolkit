@@ -8,14 +8,15 @@ from django.contrib.gis.geos import Point
 class SchematicPipeMainViewset(viewsets.ViewSet):
     http_method_names = ["get"]
 
-    # match (n)-[r:TrunkMain]-(m) return n, r, m limit 500
-
     @staticmethod
     def query_pipemain_network(request):
         # get all assets connected to the pipemains, as well as the pipemain relationships
-        limit = request.query_params.get("limit", 10)
+        limit = request.query_params.get("limit", 100)
+        dma_codes = request.query_params.get("dma_codes")
+
         query = f"""
         match (n:NetworkNode)-[r:PipeMain]-(m:NetworkNode)
+        match (n)-[r1]-(d:DMA) where d.code = 'ZWC23_06567'
         return ID(n), n, ID(r), r, ID(m), m
         limit {limit}
         """
@@ -27,7 +28,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
     def create_node(self, node_id, position, node_type="default", properties={}):
 
         point_bng = Point(position[0], position[1], srid=27700)
-        point_4326 = point_bng.transform(4326, clone=True)
+        # point_4326 = point_bng.transform(4326, clone=True)
         label = (
             properties["asset_names"][0]
             if properties.get("asset_names")
@@ -40,8 +41,8 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
             "key": node_id,
             "type": node_type,
             "position": {
-                "x": point_4326.x,
-                "y": point_4326.y,
+                "x": point_bng.x,
+                "y": point_bng.y,
                 # "x": position[0],
                 # "y": position[1],
             },
@@ -169,7 +170,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
 
             edge_id = f"{from_node_id}_{to_node_id}"
             edge_properties = {
-                "gid": edge_data._properties["gid"],
+                "tag": edge_data._properties["tag"],
                 "material": edge_data._properties["material"],
             }
 

@@ -8,7 +8,7 @@ import useFetchJson from '../../core/hooks/useFetchJson';
 function SchematicPage(props: PageProps) {
     const { pageVisibility } = props;
 
-    useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 30 });
+    useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 2000 });
 
     const mainCss = `${styles.main} ${styles[pageVisibility]}`;
 
