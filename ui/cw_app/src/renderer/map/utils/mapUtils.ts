@@ -97,7 +97,7 @@ export const MAP_LAYERS_PROPS = [
         assetType: 'point',
     },
     {
-        visible: false,
+        visible: true,
         label: 'Pipes',
         key: 'assets_pipemain',
         assetType: 'line',
@@ -337,7 +337,7 @@ async function getMapValues() {
 }
 
 const DmaCodes = getMapValues();
-console.log(DmaCodes);
+//console.log(DmaCodes);
 export const POINT_STYLING = (AssetName: string) => {
     let Styling = '';
     if (AssetName === 'assets_pressurefitting') {

@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from 'react';
 import { createLayers, DEFAULT_BASEMAP_PROPS, MAP_LAYERS_PROPS } from '../utils/mapUtils';
 
-import { unionBy as _unionBy } from 'lodash';
+import { map as _map } from 'lodash';
 
 export const MapLayerContext = createContext();
 
@@ -12,12 +12,15 @@ export default function useMapLayers() {
     const [mapLayers, setMapLayers] = useState(createLayers());
 
     const handleMapLayerProps = (newLayerProps) => {
-        const newMapLayerProps = _unionBy(
+        const newMapLayerProps = _map(
             mapLayerProps,
-            [newLayerProps],
-            'key',
+            (layerProp) => {
+                if (layerProp.key == newLayerProps.key) {
+                    return {...layerProp, ...newLayerProps}
+                }
+                return layerProp
+            }
         );
-
         setMapLayerProps(newMapLayerProps);
 
         const layers = createLayers(newMapLayerProps);

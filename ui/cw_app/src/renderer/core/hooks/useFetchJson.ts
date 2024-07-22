@@ -18,14 +18,13 @@ const useFetchJson = (queryKey, options={}) => {
     const { filterParams, setFilterParams } = useFilterParams(queryKey, options.params)
 
     const url = getApiUrl(queryKey, filterParams)
-    console.log(options)
 
     const queryValues = useQuery({
         queryKey: [queryKey, filterParams],
         retry: 0,
         queryFn: () => {
             return requestData(url, options)
-        }, 
+        },
         placeholderData: keepPreviousData
     })
 

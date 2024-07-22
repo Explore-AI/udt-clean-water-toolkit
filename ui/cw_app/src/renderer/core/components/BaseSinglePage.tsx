@@ -21,12 +21,12 @@ const BaseSinglePage = () => {
 
     return (
         <>
-            {/* <MapPage pageVisibility={pageVisibility.map} /> */}
-            {/* <GraphPage pageVisibility={pageVisibility.graph} />
-            <SpatialGraphPage pageVisibility={pageVisibility.spatialGraph} />
-            <AnalysisPage pageVisibility={pageVisibility.analysis} /> */}
+            <MapPage pageVisibility={pageVisibility.map} />
+            {/* <GraphPage pageVisibility={pageVisibility.graph} /> */}
+            {/* <SpatialGraphPage pageVisibility={pageVisibility.spatialGraph} /> */}
+            {/* <AnalysisPage pageVisibility={pageVisibility.analysis} /> */}
             {/* <SchematicPage pageVisibility={pageVisibility.schematic} /> */}
-            <AssetsPage pageVisibility={pageVisibility.assets} />
+            {/* <AssetsPage pageVisibility={pageVisibility.assets} /> */}
         </>
     );
 };
