@@ -3,7 +3,10 @@ from cwageodjango.assets.models import PipeMain
 
 
 class PipeFlow(models.Model):
-    pipe_main = models.ForeignKey(
-        PipeMain, on_delete=models.CASCADE, related_name="flows"
+    pipe_main = models.OneToOneField(
+        PipeMain,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        related_name="pipe_main_flows",
     )
     flow_data = models.JSONField()
