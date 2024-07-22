@@ -196,8 +196,6 @@ class Convert2Wntr(Neo4j2Wntr):
             roughness = self.roughness_values.get(link['material'], 120)
             self.add_pipe(link_id, start_node_id, end_node_id, diameter, length, roughness)
 
-
-
     def wntr_to_inp(self):
         """
         Exports the WNTR model to an INP (EPANET input file) format.

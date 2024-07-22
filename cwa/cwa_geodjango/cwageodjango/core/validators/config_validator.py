@@ -17,8 +17,8 @@ class ConfigValidator(forms.Form):
     outputfile = forms.CharField(max_length=256, required=False)
     dma_codes = forms.CharField(max_length=256, required=False)
     utility_names = forms.CharField(max_length=256, required=False)
-    wntr_simulation_length_hours = forms.IntegerField(required=False)
-    wntr_simulation_timestep_hours = forms.IntegerField(required=False)
+    wntr_simulation_length_hours = forms.FloatField(required=False)
+    wntr_simulation_timestep_hours = forms.FloatField(required=False)
 
 
     #    connection_distance_tolerance = forms.FloatField(required=True) # distance in meters
