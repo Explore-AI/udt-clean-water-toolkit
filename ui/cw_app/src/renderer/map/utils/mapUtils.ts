@@ -25,10 +25,34 @@ export const MAP_LAYERS_PROPS = [
         assetType: 'point',
     },
     {
-        visible: false,
-        label: 'Distribution Main',
-        key: 'assets_distributionmain',
-        assetType: 'line',
+        visible: true,
+        label: 'Bulkmeter',
+        key: 'assets_bulkmeter',
+        assetType: 'point',
+    },
+    {
+        visible: true,
+        label: 'Connectionmeter',
+        key: 'assets_connectionmeter',
+        assetType: 'point',
+    },
+    {
+        visible: true,
+        label: 'Consumptionmeter',
+        key: 'assets_consumptionmeter',
+        assetType: 'point',
+    },
+    {
+        visible: true,
+        label: 'IsolationValve',
+        key: 'assets_isolationvalve',
+        assetType: 'point',
+    },
+    {
+        visible: true,
+        label: 'Listeningpost',
+        key: 'assets_listeningpost',
+        assetType: 'point',
     },
     {
         visible: true,
@@ -74,8 +98,8 @@ export const MAP_LAYERS_PROPS = [
     },
     {
         visible: false,
-        label: 'Trunk Main',
-        key: 'assets_trunkmain',
+        label: 'Pipes',
+        key: 'assets_pipemain',
         assetType: 'line',
     },
     {
@@ -141,6 +165,46 @@ const AssetsChamberColormap = {
     default: [76, 43, 50, 1],
 };
 
+const AssetsBulkMeterColormap = {
+    property: 'gid',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [144, 182, 111, 1],
+};
+
+const AssetsConnectionMeterColormap = {
+    property: 'gid',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [236, 236, 41, 1],
+};
+
+const AssetsConsumptionMeterColormap = {
+    property: 'gid',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [171, 234, 241, 1],
+};
+
+const AssetsIsolationValveColormap = {
+    property: 'gid',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [210, 244, 39, 1],
+};
+
+const AssetsListeningPostColormap = {
+    property: 'gid',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [220, 128, 238, 1],
+};
+
 const AssetsOperationalsiteColormap = {
     property: 'subtype',
     colors: {
@@ -181,6 +245,24 @@ function AssetsChamberFillcolor(feature) {
     return getFillColorFeatures(feature, AssetsChamberColormap);
 }
 
+function AssetsBulkMeterFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsBulkMeterColormap);
+}
+
+function AssetsConnectionMeterFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsConnectionMeterColormap);
+}
+
+function AssetsConsumptionMeterFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsConsumptionMeterColormap);
+}
+function AssetsIsolationValveFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsIsolationValveColormap);
+}
+
+function AssetsListeningPostFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsListeningPostColormap);
+}
 function AssetsOperationalsiteFillcolor(feature) {
     return getFillColorFeatures(feature, AssetsOperationalsiteColormap);
 }
@@ -262,6 +344,16 @@ export const POINT_STYLING = (AssetName: string) => {
         Styling = AssetsPressurefittingFillcolor;
     } else if (AssetName === 'assets_chamber') {
         Styling = AssetsChamberFillcolor;
+    } else if (AssetName === 'assets_bulkmeter') {
+        Styling = AssetsBulkMeterFillcolor;
+    } else if (AssetName === 'assets_connectionmeter') {
+        Styling = AssetsConnectionMeterFillcolor;
+    } else if (AssetName === 'assets_consumptionmeter') {
+        Styling = AssetsConsumptionMeterFillcolor;
+    } else if (AssetName === 'assets_isolationvalve') {
+        Styling = AssetsIsolationValveFillcolor;
+    } else if (AssetName === 'assets_listeningpost') {
+        Styling = AssetsListeningPostFillcolor;
     } else if (AssetName === 'assets_operationalsite') {
         Styling = AssetsOperationalsiteFillcolor;
     } else if (AssetName === 'assets_pressurecontrolvalve') {
@@ -272,7 +364,12 @@ export const POINT_STYLING = (AssetName: string) => {
         AssetName === 'assets_pressurefitting' ||
         AssetName === 'assets_chamber' ||
         AssetName === 'assets_operationalsite' ||
-        AssetName === 'assets_pressurecontrolvalve'
+        AssetName === 'assets_pressurecontrolvalve' ||
+        AssetName === 'assets_bulkmeter' ||
+        AssetName === 'assets_connectionmeter' ||
+        AssetName === 'assets_consumptionmeter' ||
+        AssetName === 'assets_isolationvalve' ||
+        AssetName === 'assets_listeningpost'
     ) {
         StylingOptions = {
             ...COMMON_STYLING,
@@ -288,10 +385,8 @@ export const POINT_STYLING = (AssetName: string) => {
 
 export const LINE_STYLING = (AssetName: string) => {
     let ColorValue: number[] = [];
-    if (AssetName === 'assets_distributionmain') {
-        ColorValue = [228, 135, 60];
-    } else if (AssetName === 'assets_trunkmain') {
-        ColorValue = [72, 123, 182];
+    if (AssetName === 'assets_pipemain') {
+        ColorValue = [255, 96, 17];
     }
 
     return {
