@@ -82,6 +82,6 @@ router.register(
     "pressure_fitting-geojson",
 )
 
-router.register(r"pipe_flows", PipeFlowViewSet, basename="pipe_main_flows")
+router.register(r"pipe_flows", PipeFlowViewSet, basename="pipe_flows")
 
 urlpatterns = router.urls
