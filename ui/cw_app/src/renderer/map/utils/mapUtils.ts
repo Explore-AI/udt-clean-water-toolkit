@@ -158,7 +158,7 @@ const AssetsPressurefittingColormap = {
 };
 
 const AssetsChamberColormap = {
-    property: 'gid',
+    property: 'id',
     colors: {
         Null: [220, 215, 71],
     },
@@ -166,7 +166,7 @@ const AssetsChamberColormap = {
 };
 
 const AssetsBulkMeterColormap = {
-    property: 'gid',
+    property: 'id',
     colors: {
         Null: [220, 215, 71],
     },
@@ -174,7 +174,7 @@ const AssetsBulkMeterColormap = {
 };
 
 const AssetsConnectionMeterColormap = {
-    property: 'gid',
+    property: 'id',
     colors: {
         Null: [220, 215, 71],
     },
@@ -182,7 +182,7 @@ const AssetsConnectionMeterColormap = {
 };
 
 const AssetsConsumptionMeterColormap = {
-    property: 'gid',
+    property: 'id',
     colors: {
         Null: [220, 215, 71],
     },
@@ -190,7 +190,7 @@ const AssetsConsumptionMeterColormap = {
 };
 
 const AssetsIsolationValveColormap = {
-    property: 'gid',
+    property: 'id',
     colors: {
         Null: [220, 215, 71],
     },
@@ -198,7 +198,7 @@ const AssetsIsolationValveColormap = {
 };
 
 const AssetsListeningPostColormap = {
-    property: 'gid',
+    property: 'id',
     colors: {
         Null: [220, 215, 71],
     },
@@ -485,10 +485,8 @@ export const createLayers = (newMapLayerProps = []) => {
                 maxZoom: 18,
                 renderSubLayers: (props) => {
                     return new IconLayer(props, {
-                        iconMapping:
-                            'http://localhost:8080/geoserver/styles/sprites/makisprite.json',
-                        iconAtlas:
-                            'http://localhost:8080/geoserver/styles/sprites/makisprite.png',
+                        iconMapping: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.json`,
+                        iconAtlas: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.png`,
 
                         getIcon: (f) => iconFunctions[layerProps.key](f.properties),
                         sizeMinPixels: 10,
