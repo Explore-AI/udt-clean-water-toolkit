@@ -13,7 +13,6 @@ class ConfigValidator(forms.Form):
     parallel = forms.BooleanField(required=False)
     thread_count = forms.IntegerField(required=False)
     processor_count = forms.IntegerField(required=False)
-    inpfile = forms.CharField(max_length=256, required=False)
     outputfile = forms.CharField(max_length=256, required=False)
     dma_codes = forms.CharField(max_length=256, required=False)
     utility_names = forms.CharField(max_length=256, required=False)

@@ -1,3 +1,5 @@
+import pdb
+
 from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
 import wntr
@@ -16,8 +18,9 @@ class Convert2Wntr(Neo4j2Wntr):
         config: Configuration object containing settings for the conversion.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, dma=None):
         super().__init__(config)
+        self.dma = dma
         self.links_loaded = set()
         self.nodes_loaded = set()
         self.asset_dict = {}
@@ -29,13 +32,15 @@ class Convert2Wntr(Neo4j2Wntr):
         offset = 0
         total_nodes_loaded = 0
         utilities = list(set(self.config.utility_names or []))
-        dmas = list(set(self.config.dma_codes))
 
         conditions = []
-        if dmas:
-            dma_codes_str = ", ".join(f"'{dma_code}'" for dma_code in dmas)
-            conditions.append(f"d.code IN [{dma_codes_str}]")
-
+        if self.dma:
+            print(self.dma)
+            pdb.set_trace()
+            conditions.append(f"d.code IN ['{self.dma}']")
+        else:
+            print("no DMAs found!")
+            pdb.set_trace()
         if utilities:
             utility_names_str = ", ".join(f"'{utility_name}'" for utility_name in utilities)
             conditions.append(f"u.name IN [{utility_names_str}]")
@@ -207,13 +212,16 @@ class Convert2Wntr(Neo4j2Wntr):
         print(f"Fetched nodes: {len(self.nodes_loaded)}, Fetched links: {len(self.links_loaded)}")
         print(f"WN nodes: {len(self.wn.node_name_list)}, WN links: {len(self.wn.link_name_list)}")
 
-        wntr.network.write_inpfile(self.wn, filename=self.config.inpfile)
+        filename = "WNTR_" + str(self.dma)
 
-    def wntr_to_json(self, filename):
+        wntr.network.write_inpfile(self.wn, filename)
+
+    def wntr_to_json(self):
         """
         Exports the WNTR model to a JSON format.
 
         Parameters:
             filename (str): Name of the JSON file to export.
         """
-        wntr.network.write_json(self.wn, filename=filename)
+        filename = "WNTR_" + str(self.dma)
+        wntr.network.write_json(self.wn, filename)

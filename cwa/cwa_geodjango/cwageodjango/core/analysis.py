@@ -62,9 +62,10 @@ class Analysis(AppConf):
             None
 
         """
-        convert2wntr = Convert2Wntr(self.validated_config)
-        convert2wntr.convert()
-        convert2wntr.wntr_to_inp()
+        for dma in self.validated_config.dma_codes:
+            convert2wntr = Convert2Wntr(self.validated_config, dma)
+            convert2wntr.convert()
+            convert2wntr.wntr_to_inp()
 
     def neo4j_to_wntr_json(self) -> None:
         """
@@ -76,9 +77,10 @@ class Analysis(AppConf):
             None
 
         """
-        convert2wntr = Convert2Wntr(self.validated_config)
-        convert2wntr.convert()
-        convert2wntr.wntr_to_json()
+        for dma in self.validated_config.dma_codes:
+            convert2wntr = Convert2Wntr(self.validated_config, dma)
+            convert2wntr.convert()
+            convert2wntr.wntr_to_json()
 
     def inp_to_neo4j(self) -> None:
         convert2neo4j = InpToNeo4jController(self.validated_config)
