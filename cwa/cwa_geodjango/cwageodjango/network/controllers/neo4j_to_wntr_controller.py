@@ -126,7 +126,11 @@ class Convert2Wntr(Neo4j2Wntr):
             MATCH (n)-[:IN_DMA]->(d)
             MATCH (n)-[:HAS_ASSET]->(a)
             WHERE {conditions}
-            RETURN id(n) AS node_id, labels(a) AS asset_labels
+            RETURN id(n) AS node_id, 
+                   CASE
+                       WHEN a.subtype CONTAINS 'reservoir' THEN 'reservoir'
+                       ELSE labels(a)
+                   END AS asset_labels
         """
         conditions = [f"id(n) IN [{', '.join(map(str, node_ids))}]"]
 

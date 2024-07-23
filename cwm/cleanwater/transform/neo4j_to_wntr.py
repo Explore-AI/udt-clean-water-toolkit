@@ -101,7 +101,7 @@ class Neo4j2Wntr:
             is_meter = [item for item in node_type if item.endswith('Meter')]
             if is_meter:
                 self.add_consumption_junction(node_id_str, coordinates)
-            elif "OperationalSite" in node_type:
+            elif "reservoir" in node_type:
                 self.add_reservoir(node_id_str, coordinates)
             else:
                 self.add_junction(node_id_str, coordinates)
@@ -123,7 +123,7 @@ class Neo4j2Wntr:
         """
         Adds a reservoir to the network.
         """
-        base_head = 200.0  # Example base head
+        base_head = 20.0  # Example base head
         self.wn.add_reservoir(node_id_str, base_head=base_head, coordinates=coordinates)
 
     def add_pipe(self, edge_id, start_node_id, end_node_id, diameter, length, roughness):
