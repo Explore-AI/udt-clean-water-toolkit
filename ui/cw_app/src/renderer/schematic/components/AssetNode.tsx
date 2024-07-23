@@ -27,8 +27,8 @@ const AssetNode = (props: NodeProps<Node>) => {
 
     const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
 
-    const assetIcon = nodeProperties?.asset_names
-                    ? getIcons(nodeProperties?.asset_names[0])
+    const assetIcon = nodeProperties?.labels
+                    ? getIcons(nodeProperties?.labels[0])
                     : getIcons('default');
 
     const onClosePopup = (e) => {
@@ -43,14 +43,6 @@ const AssetNode = (props: NodeProps<Node>) => {
             <div className={styles.nodeContainer}>
                 <div className={styles.containerTitle}>
                     <div className={styles.icon}>{assetIcon}</div>
-                    <div className={styles.text}>
-                        <strong>{nodeProperties?.label}</strong>
-                    </div>
-                    <div className={styles.idText}>
-                        {nodeProperties?.asset_gids
-                        ? nodeProperties?.asset_gids[0]
-                        : data.key}
-                    </div>
                 </div>
             </div>
             <Handle

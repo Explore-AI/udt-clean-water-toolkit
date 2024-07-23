@@ -43,7 +43,7 @@ function Schematic() {
             </div>
         );
     }
-
+    //fitView={true}
     return (
         <>
             <ReactFlow
@@ -53,7 +53,6 @@ function Schematic() {
                 minZoom={0}
                 maxZoom={50}
                 zoomOnScroll={true}
-                fitView={true}
                 nodesDraggable={true}
                 className={styles.rfContainer}
                 onNodeClick={onNodeClick}

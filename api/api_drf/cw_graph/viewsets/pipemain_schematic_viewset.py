@@ -11,7 +11,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
     @staticmethod
     def query_pipemain_network(request):
         # get all assets connected to the pipemains, as well as the pipemain relationships
-        limit = request.query_params.get("limit", 100)
+        limit = request.query_params.get("limit", 10)
         dma_codes = request.query_params.get("dma_codes")
 
         query = f"""
@@ -25,16 +25,14 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
 
         return results
 
-    def create_node(self, node_id, position, node_type="default", properties={}):
+    def create_node(
+        self, node_id, position, node_type="default", properties={}, labels=[]
+    ):
 
         point_bng = Point(position[0], position[1], srid=27700)
         # point_4326 = point_bng.transform(4326, clone=True)
-        label = (
-            properties["asset_names"][0]
-            if properties.get("asset_names")
-            else "Point Asset"
-        )
-        properties["label"] = label.replace("_", " ").upper()
+
+        properties["labels"] = labels
 
         return {
             "id": node_id,
@@ -56,7 +54,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
             "key": edge_id,
             "source": str(from_node_id),
             "target": str(to_node_id),
-            "type": "straight",
+            "type": "step",
             "animated": True,
             "style": {"strokeWidth": "5px", "stroke": "#33658A"},
             "properties": edge_properties,
@@ -92,12 +90,14 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
             start_node_data["coords_27700"],
             node_type="assetNode",
             properties=start_node_data._properties,
+            labels=list(start_node_data.labels),
         )
         end_node = self.create_node(
             end_node_id,
             end_node_data["coords_27700"],
             node_type="assetNode",
             properties=end_node_data._properties,
+            labels=list(start_node_data.labels),
         )
 
         if point1 != point2:

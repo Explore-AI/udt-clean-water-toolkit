@@ -1,13 +1,13 @@
 .nodeContainer {
     background-color: #FFFEF6;
-    border-radius: 5px; 
-    border: 2px solid #33658A; 
-    width: 250px; 
-    height: 90px; 
-    display: flex; 
+    border-radius: 5px;
+    border: 2px solid #33658A;
+    width: 100px;
+    height: 90px;
+    display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 5px; 
+    padding: 10px;
 }
 
 .containerTitle {
@@ -15,12 +15,12 @@
     flex-direction: row;
     align-items: center;
     align-content: center;
-    
+
 }
 
 .containerTitle .text{
-    font-family: Tahoma, sans-serif; 
-    font-size: 0.85rem; 
+    font-family: Tahoma, sans-serif;
+    font-size: 0.85rem;
 }
 
 .containerTitle .idText {
@@ -29,5 +29,5 @@
 }
 
 .icon {
-    margin-right: 8px;
+    margin-right: 0px;
 }
