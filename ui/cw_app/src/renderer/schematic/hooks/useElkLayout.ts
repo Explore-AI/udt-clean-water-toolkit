@@ -7,8 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 const layoutOptions = {
     'elk.algorithm': 'layered',
     'elk.direction': 'RIGHT',
-    'elk.layered.spacing.edgeNodeBetweenLayers': '100',
-    'elk.spacing.nodeNode': '80',
+    'elk.layered.spacing.edgeNodeBetweenLayers': '80',
+    'elk.spacing.nodeNode': '40',
     'elk.layered.nodePlacement.strategy': 'SIMPLE',
 };
 

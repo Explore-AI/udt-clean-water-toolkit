@@ -20,8 +20,8 @@ export const getTableTitle = (key: string) => {
 
 export const defaultAssetColumns = [
     {
-        accessorKey: 'gid',
-        header: 'GISID',
+        accessorKey: 'tag',
+        header: 'Tag',
     },
     {
         accessorKey: 'geometry',

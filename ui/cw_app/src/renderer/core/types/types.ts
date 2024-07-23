@@ -7,7 +7,7 @@ import React from 'react';
 import {
     type MRT_ColumnDef,
     type MRT_PaginationState,
-    type MRT_Updater, 
+    type MRT_Updater,
 
 } from 'mantine-react-table';
 
@@ -22,7 +22,7 @@ type AssetColumnType = {
 };
 
 export type AssetsDataType = {
-    gid: number;
+    tag: string;
     geometry: string;
     dmas: number[];
     modified_at: string;

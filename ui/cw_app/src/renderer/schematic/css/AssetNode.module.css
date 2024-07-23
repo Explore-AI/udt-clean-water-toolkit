@@ -7,14 +7,13 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 10px;
 }
 
 .containerTitle {
     display: flex;
     flex-direction: row;
     align-items: center;
-    align-content: center;
+    justify-content: center;
 
 }
 
@@ -24,7 +23,7 @@
 }
 
 .containerTitle .idText {
-    margin-left: 10px;
+
     text-align: right;
 }
 

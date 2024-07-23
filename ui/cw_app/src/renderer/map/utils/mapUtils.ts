@@ -19,91 +19,91 @@ export const MVT_LAYER_URL = (asset_name: string) => {
 
 export const MAP_LAYERS_PROPS = [
     {
-        visible: true,
+        visible: false,
         label: 'Chambers',
         key: 'assets_chamber',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Bulkmeter',
         key: 'assets_bulkmeter',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Connectionmeter',
         key: 'assets_connectionmeter',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Consumptionmeter',
         key: 'assets_consumptionmeter',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'IsolationValve',
         key: 'assets_isolationvalve',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Listeningpost',
         key: 'assets_listeningpost',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Hydrants',
         key: 'assets_hydrant',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Loggers',
         key: 'assets_logger',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Network Meter',
         key: 'assets_networkmeter',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Network Opt Valve',
         key: 'assets_networkoptvalve',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Operational Site',
         key: 'assets_operationalsite',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Pressure Control Valve',
         key: 'assets_pressurecontrolvalve',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Pressure Fitting',
         key: 'assets_pressurefitting',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Pipes',
         key: 'assets_pipemain',
         assetType: 'line',
     },
     {
-        visible: true,
+        visible: false,
         label: 'DMA',
         key: 'utilities_dma',
         assetType: 'polygon',
@@ -429,21 +429,21 @@ const assets_networkmeter_getIcon = (subtypes) => {
 };
 
 const assets_networkoptvalve_getIcon = (subtypes) => {
-    switch (subtypes.gid) {
+    switch (subtypes.id) {
         default:
             return 'assets_networkoptvalve';
     }
 };
 
 const assets_logger_getIcon = (subtypes) => {
-    switch (subtypes.gid) {
+    switch (subtypes.id) {
         default:
             return 'logger';
     }
 };
 
 const assets_hydrant_getIcon = (subtypes) => {
-    switch (subtypes.gid) {
+    switch (subtypes.id) {
         default:
             return 'hydrant';
     }

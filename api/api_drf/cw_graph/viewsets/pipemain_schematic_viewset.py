@@ -117,6 +117,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         edge_id = str(item[2])
         edge_data = item[3]
 
+        print(edge_data)
         segment_wkt = edge_data.get("segment_wkt")
         line_coords_str = segment_wkt.split("(")[1][:-1]
         line_coords = [coord.strip() for coord in line_coords_str.split(",")]

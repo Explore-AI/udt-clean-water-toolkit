@@ -22,8 +22,8 @@ export const Table = () => {
     const columns = useMemo<MRT_ColumnDef<Assets>[]>(
         () => [
             {
-                accessorKey: 'gid',
-                header: 'GISID',
+                accessorKey: 'tag',
+                header: 'Tag',
                 mantineTableHeadCellProps: {
                     style: { backgroundColor: '#33658A', color: '#fff' },
                 },
