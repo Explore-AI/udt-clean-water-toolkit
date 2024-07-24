@@ -9,6 +9,5 @@ from .pressure_fitting import PressureFitting
 from .chamber import Chamber
 from .connection_meter import ConnectionMeter
 from .consumption_meter import ConsumptionMeter
-from .listening_post import ListeningPost
 from .isolation_valve import IsolationValve
 from .bulk_meter import BulkMeter

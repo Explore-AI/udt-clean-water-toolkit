@@ -264,16 +264,11 @@ class PipeMainsController(GeoDjangoDataManager):
         )
 
         subquery13 = self.generate_dwithin_subquery(
-            ListeningPost.objects.all(),
-            json_fields,
-        )
-
-        subquery14 = self.generate_dwithin_subquery(
             IsolationValve.objects.all(),
             json_fields,
         )
 
-        subquery15 = self.generate_dwithin_subquery(
+        subquery14 = self.generate_dwithin_subquery(
             BulkMeter.objects.all(),
             json_fields,
         )
@@ -289,9 +284,8 @@ class PipeMainsController(GeoDjangoDataManager):
             "network_opt_valve_data": ArraySubquery(subquery10),
             "connection_meter_data": ArraySubquery(subquery11),
             "consumption_meter_data": ArraySubquery(subquery12),
-            "listening_post_data": ArraySubquery(subquery13),
-            "isolation_valve_data": ArraySubquery(subquery14),
-            "bulk_meter_data": ArraySubquery(subquery15),
+            "isolation_valve_data": ArraySubquery(subquery13),
+            "bulk_meter_data": ArraySubquery(subquery14),
         }
         return subqueries
 
