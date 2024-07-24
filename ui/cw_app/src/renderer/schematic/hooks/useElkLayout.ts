@@ -5,7 +5,7 @@ import { SchematicProps } from '../types/types';
 import { useQuery } from '@tanstack/react-query';
 
 const layoutOptions = {
-    'elk.algorithm': 'layered',
+    'elk.algorithm': 'mrtree',
     'elk.direction': 'RIGHT',
     //'elk.layered.spacing.edgeNodeBetweenLayers': '200',
     //'elk.spacing.nodeNode': '1000',

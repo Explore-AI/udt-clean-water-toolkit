@@ -43,11 +43,11 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
                     <div className={styles.details}>
                         <div>
                             <strong>DMA Codes:</strong>{' '}
-                            ZWC23_06567
+                            ZMAIDL45
                         </div>
                         <div>
                             <strong>DMA Names:</strong>{' '}
-                            Sugarbrook Rural
+                            MAIDEN LANE
                         </div>
                         <div>
                             <strong>Coordinates:</strong>{' '}

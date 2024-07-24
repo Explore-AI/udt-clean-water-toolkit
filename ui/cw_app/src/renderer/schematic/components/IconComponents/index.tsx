@@ -9,12 +9,13 @@ import { Icons } from '../../types/types';
 
 const icons:Icons = {
     'network_opt_valve': <NetworkValveIcon.Default />,
-    'network_meter': <NetworkMeterIcon.Default />,
-    'hydrant': <HydrantIcon.Distribution />,
-    'pressure_control_valve': <PressureValveIcon />,
+    'NetworkMeter': <NetworkMeterIcon.Default />,
+    'Hydrant': <HydrantIcon.Distribution />,
+    'PressureControlValve': <PressureValveIcon />,
+    'IsolationValve': <PressureValveIcon />,
     'sres': <SresIcon />,
-    'logger': <LoggerIcon />,
-    'chambers': <DefaultIcon />, 
+    'Logger': <LoggerIcon />,
+    'Chamber': <DefaultIcon />,
     'default': <DefaultIcon />,
 };
 

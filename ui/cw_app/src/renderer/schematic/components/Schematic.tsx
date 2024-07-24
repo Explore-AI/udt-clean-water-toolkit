@@ -2,6 +2,7 @@
 import 'reactflow/dist/base.css';
 import { useContext } from 'react'
 import LoadingSpinner from '../../core/components/LoadingSpinner';
+import MultiSelectField from '../../core/components/MultiSelectField'
 import styles from '../css/Schematic.module.css';
 import AssetNode from './AssetNode';
 import PipeEdgeNode from './PipeEdgeNode';
@@ -9,6 +10,8 @@ import PipeNode from './PipeNode';
 import ReactFlow, { Controls, Node } from 'reactflow';
 import useElkLayout from '../hooks/useElkLayout';
 import useGetData from '../../core/hooks/useGetData';
+import useGetItems from '../../core/hooks/useGetItems'
+import { useNavigate } from 'react-router-dom';
 import { SchematicUiContext } from '../hooks/useSchematicUi'
 import { SchematicProps } from '../types/types';
 import { TRUNKMAIN_QUERY_KEY } from '../queries';
@@ -20,10 +23,17 @@ const nodeTypes = {
     pipeEdgeNode: PipeEdgeNode,
 };
 
+const DMA__QUERY_KEY = 'cw_utilities/dma'
+
 function Schematic() {
+
+    const navigate = useNavigate();
+
     const { queryValues } = useGetData(TRUNKMAIN_QUERY_KEY);
     const { data, isPending, isSuccess } = queryValues
     const { data: layoutData } = useElkLayout(data as SchematicProps || { nodes: [], edges: [] });
+
+    const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
     const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
 
@@ -45,10 +55,29 @@ function Schematic() {
             </div>
         );
     }
+
+
+    const onSearchChange = (value) => {
+        setFilterParams(DMA__QUERY_KEY, { search: value })
+    }
+
+    const onFilterByDmas = (options) => {
+        navigate(`/spatial-graph/${options.join("-")}`);
+    }
     //fitView={true}
     //nodesDraggable={true}
     return (
         <>
+            <div className={styles['search_box']}>
+                <MultiSelectField
+                    labelName="code"
+                    clearable={true}
+                    onEnter={onFilterByDmas}
+                    onSearchChange={onSearchChange}
+                    searchable={true}
+                    placeholder="Search by DMA"
+                    data={items} />
+            </div>
             <ReactFlow
                 nodes={layoutData?.nodes}
                 edges={layoutData?.edges}

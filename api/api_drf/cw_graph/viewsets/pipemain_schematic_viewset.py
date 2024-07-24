@@ -28,7 +28,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         dma_codes = request.query_params.get("dma_codes")
 
         query = f"""
-        MATCH (d:DMA {{code : 'ZWC23_06567'}})-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility {{name : 'severn_trent_water'}})
+        MATCH (d:DMA {{code : 'ZMAIDL45'}})-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility {{name : 'thames_water'}})
         MATCH (n)-[r1:PipeMain]-(s:NetworkNode)
         OPTIONAL MATCH (n)-[r2:HAS_ASSET]->(a)
         return ID(n), n, ID(r1), r1, ID(s), s, ID(a), a, ID(r2)
@@ -62,7 +62,13 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         }
 
     def create_edge(
-        self, edge_id, from_node_id, to_node_id, edge_properties={}, animated=False
+        self,
+        edge_id,
+        from_node_id,
+        to_node_id,
+        edge_properties={},
+        animated=False,
+        edge_type="step",
     ):
 
         return {
@@ -70,7 +76,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
             "key": edge_id,
             "source": str(from_node_id),
             "target": str(to_node_id),
-            "type": "step",
+            "type": edge_type,
             "animated": animated,
             "style": {"strokeWidth": "5px", "stroke": "#33658A"},
             "properties": edge_properties,
@@ -201,7 +207,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         asset_edge = self.create_edge(
             asset_edge_id,
             start_node_id,
-            asset_node_id,
+            asset_node_id,  # edge_type="straight"
         )
 
         return asset_node, asset_edge
