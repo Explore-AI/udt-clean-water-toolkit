@@ -1,4 +1,3 @@
-import pdb
 
 from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
@@ -36,11 +35,9 @@ class Convert2Wntr(Neo4j2Wntr):
         conditions = []
         if self.dma:
             print(self.dma)
-            pdb.set_trace()
             conditions.append(f"d.code IN ['{self.dma}']")
         else:
             print("no DMAs found!")
-            pdb.set_trace()
         if utilities:
             utility_names_str = ", ".join(f"'{utility_name}'" for utility_name in utilities)
             conditions.append(f"u.name IN [{utility_names_str}]")

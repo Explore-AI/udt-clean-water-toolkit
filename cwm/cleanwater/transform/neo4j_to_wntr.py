@@ -202,7 +202,7 @@ class Neo4j2Wntr:
         node_ids_added = self.wn.node_name_list
         missing_nodes = set(node_ids_queried) - set(node_ids_added)
         if missing_nodes:
-            print(f"{len(missing_nodes)} nodes excluded: {missing_nodes}")
+            print(f"{len(missing_nodes)} nodes excluded from final model")
         else:
             print("All queried nodes added to WN")
 
@@ -210,7 +210,7 @@ class Neo4j2Wntr:
         link_ids_added = self.wn.link_name_list
         missing_links = set(link_ids_queried) - set(link_ids_added)
         if missing_links:
-            print(f"{len(missing_links)} links excluded: {missing_links}")
+            print(f"{len(missing_links)} links excluded from final model")
         else:
             print("All queried edges added to WN")
 
