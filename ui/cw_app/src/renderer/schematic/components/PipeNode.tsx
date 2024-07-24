@@ -1,6 +1,11 @@
-import { Handle, Position } from 'reactflow';
-import { useMemo, memo } from 'react';
-
+import styles from '../css/AssetNode.module.css';
+import { useContext, memo } from 'react'
+import { Position, Handle, NodeProps } from 'reactflow';
+import { Node } from '../types/types';
+import { SchematicUiContext } from '../hooks/useSchematicUi'
+import { getIcons } from './IconComponents';
+import { includes as _includes, filter as _filter } from 'lodash'
+import { AssetPopup } from './AssetPopup';
 
 const handleStyle = {
     top: '13px',
@@ -16,13 +21,49 @@ const handleStyle = {
     minWidth: '1px',
 };
 
+const PipeNode = (props: NodeProps<Node>) => {
+    const { data, id: nodeId } = props;
+    const { properties: nodeProperties } = data;
 
-export default memo(() => {
+    const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
+
+    const assetIcon = nodeProperties?.labels
+                    ? getIcons(nodeProperties?.labels[0])
+                    : getIcons('default');
+
+    const onClosePopup = (e) => {
+        const newNodePopupIds = _filter(nodePopupIds, (id) => id != nodeId );
+        setSchematicUiParams({ nodePopupIds: newNodePopupIds })
+        e.stopPropagation()
+
+    }
+
     return (
         <>
-            <Handle type="target" position={Position.Top} style={{ visibility: 'hidden', ...handleStyle}}/>
-            <Handle type="source" position={Position.Top} style={{ visibility: 'hidden', ...handleStyle}}/>
+            <div className={styles.nodeContainer}>
+                <div className={styles.containerTitle}>
+                    <div className={styles.icon}>{assetIcon}</div>
+                </div>
+            </div>
+            <Handle
+                type="target"
+                position={Position.Top}
+                style={{ visibility: 'hidden', ...handleStyle }}
+            ></Handle>
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                style={{ visibility: 'hidden', ...handleStyle }}
+            ></Handle>
+            { _includes(nodePopupIds, nodeId) &&
+              <AssetPopup
+                  nodeProps={nodeProperties}
+                  onClose={onClosePopup}
+              />
+            }
         </>
     );
-});
+};
 
+
+export default memo(PipeNode)

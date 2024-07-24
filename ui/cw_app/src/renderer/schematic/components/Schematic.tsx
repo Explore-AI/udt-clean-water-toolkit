@@ -4,7 +4,8 @@ import { useContext } from 'react'
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import styles from '../css/Schematic.module.css';
 import AssetNode from './AssetNode';
-import PipeEdgeNode from './PipeNode';
+import PipeEdgeNode from './PipeEdgeNode';
+import PipeNode from './PipeNode';
 import ReactFlow, { Controls, Node } from 'reactflow';
 import useElkLayout from '../hooks/useElkLayout';
 import useGetData from '../../core/hooks/useGetData';
@@ -15,7 +16,8 @@ import { isEmpty as _isEmpty, union as _union } from 'lodash';
 
 const nodeTypes = {
     assetNode: AssetNode,
-    pipeNode: PipeEdgeNode,
+    pipeNode: PipeNode,
+    pipeEdgeNode: PipeEdgeNode,
 };
 
 function Schematic() {
@@ -44,6 +46,7 @@ function Schematic() {
         );
     }
     //fitView={true}
+    //nodesDraggable={true}
     return (
         <>
             <ReactFlow
@@ -53,7 +56,6 @@ function Schematic() {
                 minZoom={0}
                 maxZoom={50}
                 zoomOnScroll={true}
-                nodesDraggable={true}
                 className={styles.rfContainer}
                 onNodeClick={onNodeClick}
             >

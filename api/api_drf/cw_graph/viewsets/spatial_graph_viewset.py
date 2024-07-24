@@ -141,7 +141,7 @@ class SpatialGraphViewset(viewsets.ViewSet):
             edge_node = self.create_node(
                 node_id,
                 position,
-                node_type="pipeNode",
+                node_type="PipeEdgeNode",
                 properties=pipe_data._properties,
             )
 

@@ -13,7 +13,7 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
 }) => {
 
 //    const icon = getIcons(assetName);
-
+    console.log(nodeProps, "aaa")
     return (
         <>
             <Draggable>
@@ -54,7 +54,7 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
                             {` ${nodeProps.coords_27700[0]}, ${nodeProps.coords_27700[1]}`}
                         </div>
                         <div>
-                            <strong>Node Types:</strong> Pipe Junction
+                            <strong>Node Types:</strong> {nodeProps.label}
                         </div>
                         <div>
                             <strong>Utility:</strong> Severn Trent Water
