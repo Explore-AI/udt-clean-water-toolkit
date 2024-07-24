@@ -1,58 +1,63 @@
+# create an api that filters based on the PipekMains
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from neomodel import db
-
 from django.contrib.gis.geos import Point
 
 
-class SchematicViewset(viewsets.ViewSet):
+class SpatialGraphViewset(viewsets.ViewSet):
     http_method_names = ["get"]
 
     @staticmethod
-    def query_by_dma(request):
-        dma_code = request.query_params.get("dma_code")
-        if dma_code:
-            query = f"""
-            match (n)-[r]->(m) where n.dmas
-            contains '{dma_code}' return
-            ID(n), n, ID(r), r, ID(m), m
-            limit 10
-            """
+    def query_pipemain_network(request):
+        # get all assets connected to the pipemains, as well as the pipemain relationships
+        limit = request.query_params.get("limit", 10)
+        dma_codes = request.query_params.get("dma_codes")
 
-            results, _ = db.cypher_query(query)
+        query = f"""
+        match (n:NetworkNode)-[r:PipeMain]-(m:NetworkNode)
+        match (n)-[r1]-(d:DMA) where d.code = 'ZWC23_06567'
+        return ID(n), n, ID(r), r, ID(m), m
+        limit {limit}
+        """
 
-            return results
-        else:
-            return []
+        results, _ = db.cypher_query(query)
 
-    def create_node(self, node_id, position, node_type="default", properties={}):
+        return results
 
-        # point = Point(position[0], position[1], srid=27700)
+    def create_node(
+        self, node_id, position, node_type="default", properties={}, labels=[]
+    ):
 
-        # point_4326 = point.transform(4326, clone=True)
+        point_bng = Point(position[0], position[1], srid=27700)
+        # point_4326 = point_bng.transform(4326, clone=True)
+
+        properties["labels"] = labels
 
         return {
             "id": node_id,
             "key": node_id,
             "type": node_type,
             "position": {
-                # "x": point_4326.x,
-                # "y": point_4326.y,
-                "x": position[0] * 10,
-                "y": position[1] * 10,
+                "x": point_bng.x,
+                "y": point_bng.y,
+                # "x": position[0],
+                # "y": position[1],
             },
-            "data": {"label": node_id, **properties},
+            "properties": properties,
         }
 
-    def create_edge(self, edge_id, from_node_id, to_node_id):
+    def create_edge(self, edge_id, from_node_id, to_node_id, edge_properties):
 
         return {
             "id": edge_id,
             "key": edge_id,
             "source": str(from_node_id),
             "target": str(to_node_id),
-            "type": "straight",
-            "style": {"strokeWidth": "5px", "color": "black"},
+            "type": "step",
+            "animated": True,
+            "style": {"strokeWidth": "5px", "stroke": "#33658A"},
+            "properties": edge_properties,
         }
 
     def find_start_end_node_on_edge(
@@ -83,14 +88,16 @@ class SchematicViewset(viewsets.ViewSet):
         start_node = self.create_node(
             start_node_id,
             start_node_data["coords_27700"],
-            node_type="circle",
+            node_type="assetNode",
             properties=start_node_data._properties,
+            labels=list(start_node_data.labels),
         )
         end_node = self.create_node(
             end_node_id,
             end_node_data["coords_27700"],
-            node_type="circle",
+            node_type="assetNode",
             properties=end_node_data._properties,
+            labels=list(start_node_data.labels),
         )
 
         if point1 != point2:
@@ -99,12 +106,13 @@ class SchematicViewset(viewsets.ViewSet):
         return start_node, end_node
 
     def create_nodes(self, item, node_ids):
-
         start_node_id = str(item[0])
         start_node_data = item[1]
 
         end_node_id = str(item[4])
         end_node_data = item[5]
+
+        pipe_data = item[3]
 
         edge_id = str(item[2])
         edge_data = item[3]
@@ -130,7 +138,12 @@ class SchematicViewset(viewsets.ViewSet):
                 float(coord.split(" ")[0]),
                 float(coord.split(" ")[1]),
             ]
-            edge_node = self.create_node(node_id, position, node_type="edge_node")
+            edge_node = self.create_node(
+                node_id,
+                position,
+                node_type="pipeNode",
+                properties=pipe_data._properties,
+            )
 
             all_nodes.append(edge_node)
 
@@ -146,57 +159,47 @@ class SchematicViewset(viewsets.ViewSet):
 
         return new_nodes, all_nodes, node_ids
 
-    def create_edges(self, nodes, edge_ids):
+    def create_edges(self, nodes, edge_ids, edge_data):
         edges = []
 
         from_node = nodes[0]
-        # print()
-        # print(pd.DataFrame(nodes))
-        # print()
-        # import pdb
 
-        # pdb.set_trace()
         for to_node in nodes[1:]:
             from_node_id = from_node["id"]
             to_node_id = to_node["id"]
 
             edge_id = f"{from_node_id}_{to_node_id}"
+            edge_properties = {
+                "tag": edge_data._properties["tag"],
+                "material": edge_data._properties["material"],
+            }
 
             if edge_id in edge_ids:
                 continue
 
-            edge = self.create_edge(edge_id, from_node_id, to_node_id)
+            edge = self.create_edge(edge_id, from_node_id, to_node_id, edge_properties)
 
             edges.append(edge)
             edge_ids.append(edge_id)
 
             from_node = to_node
 
-        # print()
-        # print(pd.DataFrame(edges))
-        # print()
-        # import pdb
-
-        # pdb.set_trace()
-
         return edges, edge_ids
 
     def create_nodes_and_edges(self, item, node_ids, edge_ids):
-
         new_nodes, all_nodes, node_ids = self.create_nodes(item, node_ids)
-        edges, edge_ids = self.create_edges(all_nodes, edge_ids)
+        edges, edge_ids = self.create_edges(all_nodes, edge_ids, edge_data=item[3])
 
         return new_nodes, edges, node_ids, edge_ids
 
-    def get_nodes_edges(self, graph_data):
-
-        # TODO: cleanup as performing redundant operations
+    def get_nodes_edges(self, data):
+        #
         node_ids = []
         edge_ids = []
         all_nodes = []
         all_edges = []
 
-        for item in graph_data:
+        for item in data:
             nodes, edges, node_ids, edge_ids = self.create_nodes_and_edges(
                 item, node_ids, edge_ids
             )
@@ -206,7 +209,7 @@ class SchematicViewset(viewsets.ViewSet):
         return {"nodes": all_nodes, "edges": all_edges}
 
     def list(self, request):
-        data = self.query_by_dma(request)
-        n_e = self.get_nodes_edges(data)
+        results = self.query_pipemain_network(request)
+        nodes_edges = self.get_nodes_edges(results)
 
-        return Response(n_e, status=status.HTTP_200_OK)
+        return Response(nodes_edges, status=status.HTTP_200_OK)
