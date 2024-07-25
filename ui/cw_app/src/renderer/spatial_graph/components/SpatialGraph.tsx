@@ -64,6 +64,7 @@ const SpatialGraph = () => {
                     clearable={true}
                     onEnter={onFilterByDmas}
                     onSearchChange={onSearchChange}
+                    placeholder="Search by DMA"
                     searchable={true}
                     data={items} />
             </div>

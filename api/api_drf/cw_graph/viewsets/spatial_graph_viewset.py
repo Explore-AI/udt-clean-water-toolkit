@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from neomodel import db
-
+from random import randint
 from django.contrib.gis.geos import Point
 
 
@@ -12,8 +12,8 @@ class SpatialGraphViewset(viewsets.ViewSet):
     def query_by_dma(request):
 
         limit = request.query_params.get("limit", 300)
-        dma_code = request.query_params.get("dma_code", 'ZCHIPO01')
-        #ZMAIDL45
+        dma_code = request.query_params.get("dma_code", "ZCHIPO01")
+        # ZMAIDL45
         if dma_code:
             query = f"""
             match (n:NetworkNode)-[r:PipeMain]->(m:NetworkNode)
@@ -47,7 +47,7 @@ class SpatialGraphViewset(viewsets.ViewSet):
             "data": {"label": node_id, **properties},
         }
 
-    def create_edge(self, edge_id, from_node_id, to_node_id):
+    def create_edge(self, edge_id, from_node_id, to_node_id, label):
 
         return {
             "id": edge_id,
@@ -56,6 +56,7 @@ class SpatialGraphViewset(viewsets.ViewSet):
             "target": str(to_node_id),
             "type": "straight",
             "animated": True,
+            # "label": label,
             "style": {"strokeWidth": "5px", "color": "black"},
         }
 
@@ -127,6 +128,7 @@ class SpatialGraphViewset(viewsets.ViewSet):
             new_nodes.append(start_node)
 
         all_nodes = [start_node]
+
         for i, coord in enumerate(line_coords[1:-1]):
             node_id = f"{edge_id}-{str(i)}"
 
@@ -134,6 +136,7 @@ class SpatialGraphViewset(viewsets.ViewSet):
                 float(coord.split(" ")[0]),
                 float(coord.split(" ")[1]),
             ]
+
             edge_node = self.create_node(node_id, position, node_type="edge_node")
 
             all_nodes.append(edge_node)
@@ -154,12 +157,8 @@ class SpatialGraphViewset(viewsets.ViewSet):
         edges = []
 
         from_node = nodes[0]
-        # print()
-        # print(pd.DataFrame(nodes))
-        # print()
-        # import pdb
 
-        # pdb.set_trace()
+        flow_rate = None
         for to_node in nodes[1:]:
             from_node_id = from_node["id"]
             to_node_id = to_node["id"]
@@ -169,19 +168,16 @@ class SpatialGraphViewset(viewsets.ViewSet):
             if edge_id in edge_ids:
                 continue
 
-            edge = self.create_edge(edge_id, from_node_id, to_node_id)
+            # if to_node["type"] == "circle":
+            #     flow_rate = randint(500, 600)
+
+            edge = self.create_edge(edge_id, from_node_id, to_node_id, flow_rate)
+            flow_rate = None
 
             edges.append(edge)
             edge_ids.append(edge_id)
 
             from_node = to_node
-
-        # print()
-        # print(pd.DataFrame(edges))
-        # print()
-        # import pdb
-
-        # pdb.set_trace()
 
         return edges, edge_ids
 

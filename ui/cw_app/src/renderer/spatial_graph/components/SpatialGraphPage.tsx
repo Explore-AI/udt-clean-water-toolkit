@@ -1,4 +1,5 @@
 import styles from '../css/spatial-graph-page.module.css';
+import '../css/edge-label.css'
 import SpatialGraph from  './SpatialGraph';
 import useFetchJson from '../../core/hooks/useFetchJson';
 import useFetchItems from '../../core/hooks/useFetchItems'
@@ -18,7 +19,7 @@ const SpatialGraphPage = (props) => {
     }
 
     //params: {'dma_codes': dmaCodes }
-    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { limit: 500 })
+    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { limit: 7000 })
 
     useFetchItems(DMA__QUERY_KEY)
 
