@@ -12,6 +12,7 @@ import ReactFlow, { Controls, Node } from 'reactflow';
 import useElkLayout from '../hooks/useElkLayout';
 import useGetData from '../../core/hooks/useGetData';
 import useGetItems from '../../core/hooks/useGetItems'
+import NodePopups from './NodePopups'
 import { useNavigate } from 'react-router-dom';
 import { SchematicUiContext } from '../hooks/useSchematicUi'
 import { SchematicProps } from '../types/types';
@@ -45,8 +46,24 @@ function Schematic() {
         setSchematicUiParams({ nodePopupIds: _union(nodePopupIds || [], [node.id])});
     };
 
+
+    const onNodeClick2 = (
+        e: React.MouseEvent,
+        node: Node,
+    ) => {
+        setSchematicUiParams({
+            nodePopups: [
+                {
+                    id: node.id,
+                    data: node.data,
+                    position: [e.clientX, e.clientY]
+                }
+            ]
+        });
+    };
+
     if (isPending) {
-        return <LoadingSpinner />;
+            return <LoadingSpinner />;
     }
 
     if (_isEmpty(data) && isSuccess) {
@@ -87,10 +104,9 @@ function Schematic() {
                 maxZoom={50}
                 zoomOnScroll={true}
                 className={styles.rfContainer}
-                onNodeClick={onNodeClick}
-            >
-
+                onNodeClick={onNodeClick2}>
                 <Controls />
+                <NodePopups/>
             </ReactFlow>
         </>
     );
