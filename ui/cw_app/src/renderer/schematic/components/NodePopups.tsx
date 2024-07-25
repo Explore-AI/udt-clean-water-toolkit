@@ -21,11 +21,12 @@ const NodePopups = (props) => {
     return (
         <>
             { _map(nodePopups, (node) => (
-                <div style={{ position: 'relative',
-                              zIndex: 5,
-                              transform: `translate(${node.position[0]}px, ${node.position[1]-20}px)` }}>
+                <div
+                    key={node.id}
+                    style={{ position: 'relative',
+                             zIndex: 5,
+                             transform: `translate(${node.position[0]}px, ${node.position[1]-20}px)` }}>
                     <AssetPopup
-                        key={node.id}
                         nodeProps={node.data.properties}
                         onClose={() => onClosePopup(node.id)}
                     />

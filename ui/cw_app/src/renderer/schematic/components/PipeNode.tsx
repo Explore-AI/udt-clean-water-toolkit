@@ -27,9 +27,7 @@ const PipeNode = (props: NodeProps<Node>) => {
 
     const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
 
-    const assetIcon = nodeProperties?.labels
-                    ? getIcons(nodeProperties?.labels[0])
-                    : getIcons('default');
+    const assetIcon = getIcons('default');
 
     const onClosePopup = (e) => {
         const newNodePopupIds = _filter(nodePopupIds, (id) => id != nodeId );

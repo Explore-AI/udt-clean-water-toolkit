@@ -2,13 +2,13 @@
 import 'reactflow/dist/base.css';
 import styles from '../css/Schematic.module.css';
 import { useContext } from 'react'
+import ReactFlow, { Controls, Node } from 'reactflow';
+import useElkLayout from '../hooks/useElkLayout';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import MultiSelectField from '../../core/components/MultiSelectField'
 import AssetNode from './AssetNode';
 import PipeEdgeNode from './PipeEdgeNode';
 import PipeNode from './PipeNode';
-import ReactFlow, { Controls, Node } from 'reactflow';
-import useElkLayout from '../hooks/useElkLayout';
 import useGetData from '../../core/hooks/useGetData';
 import useGetItems from '../../core/hooks/useGetItems'
 import NodePopups from './NodePopups'
@@ -21,10 +21,8 @@ import { isEmpty as _isEmpty, union as _union } from 'lodash';
 const nodeTypes = {
     assetNode: AssetNode,
     pipeNode: PipeNode,
-    pipeEdgeNode: PipeEdgeNode,
 };
 
-const edgeTypes = {}
 
 const DMA__QUERY_KEY = 'cw_utilities/dma'
 

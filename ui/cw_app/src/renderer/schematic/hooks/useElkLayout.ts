@@ -9,7 +9,7 @@ const layoutOptions = {
     'elk.direction': 'RIGHT',
     //'elk.layered.spacing.edgeNodeBetweenLayers': '200',
     //'elk.spacing.nodeNode': '1000',
-    //'org.eclipse.elk.spacing.edgeEdge': '1000',
+    'org.eclipse.elk.spacing.edgeEdge': '50',
     'elk.layered.nodePlacement.strategy': 'SIMPLE',
 };
 

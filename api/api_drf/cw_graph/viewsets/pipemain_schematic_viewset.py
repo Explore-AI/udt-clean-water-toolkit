@@ -3,6 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from neomodel import db
 from django.contrib.gis.geos import Point
+from random import randint
 
 
 ABSTRACT_NODE_LABELS = ["PipeNode", "NetworkNode", "PointAsset"]
@@ -26,12 +27,12 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         # get all assets connected to the pipemains, as well as the pipemain relationships
         limit = request.query_params.get("limit", 10)
         dma_codes = request.query_params.get("dma_codes")
-        #ZMAIDL45
+        # ZMAIDL45
         query = f"""
         MATCH (d:DMA {{code : 'ZMAIDL45'}})-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility {{name : 'thames_water'}})
         MATCH (n)-[r1:PipeMain]-(s:NetworkNode)
         OPTIONAL MATCH (n)-[r2:HAS_ASSET]->(a)
-        return ID(n), n, ID(r1), r1, ID(s), s, ID(a), a, ID(r2)
+        return ID(n), n, ID(r1), r1, ID(s), s, ID(a), a, ID(r2), d, u
         limit {limit}
         """
 
@@ -68,7 +69,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         to_node_id,
         edge_properties={},
         animated=False,
-        edge_type="step",
+        label=None,
     ):
 
         return {
@@ -76,14 +77,22 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
             "key": edge_id,
             "source": str(from_node_id),
             "target": str(to_node_id),
-            "type": edge_type,
+            "type": "step",
+            "label": label,
             "animated": animated,
             "style": {"strokeWidth": "5px", "stroke": "#33658A"},
             "properties": edge_properties,
         }
 
     def find_start_end_node_on_edge(
-        self, start_node_id, start_node_data, end_node_id, end_node_data, line_coords
+        self,
+        start_node_id,
+        start_node_data,
+        end_node_id,
+        end_node_data,
+        line_coords,
+        dma_data,
+        utility_data,
     ):
         """We need to check if the line terminal points are the same as the
         node points to get them in the correct order
@@ -111,14 +120,22 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
             start_node_id,
             start_node_data["coords_27700"],
             node_type="pipeNode",
-            properties=start_node_data._properties,
+            properties={
+                **start_node_data._properties,
+                **dma_data._properties,
+                "utility": utility_data._properties["name"],
+            },  # start_node_data._properties,
             labels=list(start_node_data.labels),
         )
         end_node = self.create_node(
             end_node_id,
             end_node_data["coords_27700"],
             node_type="pipeNode",
-            properties=end_node_data._properties,
+            properties={
+                **end_node_data._properties,
+                **dma_data._properties,
+                "utility": utility_data._properties["name"],
+            },  # start_node_data._properties,
             labels=list(start_node_data.labels),
         )
 
@@ -142,7 +159,13 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         line_coords = [coord.strip() for coord in line_coords_str.split(",")]
 
         start_node, end_node = self.find_start_end_node_on_edge(
-            start_node_id, start_node_data, end_node_id, end_node_data, line_coords
+            start_node_id,
+            start_node_data,
+            end_node_id,
+            end_node_data,
+            line_coords,
+            item[9],
+            item[10],
         )
 
         new_nodes = []
@@ -167,18 +190,25 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
             from_node_id = from_node["id"]
             to_node_id = to_node["id"]
 
+            flow_rate = randint(500, 600)
             edge_id = f"{from_node_id}_{to_node_id}"
             edge_properties = {
                 "tag": edge_data._properties["tag"],
                 "material": edge_data._properties["material"],
                 "diameter": edge_data._properties["diameter"],
+                "flow_rate": flow_rate,
             }
 
             if edge_id in edge_ids:
                 continue
 
             edge = self.create_edge(
-                edge_id, from_node_id, to_node_id, edge_properties, animated=True
+                edge_id,
+                from_node_id,
+                to_node_id,
+                edge_properties,
+                animated=True,
+                label=flow_rate,
             )
 
             edges.append(edge)

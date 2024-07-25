@@ -8,11 +8,11 @@ import { Default as SresIcon } from './ServiceReservoir';
 import { Icons } from '../../types/types';
 
 const icons:Icons = {
-    'network_opt_valve': <NetworkValveIcon.Default />,
-    'NetworkMeter': <NetworkMeterIcon.Default />,
+    'NetworkOptValve': <NetworkValveIcon.DefaultNetworkValve />,
+    'NetworkMeter': <NetworkMeterIcon.DefaultNetworkMeter />,
     'Hydrant': <HydrantIcon.DefaultHydrant />,
-    'PressureControlValve': <PressureValveIcon />,
-    'IsolationValve': <PressureValveIcon />,
+    'PressureControlValve': <NetworkValveIcon.DefaultNetworkValve />,
+    'IsolationValve': <NetworkValveIcon.DefaultNetworkValve />,
     'sres': <SresIcon />,
     'Logger': <LoggerIcon />,
     'Chamber': <DefaultIcon />,
