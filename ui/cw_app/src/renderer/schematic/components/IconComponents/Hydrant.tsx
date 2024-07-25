@@ -1,3 +1,6 @@
+
+
+
 export const Distribution = () => {
     return (
         <svg
@@ -65,3 +68,11 @@ export const Single = () => {
         </svg>
     );
 };
+
+
+export const DefaultHydrant = () => {
+    return (
+        <img src={require("../../../core/images/icons8-hydrant-60.png")} alt="hydrant"/>
+        )
+
+}

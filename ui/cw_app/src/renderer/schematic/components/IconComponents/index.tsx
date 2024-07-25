@@ -10,7 +10,7 @@ import { Icons } from '../../types/types';
 const icons:Icons = {
     'network_opt_valve': <NetworkValveIcon.Default />,
     'NetworkMeter': <NetworkMeterIcon.Default />,
-    'Hydrant': <HydrantIcon.Distribution />,
+    'Hydrant': <HydrantIcon.DefaultHydrant />,
     'PressureControlValve': <PressureValveIcon />,
     'IsolationValve': <PressureValveIcon />,
     'sres': <SresIcon />,

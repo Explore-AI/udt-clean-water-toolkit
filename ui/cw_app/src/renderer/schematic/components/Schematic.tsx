@@ -1,9 +1,10 @@
 // use this to create the schematic view
 import 'reactflow/dist/base.css';
+import '../css/schematic.css';
+import styles from '../css/Schematic.module.css';
 import { useContext } from 'react'
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import MultiSelectField from '../../core/components/MultiSelectField'
-import styles from '../css/Schematic.module.css';
 import AssetNode from './AssetNode';
 import PipeEdgeNode from './PipeEdgeNode';
 import PipeNode from './PipeNode';

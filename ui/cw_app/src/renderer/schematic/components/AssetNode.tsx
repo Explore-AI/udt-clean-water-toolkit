@@ -42,7 +42,7 @@ const AssetNode = (props: NodeProps<Node>) => {
         <>
             <div className={styles.nodeContainer}>
                 <div className={styles.containerTitle}>
-                    <div className={styles.icon}>{assetIcon}</div>
+                    {assetIcon}
                 </div>
             </div>
             <Handle

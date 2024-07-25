@@ -1,6 +1,5 @@
 // create a popup for the asset node's properties
 import styles from '../css/AssetPopup.module.css';
-import Draggable from 'react-draggable';
 import { AssetPopupProps } from '../types/types';
 import { getIcons } from './IconComponents';
 import { getDmas } from '../utils/schematicUtils';
@@ -12,56 +11,52 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
     onClose,
 }) => {
 
-//    const icon = getIcons(assetName);
-    console.log(nodeProps, "aaa")
     return (
         <>
-            <Draggable>
-                <div className={styles.popupContainer}>
-                    <div className={styles.closeButton}>
-                        <CloseButton
-                            onClick={onClose}
-                            icon={
-                                <IconXboxX
-                                    size={16}
-                                    stroke={2}
-                                    color="#EB9486"
-                                />
-                            }
-                        />
+            <div className={styles.popupContainer}>
+                <div className={styles.closeButton}>
+                    <CloseButton
+                        onClick={onClose}
+                        icon={
+                            <IconXboxX
+                                size={16}
+                                stroke={2}
+                                color="#EB9486"
+                            />
+                        }
+                    />
+                </div>
+                <div className={styles.title}>
+                    {/* <div className={styles.icon}>{icon}</div> */}
+                    <div>
+                        <div><strong> {nodeProps.label} </strong></div>
                     </div>
-                    <div className={styles.title}>
-                        {/* <div className={styles.icon}>{icon}</div> */}
-                        <div>
-                            <div><strong> {nodeProps.label} </strong></div>
-                        </div>
-                        <div style={{ textAlign: 'right', fontWeight: 300 }}>
-                            <div>{null}</div>
-                        </div>
-                    </div>
-                    <hr />
-                    <div className={styles.details}>
-                        <div>
-                            <strong>DMA Codes:</strong>{' '}
-                            ZMAIDL45
-                        </div>
-                        <div>
-                            <strong>DMA Names:</strong>{' '}
-                            MAIDEN LANE
-                        </div>
-                        <div>
-                            <strong>Coordinates:</strong>{' '}
-                            {` ${nodeProps.coords_27700[0]}, ${nodeProps.coords_27700[1]}`}
-                        </div>
-                        <div>
-                            <strong>Node Types:</strong> {nodeProps.label}
-                        </div>
-                        <div>
-                            <strong>Utility:</strong> Severn Trent Water
-                        </div>
+                    <div style={{ textAlign: 'right', fontWeight: 300 }}>
+                        <div>{null}</div>
                     </div>
                 </div>
-            </Draggable>
+                <hr />
+                <div className={styles.details}>
+                    <div>
+                        <strong>DMA Codes:</strong>{' '}
+                        ZMAIDL45
+                    </div>
+                    <div>
+                        <strong>DMA Names:</strong>{' '}
+                        MAIDEN LANE
+                    </div>
+                    <div>
+                        <strong>Coordinates:</strong>{' '}
+                        {` ${nodeProps.coords_27700[0]}, ${nodeProps.coords_27700[1]}`}
+                    </div>
+                    <div>
+                        <strong>Node Types:</strong> {nodeProps.label}
+                    </div>
+                    <div>
+                        <strong>Utility:</strong> Severn Trent Water
+                    </div>
+                </div>
+            </div>
         </>
     );
 };
