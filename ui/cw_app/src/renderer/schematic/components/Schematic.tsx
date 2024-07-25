@@ -24,6 +24,8 @@ const nodeTypes = {
     pipeEdgeNode: PipeEdgeNode,
 };
 
+const edgeTypes = {}
+
 const DMA__QUERY_KEY = 'cw_utilities/dma'
 
 function Schematic() {

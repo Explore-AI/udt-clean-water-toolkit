@@ -10,6 +10,7 @@ import { startsWith as _startsWith } from 'lodash'
 const links = [
     { path: '/map', label: 'Map' },
     { path: '/graph', label: 'Graph' },
+    { path: '/explorer', label: 'Explorer' },
     { path: '/spatial-graph', label: 'Spatial Graph' },
     { path: '/schematic', label: 'Schematic' },
     { path: '/assets', label: 'Assets'},
