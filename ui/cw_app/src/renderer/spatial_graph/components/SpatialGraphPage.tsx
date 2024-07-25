@@ -1,5 +1,4 @@
 import styles from '../css/spatial-graph-page.module.css';
-import '../css/edge-label.css'
 import SpatialGraph from  './SpatialGraph';
 import useFetchJson from '../../core/hooks/useFetchJson';
 import useFetchItems from '../../core/hooks/useFetchItems'
