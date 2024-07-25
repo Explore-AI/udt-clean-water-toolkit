@@ -62,7 +62,7 @@ function Schematic() {
     };
 
     if (isPending) {
-            return <LoadingSpinner />;
+        return <LoadingSpinner />;
     }
 
     if (_isEmpty(data) && isSuccess) {
@@ -95,18 +95,20 @@ function Schematic() {
                     placeholder="Search by DMA"
                     data={items} />
             </div>
-            <ReactFlow
-                nodes={layoutData?.nodes}
-                edges={layoutData?.edges}
-                nodeTypes={nodeTypes}
-                minZoom={0}
-                maxZoom={50}
-                zoomOnScroll={true}
-                className={styles.rfContainer}
-                onNodeClick={onNodeClick2}>
-                <Controls />
-                <NodePopups/>
-            </ReactFlow>
+            <div className={styles.rflow}>
+                <ReactFlow
+                    nodes={layoutData?.nodes}
+                    edges={layoutData?.edges}
+                    nodeTypes={nodeTypes}
+                    minZoom={0}
+                    maxZoom={50}
+                    zoomOnScroll={true}
+                    className={styles.rfContainer}
+                    onNodeClick={onNodeClick2}>
+                    <Controls />
+                    <NodePopups/>
+                </ReactFlow>
+            </div>
         </>
     );
 }

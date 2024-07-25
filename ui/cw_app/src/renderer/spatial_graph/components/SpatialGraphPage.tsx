@@ -17,7 +17,8 @@ const SpatialGraphPage = (props) => {
         dmaCodes = dmas.split('-');
     }
 
-    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_codes': dmaCodes }, limit: 7000})
+    //params: {'dma_codes': dmaCodes }
+    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { limit: 500 })
 
     useFetchItems(DMA__QUERY_KEY)
 

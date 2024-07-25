@@ -67,18 +67,20 @@ const SpatialGraph = () => {
                     searchable={true}
                     data={items} />
             </div>
-            <ReactFlow
-                defaultNodes={data?.nodes}
-                defaultEdges={data?.edges}
-                nodeTypes={nodeTypes}
-                minZoom={0}
-                maxZoom={50}
-                fitView={true}
-                className={styles.rfContainer}
-                nodesDraggable={false}
-            >
-                <Controls />
-            </ReactFlow>
+            <div className={styles.rflow}>
+                <ReactFlow
+                    defaultNodes={data?.nodes}
+                    defaultEdges={data?.edges}
+                    nodeTypes={nodeTypes}
+                    minZoom={0}
+                    maxZoom={50}
+                    fitView={true}
+                    className={styles.rfContainer}
+                    nodesDraggable={false}
+                >
+                    <Controls />
+                </ReactFlow>
+            </div>
         </>
     );
 };
