@@ -10,7 +10,7 @@ import MultiSelectField from '../../core/components/MultiSelectField'
 import { useNavigate } from 'react-router-dom';
 //import useFilterParams from '../../core/hooks/useFilterParams'
 
-const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
+const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/spatial_graph'
 const DMA__QUERY_KEY = 'cw_utilities/dma'
 
 const nodeTypes = {
@@ -38,10 +38,12 @@ const SpatialGraph = () => {
 
     const navigate = useNavigate();
 
-    const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { queryValues } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { data, isLoading } = queryValues;
+
     const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
-    if (isPending)  {
+    if (isLoading)  {
         return <LoadingSpinner/>
     }
 
@@ -52,6 +54,7 @@ const SpatialGraph = () => {
     const onFilterByDmas = (options) => {
         navigate(`/spatial-graph/${options.join("-")}`);
     }
+
 
     return (
         <>
@@ -71,6 +74,7 @@ const SpatialGraph = () => {
                 minZoom={0}
                 maxZoom={50}
                 fitView={true}
+                className={styles.rfContainer}
                 nodesDraggable={false}
             >
                 <Controls />

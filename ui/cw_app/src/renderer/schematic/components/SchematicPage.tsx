@@ -11,7 +11,7 @@ const DMA__QUERY_KEY = 'cw_utilities/dma'
 function SchematicPage(props: PageProps) {
     const { pageVisibility } = props;
 
-    useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 2000 });
+    useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 7000 });
 
     useFetchItems(DMA__QUERY_KEY)
 

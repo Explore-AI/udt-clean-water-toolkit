@@ -1,2 +1,3 @@
 from .spatial_graph_viewset import SpatialGraphViewset
 from .pipemain_schematic_viewset import SchematicPipeMainViewset
+from .schematic_viewset import SchematicViewset

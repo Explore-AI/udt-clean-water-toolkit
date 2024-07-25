@@ -26,7 +26,7 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         # get all assets connected to the pipemains, as well as the pipemain relationships
         limit = request.query_params.get("limit", 10)
         dma_codes = request.query_params.get("dma_codes")
-
+        #ZMAIDL45
         query = f"""
         MATCH (d:DMA {{code : 'ZMAIDL45'}})-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility {{name : 'thames_water'}})
         MATCH (n)-[r1:PipeMain]-(s:NetworkNode)

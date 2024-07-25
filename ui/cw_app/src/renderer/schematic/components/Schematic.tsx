@@ -1,6 +1,5 @@
 // use this to create the schematic view
 import 'reactflow/dist/base.css';
-import '../css/schematic.css';
 import styles from '../css/Schematic.module.css';
 import { useContext } from 'react'
 import LoadingSpinner from '../../core/components/LoadingSpinner';
