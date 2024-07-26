@@ -1,6 +1,7 @@
 
 .nodeContainer {
-    background-color: #FFFEF6;
+    cursor: default;
+    background-color: white;
     border-radius: 5px;
     border: 2px solid #33658A;
     width: 100px;

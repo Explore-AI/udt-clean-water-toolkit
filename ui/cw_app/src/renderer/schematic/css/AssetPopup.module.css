@@ -1,6 +1,6 @@
 .popupContainer {
     position: relative;
-    background-color: #fffef6;
+    background-color: white;
     border: 2px solid #33658a;
     display: flex;
     flex-direction: column;
