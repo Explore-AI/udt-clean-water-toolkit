@@ -49,7 +49,8 @@ export default function Header() {
                     <Burger opened={opened} onClick={toggle} size="sm" />
                     {opened && (
                         <div className={styles.burgerMenu}>
-                            <p>Close App Here</p>
+                            <p style={{cursor: 'pointer'}} onClick={() => window.location.reload() }>Refresh</p>
+                            <p>Close</p>
                         </div>
                     )}
                 </div>
