@@ -8,7 +8,7 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
     nodeProps,
     onClose,
 }) => {
-    console.log(nodeProps)
+
     return (
         <>
             <div className={styles.popupContainer}>

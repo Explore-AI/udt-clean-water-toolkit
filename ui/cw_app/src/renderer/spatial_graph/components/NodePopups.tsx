@@ -16,7 +16,7 @@ const NodePopups = (props) => {
         });
         setSchematicUiParams({ nodePopups: _compact(newNodePopups) })
     }
-    console.log(nodePopups)
+
     return (
         <>
             { _map(nodePopups, (node) => (
