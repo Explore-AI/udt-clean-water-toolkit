@@ -1,5 +1,5 @@
 import { useContext, memo } from 'react'
-import { SchematicUiContext } from '../hooks/useSchematicUi'
+import { SchematicUiContext } from '../hooks/useSpatialGraphUi'
 import { compact as _compact, map as _map } from 'lodash'
 import { AssetPopup } from './AssetPopup';
 
@@ -16,7 +16,7 @@ const NodePopups = (props) => {
         });
         setSchematicUiParams({ nodePopups: _compact(newNodePopups) })
     }
-
+    console.log(nodePopups)
     return (
         <>
             { _map(nodePopups, (node) => (
@@ -26,7 +26,7 @@ const NodePopups = (props) => {
                              zIndex: 5,
                              transform: `translate(${node.position[0]}px, ${node.position[1]-20}px)` }}>
                     <AssetPopup
-                        nodeProps={node.data.properties}
+                        nodeProps={node.data}
                         onClose={() => onClosePopup(node.id)}
                     />
                 </div>

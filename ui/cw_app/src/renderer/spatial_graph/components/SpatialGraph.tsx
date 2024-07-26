@@ -1,13 +1,16 @@
 import 'reactflow/dist/style.css';
+import { useContext } from 'react'
+import { useNavigate } from 'react-router-dom';
 import styles from '../css/spatial-graph.module.css'
 import ReactFlow, { Controls } from 'reactflow';
 import CircleNode from './CircleNode';
 import EdgeNode from './EdgeNode';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
+import NodePopups from './NodePopups'
 import useGetItems from '../../core/hooks/useGetItems'
 import MultiSelectField from '../../core/components/MultiSelectField'
-import { useNavigate } from 'react-router-dom';
+import { SchematicUiContext } from '../hooks/useSpatialGraphUi'
 //import useFilterParams from '../../core/hooks/useFilterParams'
 
 const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/spatial_graph'
@@ -43,9 +46,7 @@ const SpatialGraph = () => {
 
     const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
-    if (isLoading)  {
-        return <LoadingSpinner/>
-    }
+    const { setSchematicUiParams } = useContext(SchematicUiContext)
 
     const onSearchChange = (value) => {
         setFilterParams(DMA__QUERY_KEY, { search: value })
@@ -55,6 +56,24 @@ const SpatialGraph = () => {
         navigate(`/spatial-graph/${options.join("-")}`);
     }
 
+    const onNodeClick = (
+        e: React.MouseEvent,
+        node: Node,
+    ) => {
+        setSchematicUiParams({
+            nodePopups: [
+                {
+                    id: node.id,
+                    data: node.data,
+                    position: [e.clientX, e.clientY]
+                }
+            ]
+        });
+    };
+
+    if (isLoading)  {
+        return <LoadingSpinner/>
+    }
 
     return (
         <>
@@ -78,8 +97,9 @@ const SpatialGraph = () => {
                     fitView={true}
                     className={styles.rfContainer}
                     nodesDraggable={false}
-                >
+                    onNodeClick={onNodeClick}>
                     <Controls />
+                    <NodePopups/>
                 </ReactFlow>
             </div>
         </>

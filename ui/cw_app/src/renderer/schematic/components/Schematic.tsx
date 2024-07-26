@@ -7,7 +7,7 @@ import useElkLayout from '../hooks/useElkLayout';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import MultiSelectField from '../../core/components/MultiSelectField'
 import AssetNode from './AssetNode';
-import PipeEdgeNode from './PipeEdgeNode';
+//import PipeEdgeNode from './PipeEdgeNode';
 import PipeNode from './PipeNode';
 import useGetData from '../../core/hooks/useGetData';
 import useGetItems from '../../core/hooks/useGetItems'
@@ -36,15 +36,7 @@ function Schematic() {
 
     const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
-    const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
-
-    const onNodeClick = (
-        e: React.MouseEvent,
-        node: Node,
-    ) => {
-        setSchematicUiParams({ nodePopupIds: _union(nodePopupIds || [], [node.id])});
-    };
-
+    const { setSchematicUiParams } = useContext(SchematicUiContext)
 
     const onNodeClick2 = (
         e: React.MouseEvent,

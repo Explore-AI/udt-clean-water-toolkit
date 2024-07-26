@@ -8,7 +8,7 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
     nodeProps,
     onClose,
 }) => {
-
+    console.log(nodeProps)
     return (
         <>
             <div className={styles.popupContainer}>
@@ -37,21 +37,21 @@ export const AssetPopup: React.FC<AssetPopupProps> = ({
                 <div className={styles.details}>
                     <div>
                         <strong>DMA Codes:</strong>{' '}
-                        {nodeProps.code}
+                        {nodeProps.code || 'ZCHIPO01'}
                     </div>
                     <div>
                         <strong>DMA Names:</strong>{' '}
-                        {nodeProps.name}
+                        {nodeProps.name || 'OVER NORTON'}
                     </div>
                     <div>
                         <strong>Coordinates:</strong>{' '}
                         {` ${nodeProps.coords_27700[0]}, ${nodeProps.coords_27700[1]}`}
                     </div>
                     <div>
-                        <strong>Node Types:</strong> {nodeProps.label}
+                        <strong>Node Types:</strong> Pipe Junction
                     </div>
                     <div>
-                        <strong>Utility:</strong> {nodeProps.utility}
+                        <strong>Utility:</strong> Thames Water
                     </div>
                 </div>
             </div>
