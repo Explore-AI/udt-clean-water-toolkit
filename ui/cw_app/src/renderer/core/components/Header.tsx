@@ -10,9 +10,10 @@ import { startsWith as _startsWith } from 'lodash'
 const links = [
     { path: '/map', label: 'Map' },
     { path: '/graph', label: 'Graph' },
+    { path: '/explorer', label: 'Explorer' },
     { path: '/spatial-graph', label: 'Spatial Graph' },
     { path: '/schematic', label: 'Schematic' },
-    { path: '/assets', label: 'Assets'}, 
+    { path: '/assets', label: 'Assets'},
     { path: '/analysis', label: 'Analysis' },
 ];
 
@@ -48,7 +49,8 @@ export default function Header() {
                     <Burger opened={opened} onClick={toggle} size="sm" />
                     {opened && (
                         <div className={styles.burgerMenu}>
-                            <p>Close App Here</p>
+                            <p style={{cursor: 'pointer'}} onClick={() => window.location.reload() }>Refresh</p>
+                            <p>Close</p>
                         </div>
                     )}
                 </div>

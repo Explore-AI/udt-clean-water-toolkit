@@ -19,6 +19,6 @@ export default function useSchematicUi() {
         }
         return setSchematicUiParams(newParams);
     };
-    console.log({ ...uiParams, setSchematicUiParams: handleSchematicParams }, "aaa")
+
     return { ...uiParams, setSchematicUiParams: handleSchematicParams };
 }

@@ -28,7 +28,7 @@ class GeoServerConfig:
             'WIDTH': 1024,
             'FORMAT': environ.get('OUTPUT_FORMAT', 'image/svg'),
             'DMA_CODES': environ.get('DMA_CODES', ['ZWAL4801', 'ZCHESS12', 'ZCHIPO01']),
-            'GWC_GRID': environ.get('GWC_GRID', '900913')
+            'GWC_GRID': environ.get('GWC_GRID', 3857)
         }
         # Initialize GeoServerAuth instance
         self.geoserver_auth = GeoServerAuth(

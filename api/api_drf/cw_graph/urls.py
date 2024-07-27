@@ -1,8 +1,10 @@
 from rest_framework.routers import DefaultRouter
-from .viewsets import SchematicViewset, SchematicTrunkMainViewset
+from .viewsets import SpatialGraphViewset, SchematicPipeMainViewset
 
 router = DefaultRouter()
-router.register(r"schematic", SchematicViewset, basename="schematic")
-router.register(r"schematic-trunk-main", SchematicTrunkMainViewset, basename="schematic-trunk-main")
+router.register(r"spatial_graph", SpatialGraphViewset, basename="spatial_graph")
+router.register(
+    r"schematic_pipe_main", SchematicPipeMainViewset, basename="schematic_pipe_main"
+)
 
-urlpatterns = router.urls 
+urlpatterns = router.urls

@@ -1,0 +1,14 @@
+.visible {
+    display: inherit
+}
+
+.hidden {
+    display: none
+}
+
+iframe {
+    width: 100vw;
+    height: calc(100vh - 60px);
+    display: block;
+    overflow: hidden;
+}

@@ -1,5 +1,6 @@
 import MapPage from '../../map/components/MapPage'
 import GraphPage from '../../graph/components/GraphPage'
+import ExplorerPage from '../../explorer/components/ExplorerPage'
 import AnalysisPage from '../../analysis/components/AnalysisPage'
 import SpatialGraphPage from '../../spatial_graph/components/SpatialGraphPage'
 import SchematicPage from '../../schematic/components/SchematicPage';
@@ -13,6 +14,7 @@ const BaseSinglePage = () => {
     const pageVisibility = {
         map: _startsWith(pathname,'/map') ? 'visible': 'hidden',
         graph: _startsWith(pathname,'/graph') ? 'visible': 'hidden',
+        explorer: _startsWith(pathname,'/explorer') ? 'visible': 'hidden',
         spatialGraph: _startsWith(pathname, '/spatial-graph') ? 'visible': 'hidden',
         schematic: _startsWith(pathname, '/schematic') ? 'visible': 'hidden',
         analysis: _startsWith(pathname, '/analysis') ? 'visible': 'hidden',
@@ -21,12 +23,13 @@ const BaseSinglePage = () => {
 
     return (
         <>
-            {/* <MapPage pageVisibility={pageVisibility.map} /> */}
-            {/* <GraphPage pageVisibility={pageVisibility.graph} />
+            <MapPage pageVisibility={pageVisibility.map} />
+            <GraphPage pageVisibility={pageVisibility.graph} />
+            <ExplorerPage pageVisibility={pageVisibility.explorer} />
             <SpatialGraphPage pageVisibility={pageVisibility.spatialGraph} />
-            <AnalysisPage pageVisibility={pageVisibility.analysis} /> */}
-            {/* <SchematicPage pageVisibility={pageVisibility.schematic} /> */}
-            <AssetsPage pageVisibility={pageVisibility.assets} />
+            <SchematicPage pageVisibility={pageVisibility.schematic} />
+            {/* <AnalysisPage pageVisibility={pageVisibility.analysis} /> */}
+            {/* <AssetsPage pageVisibility={pageVisibility.assets} /> */}
         </>
     );
 };

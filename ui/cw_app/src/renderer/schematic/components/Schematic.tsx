@@ -1,13 +1,18 @@
 // use this to create the schematic view
 import 'reactflow/dist/base.css';
-import { useContext } from 'react'
-import LoadingSpinner from '../../core/components/LoadingSpinner';
 import styles from '../css/Schematic.module.css';
-import AssetNode from './AssetNode';
-import PipeEdgeNode from './PipeNode';
+import { useContext } from 'react'
 import ReactFlow, { Controls, Node } from 'reactflow';
 import useElkLayout from '../hooks/useElkLayout';
+import LoadingSpinner from '../../core/components/LoadingSpinner';
+import MultiSelectField from '../../core/components/MultiSelectField'
+import AssetNode from './AssetNode';
+//import PipeEdgeNode from './PipeEdgeNode';
+import PipeNode from './PipeNode';
 import useGetData from '../../core/hooks/useGetData';
+import useGetItems from '../../core/hooks/useGetItems'
+import NodePopups from './NodePopups'
+import { useNavigate } from 'react-router-dom';
 import { SchematicUiContext } from '../hooks/useSchematicUi'
 import { SchematicProps } from '../types/types';
 import { TRUNKMAIN_QUERY_KEY } from '../queries';
@@ -15,21 +20,37 @@ import { isEmpty as _isEmpty, union as _union } from 'lodash';
 
 const nodeTypes = {
     assetNode: AssetNode,
-    pipeNode: PipeEdgeNode,
+    pipeNode: PipeNode,
 };
 
+
+const DMA__QUERY_KEY = 'cw_utilities/dma'
+
 function Schematic() {
+
+    const navigate = useNavigate();
+
     const { queryValues } = useGetData(TRUNKMAIN_QUERY_KEY);
     const { data, isPending, isSuccess } = queryValues
     const { data: layoutData } = useElkLayout(data as SchematicProps || { nodes: [], edges: [] });
 
-    const { nodePopupIds, setSchematicUiParams } = useContext(SchematicUiContext)
+    const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
-    const onNodeClick = (
+    const { setSchematicUiParams } = useContext(SchematicUiContext)
+
+    const onNodeClick2 = (
         e: React.MouseEvent,
         node: Node,
     ) => {
-        setSchematicUiParams({ nodePopupIds: _union(nodePopupIds || [], [node.id])});
+        setSchematicUiParams({
+            nodePopups: [
+                {
+                    id: node.id,
+                    data: node.data,
+                    position: [e.clientX, e.clientY]
+                }
+            ]
+        });
     };
 
     if (isPending) {
@@ -44,23 +65,42 @@ function Schematic() {
         );
     }
 
+
+    const onSearchChange = (value) => {
+        setFilterParams(DMA__QUERY_KEY, { search: value })
+    }
+
+    const onFilterByDmas = (options) => {
+        navigate(`/spatial-graph/${options.join("-")}`);
+    }
+    //fitView={true}
+    //nodesDraggable={true}
     return (
         <>
-            <ReactFlow
-                nodes={layoutData?.nodes}
-                edges={layoutData?.edges}
-                nodeTypes={nodeTypes}
-                minZoom={0}
-                maxZoom={50}
-                zoomOnScroll={true}
-                fitView={true}
-                nodesDraggable={true}
-                className={styles.rfContainer}
-                onNodeClick={onNodeClick}
-            >
-
-                <Controls />
-            </ReactFlow>
+            <div className={styles['search_box']}>
+                <MultiSelectField
+                    labelName="code"
+                    clearable={true}
+                    onEnter={onFilterByDmas}
+                    onSearchChange={onSearchChange}
+                    searchable={true}
+                    placeholder="Search by DMA"
+                    data={items} />
+            </div>
+            <div className={styles.rflow}>
+                <ReactFlow
+                    nodes={layoutData?.nodes}
+                    edges={layoutData?.edges}
+                    nodeTypes={nodeTypes}
+                    minZoom={0}
+                    maxZoom={50}
+                    zoomOnScroll={true}
+                    className={styles.rfContainer}
+                    onNodeClick={onNodeClick2}>
+                    <Controls />
+                    <NodePopups/>
+                </ReactFlow>
+            </div>
         </>
     );
 }

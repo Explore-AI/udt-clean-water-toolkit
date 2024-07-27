@@ -1,6 +1,4 @@
-version: "3"
-
-services: 
+services:
   cwageoalchemydev: 
     container_name: udtcwageoalchemydev
     image: cwa_geoalchemy_dev

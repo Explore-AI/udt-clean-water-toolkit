@@ -31,11 +31,27 @@ PIPE_JUNCTION__NAME = "pipe_junction"
 
 POINT_ASSET__NAME = "point_asset"
 
-LISTENING_POST__NAME = "listening_post"
-
 ISOLATION_VALVE__NAME = "isolation_valve"
 
 BULK_METER__NAME = "bulk_meter"
+
+BOREHOLE__NAME = "boreholes"
+
+NON_RETURN_VALVE__NAME = "nonreturnvalve"
+
+PORTABLE_WATER_STORAGE__NAME = "potable_water_storage"
+
+REGULATORS__NAME = "regulators"
+
+REVENUE_METERS__NAME = "revenuemeters"
+
+WATER_FACILITY_CONNECTIONS__NAME = "waterfacilityconnections"
+
+WATER_PIPE_CONNECTIONS__NAME = "waterpipeconnections"
+
+WATER_PUMPING_FACILITIES__NAME = "water_pumping_facilities"
+
+WATER_TREATMENT_WORKS__NAME = "water_treatment_works"
 
 PIPE_ASSETS__CHOICES = [
     (PIPE_MAIN__NAME, "Pipe Main"),

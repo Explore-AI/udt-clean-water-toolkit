@@ -583,7 +583,6 @@ class GisToGraph:
             + pipe_qs_object.network_opt_valve_data
             + pipe_qs_object.connection_meter_data
             + pipe_qs_object.consumption_meter_data
-            + pipe_qs_object.listening_post_data
             + pipe_qs_object.isolation_valve_data
             + pipe_qs_object.bulk_meter_data
         )

@@ -22,3 +22,8 @@
     height: auto;
     padding: 2px 4px;
 }
+
+.check_box {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

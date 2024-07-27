@@ -36,17 +36,19 @@ export default function MapLayerControl() {
                 <div className={styles.control_box}>
                     {_map(mapLayerProps, (layerProps) => {
                         return (
-                            <Checkbox
-                                key={layerProps.key}
-                                label={layerProps.label}
-                                defaultChecked={layerProps.visible}
-                                onChange={(e) => {
-                                    setMapLayerProps({
-                                        ...layerProps,
-                                        visible: !layerProps.visible,
-                                    });
-                                }}
-                            />
+                            <div className={styles.check_box}>
+                                <Checkbox
+                                    key={layerProps.key}
+                                    label={layerProps.label}
+                                    defaultChecked={layerProps.visible}
+                                    onChange={() => {
+                                        setMapLayerProps({
+                                            ...layerProps,
+                                            visible: !layerProps.visible,
+                                        });
+                                    }}
+                                />
+                            </div>
                         );
                     })}
                 </div>

@@ -5,7 +5,7 @@ from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water IsolationValve layer data to sql"
+    help = "Write Severn Trent Water IsolationValve layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")

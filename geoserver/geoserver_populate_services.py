@@ -11,6 +11,89 @@ class Importer:
         self.geoserver_config = GeoServerConfig()
         self.geoserver_auth = self.geoserver_config.geoserver_auth
 
+    def publish_gwc_grid(self, geoserver_site_url):
+        auth = self.geoserver_auth.auth
+        try:
+            rest_url = '%s/gwc/rest/gridsets/EPSG:3857.json' % geoserver_site_url
+            response = get(rest_url, auth=auth)
+            response.raise_for_status()
+        except exceptions.HTTPError:
+
+            xml = """ 
+                    <gridSet>
+                      <name>EPSG:3857</name>
+                      <srs>
+                        <number>3857</number>
+                      </srs>
+                      <extent>
+                        <coords>
+                          <double>-2.003750834E7</double>
+                          <double>-2.003750834E7</double>
+                          <double>2.003750834E7</double>
+                          <double>2.003750834E7</double>
+                        </coords>
+                      </extent>
+                      <alignTopLeft>false</alignTopLeft>
+                      <resolutions>
+                        <double>156543.03390625</double>
+                        <double>78271.516953125</double>
+                        <double>39135.7584765625</double>
+                        <double>19567.87923828125</double>
+                        <double>9783.939619140625</double>
+                        <double>4891.9698095703125</double>
+                        <double>2445.9849047851562</double>
+                        <double>1222.9924523925781</double>
+                        <double>611.4962261962891</double>
+                        <double>305.74811309814453</double>
+                        <double>152.87405654907226</double>
+                        <double>76.43702827453613</double>
+                        <double>38.218514137268066</double>
+                        <double>19.109257068634033</double>
+                        <double>9.554628534317017</double>
+                        <double>4.777314267158508</double>
+                        <double>2.388657133579254</double>
+                        <double>1.194328566789627</double>
+                        <double>0.5971642833948135</double>
+                        <double>0.2985821416974068</double>
+                        <double>0.1492910708487034</double>
+                        <double>0.0746455354243517</double>
+                        <double>0.0373227677121758</double>
+                      </resolutions>
+                      <metersPerUnit>1.0</metersPerUnit>
+                      <pixelSize>2.8E-4</pixelSize>
+                      <scaleNames>
+                        <string>EPSG:3857:0</string>
+                        <string>EPSG:3857:1</string>
+                        <string>EPSG:3857:2</string>
+                        <string>EPSG:3857:3</string>
+                        <string>EPSG:3857:4</string>
+                        <string>EPSG:3857:5</string>
+                        <string>EPSG:3857:6</string>
+                        <string>EPSG:3857:7</string>
+                        <string>EPSG:3857:8</string>
+                        <string>EPSG:3857:9</string>
+                        <string>EPSG:3857:10</string>
+                        <string>EPSG:3857:11</string>
+                        <string>EPSG:3857:12</string>
+                        <string>EPSG:3857:13</string>
+                        <string>EPSG:3857:14</string>
+                        <string>EPSG:3857:15</string>
+                        <string>EPSG:3857:16</string>
+                        <string>EPSG:3857:17</string>
+                        <string>EPSG:3857:18</string>
+                        <string>EPSG:3857:19</string>
+                        <string>EPSG:3857:20</string>
+                        <string>EPSG:3857:21</string>
+                        <string>EPSG:3857:22</string>
+                      </scaleNames>
+                      <tileHeight>256</tileHeight>
+                      <tileWidth>256</tileWidth>
+                      <yCoordinateFirst>false</yCoordinateFirst>
+                    </gridSet>"""
+            put('%s/gwc/rest/gridsets/EPSG:3857.xml' % geoserver_site_url, auth=auth,
+                headers={'Content-type': 'text/xml'},
+                data=xml)
+
     # Function to create a workspace in GeoServer
     def publish_workspace(self, geoserver_site_url, workspace_name):
         """
@@ -52,7 +135,6 @@ class Importer:
 
         try:
             rest_url = '%s/rest/workspaces/%s/datastores/%s.json' % (geoserver_site_url, workspace_name, workspace_name)
-            print(rest_url, "aaa")
             response = get(rest_url, auth=auth)
             response.raise_for_status()
         except exceptions.HTTPError:
@@ -144,8 +226,6 @@ class Importer:
                 data = content.read().splitlines(True)
             with open(layer_sld, 'w') as formatted:
                 formatted.writelines(data[1:])
-        else:
-            print(f"Layer SLD file {layer_sld} already exists. Skipping writing to it.")
         layer_sld = layer_sld.lstrip('\n')
         return layer_sld
 
@@ -184,6 +264,63 @@ class Importer:
                     if response == 200:
                         geo.publish_style(layer_name='%s' % table, style_name='%s' % table,
                                           workspace='%s' % workspace_name)
+                        # Update layer configuration for gwc
+                        layer_xml = """
+                                    <GeoServerLayer>
+                                      <enabled>true</enabled>
+                                      <inMemoryCached>true</inMemoryCached>
+                                      <name>{geo_workspace}:{geo_layer}</name>
+                                      <mimeFormats>
+                                        <string>application/vnd.mapbox-vector-tile</string>
+                                        <string>image/png</string>
+                                        <string>image/jpeg</string>
+                                      </mimeFormats>
+                                      <gridSubsets>
+                                        <gridSubset>
+                                          <gridSetName>EPSG:900913</gridSetName>
+                                          <extent>
+                                            <coords>
+                                              <double>-871762.9336153703</double>
+                                              <double>6406067.029592626</double>
+                                              <double>40978.26046182055</double>
+                                              <double>6827410.395957927</double>
+                                            </coords>
+                                          </extent>
+                                        </gridSubset>
+                                        <gridSubset>
+                                          <gridSetName>EPSG:3857</gridSetName>
+                                        </gridSubset>
+                                        <gridSubset>
+                                          <gridSetName>EPSG:4326</gridSetName>
+                                          <extent>
+                                            <coords>
+                                              <double>-7.831179673955589</double>
+                                              <double>49.76726301031473</double>
+                                              <double>0.3681139768948408</double>
+                                              <double>52.15064734867595</double>
+                                            </coords>
+                                          </extent>
+                                        </gridSubset>
+                                      </gridSubsets>
+                                      <metaWidthHeight>
+                                        <int>4</int>
+                                        <int>4</int>
+                                      </metaWidthHeight>
+                                      <expireCache>0</expireCache>
+                                      <expireClients>0</expireClients>
+                                      <parameterFilters>
+                                        <styleParameterFilter>
+                                          <key>STYLES</key>
+                                          <defaultValue></defaultValue>
+                                        </styleParameterFilter>
+                                      </parameterFilters>
+                                      <gutter>0</gutter>
+                                      <cacheWarningSkips/>
+                                    </GeoServerLayer>
+                                    """.format(geo_workspace=workspace_name, geo_layer=table)
+                        post('%s/gwc/rest/layers/%s:%s.xml' % (geoserver_site_url, workspace_name, table), auth=auth,
+                             headers={'Content-type': 'text/xml'}, data=layer_xml)
+
                     else:
                         print(f"Failed to create style. Status code: {response.status_code}")
 
@@ -297,6 +434,8 @@ class Importer:
         Returns:
 
         """
+        # Add a grid to GeoServer
+        self.publish_gwc_grid(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'])
         # Create geoserver workspace and set it as a default one
         self.publish_workspace(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
                                self.geoserver_config.default['GEO_WORKSPACE'])
@@ -314,6 +453,9 @@ class Importer:
         self.publish_layer_stores(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
                                   self.geoserver_config.default['GEO_WORKSPACE'],
                                   self.geoserver_config.default['GEOSERVER_DATA_DIR'])
+        # Fix lat long bounds
+        self.recalculate_bbox(self.geoserver_config.default['GEOSERVER_INSTANCE_URL'],
+                              self.geoserver_config.default['GEO_WORKSPACE'])
 
     # Cache all layers
     def gwc_cache_all_layers(self):

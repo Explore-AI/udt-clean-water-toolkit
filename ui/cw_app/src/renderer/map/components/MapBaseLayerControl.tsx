@@ -37,12 +37,14 @@ export default function MapBaseLayerControl() {
                 <div className={styles.control_box}>
                     {_map(DEFAULT_BASEMAP_PROPS, (layer) => {
                         return (
-                            <Radio
-                                key={layer.key}
-                                label={layer.label}
-                                checked={layer.mapUrl === baseMap.mapUrl}
-                                onChange={() => setBaseMap(layer)}
-                            />
+                            <div className={styles.radio_box}>
+                                <Radio
+                                    key={layer.key}
+                                    label={layer.label}
+                                    checked={layer.mapUrl === baseMap.mapUrl}
+                                    onChange={() => setBaseMap(layer)}
+                                />
+                            </div>
                         );
                     })}
                 </div>

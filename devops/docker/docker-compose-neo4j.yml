@@ -1,6 +1,5 @@
 # Create a docker compose file that will spin up a neo4j image/container
 
-version: "3"
 volumes:
     neo4j-data:
     neo4j-backups:

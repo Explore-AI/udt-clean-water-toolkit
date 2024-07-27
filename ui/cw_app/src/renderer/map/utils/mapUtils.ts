@@ -19,67 +19,91 @@ export const MVT_LAYER_URL = (asset_name: string) => {
 
 export const MAP_LAYERS_PROPS = [
     {
-        visible: true,
+        visible: false,
         label: 'Chambers',
         key: 'assets_chamber',
         assetType: 'point',
     },
     {
         visible: false,
-        label: 'Distribution Main',
-        key: 'assets_distributionmain',
-        assetType: 'line',
+        label: 'Bulkmeter',
+        key: 'assets_bulkmeter',
+        assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
+        label: 'Connectionmeter',
+        key: 'assets_connectionmeter',
+        assetType: 'point',
+    },
+    {
+        visible: false,
+        label: 'Consumptionmeter',
+        key: 'assets_consumptionmeter',
+        assetType: 'point',
+    },
+    {
+        visible: false,
+        label: 'IsolationValve',
+        key: 'assets_isolationvalve',
+        assetType: 'point',
+    },
+    {
+        visible: false,
+        label: 'Listeningpost',
+        key: 'assets_listeningpost',
+        assetType: 'point',
+    },
+    {
+        visible: false,
         label: 'Hydrants',
         key: 'assets_hydrant',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Loggers',
         key: 'assets_logger',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Network Meter',
         key: 'assets_networkmeter',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Network Opt Valve',
         key: 'assets_networkoptvalve',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Operational Site',
         key: 'assets_operationalsite',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Pressure Control Valve',
         key: 'assets_pressurecontrolvalve',
         assetType: 'point',
     },
     {
-        visible: true,
+        visible: false,
         label: 'Pressure Fitting',
         key: 'assets_pressurefitting',
         assetType: 'point',
     },
     {
         visible: false,
-        label: 'Trunk Main',
-        key: 'assets_trunkmain',
+        label: 'Pipes',
+        key: 'assets_pipemain',
         assetType: 'line',
     },
     {
-        visible: true,
+        visible: false,
         label: 'DMA',
         key: 'utilities_dma',
         assetType: 'polygon',
@@ -134,11 +158,51 @@ const AssetsPressurefittingColormap = {
 };
 
 const AssetsChamberColormap = {
-    property: 'gid',
+    property: 'id',
     colors: {
         Null: [220, 215, 71],
     },
     default: [76, 43, 50, 1],
+};
+
+const AssetsBulkMeterColormap = {
+    property: 'id',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [144, 182, 111, 1],
+};
+
+const AssetsConnectionMeterColormap = {
+    property: 'id',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [236, 236, 41, 1],
+};
+
+const AssetsConsumptionMeterColormap = {
+    property: 'id',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [171, 234, 241, 1],
+};
+
+const AssetsIsolationValveColormap = {
+    property: 'id',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [210, 244, 39, 1],
+};
+
+const AssetsListeningPostColormap = {
+    property: 'id',
+    colors: {
+        Null: [220, 215, 71],
+    },
+    default: [220, 128, 238, 1],
 };
 
 const AssetsOperationalsiteColormap = {
@@ -181,6 +245,24 @@ function AssetsChamberFillcolor(feature) {
     return getFillColorFeatures(feature, AssetsChamberColormap);
 }
 
+function AssetsBulkMeterFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsBulkMeterColormap);
+}
+
+function AssetsConnectionMeterFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsConnectionMeterColormap);
+}
+
+function AssetsConsumptionMeterFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsConsumptionMeterColormap);
+}
+function AssetsIsolationValveFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsIsolationValveColormap);
+}
+
+function AssetsListeningPostFillcolor(feature) {
+    return getFillColorFeatures(feature, AssetsListeningPostColormap);
+}
 function AssetsOperationalsiteFillcolor(feature) {
     return getFillColorFeatures(feature, AssetsOperationalsiteColormap);
 }
@@ -255,13 +337,23 @@ async function getMapValues() {
 }
 
 const DmaCodes = getMapValues();
-console.log(DmaCodes);
+//console.log(DmaCodes);
 export const POINT_STYLING = (AssetName: string) => {
     let Styling = '';
     if (AssetName === 'assets_pressurefitting') {
         Styling = AssetsPressurefittingFillcolor;
     } else if (AssetName === 'assets_chamber') {
         Styling = AssetsChamberFillcolor;
+    } else if (AssetName === 'assets_bulkmeter') {
+        Styling = AssetsBulkMeterFillcolor;
+    } else if (AssetName === 'assets_connectionmeter') {
+        Styling = AssetsConnectionMeterFillcolor;
+    } else if (AssetName === 'assets_consumptionmeter') {
+        Styling = AssetsConsumptionMeterFillcolor;
+    } else if (AssetName === 'assets_isolationvalve') {
+        Styling = AssetsIsolationValveFillcolor;
+    } else if (AssetName === 'assets_listeningpost') {
+        Styling = AssetsListeningPostFillcolor;
     } else if (AssetName === 'assets_operationalsite') {
         Styling = AssetsOperationalsiteFillcolor;
     } else if (AssetName === 'assets_pressurecontrolvalve') {
@@ -272,7 +364,12 @@ export const POINT_STYLING = (AssetName: string) => {
         AssetName === 'assets_pressurefitting' ||
         AssetName === 'assets_chamber' ||
         AssetName === 'assets_operationalsite' ||
-        AssetName === 'assets_pressurecontrolvalve'
+        AssetName === 'assets_pressurecontrolvalve' ||
+        AssetName === 'assets_bulkmeter' ||
+        AssetName === 'assets_connectionmeter' ||
+        AssetName === 'assets_consumptionmeter' ||
+        AssetName === 'assets_isolationvalve' ||
+        AssetName === 'assets_listeningpost'
     ) {
         StylingOptions = {
             ...COMMON_STYLING,
@@ -288,10 +385,8 @@ export const POINT_STYLING = (AssetName: string) => {
 
 export const LINE_STYLING = (AssetName: string) => {
     let ColorValue: number[] = [];
-    if (AssetName === 'assets_distributionmain') {
-        ColorValue = [228, 135, 60];
-    } else if (AssetName === 'assets_trunkmain') {
-        ColorValue = [72, 123, 182];
+    if (AssetName === 'assets_pipemain') {
+        ColorValue = [255, 96, 17];
     }
 
     return {
@@ -334,21 +429,21 @@ const assets_networkmeter_getIcon = (subtypes) => {
 };
 
 const assets_networkoptvalve_getIcon = (subtypes) => {
-    switch (subtypes.gid) {
+    switch (subtypes.id) {
         default:
             return 'assets_networkoptvalve';
     }
 };
 
 const assets_logger_getIcon = (subtypes) => {
-    switch (subtypes.gid) {
+    switch (subtypes.id) {
         default:
             return 'logger';
     }
 };
 
 const assets_hydrant_getIcon = (subtypes) => {
-    switch (subtypes.gid) {
+    switch (subtypes.id) {
         default:
             return 'hydrant';
     }
@@ -390,10 +485,8 @@ export const createLayers = (newMapLayerProps = []) => {
                 maxZoom: 18,
                 renderSubLayers: (props) => {
                     return new IconLayer(props, {
-                        iconMapping:
-                            'http://localhost:8080/geoserver/styles/sprites/makisprite.json',
-                        iconAtlas:
-                            'http://localhost:8080/geoserver/styles/sprites/makisprite.png',
+                        iconMapping: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.json`,
+                        iconAtlas: `${GEOSERVER_URL}/geoserver/styles/sprites/makisprite.png`,
 
                         getIcon: (f) => iconFunctions[layerProps.key](f.properties),
                         sizeMinPixels: 10,

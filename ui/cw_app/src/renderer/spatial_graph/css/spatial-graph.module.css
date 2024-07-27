@@ -6,3 +6,12 @@
     top: 20px;
     z-index: 3;
 }
+
+.rfContainer {
+    background-color: #E9ECEF;
+}
+
+.rflow {
+    height: 100%;
+    width: 100%;
+}
