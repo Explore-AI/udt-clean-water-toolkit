@@ -1,4 +1,6 @@
 from multiprocessing.pool import ThreadPool
+from typing import Annotated
+from annotated_types import Gt
 from neomodel import db
 from collections import defaultdict
 from . import GisToGraph
@@ -18,10 +20,10 @@ class GisToNeo4j(GisToGraph):
         self,
         srid,
         sqids,
-        processor_count=None,
-        chunk_size=None,
-        neoj4_point=False,
-        point_asset_names=[],
+        point_asset_names: list = [],
+        processor_count: int = 2,
+        chunk_size: Annotated[int, Gt(0)] = 1,
+        neoj4_point: bool = False,
     ):
         self.srid = srid
         self.squids = sqids

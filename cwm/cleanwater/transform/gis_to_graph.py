@@ -1,6 +1,7 @@
 import json
 import bisect
-from random import randint
+from typing import Annotated
+from annotated_types import Gt
 from multiprocessing import Pool
 from django.contrib.gis.geos import GEOSGeometry
 from django.db.models.query import QuerySet
@@ -31,12 +32,12 @@ def flatten_concatenation(matrix):
 class GisToGraph:
     def __init__(
         self,
-        srid,
+        srid: int,
         sqids,
-        point_asset_names=[],
-        processor_count=None,
-        chunk_size=None,
-        neoj4_point=False,
+        point_asset_names: list = [],
+        processor_count: int = 2,
+        chunk_size: None | Annotated[int, Gt(0)] = None,
+        neoj4_point: bool = False,
     ):
         self.srid = srid
         self.sqids = sqids

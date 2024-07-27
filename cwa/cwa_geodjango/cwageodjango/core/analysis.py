@@ -2,7 +2,6 @@ import argparse
 from cwageodjango.core.conf import AppConf
 from cwageodjango.network.controllers import (
     GisToNeo4jController,
-    GisToNeo4jController2,
     GisToNxController,
     GisToNkController,
     InpToNeo4jController,
@@ -42,19 +41,7 @@ class Analysis(AppConf):
 
     def cleanwater_gis2neo4j(self) -> None:
         gis_to_neo4j = GisToNeo4jController(self.validated_config)
-
-        if self.validated_config.parallel:
-            gis_to_neo4j.create_network_parallel()
-        else:
-            gis_to_neo4j.create_network()
-
-    def cleanwater_gis2neo4j2(self) -> None:
-        gis_to_neo4j = GisToNeo4jController2(self.validated_config)
-
-        if self.validated_config.parallel:
-            gis_to_neo4j.create_network_parallel()
-        else:
-            gis_to_neo4j.create_network()
+        gis_to_neo4j.create_network()
 
     def cleanwater_gis2networkit(self) -> None:
         gis_to_nk = GisToNkController(self.validated_config)
@@ -107,7 +94,6 @@ class Analysis(AppConf):
         return {
             "gis2nx": self.cleanwater_gis2nx,
             "gis2neo4j": self.cleanwater_gis2neo4j,
-            "gis2neo4j2": self.cleanwater_gis2neo4j2,
             "gis2nk": self.cleanwater_gis2networkit,
             "neo4j2wntrinp": self.neo4j_to_wntr_inp,
             "neo4j2wntrjson": self.neo4j_to_wntr_json,

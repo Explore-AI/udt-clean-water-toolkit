@@ -258,7 +258,7 @@ class PipeAndAssets(GeoDjangoDataManager):
         qs = self._filter_by_dma(qs, filters)
         return qs.count()
 
-    def get_mains_pks(self, pipe_model, filters):
+    def get_pipe_mains_pks(self, pipe_model, filters):
         qs = pipe_model.objects.prefetch_related("dmas", "dmas__utility")
 
         qs = self._filter_by_utility(qs, filters)
