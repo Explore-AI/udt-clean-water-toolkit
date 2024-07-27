@@ -1,6 +1,6 @@
 # udt-clean-water-toolkit
 
-NB: This project is in active development and the toolkit is in the alpha.
+NB: This project is in active development and the toolkit is in alpha.
 
 ## 1. Overview
 
