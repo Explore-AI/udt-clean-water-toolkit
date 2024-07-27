@@ -1,7 +1,6 @@
 from .base_gis_to_graph_controller import BaseGisToGraphController
 from ..calculators import GisToNeo4jCalculator
 from ..models import initialise_node_labels
-from cwageodjango.assets.models import *
 
 
 class GisToNeo4jController(BaseGisToGraphController, GisToNeo4jCalculator):
@@ -24,24 +23,47 @@ class GisToNeo4jController(BaseGisToGraphController, GisToNeo4jCalculator):
         self.create_network()
 
 
-class GisToNeo4jController2(BaseGisToGraphController, GisToNeo4jCalculator):
+from collections import OrderedDict
+from cwageodjango.config.settings import sqids
+from cwageodjango.assets.models import *
+from cleanwater.transform.network_transform import NetworkTransform
+
+
+# BaseGisToGraphController, GisToNeo4jCalculator
+class GisToNeo4jController2:
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
     def __init__(self, config):
         self.config = config
         initialise_node_labels()
-        super().__init__(self.config)
-        super(BaseGisToGraphController, self).__init__(self.config)
+        # super().__init__(self.config)
+        # super(BaseGisToGraphController, self).__init__(self.config)
 
     def create_network(self):
 
-        point_asset_models = {'logger': Logger}
+        point_asset_models = OrderedDict(
+            [("logger", Logger), ("hydrant", Hydrant), ("network_meter", NetworkMeter)]
+        )
+
+        filters = {
+            "utility_names": self.config.utility_names,
+            "dma_codes": self.config.dma_codes,
+        }
 
         nt = NetworkTransform()
-        nt.initialise(PipeMain, point_asset_models, method="geodjango")
-        #nt.gis_to_neo4j()
+        nt.initialise(
+            "gis2neo4j",
+            pipe_asset=PipeMain,
+            point_assets=point_asset_models,
+            filters=filters,
+        )
 
+        nt.run(srid=27700, sqids=sqids, gis_framework="geodjango")
+        print("aaaaa")
+        import pdb
+
+        pdb.set_trace()
 
     def create_network_parallel(self):
 

@@ -1,96 +1,59 @@
+from collections import OrderedDict
 from ..relations import PipeAndAssets
+from . import GisToGraph
 
 
 class NetworkTransform(PipeAndAssets):
 
-    def initialise(
-        self, pipe_asset, point_assets: dict, method: str | None = "geodjango"
-    ):
-        # if method in ["geodjango", "geoalchemy"] and not pipe_model:
-        #     raise Exception(
-        #         "If the 'geodjango' or 'geoalchemy' method is chosen a 'pipe_model' mush be specified"
-        #     )
-        self.get_pipe_point_relation_queryset(pipe_asset, point_assets, filters)
+    def __init__(self):
+        self.method = None
+        self.pipe_asset = None
+        self.point_assets = OrderedDict()
+        self.filters = {}
 
-        # Logger, Hydrant
+    def initialise(self, method, **kwargs):
 
-        #         subquery4 = self.generate_dwithin_subquery(
-        #     pipe_model,
-        #     Hydrant.objects.all(),
-        #     json_fields,
-        #     extra_json_fields={"acoustic_logger": "acoustic_logger"},
-        # )
+        if method == "gis2neo4j":
+            self.intialise_gis2neo4j(**kwargs)
+            self.method = method
+        else:
+            raise Exception(
+                "A valid method must be provided. Allowed values are 'gis2neo4j' ..."
+            )
 
-        # subquery5 = self.generate_dwithin_subquery(
-        #     pipe_model,
-        #     PressureFitting.objects.all(),
-        #     json_fields,
-        #     extra_json_fields={"subtype": "subtype"},
-        # )
+    def run(self, **kwargs):
 
-        # subquery6 = self.generate_dwithin_subquery(
-        #     PressureControlValve.objects.all(),
-        #     json_fields,
-        #     extra_json_fields={"subtype": "subtype"},
-        # )
+        if self.method == "gis2neo4j":
+            srid = kwargs.pop("srid")
+            sqids = kwargs.pop("sqids")
+            self.run_gis2neo4j(srid, sqids, **kwargs)
 
-        # subquery7 = self.generate_dwithin_subquery(
-        #     NetworkMeter.objects.all(),
-        #     json_fields,
-        #     extra_json_fields={"subtype": "subtype"},
-        # )
+    def intialise_gis2neo4j(self, **kwargs):
 
-        # subquery8 = self.generate_dwithin_subquery(Chamber.objects.all(), json_fields)
+        self.pipe_asset = kwargs.get("pipe_asset")
+        self.point_assets = kwargs.get("point_assets", OrderedDict())
+        self.filters = kwargs.get("filters", {})
 
-        # subquery9 = self.generate_dwithin_subquery(
-        #     OperationalSite.objects.all(),
-        #     json_fields,
-        #     extra_json_fields={"subtype": "subtype"},
-        # )
+        if not (self.pipe_asset or self.point_assets):
+            raise Exception(
+                "If the 'gis2neo4j' method is chosen a 'pipe_asset' and 'point_assets' must be specified."
+            )
 
-        # subquery10 = self.generate_dwithin_subquery(
-        #     NetworkOptValve.objects.all(),
-        #     json_fields,
-        #     extra_json_fields={"acoustic_logger": "acoustic_logger"},
-        # )
+    def run_gis2neo4j(self, srid, sqids, **kwargs):
 
-        # subquery11 = self.generate_dwithin_subquery(
-        #     ConnectionMeter.objects.all(),
-        #     json_fields,
-        # )
+        gis_framework = kwargs.get("gis_framework")
 
-        # subquery12 = self.generate_dwithin_subquery(
-        #     ConsumptionMeter.objects.all(),
-        #     json_fields,
-        # )
+        if gis_framework == "geodjango":
+            qs = self.get_pipe_and_point_relations(
+                self.pipe_asset, self.point_assets, self.filters
+            )
 
-        # subquery13 = self.generate_dwithin_subquery(
-        #     ListeningPost.objects.all(),
-        #     json_fields,
-        # )
+            gtg = GisToGraph(
+                srid, sqids, point_asset_names=list(self.point_assets.keys())
+            )
 
-        # subquery14 = self.generate_dwithin_subquery(
-        #     IsolationValve.objects.all(),
-        #     json_fields,
-        # )
-
-        # subquery15 = self.generate_dwithin_subquery(
-        #     BulkMeter.objects.all(),
-        #     json_fields,
-        # )
-
-        #         subqueries = {
-        #     "logger_data": ArraySubquery(subquery3),
-        #     "hydrant_data": ArraySubquery(subquery4),
-        #     "pressure_fitting_data": ArraySubquery(subquery5),
-        #     "pressure_valve_data": ArraySubquery(subquery6),
-        #     "network_meter_data": ArraySubquery(subquery7),
-        #     "chamber_data": ArraySubquery(subquery8),
-        #     "operational_site_data": ArraySubquery(subquery9),
-        #     "network_opt_valve_data": ArraySubquery(subquery10),
-        #     "connection_meter_data": ArraySubquery(subquery11),
-        #     "consumption_meter_data": ArraySubquery(subquery12),
-        #     "listening_post_data": ArraySubquery(subquery13),
-        #     "isolation_valve_data": ArraySubquery(subquery14),
-        #     "bulk_meter_data": ArraySubquery(subquery15),
-        # }
+            gtg.calc_pipe_point_relative_positions(list(qs[:5]))
+        else:
+            raise Exception(
+                "The specified 'gis_framework' is not supported. Allowed values are 'geodjango', 'geoalchemy"
+            )

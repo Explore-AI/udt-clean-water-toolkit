@@ -199,7 +199,7 @@ class PipeAndAssets(GeoDjangoDataManager):
             subquery = self.generate_dwithin_subquery(
                 pipe_model, asset_model.objects.all(), json_fields
             )
-            subqueries[annotation] = subquery
+            subqueries[annotation] = ArraySubquery(subquery)
 
         return subqueries
 
@@ -221,7 +221,7 @@ class PipeAndAssets(GeoDjangoDataManager):
 
         return qs.filter(dmas__code__in=dma_codes)
 
-    def get_pipe_point_relation_queryset(self, pipe_model, point_assets, filters):
+    def get_pipe_and_point_relations(self, pipe_model, point_assets, filters):
         mains_intersection_subqueries = self._generate_mains_subqueries(pipe_model)
         asset_subqueries = self._generate_asset_subqueries(pipe_model, point_assets)
 

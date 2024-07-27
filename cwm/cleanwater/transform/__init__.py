@@ -1,4 +1,3 @@
-from .network_transform import NetworkTransform
 from .gis_to_graph import GisToGraph
 from .gis_to_networkx import GisToNx
 from .gis_to_networkit import GisToNk
