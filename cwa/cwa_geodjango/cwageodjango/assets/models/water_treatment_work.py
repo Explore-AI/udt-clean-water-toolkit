@@ -1,9 +1,9 @@
 from django.contrib.gis.db import models
 from cwageodjango.utilities.models import DMA
-from cwageodjango.core.constants import DEFAULT_SRID, REVENUE_METERS__NAME
+from cwageodjango.core.constants import DEFAULT_SRID, WATER_TREATMENT_WORKS__NAME
 
 
-class RevenueMeters(models.Model):
+class WaterTreatmentWork(models.Model):
     tag = models.CharField(
         max_length=50, null=False, blank=False, unique=True, db_index=True
     )
@@ -22,4 +22,4 @@ class RevenueMeters(models.Model):
         ordering = ["pk"]
 
     class AssetMeta:
-        asset_name = REVENUE_METERS__NAME
+        asset_name = WATER_TREATMENT_WORKS__NAME

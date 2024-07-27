@@ -1,9 +1,9 @@
 from django.contrib.gis.db import models
 from cwageodjango.utilities.models import DMA
-from cwageodjango.core.constants import DEFAULT_SRID, WATER_PUMPING_FACILITIES__NAME
+from cwageodjango.core.constants import DEFAULT_SRID, WATER_PIPE_CONNECTIONS__NAME
 
 
-class WaterPumpingFacilities(models.Model):
+class WaterPipeConnection(models.Model):
     tag = models.CharField(
         max_length=50, null=False, blank=False, unique=True, db_index=True
     )
@@ -22,4 +22,4 @@ class WaterPumpingFacilities(models.Model):
         ordering = ["pk"]
 
     class AssetMeta:
-        asset_name = WATER_PUMPING_FACILITIES__NAME
+        asset_name = WATER_PIPE_CONNECTIONS__NAME

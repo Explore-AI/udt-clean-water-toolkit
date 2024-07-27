@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.contrib.gis.gdal import DataSource
-from cwageodjango.assets.models import BulkMeter
+from cwageodjango.assets.models import Borehole
 from cwageodjango.utilities.models import DMA, Utility
 
 
 class Command(BaseCommand):
-    help = "Write Thames Water BulkMeter layer data to sql"
+    help = "Write Severn Trent Water Borehole layer data to sql"
 
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file", type=str, help="Path to valid datasource")
@@ -22,34 +22,34 @@ class Command(BaseCommand):
 Large numbers of features will take a long time to save."""
         )
 
-        bulk_meter_layer = ds[layer_index]
+        borehole_layer = ds[layer_index]
 
-        new_bulk_meters = []
-        for feature in bulk_meter_layer:
+        new_boreholes = []
+        for feature in borehole_layer:
             gid = feature.get("tag")
             geom = feature.geom
             geom_4326 = feature.get("wkt_geom_4326")
 
-            new_bulk_meter = BulkMeter(
+            new_borehole = Borehole(
                 tag=gid, geometry=geom.wkt, geometry_4326=geom_4326
             )
-            new_bulk_meters.append(new_bulk_meter)
+            new_boreholes.append(new_borehole)
 
-            if len(new_bulk_meters) == 100000:
-                BulkMeter.objects.bulk_create(new_bulk_meters)
-                new_bulk_meters = []
+            if len(new_boreholes) == 100000:
+                Borehole.objects.bulk_create(new_boreholes)
+                new_boreholes = []
 
         # save the last set of data as it will probably be less than 100000
-        if new_bulk_meters:
-            BulkMeter.objects.bulk_create(new_bulk_meters)
+        if new_boreholes:
+            Borehole.objects.bulk_create(new_boreholes)
 
         # get the utility
         utility = Utility.objects.get(name="severn_trent_water")
 
-        DMAThroughModel = BulkMeter.dmas.through
+        DMAThroughModel = Borehole.dmas.through
         bulk_create_list = []
-        for bulk_meter in BulkMeter.objects.filter(dmas=None).only("id", "geometry"):
-            wkt = bulk_meter.geometry.wkt
+        for borehole in Borehole.objects.filter(dmas=None).only("id", "geometry"):
+            wkt = borehole.geometry.wkt
 
             dma_ids = DMA.objects.filter(
                 geometry__intersects=wkt, utility=utility
@@ -60,7 +60,7 @@ Large numbers of features will take a long time to save."""
 
             bulk_create_list.extend(
                 [
-                    DMAThroughModel(bulkmeter_id=bulk_meter.pk, dma_id=dma_id)
+                    DMAThroughModel(borehole_id=borehole.pk, dma_id=dma_id)
                     for dma_id in dma_ids
                 ]
             )
