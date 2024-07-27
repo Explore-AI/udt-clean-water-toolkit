@@ -61,9 +61,6 @@ class GisToNeo4jController2:
 
         nt.run(srid=27700, sqids=sqids, gis_framework="geodjango")
         print("aaaaa")
-        import pdb
-
-        pdb.set_trace()
 
     def create_network_parallel(self):
 

@@ -1,6 +1,7 @@
 from multiprocessing.pool import ThreadPool
 from neomodel import db
 from collections import defaultdict
+from . import GisToGraph
 
 
 def flatten_concatenation(matrix):
@@ -13,8 +14,19 @@ def flatten_concatenation(matrix):
 class GisToNeo4j(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial network of assets"""
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(
+        self,
+        srid,
+        sqids,
+        processor_count=None,
+        chunk_size=None,
+        neoj4_point=False,
+        point_asset_names=[],
+    ):
+        self.srid = srid
+        self.squids = sqids
+        self.processor_count = processor_count
+
         self.all_pipe_nodes_by_pipe = []
         self.all_pipe_edges_by_pipe = []
         self.all_asset_nodes_by_pipe = []
@@ -24,11 +36,12 @@ class GisToNeo4j(GisToGraph):
         self.network_node_labels = []
 
         super().__init__(
-            self.config.srid,
+            srid,
             sqids,
-            processor_count=config.processor_count,
-            chunk_size=config.chunk_size,
-            neoj4_point=self.config.neoj4_point,
+            point_asset_names=point_asset_names,
+            processor_count=processor_count,
+            chunk_size=chunk_size,
+            neoj4_point=neoj4_point,
         )
 
     def _get_unique_nodes_and_edges(self, all_nodes, all_edges):
@@ -230,7 +243,7 @@ class GisToNeo4j(GisToGraph):
         self.reset_pipe_asset_data()
 
     def _create_neo4j_graph_parallel(self) -> None:
-        with ThreadPool(self.config.thread_count) as p:
+        with ThreadPool(self.processor_count) as p:
             p.starmap(
                 self._map_pipe_connected_asset_relations,
                 zip(self.all_pipe_edges_by_pipe, self.all_pipe_nodes_by_pipe),

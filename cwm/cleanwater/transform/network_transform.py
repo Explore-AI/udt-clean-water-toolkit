@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from ..relations import PipeAndAssets
-from . import GisToGraph
+from . import GisToNeo4j
 
 
 class NetworkTransform(PipeAndAssets):
@@ -48,11 +48,14 @@ class NetworkTransform(PipeAndAssets):
                 self.pipe_asset, self.point_assets, self.filters
             )
 
-            gtg = GisToGraph(
+            gtn = GisToNeo4j(
                 srid, sqids, point_asset_names=list(self.point_assets.keys())
             )
 
-            gtg.calc_pipe_point_relative_positions(list(qs[:5]))
+            gtn.calc_pipe_point_relative_positions(list(qs[:5]))
+
+            gtn.create_neo4j_graph()
+
         else:
             raise Exception(
                 "The specified 'gis_framework' is not supported. Allowed values are 'geodjango', 'geoalchemy"
