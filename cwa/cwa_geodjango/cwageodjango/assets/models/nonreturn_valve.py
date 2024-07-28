@@ -14,7 +14,7 @@ class NonReturnValve(models.Model):
         spatial_index=True, null=False, blank=False, srid=4326
     )
     sub_type = models.CharField(null=False, blank=False)
-    dmas = models.ManyToManyField(DMA, related_name="dma_bulk_meters")
+    dmas = models.ManyToManyField(DMA, related_name="dma_nonreturn_valves")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 

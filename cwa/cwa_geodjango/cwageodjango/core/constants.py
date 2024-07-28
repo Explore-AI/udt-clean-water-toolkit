@@ -41,23 +41,21 @@ NON_RETURN_VALVE__NAME = "nonreturnvalve"
 
 PORTABLE_WATER_STORAGE__NAME = "potable_water_storage"
 
-REGULATORS__NAME = "regulators"
+REGULATOR__NAME = "regulator"
 
-REVENUE_METERS__NAME = "revenuemeters"
+REVENUE_METER__NAME = "revenue_meter"
 
-WATER_FACILITY_CONNECTIONS__NAME = "waterfacilityconnections"
+WATER_FACILITY_CONNECTION__NAME = "waterfacilityconnection"
 
-WATER_PIPE_CONNECTIONS__NAME = "waterpipeconnections"
+WATER_PIPE_CONNECTION__NAME = "waterpipeconnection"
 
-WATER_PUMPING_FACILITIES__NAME = "water_pumping_facilities"
+WATER_PUMPING_FACILITY__NAME = "water_pumping_facility"
 
-WATER_TREATMENT_WORKS__NAME = "water_treatment_works"
+WATER_TREATMENT_WORK__NAME = "water_treatment_work"
 
 PIPE_ASSETS__CHOICES = [
     (PIPE_MAIN__NAME, "Pipe Main"),
 ]
-
-PIPE_ASSETS__NAMES = [PIPE_MAIN__NAME]
 
 GEOS_LINESTRING_TYPES = [1, 5]
 

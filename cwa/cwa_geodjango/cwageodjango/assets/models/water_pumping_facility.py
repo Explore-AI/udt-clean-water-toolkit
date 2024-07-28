@@ -1,9 +1,9 @@
 from django.contrib.gis.db import models
 from cwageodjango.utilities.models import DMA
-from cwageodjango.core.constants import DEFAULT_SRID, REGULATORS__NAME
+from cwageodjango.core.constants import DEFAULT_SRID, WATER_PUMPING_FACILITY__NAME
 
 
-class Regulators(models.Model):
+class WaterPumpingFacility(models.Model):
     tag = models.CharField(
         max_length=50, null=False, blank=False, unique=True, db_index=True
     )
@@ -14,7 +14,7 @@ class Regulators(models.Model):
         spatial_index=True, null=False, blank=False, srid=4326
     )
     sub_type = models.CharField(null=False, blank=False)
-    dmas = models.ManyToManyField(DMA, related_name="dma_bulk_meters")
+    dmas = models.ManyToManyField(DMA, related_name="dma_water_pumping_facilities")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
@@ -22,4 +22,4 @@ class Regulators(models.Model):
         ordering = ["pk"]
 
     class AssetMeta:
-        asset_name = REGULATORS__NAME
+        asset_name = WATER_PUMPING_FACILITY__NAME

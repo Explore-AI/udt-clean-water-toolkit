@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from cwageodjango.utilities.models import DMA
-from cwageodjango.core.constants import DEFAULT_SRID, WATER_PIPE_CONNECTIONS__NAME
+from cwageodjango.core.constants import DEFAULT_SRID, WATER_PIPE_CONNECTION__NAME
 
 
 class WaterPipeConnection(models.Model):
@@ -14,7 +14,7 @@ class WaterPipeConnection(models.Model):
         spatial_index=True, null=False, blank=False, srid=4326
     )
     sub_type = models.CharField(null=False, blank=False)
-    dmas = models.ManyToManyField(DMA, related_name="dma_bulk_meters")
+    dmas = models.ManyToManyField(DMA, related_name="dma_water_pipe_connections")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
@@ -22,4 +22,4 @@ class WaterPipeConnection(models.Model):
         ordering = ["pk"]
 
     class AssetMeta:
-        asset_name = WATER_PIPE_CONNECTIONS__NAME
+        asset_name = WATER_PIPE_CONNECTION__NAME

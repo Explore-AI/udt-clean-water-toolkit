@@ -3,7 +3,7 @@ from cwageodjango.utilities.models import DMA
 from cwageodjango.core.constants import DEFAULT_SRID, PORTABLE_WATER_STORAGE__NAME
 
 
-class PortableWaterStorage(models.Model):
+class PotableWaterStorage(models.Model):
     tag = models.CharField(
         max_length=50, null=False, blank=False, unique=True, db_index=True
     )
@@ -14,7 +14,7 @@ class PortableWaterStorage(models.Model):
         spatial_index=True, null=False, blank=False, srid=4326
     )
     sub_type = models.CharField(null=False, blank=False)
-    dmas = models.ManyToManyField(DMA, related_name="dma_bulk_meters")
+    dmas = models.ManyToManyField(DMA, related_name="dma_potable_water_storages")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
