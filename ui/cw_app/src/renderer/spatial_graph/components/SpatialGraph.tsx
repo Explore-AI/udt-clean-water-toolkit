@@ -10,6 +10,8 @@ import useGetData from '../../core/hooks/useGetData'
 import NodePopups from './NodePopups'
 import useGetItems from '../../core/hooks/useGetItems'
 import MultiSelectField from '../../core/components/MultiSelectField'
+import DateTimePickerField from '../../core/components/DateTimePickerField'
+import PlayControls from '../../core/components/PlayControls'
 import { SchematicUiContext } from '../hooks/useSpatialGraphUi'
 //import useFilterParams from '../../core/hooks/useFilterParams'
 
@@ -86,6 +88,12 @@ const SpatialGraph = () => {
                     placeholder="Search by DMA"
                     searchable={true}
                     data={items} />
+            </div>
+            <div className={styles['play-box']}>
+                <PlayControls/>
+            </div>
+            <div className={styles['date-time']}>
+                <DateTimePickerField/>
             </div>
             <div className={styles.rflow}>
                 <ReactFlow
