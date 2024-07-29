@@ -16,6 +16,10 @@ class NetworkTransform(PipeAndAssets):
         if method == "gis2neo4j":
             self.method = method
             self.intialise_gis2neo4j(**kwargs)
+
+        elif method == "gis2nx":
+            self.method = method
+            self.intialise_gis2nx(**kwargs)
         else:
             raise Exception(
                 "A valid method must be provided. Allowed values are 'gis2neo4j' ..."
@@ -30,6 +34,16 @@ class NetworkTransform(PipeAndAssets):
 
     def intialise_gis2neo4j(self, **kwargs):
 
+        self.pipe_asset = kwargs.get("pipe_asset")
+        self.point_assets = kwargs.get("point_assets", OrderedDict())
+        self.filters = kwargs.get("filters", {})
+
+        if not (self.pipe_asset or self.point_assets):
+            raise Exception(
+                "If the 'gis2neo4j' method is chosen a 'pipe_asset' and 'point_assets' must be specified."
+            )
+
+    def intialise_gis2nx(self, **kwargs):
         self.pipe_asset = kwargs.get("pipe_asset")
         self.point_assets = kwargs.get("point_assets", OrderedDict())
         self.filters = kwargs.get("filters", {})
@@ -82,6 +96,17 @@ class NetworkTransform(PipeAndAssets):
             raise Exception(
                 "The specified 'gis_framework' is not supported. Allowed values are 'geodjango', 'geoalchemy"
             )
+
+    def run_gis2nx(self, srid, sqids, **kwargs):
+
+        gis_framework = kwargs.get("gis_framework")
+        initial_query_limit = kwargs.get("query_limit")
+        initial_query_offset = kwargs.get("query_offset")
+        batch_size = kwargs.get("batch_size", 1)
+
+        g2nx = GisToNx()
+
+        g2nx.create_nx_graph()
 
     # This fn is a candidate to be abstracted out into the NetworkController
     def get_pipe_and_asset_data(self):

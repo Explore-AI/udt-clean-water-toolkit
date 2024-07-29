@@ -31,8 +31,8 @@ class GisToNeo4jController:
         )
 
         nt.run(
-            srid=27700,
-            sqids=sqids,
+            27700,
+            sqids,
             gis_framework="geodjango",
             batch_size=self.config.batch_size,
             query_limit=self.config.query_limit,
