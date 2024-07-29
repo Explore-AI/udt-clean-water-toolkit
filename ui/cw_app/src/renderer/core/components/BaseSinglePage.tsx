@@ -23,10 +23,10 @@ const BaseSinglePage = () => {
 
     return (
         <>
-            {/* <MapPage pageVisibility={pageVisibility.map} />
-                <GraphPage pageVisibility={pageVisibility.graph} />
-                <ExplorerPage pageVisibility={pageVisibility.explorer} /> */}
-            <SpatialGraphPage pageVisibility={pageVisibility.spatialGraph} />
+            <MapPage pageVisibility={pageVisibility.map} />
+            {/* <GraphPage pageVisibility={pageVisibility.graph} />
+                <ExplorerPage pageVisibility={pageVisibility.explorer} />
+                <SpatialGraphPage pageVisibility={pageVisibility.spatialGraph} /> */}
             {/* <SchematicPage pageVisibility={pageVisibility.schematic} /> */}
             {/* <AnalysisPage pageVisibility={pageVisibility.analysis} /> */}
             {/* <AssetsPage pageVisibility={pageVisibility.assets} /> */}
