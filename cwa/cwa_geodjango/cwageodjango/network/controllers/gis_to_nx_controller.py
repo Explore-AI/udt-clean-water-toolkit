@@ -2,7 +2,7 @@ from ..constants import POINT_ASSET_MODELS, PIPE_MAIN_MODEL
 from cleanwater.transform.network_transform import NetworkTransform
 
 
-class GisToNxController(GisToNx):
+class GisToNxController:
     """Create a Neo4J graph of assets from a geospatial
     network of assets"""
 
