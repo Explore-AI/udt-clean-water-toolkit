@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from neomodel import db
 from random import randint
 from django.contrib.gis.geos import Point
+from cwageodjango.utilities.models import DMA
 
 
 class SpatialGraphViewset(viewsets.ViewSet):
@@ -12,21 +13,23 @@ class SpatialGraphViewset(viewsets.ViewSet):
     def query_by_dma(request):
 
         limit = request.query_params.get("limit", 300)
-        dma_code = request.query_params.get("dma_code", "ZCHIPO01")
-        # ZMAIDL45
-        if dma_code:
-            query = f"""
+        dma_codes = request.query_params.get("dma_codes", DMA.objects.first().code)
+
+        if dma_codes:
+            dma_codes = dma_codes.split(",")
+
+        # ZMAIDL45, ZCHIPO01
+        query = f"""
             match (n:NetworkNode)-[r:PipeMain]->(m:NetworkNode)
-            match (n)-[r1]-(d:DMA) where d.code = 'ZCHIPO01'
+            match (n)-[r1]-(d:DMA)
+            WHERE d.code IN {dma_codes}
             return ID(n), n, ID(r), r, ID(m), m
             limit {limit}
-            """
+        """
 
-            results, _ = db.cypher_query(query)
+        results, _ = db.cypher_query(query)
 
-            return results
-        else:
-            return []
+        return results
 
     def create_node(self, node_id, position, node_type="default", properties={}):
 
