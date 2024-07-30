@@ -1,11 +1,10 @@
 from django_filters import rest_framework as filters
-from django.db.models import Q, F, JSONField
+from django.db.models import Q, JSONField
 from cwageodjango.waterpipes.models import PipeFlow
 from config.filters import BaseFilter
 from config.viewsets import BaseModelViewSet
 from cw_gis_assets.serializers import PipeFlowSerializer
 import json
-from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
@@ -30,15 +29,11 @@ class PipeFlowFilter(BaseFilter):
         filter_condition = Q()
         for obj in queryset:
             try:
-                # Parse the JSON string into a Python dictionary
                 data = json.loads(obj.flow_data)
-                # Check if the specific timestamp key exists in the dictionary
                 if value in data:
                     filter_condition |= Q(pk=obj.pk)
             except json.JSONDecodeError:
                 continue
-
-        # Apply the filter condition to the queryset
         return queryset.filter(filter_condition)
 
 
@@ -52,11 +47,8 @@ class PipeFlowViewSet(BaseModelViewSet):
     http_method_names = ["get"]
 
     def list(self, request, *args, **kwargs):
-        # Get the filter parameters
         ids = request.query_params.getlist("ids")
         timestamp = request.query_params.get("flow_data_timestamp")
-
-        # Apply filters based on `ids` and `flow_data_timestamp`
         queryset = self.filter_queryset(self.get_queryset())
 
         if timestamp:
@@ -66,7 +58,6 @@ class PipeFlowViewSet(BaseModelViewSet):
                     data = json.loads(obj.flow_data)
                     value = data.get(timestamp)
                     if value is not None:
-                        # Collect results with specific timestamp values
                         filtered_results.append({obj.pipe_main.id: value})
                 except json.JSONDecodeError:
                     continue
@@ -78,7 +69,5 @@ class PipeFlowViewSet(BaseModelViewSet):
                     {"detail": "Timestamp not found for the given IDs."},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-
-        # If no timestamp is provided, return the filtered queryset as usual
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
