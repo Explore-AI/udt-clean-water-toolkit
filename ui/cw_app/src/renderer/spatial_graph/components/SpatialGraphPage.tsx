@@ -1,10 +1,11 @@
 import styles from '../css/spatial-graph-page.module.css';
 import SpatialGraph from  './SpatialGraph';
+import withSpatialGraph from '../hocs/withSpatialGraph'
 import useFetchJson from '../../core/hooks/useFetchJson';
 import useFetchItems from '../../core/hooks/useFetchItems'
 import { useParams } from 'react-router-dom';
 
-const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
+const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/spatial_graph'
 const DMA__QUERY_KEY = 'cw_utilities/dma'
 
 const SpatialGraphPage = (props) => {
@@ -17,7 +18,8 @@ const SpatialGraphPage = (props) => {
         dmaCodes = dmas.split('-');
     }
 
-    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { params: {'dma_codes': dmaCodes }})
+    //params: {'dma_codes': dmaCodes }
+    useFetchJson(SPATIAL_GRAPH__QUERY_KEY, { limit: 500 })
 
     useFetchItems(DMA__QUERY_KEY)
 
@@ -30,7 +32,7 @@ const SpatialGraphPage = (props) => {
     );
 }
 
-export default SpatialGraphPage
+export default withSpatialGraph(SpatialGraphPage)
 
 
 

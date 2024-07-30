@@ -1,16 +1,21 @@
 import 'reactflow/dist/style.css';
+import { useContext } from 'react'
+import { useNavigate } from 'react-router-dom';
 import styles from '../css/spatial-graph.module.css'
 import ReactFlow, { Controls } from 'reactflow';
 import CircleNode from './CircleNode';
 import EdgeNode from './EdgeNode';
 import LoadingSpinner from '../../core/components/LoadingSpinner';
 import useGetData from '../../core/hooks/useGetData'
+import NodePopups from './NodePopups'
 import useGetItems from '../../core/hooks/useGetItems'
 import MultiSelectField from '../../core/components/MultiSelectField'
-import { useNavigate } from 'react-router-dom';
+import DateTimePickerField from '../../core/components/DateTimePickerField'
+import PlayControls from '../../core/components/PlayControls'
+import { SchematicUiContext } from '../hooks/useSpatialGraphUi'
 //import useFilterParams from '../../core/hooks/useFilterParams'
 
-const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/schematic'
+const SPATIAL_GRAPH__QUERY_KEY = 'cw_graph/spatial_graph'
 const DMA__QUERY_KEY = 'cw_utilities/dma'
 
 const nodeTypes = {
@@ -38,12 +43,12 @@ const SpatialGraph = () => {
 
     const navigate = useNavigate();
 
-    const { data, isPending } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { queryValues } = useGetData(SPATIAL_GRAPH__QUERY_KEY)
+    const { data, isLoading } = queryValues;
+
     const { items, setFilterParams } = useGetItems(DMA__QUERY_KEY)
 
-    if (isPending)  {
-        return <LoadingSpinner/>
-    }
+    const { setSchematicUiParams } = useContext(SchematicUiContext)
 
     const onSearchChange = (value) => {
         setFilterParams(DMA__QUERY_KEY, { search: value })
@@ -51,6 +56,25 @@ const SpatialGraph = () => {
 
     const onFilterByDmas = (options) => {
         navigate(`/spatial-graph/${options.join("-")}`);
+    }
+
+    const onNodeClick = (
+        e: React.MouseEvent,
+        node: Node,
+    ) => {
+        setSchematicUiParams({
+            nodePopups: [
+                {
+                    id: node.id,
+                    data: node.data,
+                    position: [e.clientX, e.clientY]
+                }
+            ]
+        });
+    };
+
+    if (isLoading)  {
+        return <LoadingSpinner/>
     }
 
     return (
@@ -61,20 +85,31 @@ const SpatialGraph = () => {
                     clearable={true}
                     onEnter={onFilterByDmas}
                     onSearchChange={onSearchChange}
+                    placeholder="Search by DMA"
                     searchable={true}
                     data={items} />
             </div>
-            <ReactFlow
-                defaultNodes={data?.nodes}
-                defaultEdges={data?.edges}
-                nodeTypes={nodeTypes}
-                minZoom={0}
-                maxZoom={50}
-                fitView={true}
-                nodesDraggable={false}
-            >
-                <Controls />
-            </ReactFlow>
+            <div className={styles['play-box']}>
+                <PlayControls/>
+            </div>
+            <div className={styles['date-time']}>
+                <DateTimePickerField/>
+            </div>
+            <div className={styles.rflow}>
+                <ReactFlow
+                    defaultNodes={data?.nodes}
+                    defaultEdges={data?.edges}
+                    nodeTypes={nodeTypes}
+                    minZoom={0}
+                    maxZoom={50}
+                    fitView={true}
+                    className={styles.rfContainer}
+                    nodesDraggable={false}
+                    onNodeClick={onNodeClick}>
+                    <Controls />
+                    <NodePopups/>
+                </ReactFlow>
+            </div>
         </>
     );
 };

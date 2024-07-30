@@ -1,3 +1,12 @@
+.rfContainer {
+    background-color: #E9ECEF;
+}
+
+.rflow {
+    height: 100%;
+    width: 100%;
+}
+
 .search_box {
     height: calc(2rem * var(--mantine-scale));
     width: calc(25rem * var(--mantine-scale));
@@ -5,4 +14,26 @@
     left: 20px;
     top: 20px;
     z-index: 3;
+}
+
+.date-time {
+    height: calc(2rem * var(--mantine-scale));
+    width: calc(20rem * var(--mantine-scale));
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 3;
+}
+
+
+.play-box {
+    height: calc(2rem * var(--mantine-scale));
+    display: flex;
+    /* width: calc(20rem * var(--mantine-scale)); */
+    position: absolute;
+    right: 350px;
+    top: 20px;
+    align-items: center;
+    z-index: 3;
+
 }

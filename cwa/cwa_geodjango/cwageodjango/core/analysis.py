@@ -41,11 +41,7 @@ class Analysis(AppConf):
 
     def cleanwater_gis2neo4j(self) -> None:
         gis_to_neo4j = GisToNeo4jController(self.validated_config)
-
-        if self.validated_config.parallel:
-            gis_to_neo4j.create_network_parallel()
-        else:
-            gis_to_neo4j.create_network()
+        gis_to_neo4j.create_network()
 
     def cleanwater_gis2networkit(self) -> None:
         gis_to_nk = GisToNkController(self.validated_config)

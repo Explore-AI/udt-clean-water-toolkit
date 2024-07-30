@@ -1,1 +1,0 @@
-from .gis_to_neo4j_calculator import GisToNeo4jCalculator

@@ -1,9 +1,9 @@
 from django.contrib.gis.db import models
 from cwageodjango.utilities.models import DMA
-from cwageodjango.core.constants import DEFAULT_SRID, LISTENING_POST__NAME
+from cwageodjango.core.constants import DEFAULT_SRID, REGULATOR__NAME
 
 
-class ListeningPost(models.Model):
+class Regulator(models.Model):
     tag = models.CharField(
         max_length=50, null=False, blank=False, unique=True, db_index=True
     )
@@ -13,7 +13,8 @@ class ListeningPost(models.Model):
     geometry_4326 = models.PointField(
         spatial_index=True, null=False, blank=False, srid=4326
     )
-    dmas = models.ManyToManyField(DMA, related_name="dma_listening_posts")
+    sub_type = models.CharField(null=False, blank=False)
+    dmas = models.ManyToManyField(DMA, related_name="dma_regulators")
     modified_at = models.DateTimeField(auto_now=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
@@ -21,4 +22,4 @@ class ListeningPost(models.Model):
         ordering = ["pk"]
 
     class AssetMeta:
-        asset_name = LISTENING_POST__NAME
+        asset_name = REGULATOR__NAME

@@ -1,1 +1,1 @@
-export const TRUNKMAIN_QUERY_KEY = 'cw_graph/schematic-pipe-main'
+export const TRUNKMAIN_QUERY_KEY = 'cw_graph/schematic_pipe_main'

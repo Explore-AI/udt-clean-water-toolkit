@@ -1,11 +1,12 @@
+
 .nodeContainer {
-    background-color: #FFFEF6;
+    cursor: default;
+    background-color: white;
     border-radius: 5px;
     border: 2px solid #33658A;
     width: 100px;
     height: 90px;
     display: flex;
-    flex-direction: column;
     justify-content: center;
 }
 
@@ -23,10 +24,5 @@
 }
 
 .containerTitle .idText {
-
     text-align: right;
-}
-
-.icon {
-    margin-right: 0px;
 }

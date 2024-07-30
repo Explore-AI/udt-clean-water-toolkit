@@ -141,3 +141,11 @@ export const Zonal = () => {
         </svg>
     );
 };
+
+
+export const DefaultNetworkMeter = () => {
+    return (
+        <img src={require("../../../core/images/icons8-water-meter-64.png")} alt="hydrant"/>
+    )
+
+}

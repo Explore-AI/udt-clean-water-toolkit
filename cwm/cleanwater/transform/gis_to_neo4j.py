@@ -1,18 +1,9 @@
 from multiprocessing.pool import ThreadPool
+from typing import Annotated
+from annotated_types import Gt
 from neomodel import db
 from collections import defaultdict
-from cleanwater.transform import GisToGraph
-from cwageodjango.core.constants import (
-    PIPE_JUNCTION__NAME,
-    PIPE_END__NAME,
-    POINT_ASSET__NAME,
-)
-from cwageodjango.config.settings import sqids
-
-MIXED_NODE_TYPES_SORTED = [
-    sorted([PIPE_JUNCTION__NAME, POINT_ASSET__NAME]),
-    sorted([PIPE_END__NAME, POINT_ASSET__NAME]),
-]
+from . import GisToGraph
 
 
 def flatten_concatenation(matrix):
@@ -22,11 +13,22 @@ def flatten_concatenation(matrix):
     return flat_list
 
 
-class GisToNeo4jCalculator(GisToGraph):
+class GisToNeo4j(GisToGraph):
     """Create a Neo4J graph of assets from a geospatial network of assets"""
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(
+        self,
+        srid,
+        sqids,
+        point_asset_names: list = [],
+        processor_count: int = 2,
+        chunk_size: Annotated[int, Gt(0)] = 1,
+        neoj4_point: bool = False,
+    ):
+        self.srid = srid
+        self.squids = sqids
+        self.processor_count = processor_count
+
         self.all_pipe_nodes_by_pipe = []
         self.all_pipe_edges_by_pipe = []
         self.all_asset_nodes_by_pipe = []
@@ -36,11 +38,12 @@ class GisToNeo4jCalculator(GisToGraph):
         self.network_node_labels = []
 
         super().__init__(
-            self.config.srid,
+            srid,
             sqids,
-            processor_count=config.processor_count,
-            chunk_size=config.chunk_size,
-            neoj4_point=self.config.neoj4_point,
+            point_asset_names=point_asset_names,
+            processor_count=processor_count,
+            chunk_size=chunk_size,
+            neoj4_point=neoj4_point,
         )
 
     def _get_unique_nodes_and_edges(self, all_nodes, all_edges):
@@ -242,7 +245,7 @@ class GisToNeo4jCalculator(GisToGraph):
         self.reset_pipe_asset_data()
 
     def _create_neo4j_graph_parallel(self) -> None:
-        with ThreadPool(self.config.thread_count) as p:
+        with ThreadPool(self.processor_count) as p:
             p.starmap(
                 self._map_pipe_connected_asset_relations,
                 zip(self.all_pipe_edges_by_pipe, self.all_pipe_nodes_by_pipe),

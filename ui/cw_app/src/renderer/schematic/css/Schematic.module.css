@@ -1,12 +1,17 @@
-.contents {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-items: center;
-    height: 100vh; 
-    width: 100%;
+.search_box {
+    height: calc(2rem * var(--mantine-scale));
+    width: calc(25rem * var(--mantine-scale));
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 3;
 }
 
 .rfContainer {
-    background-color: bisque;
+    background-color: #E9ECEF;
+}
+
+.rflow {
+    height: 100%;
+    width: 100%;
 }

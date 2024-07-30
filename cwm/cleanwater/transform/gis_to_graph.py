@@ -1,6 +1,7 @@
 import json
 import bisect
-from random import randint
+from typing import Annotated
+from annotated_types import Gt
 from multiprocessing import Pool
 from django.contrib.gis.geos import GEOSGeometry
 from django.db.models.query import QuerySet
@@ -30,10 +31,17 @@ def flatten_concatenation(matrix):
 
 class GisToGraph:
     def __init__(
-        self, srid, sqids, processor_count=None, chunk_size=None, neoj4_point=False
+        self,
+        srid: int,
+        sqids,
+        point_asset_names: list = [],
+        processor_count: int = 2,
+        chunk_size: None | Annotated[int, Gt(0)] = None,
+        neoj4_point: bool = False,
     ):
         self.srid = srid
         self.sqids = sqids
+        self.point_asset_names = point_asset_names
         self.processor_count = processor_count
         self.chunk_size = chunk_size
         self.neoj4_point = neoj4_point
@@ -70,14 +78,7 @@ class GisToGraph:
             self.dma_data,
             self.utility_data,
             all_asset_node_labels,
-        ) = list(
-            zip(
-                *map(
-                    self._map_relative_positions_calc,
-                    pipes_qs,
-                )
-            )
-        )
+        ) = list(zip(*map(self._map_relative_positions_calc, pipes_qs)))
 
         self.network_node_labels.extend(
             list(set(flatten_concatenation(all_asset_node_labels)))
@@ -571,21 +572,13 @@ class GisToGraph:
         return pipe_qs_object.pipemain_junctions
 
     def _combine_all_point_assets(self, pipe_qs_object) -> list:
-        return (
-            pipe_qs_object.chamber_data
-            + pipe_qs_object.operational_site_data
-            + pipe_qs_object.network_meter_data
-            + pipe_qs_object.logger_data
-            + pipe_qs_object.hydrant_data
-            + pipe_qs_object.pressure_fitting_data
-            + pipe_qs_object.pressure_valve_data
-            + pipe_qs_object.network_opt_valve_data
-            + pipe_qs_object.connection_meter_data
-            + pipe_qs_object.consumption_meter_data
-            + pipe_qs_object.listening_post_data
-            + pipe_qs_object.isolation_valve_data
-            + pipe_qs_object.bulk_meter_data
-        )
+
+        assets = []
+        for asset in self.point_asset_names:
+            asset_data = getattr(pipe_qs_object, asset)
+            assets.extend(asset_data)
+
+        return assets
 
     @staticmethod
     def _get_intersecting_geometry(base_pipe_geom, wkt, srid):

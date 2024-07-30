@@ -176,3 +176,10 @@ export const OptSiteInoperable = () => {
         </svg>
     );
 };
+
+export const DefaultNetworkValve = () => {
+    return (
+        <img src={require("../../../core/images/icons8-valve-64.png")} alt="hydrant"/>
+    )
+
+}

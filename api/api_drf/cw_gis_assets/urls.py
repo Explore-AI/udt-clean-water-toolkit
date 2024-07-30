@@ -29,14 +29,6 @@ router = DefaultRouter()
 
 router.register(r"pipe_main", PipeMainViewSet, basename="pipe_main")
 router.register(r"geojson/pipe_main", PipeMainGeoJsonViewSet, "pipe_main-geojson")
-# router.register(
-#     r"distribution_main", DistributionMainViewSet, basename="distribution_main"
-# )
-# router.register(
-#     r"geojson/distribution_main",
-#     DistributionMainGeoJsonViewSet,
-#     "distribution_main-geojson",
-# )
 router.register(r"chamber", ChamberViewSet, basename="chamber")
 router.register(r"geojson/chamber", ChamberGeoJsonViewSet, "chamber-geojson")
 router.register(r"hydrant", HydrantViewSet, basename="hydrant")
