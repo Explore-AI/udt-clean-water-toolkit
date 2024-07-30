@@ -1,107 +1,79 @@
 {
-  "hydrant": {
-    "height": 240,
+  "assets_networkoptvalve": {
+    "height": 1500,
     "pixelRatio": 3,
-    "width": 150,
-    "x": 0,
+    "width": 1500,
+    "x": 1500,
     "y": 0
+  },
+  "hydrant": {
+    "height": 1500,
+    "pixelRatio": 3,
+    "width": 1500,
+    "x": 0,
+    "y": 1687
   },
   "logger": {
-    "height": 231,
+    "height": 1687,
     "pixelRatio": 3,
-    "width": 231,
+    "width": 1500,
     "x": 0,
-    "y": 240
+    "y": 0
+  },
+  "marker": {
+    "height": 1500,
+    "pixelRatio": 3,
+    "width": 1500,
+    "x": 1500,
+    "y": 1687
+  },
+  "monitor-water-svgrepo-com": {
+    "height": 1500,
+    "pixelRatio": 3,
+    "width": 1500,
+    "x": 3000,
+    "y": 1687
+  },
+  "network-meter-default": {
+    "height": 1125,
+    "pixelRatio": 3,
+    "width": 1500,
+    "x": 0,
+    "y": 3187
   },
   "network-meter-distribution-input-meter": {
-    "height": 150,
+    "height": 1500,
     "pixelRatio": 3,
-    "width": 150,
-    "x": 0,
-    "y": 471
-  },
-  "network-meter-district-meter": {
-    "height": 150,
-    "pixelRatio": 3,
-    "width": 150,
-    "x": 150,
-    "y": 471
+    "width": 1500,
+    "x": 4500,
+    "y": 1687
   },
   "network-meter-fire": {
-    "height": 150,
+    "height": 1500,
     "pixelRatio": 3,
-    "width": 150,
-    "x": 300,
-    "y": 471
+    "width": 1500,
+    "x": 3000,
+    "y": 0
   },
-  "network-meter-unkown": {
-    "height": 150,
+  "network-meter-unknown": {
+    "height": 843,
     "pixelRatio": 3,
-    "width": 150,
-    "x": 450,
-    "y": 471
+    "width": 1500,
+    "x": 1500,
+    "y": 3187
   },
   "network-meter-waste": {
-    "height": 150,
+    "height": 562,
     "pixelRatio": 3,
-    "width": 150,
-    "x": 0,
-    "y": 621
+    "width": 1500,
+    "x": 3000,
+    "y": 3187
   },
   "network-meter-zonal": {
-    "height": 150,
+    "height": 1500,
     "pixelRatio": 3,
-    "width": 150,
-    "x": 150,
-    "y": 621
-  },
-  "network-opt-valve": {
-    "height": 162,
-    "pixelRatio": 3,
-    "width": 162,
-    "x": 231,
-    "y": 240
-  },
-  "operational_site_non-potable_state_closed": {
-    "height": 162,
-    "pixelRatio": 3,
-    "width": 162,
-    "x": 393,
-    "y": 240
-  },
-  "operational_site_non_potable_state_default": {
-    "height": 150,
-    "pixelRatio": 3,
-    "width": 150,
-    "x": 300,
-    "y": 621
-  },
-  "operational_site_non_potable_state_inoperable": {
-    "height": 150,
-    "pixelRatio": 3,
-    "width": 150,
-    "x": 450,
-    "y": 621
-  },
-  "operational_site_non_potable_state_inoperable_closed": {
-    "height": 162,
-    "pixelRatio": 3,
-    "width": 162,
-    "x": 300,
+    "width": 1500,
+    "x": 4500,
     "y": 0
-  },
-  "operational_site_variation_double": {
-    "height": 225,
-    "pixelRatio": 3,
-    "width": 150,
-    "x": 150,
-    "y": 0
-  },
-  "operational_site_variation_single": {
-    "height": 150,
-    "pixelRatio": 3,
-    "width": 150,
-    "x": 0,
-    "y": 771
   }
 }

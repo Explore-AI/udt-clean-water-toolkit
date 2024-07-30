@@ -3,7 +3,7 @@ import { MVTLayer } from '@deck.gl/geo-layers';
 import { IconLayer } from '@deck.gl/layers';
 import { colorCategories } from '@deck.gl/carto';
 import { map as _map, isEmpty as _isEmpty } from 'lodash';
-import {GEOSERVER_ADMIN_PASSWORD, GEOSERVER_URL} from '../../config';
+import {GEOSERVER_URL} from '../../config';
 
 export type LayerNames = {
     [key: string]: string;
@@ -276,68 +276,7 @@ export const COMMON_STYLING = {
     stroked: true,
 };
 
-async function getValues() {
-    try {
-        const url = `${GEOSERVER_URL}/geoserver/wfs?service=wfs&version=2.0.0&request=GetPropertyValue&typeNames=udt:utilities_dma&valueReference=code`;
-        const username = 'admin';
-        const password = `${GEOSERVER_ADMIN_PASSWORD}`;
-        const credentials = `${username}:${password}`;
-        const encodedCredentials = btoa(credentials);
 
-        const headers = {
-            'Authorization': `Basic ${encodedCredentials}`
-        };
-
-        const response = await fetch(url, { headers });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const xmlString = await response.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
-
-        // Check for parse errors
-        const parseError = xmlDoc.getElementsByTagName('parsererror');
-        if (parseError.length > 0) {
-            throw new Error(`Error parsing XML: ${parseError[0].textContent}`);
-        }
-        const evaluator = new XPathEvaluator();
-
-        // Define namespace resolver
-        const nsResolver = function(prefix) {
-            const ns = {
-                'wfs': 'http://www.opengis.net/wfs/2.0',
-                'udt': 'http://udt'
-            };
-            return ns[prefix] || null;
-        };
-
-        const result = evaluator.evaluate('//wfs:member//udt:code', xmlDoc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-        const values = [];
-        for (let i = 0; i < result.snapshotLength; i++) {
-            values.push(result.snapshotItem(i).textContent.trim());
-        }
-        return values;
-    } catch (error) {
-        // Log any errors that occur during the fetch or parsing
-        console.error(error);
-    }
-}
-
-async function getMapValues() {
-    let MapValues = [];
-
-    if (MapValues.length === 0) {
-        const values = await getValues();
-        MapValues = values;
-    }
-
-    return MapValues;
-}
-
-const DmaCodes = getMapValues();
-//console.log(DmaCodes);
 export const POINT_STYLING = (AssetName: string) => {
     let Styling = '';
     if (AssetName === 'assets_pressurefitting') {
@@ -403,9 +342,12 @@ export const POLYGON_STYLING = {
     ...COMMON_STYLING,
     opacity: 0.1,
     getFillColor: colorCategories({
-        attr: 'code',
-        domain: ['ZABINB01', 'ZABIND03', 'ZCHIPO01', 'ZABIND08'], // TODO: We need to call getValues(); to get the array
-        colors: 'BluYl',
+        attr: 'utility_id',
+        domain: ['1', '2'],
+        colors: [
+            [226, 238, 244],
+            [72, 123, 182],
+        ],
         othersColor: [72, 123, 182],
     }),
 };
