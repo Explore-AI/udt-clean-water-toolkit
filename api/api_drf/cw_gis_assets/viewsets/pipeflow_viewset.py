@@ -15,10 +15,11 @@ class PipeFlowFilter(BaseFilter):
     tag = filters.CharFilter(field_name="pipe_main__tag", lookup_expr="icontains")
     ids = filters.BaseInFilter(field_name="pipe_main__id", lookup_expr="in")
     flow_data_timestamp = filters.CharFilter(method="filter_flow_data_timestamp")
+    dmas = filters.CharFilter(field_name="pipe_main__dmas", lookup_expr="icontains")
 
     class Meta:
         model = PipeFlow
-        fields = ["pipe_main", "flow_data", "ids", "tag", "flow_data_timestamp"]
+        fields = ["pipe_main", "flow_data", "ids", "tag", "flow_data_timestamp", "dmas"]
         filter_overrides = {
             JSONField: {
                 "filter_class": filters.CharFilter,
