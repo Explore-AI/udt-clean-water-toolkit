@@ -27,22 +27,23 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
     def query_pipemain_network(request):
         # get all assets connected to the pipemains, as well as the pipemain relationships
         limit = request.query_params.get("limit", 10)
-        dma_codes = request.query_params.get("dma_codes", DMA.objects.first().code)
+        dma_codes = request.query_params.get(
+            "dma_codes", "ZMAIDL45"
+        )  # DMA.objects.first().code)
         # ZMAIDL45
         if dma_codes:
             dma_codes = dma_codes.split(",")
 
+        dma_codes = ["ZMAIDL45"]
         query = f"""
         MATCH (d:DMA)-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility)
         MATCH (n)-[r1:PipeMain]-(s:NetworkNode)
-        OPTIONAL MATCH (n)-[r2:HAS_ASSET]->(a)
         WHERE d.code IN {dma_codes}
+        OPTIONAL MATCH (n)-[r2:HAS_ASSET]->(a)
         return ID(n), n, ID(r1), r1, ID(s), s, ID(a), a, ID(r2), d, u
         limit {limit}
         """
-        import pdb
 
-        pdb.set_trace()
         results, _ = db.cypher_query(query)
 
         return results
