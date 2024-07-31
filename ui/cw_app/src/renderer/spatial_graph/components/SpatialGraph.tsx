@@ -22,13 +22,6 @@ const nodeTypes = {
     circle: CircleNode,
     edge_node: EdgeNode,
 };
-type Node = {
-    id: string;
-    key: string;
-    type: string;
-    position: { x: number; y: number };
-    data: any;
-};
 
 type Edge = {
     id: string;
@@ -60,13 +53,13 @@ const SpatialGraph = () => {
 
     const onNodeClick = (
         e: React.MouseEvent,
-        node: Node,
+        node,
     ) => {
         setSchematicUiParams({
             nodePopups: [
                 {
                     id: node.id,
-                    data: node.data,
+                    properties: node.data,
                     position: [e.clientX, e.clientY]
                 }
             ]

@@ -26,7 +26,7 @@ const NodePopups = (props) => {
                              zIndex: 5,
                              transform: `translate(${node.position[0]}px, ${node.position[1]-20}px)` }}>
                     <AssetPopup
-                        nodeProps={node.data}
+                        nodeProps={node.properties}
                         onClose={() => onClosePopup(node.id)}
                     />
                 </div>
