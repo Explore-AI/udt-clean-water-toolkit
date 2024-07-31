@@ -1,6 +1,6 @@
 export const QUERY_PREFIX = 'cw_gis_assets'
 export const DIST_MAINS = `${QUERY_PREFIX}/distribution_main`
-export const TRUNK_MAINS = `${QUERY_PREFIX}/trunk_main`
+export const PIPE_MAINS = `${QUERY_PREFIX}/pipe_main`
 export const CHAMBER = `${QUERY_PREFIX}/chamber`
 export const HYDRANT = `${QUERY_PREFIX}/hydrant`
 export const LOGGER = `${QUERY_PREFIX}/logger`
@@ -14,7 +14,7 @@ type tableType = {
     [key: string]: string;
 }
 const tableKeys = {
-        trunk_main: TRUNK_MAINS,
+        pipe_main: PIPE_MAINS,
         distribution_main: DIST_MAINS,
         chamber: CHAMBER,
         hydrant: HYDRANT,

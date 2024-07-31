@@ -11,8 +11,7 @@ type componentObject = {
 };
 
 const pathComponent: componentObject = {
-    trunk_main: <Table.TrunkMainTable />,
-    distribution_main: <Table.DistributionMainTable />,
+    pipe_main: <Table.TrunkMainTable />,
     chamber: <Table.ChamberTable />,
     hydrant: <Table.HydrantTable />,
     logger: <Table.LoggerTable />,
@@ -28,7 +27,7 @@ export const TableView = () => {
     //params = useParams from react-router
     const component = pathComponent[assetType as string];
 
-    // if no params then use default; 1 and 100 
+    // if no params then use default; 1 and 100
     // useFetchItems(`${QUERY_PREFIX}/${assetType}`, {
     //     params: { page_num: pagination.pageIndex+1, page_size: pagination.pageSize},
     // });

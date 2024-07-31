@@ -1,6 +1,6 @@
 import { BaseTable } from '../../../core/components/BaseTable';
 import { defaultAssetColumns } from '../../utils/utils';
-import { TRUNK_MAINS } from '../../queries';
+import { PIPE_MAINS } from '../../queries';
 import { AssetsDataType } from '../../../core/types/types';
 import { get as _get } from 'lodash';
 import usePagination from '../../../core/hooks/usePagination';
@@ -10,13 +10,13 @@ import useGetItems from '../../../core/hooks/useGetItems';
 export const TrunkMainTable = () => {
     // const { items, isFetching, refetch, pagination } = useGetItems(TRUNK_MAINS);
     const { pagination: localPagination, setPagination } = usePagination();
-    const { queryValues } = useFetchItems(TRUNK_MAINS, {
+    const { queryValues } = useFetchItems(PIPE_MAINS, {
         params: {
             page: localPagination.pageIndex + 1,
             page_size: localPagination.pageSize,
         },
     });
-    const { data, isFetching, refetch} = queryValues; 
+    const { data, isFetching, refetch} = queryValues;
     const { items, pagination } = data || {};
     return (
         <div>
@@ -24,7 +24,7 @@ export const TrunkMainTable = () => {
                 data={(items as AssetsDataType[]) || []}
                 isLoading={isFetching}
                 assetColumns={defaultAssetColumns}
-                assetName={'TRUNK MAINS'}
+                assetName={'PIPE MAINS'}
                 refetch={refetch}
                 manualPagination={true}
                 rowCount={_get(pagination, 'num_items')}
