@@ -1,32 +1,15 @@
 import styles from '../css/Circle.module.css';
 import React, { memo } from 'react';
 import { Handle, Position } from 'reactflow';
-import { getIcons } from '../../schematic/components/IconComponents';
 import { includes as _includes } from 'lodash'
 
-const pipeLabels = ['PipeJunction', 'PipeEnd']
 
-
-const CircleNode = (props) => {
-
-    const { data } = props
-
-    const assetIcon = data?.label
-                    ? getIcons(data?.label)
-                    : null;
-
-    //console.log(data.label, "a")
+const CircleNode = () => {
 
     return (
         <>
-            {_includes(pipeLabels, data?.label) &&
              <div className={styles.node}>
              </div>
-            }
-            {!_includes(pipeLabels, data?.label) &&
-             <div className={styles.node}>
-             </div>
-            }
             <Handle
                 type="source"
                 position={Position.Top}

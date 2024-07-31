@@ -72,7 +72,8 @@ export const Single = () => {
 
 export const DefaultHydrant = () => {
     return (
-        <img src={require("../../../core/images/icons8-hydrant-60.png")} alt="hydrant"/>
-        )
+        <img
+            src={require("../../../core/images/icons8-hydrant-60.png")} alt="hydrant"/>
+    )
 
 }

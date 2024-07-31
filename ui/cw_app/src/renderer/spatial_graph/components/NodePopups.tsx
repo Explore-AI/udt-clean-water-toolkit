@@ -19,20 +19,21 @@ const NodePopups = (props) => {
 
     return (
         <>
-            { _map(nodePopups, (node) => (
-                <div
-                    key={node.id}
-                    style={{ position: 'relative',
-                             zIndex: 5,
-                             transform: `translate(${node.position[0]}px, ${node.position[1]-20}px)` }}>
-                    <AssetPopup
-                        nodeProps={node.properties}
-                        onClose={() => onClosePopup(node.id)}
-                    />
-                </div>
-              ))}
+            { _map(nodePopups, (node) => {
+                  return (
+                      <div
+                          key={node.id}
+                          style={{ position: 'relative',
+                                   zIndex: 5,
+                                   transform: `translate(${node.position[0]}px, ${node.position[1]-20}px)` }}>
+                          <AssetPopup
+                              nodeProps={node.properties}
+                              onClose={() => onClosePopup(node.id)}
+                          />
+                      </div>
+              )})}
         </>
-    );
+);
 };
 
 

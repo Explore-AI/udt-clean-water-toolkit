@@ -3,38 +3,60 @@ import styles from '../css/AssetPopup.module.css';
 import { AssetPopupProps } from '../types/types';
 import { IconXboxX } from '@tabler/icons-react';
 import { CloseButton } from '@mantine/core';
+import { getIcons } from '../../schematic/components/IconComponents';
 
 export const AssetPopup: React.FC<AssetPopupProps> = ({
     nodeProps,
     onClose,
 }) => {
-
+    const assetIcon = nodeProps?.label
+                    ? getIcons(nodeProps?.label)
+                    : getIcons('default');
     return (
         <>
             <div className={styles.popupContainer}>
-                <div className={styles.closeButton}>
+                {/* <div className={styles.closeButton}>
                     <CloseButton
-                        onClick={onClose}
-                        icon={
-                            <IconXboxX
-                                size={16}
-                                stroke={2}
-                                color="#EB9486"
-                            />
-                        }
+                    onClick={onClose}
+                    icon={
+                    <IconXboxX
+                    size={16}
+                    stroke={2}
+                    color="#EB9486"
                     />
-                </div>
+                    }
+                    />
+                    </div> */}
+
                 <div className={styles.title}>
-                    {/* <div className={styles.icon}>{icon}</div> */}
+                    <div className={styles.icon}>{assetIcon}</div>
                     <div>
-                        <div><strong> {nodeProps.label} </strong></div>
+                        <div><strong> {nodeProps?.label} </strong></div>
                     </div>
                     <div style={{ textAlign: 'right', fontWeight: 300 }}>
                         <div>{null}</div>
                     </div>
+                    <div className={styles.closeButton}>
+                        <CloseButton
+                            onClick={onClose}
+                            icon={
+                                <IconXboxX
+                                    size={16}
+                                    stroke={2}
+                                    color="#EB9486"
+                                />
+                            }
+                        />
+                    </div>
                 </div>
                 <hr />
                 <div className={styles.details}>
+                    { nodeProps?.tag &&
+                      <div>
+                          <strong>Tag: </strong>{' '}
+                          {nodeProps.tag}
+                      </div>
+                    }
                     <div>
                         <strong>DMA Codes:</strong>{' '}
                         {nodeProps.code || 'ZCHIPO01'}
