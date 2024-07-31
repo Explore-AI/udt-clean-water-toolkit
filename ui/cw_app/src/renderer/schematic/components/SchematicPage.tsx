@@ -13,7 +13,7 @@ function SchematicPage(props: PageProps) {
 
     useFetchJson(TRUNKMAIN_QUERY_KEY, { limit: 3000 });
 
-    useFetchItems(DMA__QUERY_KEY)
+    useFetchItems(DMA__QUERY_KEY, { limit: 1000 })
 
     const mainCss = `${styles.main} ${styles[pageVisibility]}`;
 
