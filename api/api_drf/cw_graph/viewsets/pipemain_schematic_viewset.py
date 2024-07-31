@@ -34,7 +34,6 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
         if dma_codes:
             dma_codes = dma_codes.split(",")
 
-        dma_codes = ["ZMAIDL45"]
         query = f"""
         MATCH (d:DMA)-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility)
         MATCH (n)-[r1:PipeMain]-(s:NetworkNode)

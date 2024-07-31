@@ -13,7 +13,9 @@ class SpatialGraphViewset(viewsets.ViewSet):
     def query_by_dma(request):
 
         limit = request.query_params.get("limit", 300)
-        dma_codes = request.query_params.get("dma_codes", DMA.objects.first().code)
+        dma_codes = request.query_params.get(
+            "dma_codes", "ZCHIPO01"
+        )  # DMA.objects.first().code)
 
         if dma_codes:
             dma_codes = dma_codes.split(",")
