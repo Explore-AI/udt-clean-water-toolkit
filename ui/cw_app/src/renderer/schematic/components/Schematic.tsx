@@ -12,6 +12,8 @@ import PipeNode from './PipeNode';
 import useGetData from '../../core/hooks/useGetData';
 import useGetItems from '../../core/hooks/useGetItems'
 import NodePopups from './NodePopups'
+import DateTimePickerField from '../../core/components/DateTimePickerField'
+import PlayControls from '../../core/components/PlayControls'
 import { useNavigate } from 'react-router-dom';
 import { SchematicUiContext } from '../hooks/useSchematicUi'
 import { SchematicProps } from '../types/types';
@@ -86,6 +88,12 @@ function Schematic() {
                     searchable={true}
                     placeholder="Search by DMA"
                     data={items} />
+            </div>
+            <div className={styles['play-box']}>
+                <PlayControls/>
+            </div>
+            <div className={styles['date-time']}>
+                <DateTimePickerField/>
             </div>
             <div className={styles.rflow}>
                 <ReactFlow
