@@ -1,6 +1,7 @@
 
 from neomodel import db
 from cleanwater.transform import Neo4j2Wntr
+import pandas as pd
 import wntr
 
 
@@ -213,6 +214,8 @@ class Convert2Wntr(Neo4j2Wntr):
 
         wntr.network.write_inpfile(self.wn, filename)
 
+        self.run_hydraulic_sim()
+
     def wntr_to_json(self):
         """
         Exports the WNTR model to a JSON format.
@@ -222,3 +225,31 @@ class Convert2Wntr(Neo4j2Wntr):
         """
         filename = "WNTR_" + str(self.dma)
         wntr.network.write_json(self.wn, filename)
+
+    def run_hydraulic_sim(self):
+        sim = wntr.sim.WNTRSimulator(self.wn)
+        results_WNTR = sim.run_sim()
+        flow_results = results_WNTR.link['flowrate']
+
+        # Get the time step information
+        duration = self.wn.options.time.duration
+        hydraulic_timestep = self.wn.options.time.hydraulic_timestep
+
+        # Calculate the time steps
+        time_steps = pd.date_range(start='0:00:00', periods=int(duration / hydraulic_timestep) + 1,
+                                   freq=f'{hydraulic_timestep}s')
+
+        # Convert time_steps to a dataframe
+        time_steps_df = pd.DataFrame({'Time': time_steps})
+
+        # Add the time steps to the flow results
+        flow_results_with_time = pd.concat([time_steps_df, flow_results.reset_index(drop=True)], axis=1)
+
+        # Prepare the header for the CSV
+        flow_results_with_time.columns = ['Time'] + [f'{link_id}' for link_id in flow_results.columns]
+        flow_results_with_time.to_csv(f'{self.dma}_flowrates.csv', index=False)
+
+        # Read the CSV file to add the top-left header
+        df = pd.read_csv(f'{self.dma}_flowrates.csv')
+        df.columns.values[0] = 'Time steps'
+        df.to_csv(f'{self.dma}_flowrates.csv', index=False)
