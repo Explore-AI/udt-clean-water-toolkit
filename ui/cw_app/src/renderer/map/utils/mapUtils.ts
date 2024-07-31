@@ -103,7 +103,7 @@ export const MAP_LAYERS_PROPS = [
         assetType: 'line',
     },
     {
-        visible: false,
+        visible: true,
         label: 'DMA',
         key: 'utilities_dma',
         assetType: 'polygon',
@@ -343,11 +343,8 @@ export const POLYGON_STYLING = {
     opacity: 0.1,
     getFillColor: colorCategories({
         attr: 'utility_id',
-        domain: ['1', '2'],
-        colors: [
-            [226, 238, 244],
-            [72, 123, 182],
-        ],
+        domain: ['2'],
+        colors: 'BluYl',
         othersColor: [72, 123, 182],
     }),
 };
