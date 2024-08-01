@@ -9,7 +9,6 @@ class GisToNxController:
 
     def __init__(self, config):
         self.config = config
-        super().__init__(self.config)
 
     def create_network(self):
         filters = {

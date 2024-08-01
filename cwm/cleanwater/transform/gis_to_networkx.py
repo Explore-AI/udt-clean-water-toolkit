@@ -12,21 +12,15 @@ class GisToNx(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, config, sqids):
-        self.config = config
+    def __init__(self, srid, sqids, point_asset_names: list = []):
+        self.srid = srid
         self.sqids = sqids
         self.G: Graph = Graph()
 
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
 
-        super().__init__(
-            self.config.srid,
-            sqids,
-            processor_count=config.processor_count,
-            chunk_size=config.chunk_size,
-            neoj4_point=self.config.neoj4_point,
-        )
+        super().__init__(srid, sqids, point_asset_names=point_asset_names)
 
     def create_nx_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
@@ -38,6 +32,11 @@ class GisToNx(GisToGraph):
         Returns:
               None
         """
+
+        print("yellow")
+        import pdb
+
+        pdb.set_trace()
         edges = self._gather_edges()
         nodes = self._gather_nodes()
         self.G = nx.Graph()
