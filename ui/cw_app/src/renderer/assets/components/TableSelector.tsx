@@ -9,26 +9,14 @@ export const TableSelector = () => {
             <Link
                 key="tm"
                 className={
-                    'trunk_main' === (assetType as string)
+                    'pipe_main' === (assetType as string)
                         ? `${styles.tab} ${styles.selected}`
                         : `${styles.tab}`
                 }
-                to="/assets/trunk_main"
+                to="/assets/pipe_main"
                 replace={true}
             >
-                Trunk Mains
-            </Link>
-            <Link
-                key="dm"
-                className={
-                    'distribution_main' === (assetType as string)
-                        ? `${styles.tab} ${styles.selected}`
-                        : `${styles.tab}`
-                }
-                to="/assets/distribution_main"
-                replace={true}
-            >
-                Distribution Mains
+                Pipe Mains
             </Link>
             <Link
                 key="chm"

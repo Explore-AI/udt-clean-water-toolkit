@@ -23,8 +23,3 @@ class DmaViewSet(BaseModelViewSet):
     serializer_class = DmaSerializer
     filterset_class = DmaFilter
     http_method_names = ["get"]
-
-    # def list(self, request):
-    #     import pdb
-
-    #     pdb.set_trace()

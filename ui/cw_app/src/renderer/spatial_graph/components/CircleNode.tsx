@@ -1,16 +1,15 @@
 import styles from '../css/Circle.module.css';
 import React, { memo } from 'react';
 import { Handle, Position } from 'reactflow';
+import { includes as _includes } from 'lodash'
 
-type Props = {
-    id: string;
-};
 
-export default memo(({ id }: Props) => {
+const CircleNode = () => {
+
     return (
         <>
-            <div className={styles.node}>
-            </div>
+             <div className={styles.node}>
+             </div>
             <Handle
                 type="source"
                 position={Position.Top}
@@ -49,7 +48,7 @@ export default memo(({ id }: Props) => {
             />
         </>
     );
-});
+};
 //style={{ visibility: 'hidden', top: '7px', bottom: '0px', left: '10px', right: '0px'}}
 
 //style={{ visibility: 'hidden', width: '1px', height: '1px'}}
@@ -57,3 +56,6 @@ export default memo(({ id }: Props) => {
 //style={{ visibility: 'hidden', top: '10px', bottom: '0px', left: '5px', right: '0px', width: '1px', height: '1px'}}
 
 /* const style = { visibility: 'hidden', top: '14px', bottom: '0px', left: '0px', right: '0px', width: '1px', height: '1px', border: '0px', maxHeight:'1px', minHeight:'1px', maxWidth:'1px', minWidth:'1px'} */
+
+
+export default memo(CircleNode)

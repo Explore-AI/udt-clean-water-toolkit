@@ -6,7 +6,7 @@ from config.serializers import BaseGeoJsonSerializer
 class ChamberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chamber
-        fields = ["gid", "geometry", "dmas", "modified_at", "created_at"]
+        fields = ["tag", "geometry", "dmas", "modified_at", "created_at"]
         read_only_fields = ["id"]
 
 

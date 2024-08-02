@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from neomodel import db
 from django.contrib.gis.geos import Point
 from random import randint
+from cwageodjango.utilities.models import DMA
 
 
 ABSTRACT_NODE_LABELS = ["PipeNode", "NetworkNode", "PointAsset"]
@@ -26,11 +27,17 @@ class SchematicPipeMainViewset(viewsets.ViewSet):
     def query_pipemain_network(request):
         # get all assets connected to the pipemains, as well as the pipemain relationships
         limit = request.query_params.get("limit", 10)
-        dma_codes = request.query_params.get("dma_codes")
+        dma_codes = request.query_params.get(
+            "dma_codes", "ZMAIDL45"
+        )  # DMA.objects.first().code)
         # ZMAIDL45
+        if dma_codes:
+            dma_codes = dma_codes.split(",")
+
         query = f"""
-        MATCH (d:DMA {{code : 'ZMAIDL45'}})-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility {{name : 'thames_water'}})
+        MATCH (d:DMA)-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility)
         MATCH (n)-[r1:PipeMain]-(s:NetworkNode)
+        WHERE d.code IN {dma_codes}
         OPTIONAL MATCH (n)-[r2:HAS_ASSET]->(a)
         return ID(n), n, ID(r1), r1, ID(s), s, ID(a), a, ID(r2), d, u
         limit {limit}

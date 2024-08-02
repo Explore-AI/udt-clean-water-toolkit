@@ -10,6 +10,8 @@ import useGetData from '../../core/hooks/useGetData'
 import NodePopups from './NodePopups'
 import useGetItems from '../../core/hooks/useGetItems'
 import MultiSelectField from '../../core/components/MultiSelectField'
+import DateTimePickerField from '../../core/components/DateTimePickerField'
+import PlayControls from '../../core/components/PlayControls'
 import { SchematicUiContext } from '../hooks/useSpatialGraphUi'
 //import useFilterParams from '../../core/hooks/useFilterParams'
 
@@ -19,13 +21,6 @@ const DMA__QUERY_KEY = 'cw_utilities/dma'
 const nodeTypes = {
     circle: CircleNode,
     edge_node: EdgeNode,
-};
-type Node = {
-    id: string;
-    key: string;
-    type: string;
-    position: { x: number; y: number };
-    data: any;
 };
 
 type Edge = {
@@ -58,13 +53,13 @@ const SpatialGraph = () => {
 
     const onNodeClick = (
         e: React.MouseEvent,
-        node: Node,
+        node,
     ) => {
         setSchematicUiParams({
             nodePopups: [
                 {
                     id: node.id,
-                    data: node.data,
+                    properties: node.data,
                     position: [e.clientX, e.clientY]
                 }
             ]
@@ -86,6 +81,12 @@ const SpatialGraph = () => {
                     placeholder="Search by DMA"
                     searchable={true}
                     data={items} />
+            </div>
+            <div className={styles['play-box']}>
+                <PlayControls/>
+            </div>
+            <div className={styles['date-time']}>
+                <DateTimePickerField/>
             </div>
             <div className={styles.rflow}>
                 <ReactFlow

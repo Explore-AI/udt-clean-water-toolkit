@@ -3,36 +3,68 @@ from rest_framework.response import Response
 from neomodel import db
 from random import randint
 from django.contrib.gis.geos import Point
+from cwageodjango.utilities.models import DMA
+
+ABSTRACT_NODE_LABELS = ["PipeNode", "NetworkNode", "PointAsset"]
 
 
 class SpatialGraphViewset(viewsets.ViewSet):
     http_method_names = ["get"]
 
     @staticmethod
+    def _remove_abstract_node_labels(labels):
+        try:
+            label = [label for label in labels if label not in ABSTRACT_NODE_LABELS][0]
+        except IndexError:
+            raise Exception(
+                "After removing all asbtract node labels there should only be one node label."
+            )
+        return label
+
+    @staticmethod
     def query_by_dma(request):
 
         limit = request.query_params.get("limit", 300)
-        dma_code = request.query_params.get("dma_code", "ZCHIPO01")
-        # ZMAIDL45
-        if dma_code:
-            query = f"""
-            match (n:NetworkNode)-[r:PipeMain]->(m:NetworkNode)
-            match (n)-[r1]-(d:DMA) where d.code = 'ZCHIPO01'
-            return ID(n), n, ID(r), r, ID(m), m
-            limit {limit}
-            """
+        dma_codes = request.query_params.get(
+            "dma_codes", "ZCHIPO01"
+        )  # DMA.objects.first().code)
 
-            results, _ = db.cypher_query(query)
+        if dma_codes:
+            dma_codes = dma_codes.split(",")
 
-            return results
-        else:
-            return []
+        # ZMAIDL45, ZCHIPO01
+        # query = f"""
+        #     match (n:NetworkNode)-[r:PipeMain]->(m:NetworkNode)
+        #     match (n)-[r1]-(d:DMA)
+        #     WHERE d.code IN {dma_codes}
+        #     return ID(n), n, ID(r), r, ID(m), m
+        #     limit {limit}
+        # """
 
-    def create_node(self, node_id, position, node_type="default", properties={}):
+        query = f"""
+        MATCH (d:DMA)-[:IN_DMA]-(n:NetworkNode)-[:IN_UTILITY]-(u:Utility)
+        MATCH (n)-[r1:PipeMain]-(s:NetworkNode)
+        WHERE d.code IN {dma_codes}
+        OPTIONAL MATCH (n)-[r2:HAS_ASSET]->(a)
+        return ID(n), n, ID(r1), r1, ID(s), s, ID(a), a, ID(r2), d, u
+        limit {limit}
+        """
+
+        results, _ = db.cypher_query(query)
+
+        return results
+
+    def create_node(
+        self, node_id, position, node_type="default", properties={}, labels={}
+    ):
 
         # point = Point(position[0], position[1], srid=27700)
 
         # point_4326 = point.transform(4326, clone=True)
+
+        label = {}
+        if labels:
+            label = self._remove_abstract_node_labels(labels)
 
         return {
             "id": node_id,
@@ -44,7 +76,7 @@ class SpatialGraphViewset(viewsets.ViewSet):
                 "x": position[0] * 10,
                 "y": position[1] * 10,
             },
-            "data": {"label": node_id, **properties},
+            "data": {"label": label, **properties},
         }
 
     def create_edge(self, edge_id, from_node_id, to_node_id, label):
@@ -90,12 +122,14 @@ class SpatialGraphViewset(viewsets.ViewSet):
             start_node_data["coords_27700"],
             node_type="circle",
             properties=start_node_data._properties,
+            labels=list(start_node_data.labels),
         )
         end_node = self.create_node(
             end_node_id,
             end_node_data["coords_27700"],
             node_type="circle",
             properties=end_node_data._properties,
+            labels=list(start_node_data.labels),
         )
 
         if point1 != point2:
@@ -113,6 +147,13 @@ class SpatialGraphViewset(viewsets.ViewSet):
 
         edge_id = str(item[2])
         edge_data = item[3]
+
+        asset_id = str(item[6])
+        asset_data = item[7]
+
+        if asset_data:
+            asset_id = start_node_id
+            start_node_data = asset_data
 
         segment_wkt = edge_data.get("segment_wkt")
         line_coords_str = segment_wkt.split("(")[1][:-1]

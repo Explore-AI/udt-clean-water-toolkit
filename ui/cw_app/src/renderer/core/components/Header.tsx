@@ -50,7 +50,6 @@ export default function Header() {
                     {opened && (
                         <div className={styles.burgerMenu}>
                             <p style={{cursor: 'pointer'}} onClick={() => window.location.reload() }>Refresh</p>
-                            <p>Close</p>
                         </div>
                     )}
                 </div>

@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from ..relations import PipeAndAssets
-from . import GisToNeo4j
+from . import GisToNeo4j, GisToNx
 
 
 class NetworkTransform(PipeAndAssets):
@@ -32,6 +32,11 @@ class NetworkTransform(PipeAndAssets):
             sqids = kwargs.pop("sqids")
             self.run_gis2neo4j(srid, sqids, **kwargs)
 
+        elif self.method == "gis2nx":
+            srid = kwargs.pop("srid")
+            sqids = kwargs.pop("sqids")
+            self.run_gis2nx(srid, sqids, **kwargs)
+
     def intialise_gis2neo4j(self, **kwargs):
 
         self.pipe_asset = kwargs.get("pipe_asset")
@@ -50,7 +55,7 @@ class NetworkTransform(PipeAndAssets):
 
         if not (self.pipe_asset or self.point_assets):
             raise Exception(
-                "If the 'gis2neo4j' method is chosen a 'pipe_asset' and 'point_assets' must be specified."
+                "If the 'gis2nx' method is chosen a 'pipe_asset' and 'point_assets' must be specified."
             )
 
     def run_gis2neo4j(self, srid, sqids, **kwargs):
@@ -104,9 +109,34 @@ class NetworkTransform(PipeAndAssets):
         initial_query_offset = kwargs.get("query_offset")
         batch_size = kwargs.get("batch_size", 1)
 
-        g2nx = GisToNx()
+        if gis_framework == "geodjango":
 
-        g2nx.create_nx_graph()
+            pipes_qs, pipes_pks = self.get_pipe_and_asset_data()
+
+            query_offset, query_limit = self.get_query_offset_limit(
+                pipes_pks, initial_query_limit, initial_query_offset
+            )
+
+            gtn = GisToNx(
+                srid,
+                sqids,
+                point_asset_names=list(self.point_assets.keys()),
+            )
+
+            for offset in range(query_offset, query_limit, batch_size):
+
+                start_pk = pipes_pks[offset]
+
+                pipe_data = list(pipes_qs.filter(pk__gte=start_pk)[:batch_size])
+
+                gtn.calc_pipe_point_relative_positions(pipe_data)
+
+                gtn.create_nx_graph()
+
+        else:
+            raise Exception(
+                "The specified 'gis_framework' is not supported. Allowed values are 'geodjango', 'geoalchemy"
+            )
 
     # This fn is a candidate to be abstracted out into the NetworkController
     def get_pipe_and_asset_data(self):

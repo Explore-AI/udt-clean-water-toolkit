@@ -2,8 +2,7 @@ type keyType = {
     [key: string]: string;
 };
 const keys = {
-    trunk_main: 'TRUNK MAINS',
-    distribution_main: 'DISTRIBUTION MAINS',
+    pipe_main: 'PIPE MAINS',
     chamber: 'CHAMBERS',
     hydrant: 'HYDRANTS',
     logger: 'LOGGERS',

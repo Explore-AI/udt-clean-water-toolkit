@@ -6,12 +6,10 @@ from config.serializers import BaseGeoJsonSerializer
 class DistributionMainSerializer(serializers.ModelSerializer):
     class Meta:
         model = DistributionMain
-        fields = ["gid", "geometry", "dmas", "modified_at", "created_at"]
-        
+        fields = ["tag", "geometry", "dmas", "modified_at", "created_at"]
 
-class DistributionMainGeoJsonSerializer(BaseGeoJsonSerializer): 
-    class Meta: 
+
+class DistributionMainGeoJsonSerializer(BaseGeoJsonSerializer):
+    class Meta:
         model = DistributionMain
         fields = ["geojson"]
-    
-

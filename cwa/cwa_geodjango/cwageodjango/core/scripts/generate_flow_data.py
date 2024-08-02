@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = "Generate flow data for each pipe at 15 minute intervals for a day"
 
     def handle(self, *args, **kwargs):
-        pipes = PipeMain.objects.all()[:5]
+        pipes = PipeMain.objects.all()[:1000]
 
         for pipe in pipes:
             flow_data = self.generate_random_flow_data()

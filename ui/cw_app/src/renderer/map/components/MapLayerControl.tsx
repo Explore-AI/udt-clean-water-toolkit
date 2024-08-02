@@ -36,9 +36,9 @@ export default function MapLayerControl() {
                 <div className={styles.control_box}>
                     {_map(mapLayerProps, (layerProps) => {
                         return (
-                            <div className={styles.check_box}>
+                            <div className={styles.check_box}
+                                key={layerProps.key}>
                                 <Checkbox
-                                    key={layerProps.key}
                                     label={layerProps.label}
                                     defaultChecked={layerProps.visible}
                                     onChange={() => {
