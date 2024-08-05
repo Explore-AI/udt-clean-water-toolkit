@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import geopandas as gpd
 from shapely import wkt
 from shapely.geometry import Point
-from
-
 
 class GisToNx(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
@@ -45,9 +43,8 @@ class GisToNx(GisToGraph):
         self._add_edges_to_graph(edges)
         self._remove_unconnected_nodes()
         self._connected_components()
-        G = self.G
-        self._plot_graph(G)
-        self._spatial_plot(G)
+        self._plot_graph()
+        self._spatial_plot()
 
     def _gather_edges(self):
         edges = []
@@ -105,19 +102,18 @@ class GisToNx(GisToGraph):
         connected = len(list(nx.connected_components(self.G)))
         print("Connected components:", connected)
 
-    @staticmethod
-    def _plot_graph(G):
-        dma_codes = GisToNxCalculator._get_dma_codes_from_graph(G)
+    def _plot_graph(self):
+        dma_codes = self._get_dma_codes_from_graph(self.G)
         if dma_codes:
             for dma in dma_codes:
                 filename = f"dma_{dma}_graph.svg"
 
                 # Define edge positions
-                pos = nx.spring_layout(G, scale=10)
+                pos = nx.spring_layout(self.G, scale=10)
 
                 # Extracting node and edge labels from the graph
-                node_labels = nx.get_node_attributes(G, "node_labels").values()
-                edge_labels = nx.get_edge_attributes(G, "asset_name").values()
+                node_labels = nx.get_node_attributes(self.G, "node_labels").values()
+                edge_labels = nx.get_edge_attributes(self.G, "asset_name").values()
 
                 # Define colour map based on node and edge labels
                 nodes_colour_map = [
@@ -137,18 +133,18 @@ class GisToNx(GisToGraph):
                 # Draw the graph nodes and edges
                 plt.figure(figsize=(30, 30))
                 nx.draw(
-                    G,
+                    self.G,
                     pos,
                     with_labels=False,
                     node_color=nodes_colour_map,
                     node_size=15,
                     font_size=2,
                 )
-                nx.draw_networkx_edges(G, pos, edge_color=edges_colour_map, width=1)
+                nx.draw_networkx_edges(self.G, pos, edge_color=edges_colour_map, width=1)
 
                 # Draw edge labels using the gid attribute
-                edge_labels = nx.get_edge_attributes(G, "gid")
-                nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+                edge_labels = nx.get_edge_attributes(self.G, "gid")
+                nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels)
                 plt.savefig(filename, format="svg")
                 plt.close()
                 print(f"file {filename} successfully saved")
@@ -156,11 +152,11 @@ class GisToNx(GisToGraph):
             filename = "dma_unknown_graph.svg"
 
             # Define edge positions
-            pos = nx.spring_layout(G, scale=10)
+            pos = nx.spring_layout(self.G, scale=10)
 
             # Extracting node and edge labels from the graph
-            node_labels = nx.get_node_attributes(G, "node_labels").values()
-            edge_labels = nx.get_edge_attributes(G, "asset_name").values()
+            node_labels = nx.get_node_attributes(self.G, "node_labels").values()
+            edge_labels = nx.get_edge_attributes(self.G, "asset_name").values()
 
             # Define colour map based on node and edge labels
             nodes_colour_map = [
@@ -179,31 +175,30 @@ class GisToNx(GisToGraph):
             # Draw the graph nodes and edges
             plt.figure(figsize=(30, 30))
             nx.draw(
-                G,
+                self.G,
                 pos,
                 with_labels=False,
                 node_color=nodes_colour_map,
                 node_size=15,
                 font_size=2,
             )
-            nx.draw_networkx_edges(G, pos, edge_color=edges_colour_map, width=1)
+            nx.draw_networkx_edges(self.G, pos, edge_color=edges_colour_map, width=1)
 
             # Draw edge labels using the gid attribute
-            edge_labels = nx.get_edge_attributes(G, "gid")
-            nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+            edge_labels = nx.get_edge_attributes(self.G, "gid")
+            nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels)
             plt.savefig(filename, format="svg")
             plt.close()
             print(f"file {filename} successfully saved")
 
-    @staticmethod
-    def _spatial_plot(G):
-        dma_codes = GisToNxCalculator._get_dma_codes_from_graph(G)
+    def _spatial_plot(self):
+        dma_codes = self._get_dma_codes_from_graph(self.G)
         if dma_codes:
             for dma in dma_codes:
                 filename = f"dma_{dma}_SpatialPlot.svg"
                 # if no dma codes, plot entire graph, otherwise filter by code, produce one map per code
-                nodes_gdf = GisToNxCalculator._create_nodes_gdf(G)
-                edges_gdf = GisToNxCalculator._create_edges_gdf(G)
+                nodes_gdf = self._create_nodes_gdf(self.G)
+                edges_gdf = self._create_edges_gdf(self.G)
 
                 # Define colour mapping dictionaries
                 default_node_colour = "gray"
@@ -261,8 +256,8 @@ class GisToNx(GisToGraph):
         else:
             filename = "dma_unknown_SpatialPlot.svg"
             # if no dma codes, plot entire graph, otherwise filter by code, produce one map per code
-            nodes_gdf = GisToNxCalculator._create_nodes_gdf(G)
-            edges_gdf = GisToNxCalculator._create_edges_gdf(G)
+            nodes_gdf = self._create_nodes_gdf(self.G)
+            edges_gdf = self._create_edges_gdf(self.G)
 
             # Define colour mapping dictionaries
             default_node_colour = "gray"

@@ -1,4 +1,5 @@
 import networkit as nk
+from networkit import Graph
 from .gis_to_graph import GisToGraph
 
 
