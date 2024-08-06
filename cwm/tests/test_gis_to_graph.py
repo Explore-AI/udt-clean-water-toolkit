@@ -2,10 +2,13 @@ import pytest
 import joblib
 from sqids import Sqids
 from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.measure import Distance
 
 # from shapely import wkt
 import pandas as pd
 import geopandas as gpd
+
+
 from .data.gis_to_graph_data import (
     PIPE_JUNCTIONS,
     POINT_ASSETS,
@@ -26,16 +29,11 @@ SRID = 27700
 
 @pytest.mark.skip(reason="This function received the test input data.")
 def get_pipe_data():
-
     gdf = gpd.read_file(BASE_PIPE_DATA_FILE_PATH)
     gdf.crs = "epsg:27700"
     base_pipe = gdf.to_dict("records")[0]
 
     base_pipe["geometry"] = GEOSGeometry(base_pipe["wkt"], SRID)
-
-    import pdb
-
-    pdb.set_trace()
 
     return base_pipe
 
@@ -72,6 +70,13 @@ class TestGisToGraph:
     def test_set_node_properties(self):
 
         base_pipe = get_pipe_data()
+
+        # Parse the pipe_length correctly
+        length_str = base_pipe["pipe_length"]
+        value, unit = length_str.split()
+        base_pipe["pipe_length"] = Distance(**{unit: float(value)})
+        print(base_pipe)
+
         gis_to_graph = GisToGraph(SRID, sqids)
 
         # Get the intersection points of all intersecting pipes (pipe junctions)
@@ -86,7 +91,10 @@ class TestGisToGraph:
             POINT_ASSETS,
         )
 
-        print("ok")
+        # CONVERT UTILITIES TO LIST
+        if not isinstance(base_pipe["utilities"], list):
+            base_pipe["utilities"] = [base_pipe["utilities"]]
+
         nodes_ordered = gis_to_graph._set_node_properties(
             base_pipe, junctions_with_positions, point_assets_with_positions
         )
@@ -101,18 +109,8 @@ class TestGisToGraph:
         for geom in nodes_ordered:
             for geometry in geometries:
                 if geometry in geom:
-                    del nodes_ordered[geometry]
+                    del geom[geometry]
 
-        assert nodes_ordered == NODES_ORDERED
-
-    # def test_set_node_properties(self):
-
-    #     base_pipe = get_pipe_data()
-
-    #     gis_to_graph = GisToGraph(SRID, sqids)
-
-    #     nodes_ordered = gis_to_graph._set_node_properties(
-    #         base_pipe, JUNCTIONS_WITH_POSITIONS, POINT_ASSETS_WITH_POSITIONS
-    #     )
-
-    #     print(nodes_ordered)
+        assert (
+            nodes_ordered == NODES_ORDERED
+        ), "Processed nodes do not match expected nodes"
