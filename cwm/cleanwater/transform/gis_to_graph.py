@@ -183,8 +183,16 @@ class GisToGraph:
 
     def _set_pipe_properties(self, node, pipe_node_data):
 
+        # if pipe_node_data["tag"] == "10915565":
+        #     print(node)
+
+        if "PipeJunction" in pipe_node_data["node_labels"]:
+            pipe_type_encode_index = 0
+        else:
+            pipe_type_encode_index = 1
+
         pipe_node_data["node_key"] = self._encode_node_key(
-            node["intersection_point_geometry"]
+            node["intersection_point_geometry"], extra_params=[pipe_type_encode_index]
         )
         pipe_node_data["pipe_tags"] = node["pipe_tags"]
 
@@ -205,8 +213,10 @@ class GisToGraph:
 
     def _handle_pipe_asset_node_labels(self, node):
         pipe_node_data = {}
+
+        node_encode_index = self.point_asset_names.index(node["asset_name"])
         pipe_node_data["node_key"] = self._encode_node_key(
-            node["intersection_point_geometry"]
+            node["intersection_point_geometry"], extra_params=[node_encode_index]
         )
 
         pipe_node_data["node_labels"] = [PIPE_NODE__LABEL, PIPE_JUNCTION__LABEL]
@@ -222,8 +232,10 @@ class GisToGraph:
             node["asset_label"],
         ]
 
+        node_encode_index = self.point_asset_names.index(node["asset_name"])
+
         asset_node_data["node_key"] = self._encode_node_key(
-            node["intersection_point_geometry"], extra_params=node["dma_ids"]
+            node["intersection_point_geometry"], extra_params=[node_encode_index]
         )
 
         asset_node_data["tag"] = node["tag"]
