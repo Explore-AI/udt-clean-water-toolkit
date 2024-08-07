@@ -1,7 +1,7 @@
 from os import makedirs
 from os.path import exists, join
 from random import randint
-from requests import get, put, exceptions, post
+from requests import get, put, exceptions, post, delete
 from utils.utils import GeoServerConfig, DBConnection
 from sys import argv
 
@@ -246,7 +246,26 @@ class Importer:
         db_conn = DBConnection()
         pg_tables = db_conn.pg_spatial_tables()
 
+        geoserver_feature_type_url = f"{geoserver_site_url}/rest/workspaces/{workspace_name}/featuretypes.json"
+        response = get(geoserver_feature_type_url, auth=auth)
+        data = response.json()
+        feature_type_names = [feature_type["name"] for feature_type in data["featureTypes"]["featureType"]]
+
         if pg_tables:
+            # Cleanup GeoServer tables if DB config has changed
+            for feature_type in feature_type_names:
+                if feature_type not in pg_tables:
+                    # Delete the layer from GeoServer
+                    layer_url = f"{geoserver_site_url}/rest/layers/{workspace_name}:{feature_type}?recurse=true"
+                    headers = {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                    response = delete(layer_url, headers=headers, auth=auth)
+                    if response.status_code == 200:
+                        print(f"Deleted layer: {workspace_name}:{feature_type}")
+                    else:
+                        print(f"Error deleting layer: {workspace_name}:{feature_type}")
             for table, geom_type in pg_tables:
                 try:
                     rest_url = '%s/rest/workspaces/%s/datastores/%s/featuretypes/%s.json' % (
@@ -320,7 +339,6 @@ class Importer:
                                     """.format(geo_workspace=workspace_name, geo_layer=table)
                         post('%s/gwc/rest/layers/%s:%s.xml' % (geoserver_site_url, workspace_name, table), auth=auth,
                              headers={'Content-type': 'text/xml'}, data=layer_xml)
-
                     else:
                         print(f"Failed to create style. Status code: {response.status_code}")
 
