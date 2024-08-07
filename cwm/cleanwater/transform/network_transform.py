@@ -1,4 +1,3 @@
-
 from collections import OrderedDict
 from ..relations import PipeAndAssets
 from . import GisToNeo4j, GisToNx
