@@ -1,4 +1,6 @@
 import networkit as nk
+from typing import Annotated
+from annotated_types import Gt
 from .gis_to_graph import GisToGraph
 
 
@@ -7,24 +9,43 @@ class GisToNk(GisToGraph):
     Calculate network graph from geospatial asset data.
     """
 
-    def __init__(self, config, sqids):
-        self.config = config
-        self.sqids = sqids
+    def __init__(
+        self,
+        srid,
+        sqids,
+        point_asset_names: list = [],
+        processor_count: int = 2,
+        chunk_size: Annotated[int, Gt(0)] = 1,
+        neoj4_point: bool = False,
+        outputfile=None,
+    ):
+        self.srid = srid
+        self.squids = sqids
+        self.processor_count = processor_count
+
         self.G: Graph = nk.Graph(edgesIndexed=True)
         self.edgelabel = self.G.attachEdgeAttribute("label", str)
         self.edgegid = self.G.attachEdgeAttribute("gid", str)
         self.nodelabel = self.G.attachNodeAttribute("label", str)
 
-        self.all_edges_by_pipe = []
-        self.all_nodes_by_pipe = []
+        self.all_pipe_nodes_by_pipe = []
+        self.all_pipe_edges_by_pipe = []
+
         self.node_index = {}
 
+        self.dma_data = []
+        self.utility_data = []
+        self.network_node_labels = []
+
+        self.outputfile = outputfile
+
         super().__init__(
-            self.config.srid,
+            srid,
             sqids,
-            processor_count=config.processor_count,
-            chunk_size=config.chunk_size,
-            neoj4_point=self.config.neoj4_point,
+            point_asset_names=point_asset_names,
+            processor_count=processor_count,
+            chunk_size=chunk_size,
+            neoj4_point=neoj4_point,
         )
 
     def add_pipe(self, start_node_id, end_node_id):
@@ -39,23 +60,13 @@ class GisToNk(GisToGraph):
         self.G.addEdge(start_node_id, end_node_id, addMissing=True)
 
     def create_nk_graph(self) -> None:
-        """
-        Create a Networkit graph from geospatial asset data.
-
-        Iterates through pipe and node data to construct the network graph with
-        appropriate attributes.
-
-        """
-        self.G.addEdge(start_node_id, end_node_id, addMissing=True)
-
-    def create_nk_graph(self) -> None:
         n = 0
         node_index = {}
 
-        for i, pipe in enumerate(self.all_edges_by_pipe):
+        for i, pipe in enumerate(self.all_pipe_edges_by_pipe):
             from_node_key = pipe[0]["from_node_key"]
             to_node_key = pipe[0]["to_node_key"]
-            edge_gid = pipe[0]["gid"]
+            edge_gid = pipe[0]["tag"]
 
             # Check if from_node_key exists in node_index, if not, assign a new index
             if from_node_key not in self.node_index:
@@ -74,7 +85,7 @@ class GisToNk(GisToGraph):
             self.edgelabel[from_node_id, to_node_id] = pipe[0]["asset_label"]
             self.edgegid[from_node_id, to_node_id] = str(edge_gid)
 
-            for n in self.all_nodes_by_pipe[i]:
+            for n in self.all_pipe_nodes_by_pipe[i]:
                 if n.get("node_key") == from_node_key:
                     self.nodelabel[from_node_id] = n.get("node_labels")[-1]
                 elif n.get("node_key") == to_node_key:
@@ -84,3 +95,10 @@ class GisToNk(GisToGraph):
             asset_label = pipe[0]["asset_label"]
             self.nodelabel[from_node_id] = asset_label
             self.nodelabel[to_node_id] = asset_label
+
+    def nk_to_graphml(self, outputfile):
+        """
+        Export the network graph to a GraphML file.
+        Writes the network graph to a specified GraphML file using the NetworkKit library.
+        """
+        nk.writeGraph(self.G, outputfile, nk.Format.GML)
