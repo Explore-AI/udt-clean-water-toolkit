@@ -15,7 +15,6 @@ class GisToNx(GisToGraph):
         self.srid = srid
         self.sqids = sqids
         self.G: Graph = Graph()
-
         self.all_edges_by_pipe = []
         self.all_nodes_by_pipe = []
 
@@ -31,11 +30,7 @@ class GisToNx(GisToGraph):
         Returns:
               None
         """
-
-        print("yellow")
-        import pdb
-
-        pdb.set_trace()
+        print(self.all_edges_by_pipe)
         edges = self._gather_edges()
         nodes = self._gather_nodes()
         self.G = nx.Graph()
@@ -365,7 +360,7 @@ class GisToNx(GisToGraph):
         # method for collecting list of DMA codes from graph
         dma_codes = []
         for _, attributes in nxgraph.nodes(data=True):
-            dmas_str = attributes.get("dmas", "[]")
+            dmas_str = attributes.get("dma", "[]")
             dmas = json.loads(dmas_str)
             dma_code = dmas[0]["code"]
             if dma_code not in dma_codes:

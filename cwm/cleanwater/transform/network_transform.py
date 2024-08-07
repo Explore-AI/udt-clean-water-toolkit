@@ -1,3 +1,4 @@
+
 from collections import OrderedDict
 from ..relations import PipeAndAssets
 from . import GisToNeo4j, GisToNx
@@ -129,7 +130,7 @@ class NetworkTransform(PipeAndAssets):
 
                 pipe_data = list(pipes_qs.filter(pk__gte=start_pk)[:batch_size])
 
-                gtn.calc_pipe_point_relative_positions(pipe_data)
+                # gtn.calc_pipe_point_relative_positions(pipe_data)
 
                 gtn.create_nx_graph()
 
