@@ -1,24 +1,42 @@
 import json
 from networkx import Graph
 import networkx as nx
+from typing import Annotated
+from annotated_types import Gt
 from cleanwater.transform import GisToGraph
 import matplotlib.pyplot as plt
 import geopandas as gpd
 from shapely import wkt
 from shapely.geometry import Point
 
+
 class GisToNx(GisToGraph):
     """Create a NetworkX graph of assets from a geospatial
     network of assets"""
 
-    def __init__(self, srid, sqids, point_asset_names: list = []):
+    def __init__(
+        self,
+        srid,
+        sqids,
+        point_asset_names: list = [],
+        processor_count: int = 2,
+        chunk_size: Annotated[int, Gt(0)] = 1,
+        neoj4_point: bool = False,
+    ):
         self.srid = srid
         self.sqids = sqids
         self.G: Graph = Graph()
-        self.all_edges_by_pipe = []
-        self.all_nodes_by_pipe = []
+        self.all_pipe_edges_by_pipe = []
+        self.all_pipe_nodes_by_pipe = []
 
-        super().__init__(srid, sqids, point_asset_names=point_asset_names)
+        super().__init__(
+            srid,
+            sqids,
+            point_asset_names=point_asset_names,
+            processor_count=processor_count,
+            chunk_size=chunk_size,
+            neoj4_point=neoj4_point,
+        )
 
     def create_nx_graph(self) -> None:
         """Iterate over pipes and connect related pipe interactions
@@ -30,7 +48,6 @@ class GisToNx(GisToGraph):
         Returns:
               None
         """
-        print(self.all_edges_by_pipe)
         edges = self._gather_edges()
         nodes = self._gather_nodes()
         self.G = nx.Graph()
@@ -43,7 +60,7 @@ class GisToNx(GisToGraph):
 
     def _gather_edges(self):
         edges = []
-        for sublist in self.all_edges_by_pipe:
+        for sublist in self.all_pipe_edges_by_pipe:
             for edge in sublist:
                 edges.append(edge)
 
@@ -51,7 +68,7 @@ class GisToNx(GisToGraph):
 
     def _gather_nodes(self):
         nodes = []
-        for sublist in self.all_nodes_by_pipe:
+        for sublist in self.all_pipe_nodes_by_pipe:
             for node in sublist:
                 nodes.append(node)
 
