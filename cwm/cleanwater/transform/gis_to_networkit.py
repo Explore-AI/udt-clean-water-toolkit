@@ -33,10 +33,6 @@ class GisToNk(GisToGraph):
 
         self.node_index = {}
 
-        self.dma_data = []
-        self.utility_data = []
-        self.network_node_labels = []
-
         self.outputfile = outputfile
 
         super().__init__(
