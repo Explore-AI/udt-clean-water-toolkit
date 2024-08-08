@@ -105,16 +105,18 @@ class PipeAndAssets(GeoDjangoDataManager):
 
     def generate_termini_subqueries(self, qs):
 
+        ### we use dwithing with zero distance as opposed to touches as postgis
+        ### handles touches in a different way leading to unexpected results
         subquery_line_start = (
             qs.exclude(pk=OuterRef("id"))
-            .filter(geometry__touches=OuterRef("start_point_geom"))
+            .filter(geometry__dwithin=(OuterRef("start_point_geom"), D(m=0)))
             .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
             .order_by("pk")
         )
 
         subquery_line_end = (
             qs.exclude(pk=OuterRef("id"))
-            .filter(geometry__touches=OuterRef("end_point_geom"))
+            .filter(geometry__dwithin=(OuterRef("end_point_geom"), D(m=0)))
             .values(json=JSONObject(tags=ArrayAgg("tag"), ids=ArrayAgg("id")))
             .order_by("pk")
         )
